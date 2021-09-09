@@ -28,6 +28,7 @@ typedef struct{
 }TokenInfo;
 
 TokenInfo keywords[] = {
+	{TK_INT, "int"},
 	{TK_IF, "if"},
 	{TK_WHILE, "while"},
 	{TK_ELSE, "else"}
@@ -67,10 +68,14 @@ int main(int argc, char *argv[])
 	}
 	
 	Token token;
+	int i = 0;
 	
 	while(1){
 		dump_token(get_token());
+//		printf("i = %d\n", i++);
 	}
+
+	printf("over\n");
 
 	return 0;
 }
@@ -79,9 +84,9 @@ int main(int argc, char *argv[])
 void dump_token(Token token)
 {
 	if(token.kind == TK_NUM){
-		printf("token = %d\n", token.value.value_num);
+		printf("token = %d, type = %d\n", token.value.value_num, token.kind);
 	}else{// if(token.token_kind == T_)
-		printf("token = %s\n", token.value.value_str);
+		printf("token = %s, type = %d\n", token.value.value_str, token.kind);
 	}
 }
 
@@ -113,6 +118,7 @@ Token get_token()
 		int num = 0;
 		do{
 			num = num * 10 + current_char - '0';
+			get_next_char();
 		}while(isdigit(current_char));	// 是数字
 		
 		token.value.value_num = num;
@@ -180,6 +186,7 @@ int get_token_kind(char *token_name)
 	int kind = -1;
 	for(int i = 0; i < sizeof(token_names) / sizeof(token_names[0]); i++){
 		if(strcmp(token_names[i], token_name) == 0){
+			// return token_names[i].kind;
 			return i;
 		}
 	}
@@ -191,10 +198,10 @@ int get_token_kind(char *token_name)
 
 int get_keyword_kind(char *keyword)
 {
-	int kind = -1;
+	int kind = TK_ID;
 	for(int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++){
 		if(strcmp(keywords[i].name, keyword) == 0){
-			return i;
+			return keywords[i].kind;
 		}
 	}
 

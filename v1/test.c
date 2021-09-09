@@ -6,4 +6,6 @@ int a5bh;
 
 if(a){
 	name = "Jim Green";
+	4567ade;
+	ab87cd;
 }
