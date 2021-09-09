@@ -1,0 +1,22 @@
+
+TOKEN(TK_NAN, "")
+TOKEN(TK_IF, "if")
+TOKEN(TK_ELSE, "else")
+TOKEN(TK_WHILE, "while")
+TOKEN(TK_ID, "id")
+TOKEN(TK_NUM, "num")
+TOKEN(TK_ADD, "+")
+TOKEN(TK_MINUS, "-")
+TOKEN(TK_MUL, "*")
+TOKEN(TK_DIV, "/")
+TOKEN(TK_MOD, "%")
+
+TOKEN(TK_LPARENTHESES, "(")
+TOKEN(TK_RPARENTHESES, ")")
+
+
+TOKEN(TK_SEMICOLON, ";")
+
+
+
+//TOKEN(TK_EOF, EOF)
