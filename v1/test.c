@@ -1,18 +1,24 @@
-name = 78;
 {
-int a5bh;
-
-(a+b)*c;
 
 if(a){
-	name = "Jim Green";
-	4567ade;
-	ab87cd;
+	ac = 58;
+	dfm = fh;
+	we = he;
+	if(abc){
+		str = how;
+		while(ab){
+			age = 120;
+			if(ddef){
+				while(true){
+					name = Jim;
+					if(false){
+						your = me;
+					}
+				}
+			}
+		}
+	}
 }
 
-while(a==5){
-	int min = 584;
-	age = 78;
-	name = "How are you";
-}
+
 }

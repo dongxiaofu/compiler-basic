@@ -2,6 +2,7 @@
 #define LEX_H
 
 #include <stdio.h>
+#include <assert.h>
 //#include <string.h>
 //#include <ctype.h>
 //#include <stdlib.h>
@@ -35,6 +36,10 @@ static TokenInfo keywords[] = {
 	{TK_IF, "if"},
 	{TK_WHILE, "while"},
 	{TK_ELSE, "else"}
+};
+
+static TokenKind prefix_of_stmt_token_kinds[] = {
+	TK_INT, TK_ID, TK_IF, TK_WHILE,TK_LBRACE
 };
 
 typedef struct{

@@ -92,6 +92,8 @@ Token get_token()
 
 	current_token = token;
 
+	dump_token(token);
+
 	return token;
 }
 
@@ -168,6 +170,8 @@ void expect_token(TokenKind kind)
 	
 	if(cur_kind != kind){
 		printf("Expect:%s\n", token_name);
+		perror("Expect error");
+		exit(-2);
 	}
 	NEXT_TOKEN;
 }

@@ -2,7 +2,7 @@
 # 指定默认动作是all。在终端执行make，默认会执行make all。
 PYTHON:all
 
-C_SRC	=	lex.c stmt.c
+C_SRC	=	lex.c stmt.c expr.c
 H_SRC			= lex.h stmt.h
 T_SRC			= tokens.txt
 CFLAGS	= -I ./include -g -m32
@@ -15,7 +15,7 @@ LDFLAGS		= -m elf_i386
 SCANNER = lex
 # 包含main函数的.o文件必须放在前面。
 #OBJS	= lex.o	stmt.o
-OBJS	= stmt.o lex.o
+OBJS	= stmt.o lex.o expr.o
 
 all:clean everything
 
@@ -39,3 +39,6 @@ lex.o:lex.c
 stmt.o:stmt.c
 	#${CC} ${CFLAGS} -c -o $@ $<
 	${CC} ${CFLAGS} -c stmt.c
+
+expr.o:expr.c
+	${CC} ${CFLAGS} -c -o $@ $<
