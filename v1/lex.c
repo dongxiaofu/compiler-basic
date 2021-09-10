@@ -1,84 +1,30 @@
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
-#define MAX_NAME_LEN	15
+#include "lex.h"
 
-typedef union{
-	char value_str[MAX_NAME_LEN];
-	int value_num;
-}Value;
-
-typedef enum{
-	#define TOKEN(kind, name)	kind,
-	#include "tokens.txt"
-	#undef TOKEN
-}TokenKind;
-
-char *token_names[] = {
-	#define TOKEN(kind, name)	name,
-	#include "tokens.txt"
-	#undef TOKEN
-};
-
-typedef struct{
-	TokenKind kind;
-	char name[MAX_NAME_LEN];
-}TokenInfo;
-
-TokenInfo keywords[] = {
-	{TK_INT, "int"},
-	{TK_IF, "if"},
-	{TK_WHILE, "while"},
-	{TK_ELSE, "else"}
-};
-
-typedef struct{
-	Value value;
-	TokenKind kind;
-}Token;
-
-Token current_token;
-char current_char = -1;
-FILE *fp;
-
-int is_whitespace(char ch);
-
-void get_next_char();
-
-int get_token_kind(char *token_name);
-
-// TokenKind get_keyword_kind(char *keyword);
-// todo 这样修改，不知道有没有问题。
-int get_keyword_kind(char *keyword);
-
-Token get_token();
-
-void dump_token(Token token);
-
-
-int main(int argc, char *argv[])
-{
-	printf("I am a scanner\n");
-	fp = fopen("test.c", "r");
-	if(fp == NULL){
-		perror("open file error\n");
-		return -1;
-	}
-	
-	Token token;
-	int i = 0;
-	
-	while(1){
-		dump_token(get_token());
-//		printf("i = %d\n", i++);
-	}
-
-	printf("over\n");
-
-	return 0;
-}
+//int main(int argc, char *argv[])
+//{
+//	printf("I am a scanner\n");
+//	fp = fopen("test.c", "r");
+//	if(fp == NULL){
+//		perror("open file error\n");
+//		return -1;
+//	}
+//	
+//	Token token;
+//	int i = 0;
+//	
+//	while(1){
+//		dump_token(get_token());
+////		printf("i = %d\n", i++);
+//	}
+//
+//	printf("over\n");
+//
+//	return 0;
+//}
 
 
 void dump_token(Token token)
@@ -92,6 +38,7 @@ void dump_token(Token token)
 
 Token get_token()
 {
+//	printf("get token\n");
 	Token token;
 	token.kind = TK_NAN;
 	if(current_char == -1){
@@ -142,6 +89,8 @@ Token get_token()
 			exit(3);
 		}
 	}	
+
+	current_token = token;
 
 	return token;
 }
@@ -206,4 +155,26 @@ int get_keyword_kind(char *keyword)
 	}
 
 	return kind;
+}
+
+// todo 会出错吗？
+// 只担心关键字类型。
+void expect_token(TokenKind kind)
+{
+	TokenKind cur_kind = current_token.kind;
+	// todo 又是一个常见问题。此处的token_name设置为多大合适?
+	char token_name[30];
+	get_token_name(token_name, kind);
+	
+	if(cur_kind != kind){
+		printf("Expect:%s\n", token_name);
+	}
+	NEXT_TOKEN;
+}
+
+// todo 不存在数组元素怎么处理？
+// todo 很常见的问题：要通过函数获取返回值，究竟是用指针参数
+// 还是使用返回值？
+void get_token_name(char *token_name, TokenKind kind){
+	strcpy(token_name, token_names[kind]);
 }
