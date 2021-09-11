@@ -18,6 +18,8 @@ if(a){
 			}
 		}
 	}
+
+	int (*f(int,int,int))[4];
 }
 
 

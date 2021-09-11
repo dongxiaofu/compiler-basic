@@ -1,6 +1,7 @@
 #include "lex.h"
 #include "stmt.h"
 #include "expr.h"
+#include "decl.h"
 
 int main(int argc, char *argv[])
 {
@@ -113,6 +114,7 @@ void expr_stmt()
 	}else if(current_token.kind == TK_INT){
 		
 		printf("process int\n");		
+		declaration();	
 
 	}else{
 		printf("expr stmt error\n");
