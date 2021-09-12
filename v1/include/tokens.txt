@@ -25,5 +25,11 @@ TOKEN(TK_SINGLE_QUOTATION_MARK, "'")
 TOKEN(TK_SEMICOLON, ";")
 TOKEN(TK_COMMA, ",")
 
+TOKEN(TK_COMPOUND, "{}")
+// 这个定义太神奇了。
+TOKEN(TK_DECLARATION,		"decl")
+TOKEN(TK_ARRAY,			"[]")
+TOKEN(TK_FUNCTION,		"FUNC")
+TOKEN(TK_POINTER,                       "*")
 
-//TOKEN(TK_EOF, EOF)
+TOKEN(TK_EOF, "eof_ch")

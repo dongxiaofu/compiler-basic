@@ -3,6 +3,22 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+//#include "decl.h"
+
+
+typedef struct astStmtNode{
+	TokenKind op;
+	Value value;
+	struct astNode *kids[2];
+
+	struct astNode *expr;
+	struct astStmtNode *then_stmt;
+	struct astStmtNode *else_stmt;
+	struct astStmtNode *next;
+} *AstStmtNodePtr;
+
+AstStmtNodePtr create_ast_stmt_node(TokenKind op);
 
 // 默认语句
 // todo 后期可能要丢弃
@@ -12,15 +28,15 @@ void default_stmt();
 int check_is_prefix_of_stmt(TokenKind kind);
 
 // 解析表达式语句
-void expr_stmt();
+ AstStmtNodePtr expr_stmt();
 
 // 解析if语句
-void if_stmt();
+ AstStmtNodePtr if_stmt();
 // 解析while语句
-void while_stmt();
+ AstStmtNodePtr while_stmt();
 // 解析语句
-void stmt();
+ AstStmtNodePtr stmt();
 // 解析复杂语句
-void compound_stmt();
+ AstStmtNodePtr compound_stmt();
 
 #endif

@@ -39,8 +39,10 @@ void dump_token(Token token)
 Token get_token()
 {
 //	printf("get token\n");
+//	Token token;
+//	token.kind = TK_NAN;
 	Token token;
-	token.kind = TK_NAN;
+	memset(&token, 0, sizeof(token));
 	if(current_char == -1){
 		get_next_char();
 	}
@@ -49,8 +51,11 @@ Token get_token()
 		get_next_char();
 	}
 
-	// 是字母
-	if(isalpha(current_char)){
+try_again:
+	if(current_char == TK_EOF){
+		token.kind = TK_EOF;
+	
+	}else if(isalpha(current_char)){ // 是字母
 		int len = 0;
 		do{
 			token.value.value_str[len] = current_char;
@@ -73,9 +78,10 @@ Token get_token()
 
 	}else{	// 是其他
 		// todo 暂时没有想到好方法。
-		if(current_char == EOF){
-			exit(3);
-		}
+	//	if(current_char == EOF){
+	//		printf("There is no token any more 100\n");
+	//		exit(100);
+	//	}
 		char name[2];
 		name[0] = current_char;
 		name[1] = 0;
@@ -86,7 +92,8 @@ Token get_token()
 
 			get_next_char();
 		}else{
-			exit(3);
+			printf("There is no token any more 101\n");
+			goto try_again;
 		}
 	}	
 
@@ -126,7 +133,7 @@ void get_next_char()
 	if(ch != EOF){
 		current_char = ch;
 	}else{
-		current_char = EOF;
+		current_char = TK_EOF;
 	}
 }
 

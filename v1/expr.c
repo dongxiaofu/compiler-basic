@@ -1,23 +1,31 @@
 #include "lex.h"
 #include "expr.h"
 
-
-// todo 不知道怎么写
-void primary_expr()
+AstNodePtr primary_expr()
 {
 	TokenKind kind = current_token.kind;
-	printf("kind = %d\n", kind);
 	if(kind == TK_ID || kind == TK_NUM){
-	
-		// todo 创建节点
-		
+		Value value;
+		// todo value设置什么值比较好？
+		memset(&value, 0, sizeof(value));
+		value = current_token.value;
 		NEXT_TOKEN;
-
+		// todo 这样给value赋值可以吗？
+		AstNodePtr expr = create_ast_node(kind, value, NULL, NULL);
+// todo 在外面获取下一个token。
+//		NEXT_TOKEN;
+		return expr;
 	}else if(kind == TK_LPARENTHESES){
 		NEXT_TOKEN;
-		expression();
+		// todo 不知道应该存储在kids的第0个还是第1个元素。
+		AstNodePtr right  = expression();
 		assert(current_token.kind == TK_RPARENTHESES);
 		EXPECT(TK_RPARENTHESES);
+		Value value;
+		// todo value设置什么值比较好？
+		memset(&value, 0, sizeof(value));
+		AstNodePtr expr = create_ast_node(kind, value, NULL, right);
+		return expr;
 	}else{
 		printf("expect id,num or (\n");
 		exit(-3);
@@ -25,32 +33,60 @@ void primary_expr()
 }
 
 // 解析乘法表达式
-void mul_expr()
+AstNodePtr mul_expr()
 {
-	primary_expr();
+	AstNodePtr left = primary_expr();
 	TokenKind kind = current_token.kind;
+	AstNodePtr expr;
 	if(kind == TK_MUL || kind == TK_DIV){
+		Value value;
+		// todo value设置什么值比较好？
+		memset(&value, 0, sizeof(value));
+		expr = create_ast_node(kind, value, left, NULL);
 		NEXT_TOKEN;
-		mul_expr();
+		AstNodePtr right = mul_expr();
+		expr->kids[0] = left;
+		expr->kids[1] = right;
+		return expr;
+	}else{
+		return left;
 	}
 }
 
 // 解析加法表达式
-void add_expr()
+AstNodePtr add_expr()
 {
 	// 使用右递归
-	mul_expr();
-	//EXPECT(TK_);
+	AstNodePtr left = mul_expr();
 	TokenKind kind = current_token.kind;
 	if(kind == TK_ADD || kind == TK_MINUS){
+		Value value;
+		// todo value设置什么值比较好？
+		memset(&value, 0, sizeof(value));
+		AstNodePtr expr = create_ast_node(kind, value, left, NULL);
 		NEXT_TOKEN;
-		add_expr();
+		AstNodePtr right  = add_expr();
+		expr->kids[0] = left;
+		expr->kids[1] = right;
+		return expr;	
+	}else{
+		return left;
 	}
 }
 
 // 解析表达式
-// todo 不想现在设计AST结点，不设计返回值
-void expression()
+AstNodePtr expression()
 {
-	add_expr();
+	return add_expr();
+}
+
+AstNodePtr create_ast_node(TokenKind op, Value value, AstNodePtr left, AstNodePtr right)
+{
+	AstNodePtr ast_node = (AstNodePtr)malloc(sizeof(struct astNode));
+	memset(ast_node,0,sizeof(*ast_node));
+	ast_node->op = op;
+	ast_node->value = value;
+	ast_node->kids[0] = left;
+	ast_node->kids[1] = right;
+	return ast_node;
 }

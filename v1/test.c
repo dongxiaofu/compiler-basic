@@ -1,26 +1,6 @@
 {
-
-if(a){
-	ac = 58;
-	dfm = fh;
-	we = he;
-	if(abc){
-		str = how;
-		while(ab){
-			age = 120;
-			if(ddef){
-				while(true){
-					name = Jim;
-					if(false){
-						your = me;
-					}
-				}
-			}
-		}
+	ab = 58;
+	if(de){
+		int (*f(int, int, int))[5];
 	}
-
-	int (*f(int,int,int))[4];
-}
-
-
 }

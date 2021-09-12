@@ -6,13 +6,13 @@
 #include "expr.h"
 
 
-void direct_declarator();
+AstNodePtr direct_declarator();
 
-void postfix_declarator();
+AstNodePtr postfix_declarator();
 
-void declarator();
+AstNodePtr declarator();
 
-void declaration();
+AstNodePtr declaration();
 
 
 

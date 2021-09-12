@@ -75,4 +75,10 @@ void get_token_name(char *token_name, TokenKind kind);
 
 void expect_token(TokenKind kind);
 
+typedef struct astNode{
+	TokenKind op;
+	Value value;
+	struct astNode *kids[2];
+} *AstNodePtr;
+
 #endif
