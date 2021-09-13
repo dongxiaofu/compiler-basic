@@ -14,7 +14,7 @@ AstNodePtr declarator();
 
 AstNodePtr declaration();
 
-
+void visit_declaration(AstNodePtr pNode);
 
 
 

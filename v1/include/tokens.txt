@@ -31,5 +31,6 @@ TOKEN(TK_DECLARATION,		"decl")
 TOKEN(TK_ARRAY,			"[]")
 TOKEN(TK_FUNCTION,		"FUNC")
 TOKEN(TK_POINTER,                       "*")
+TOKEN(TK_LABEL,			"label")
 
 TOKEN(TK_EOF, "eof_ch")

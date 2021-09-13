@@ -20,7 +20,9 @@ AstNodePtr postfix_declarator(){
 	while(1){
 		if(current_token.kind == TK_LPARENTHESES){
 			NEXT_TOKEN;
-			Value value = current_token.value;
+			Value value;
+			memset(&value, 0, sizeof(value));
+			get_token_name(value.value_str, TK_FUNCTION);
 			AstNodePtr *params;
 			decl = create_ast_node(TK_FUNCTION, value, NULL, decl);
 			params = &(decl->kids[0]);
@@ -36,9 +38,10 @@ AstNodePtr postfix_declarator(){
 			}	
 			EXPECT(TK_RPARENTHESES);
 		}else if(current_token.kind == TK_LBRACKET){
+			NEXT_TOKEN;
 			Value value = current_token.value;
 			decl = create_ast_node(TK_ARRAY, value, NULL, decl);
-			NEXT_TOKEN;
+			// NEXT_TOKEN;
 			if(current_token.kind == TK_NUM){
 				// todo value是当前token的值
 				decl->value.value_num = value.value_num;
@@ -86,4 +89,43 @@ AstNodePtr declaration(){
 	}
 
 	return decl;
+}
+
+void visit_declaration(AstNodePtr pNode){
+	if(pNode){
+		visit_declaration(pNode->kids[1]);
+		// 为什么能写出这么多case？我记得那个复杂的例子。
+		switch(pNode->op){
+			case TK_ID:
+				printf("%s is", pNode->value.value_str);
+				break;
+			case TK_ARRAY:
+				printf("\t[%d] of", pNode->value.value_num);
+				break;
+			case TK_INT:
+				printf("\tint\n");
+				break;
+			case TK_FUNCTION:
+				printf("\tfunction(");
+				AstNodePtr curParam = pNode->kids[0];
+				while(curParam){
+					// printf("%s", curParam->op);	
+					char token_name[10];
+					get_token_name(token_name, curParam->op);
+					printf("%s", token_name);	
+					curParam = curParam->kids[0];
+					if(curParam){
+						printf(",");
+					}
+				}
+				printf(") which returns to");
+				break;
+			case TK_POINTER:
+				printf("\tpointer to");
+				break;
+			default:
+				printf("visit_declaration error\n");
+				break;
+		}
+	}	
 }

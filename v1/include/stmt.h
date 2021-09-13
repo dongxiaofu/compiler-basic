@@ -18,6 +18,10 @@ typedef struct astStmtNode{
 	struct astStmtNode *next;
 } *AstStmtNodePtr;
 
+int new_label();
+
+AstNodePtr new_label_node();
+
 AstStmtNodePtr create_ast_stmt_node(TokenKind op);
 
 // 默认语句
@@ -39,4 +43,5 @@ int check_is_prefix_of_stmt(TokenKind kind);
 // 解析复杂语句
  AstStmtNodePtr compound_stmt();
 
+void visit_stmt_node(AstStmtNodePtr stmt);
 #endif

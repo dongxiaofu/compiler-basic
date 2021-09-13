@@ -13,6 +13,10 @@ int main(int argc, char *argv[])
 
 	NEXT_TOKEN;
 	AstStmtNodePtr comNode = compound_stmt();
+	
+	visit_stmt_node(comNode);
+	
+	printf("\n");
 
 	return 0;
 }
@@ -90,10 +94,21 @@ AstStmtNodePtr if_stmt()
 	EXPECT(TK_RPARENTHESES);
 	// 解析复合语句
 	// todo 应该使用kids[0]还是kids[1]？
-	stmt_node->then_stmt = compound_stmt();
+	// stmt_node->then_stmt = compound_stmt();
+	stmt_node->then_stmt = stmt();
+	stmt_node->kids[0] = new_label_node();
+	// else
+	// 在这里纠结了很久，突然恍然大悟。我不知道该不该在这里处理花括号。
+	// 呵呵，我之前的恍然大悟是错误的。
+	if(current_token.kind == TK_ELSE){
+		EXPECT(TK_ELSE);
+		stmt_node->else_stmt = stmt();
+		stmt_node->kids[1] = new_label_node();
+	}
 
 	return stmt_node;
 }
+
 // 解析while语句
 AstStmtNodePtr while_stmt()
 {
@@ -102,12 +117,15 @@ AstStmtNodePtr while_stmt()
 	assert(current_token.kind == TK_WHILE);
 	EXPECT(TK_WHILE);	
 	EXPECT(TK_LPARENTHESES);
+	stmt_node->kids[0] = new_label_node();
 	// 处理表达式
 	stmt_node->expr = expression();
 	assert(current_token.kind == TK_RPARENTHESES);
 	EXPECT(TK_RPARENTHESES);
 	// 解析复合语句
-	stmt_node->then_stmt = compound_stmt();
+	// stmt_node->then_stmt = compound_stmt();
+	stmt_node->then_stmt = stmt();
+	stmt_node->kids[1] = new_label_node();
 	
 	return stmt_node;
 }
@@ -125,10 +143,16 @@ AstStmtNodePtr expr_stmt()
 {
 	// 只能解析 a = 5; 
 	if(current_token.kind == TK_ID){
+		AstStmtNodePtr stmt_node = create_ast_stmt_node(TK_ASSIGN);
+		// todo 我并未写出来，看了作者的代码，才知道我漏掉了这一句。
+		stmt_node->kids[0] = create_ast_node(TK_ID, current_token.value,NULL,NULL);
+		
 		NEXT_TOKEN;
 		assert(current_token.kind == TK_ASSIGN);
 		EXPECT(TK_ASSIGN);
-		AstStmtNodePtr stmt_node = create_ast_stmt_node(TK_ASSIGN);
+	//	AstStmtNodePtr stmt_node = create_ast_stmt_node(TK_ASSIGN);
+	//	// todo 我并未写出来，看了作者的代码，才知道我漏掉了这一句。
+	//	stmt_node->kids[0] = create_ast_node(TK_ID, current_token.value,NULL,NULL);
 		stmt_node->expr = expression();
 		assert(current_token.kind == TK_SEMICOLON);
 		EXPECT(TK_SEMICOLON);
@@ -165,4 +189,84 @@ AstStmtNodePtr create_ast_stmt_node(TokenKind op)
 	memset(pNode, 0, sizeof(*pNode));
 	pNode->op = op;
 	return pNode;
+}
+
+void visit_stmt_node(AstStmtNodePtr stmt){
+	if(!stmt){
+		return;
+	}
+
+	switch(stmt->op){
+		// 最费劲的一个。
+		case TK_IF:
+			visit_arithmetic_node(stmt->expr);	
+			if(stmt->then_stmt && stmt->else_stmt){
+				printf("if(!%s) goto %s\n", 
+					stmt->expr->value.value_str,
+					stmt->kids[1]->value.value_str);
+				visit_stmt_node(stmt->then_stmt);
+				printf("%s:\n", stmt->kids[1]->value.value_str);
+				visit_stmt_node(stmt->else_stmt);
+				// todo 在此纠结许久，有必要设置一个这样的出口标签吗？
+				printf("%s:\n", stmt->kids[0]->value.value_str);
+			}else{
+				printf("if(!%s) goto %s\n", 
+					stmt->expr->value.value_str,
+					stmt->kids[0]->value.value_str);
+				visit_stmt_node(stmt->then_stmt);
+				printf("%s:\n", stmt->kids[0]->value.value_str);
+			}
+			break;
+		case TK_WHILE:
+			printf("%s:\n", stmt->kids[0]->value.value_str);
+			visit_arithmetic_node(stmt->expr);	
+			printf("if(!%s) goto %s\n", 
+				stmt->expr->value.value_str,
+				stmt->kids[1]->value.value_str);
+			visit_stmt_node(stmt->then_stmt);
+			printf("goto %s\n", stmt->kids[0]->value.value_str);
+			printf("%s:\n", stmt->kids[1]->value.value_str);
+			break;
+		case TK_ASSIGN:
+			visit_arithmetic_node(stmt->expr);
+			// todo 费解。
+			// todo 必须有这个判断。可惜，我看了作者的代码才补充这个判断。
+			if(stmt->kids[0] && stmt->expr){
+				if(stmt->expr->op == TK_NUM){
+					printf("\t%s = %d\n", stmt->kids[0]->value.value_str, stmt->expr->value.value_num);
+				}else{
+					printf("\t%s = %s\n", stmt->kids[0]->value.value_str, stmt->expr->value.value_str);
+				}
+			}
+			break;
+		case TK_DECLARATION:
+			visit_declaration(stmt->expr);
+			break;
+		case TK_COMPOUND:
+			stmt = stmt->next;
+			while(stmt){
+				visit_stmt_node(stmt);	
+				stmt = stmt->next;
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+int new_label()
+{
+	static int counter;
+	return counter++;
+}
+
+AstNodePtr new_label_node()
+{
+	int label_count = new_label();
+	Value value;
+	memset(&value, 0, sizeof(value));
+	AstNodePtr label = create_ast_node(TK_LABEL, value, NULL, NULL);
+	snprintf(label->value.value_str, 15, "Lable_%d", label_count );
+
+	return label;
 }
