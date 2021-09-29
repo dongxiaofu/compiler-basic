@@ -1,0 +1,108 @@
+//+    &     +=    &=     &&    ==    !=    (    )
+//-    |     -=    |=     ||    <     <=    [    ]
+//*    ^     *=    ^=     <-    >     >=    {    }
+///    <<    /=    <<=    ++    =     :=    ,    ;
+//%    >>    %=    >>=    --    !     ...   .    :
+//     &^          &^=
+
+TOKEN(TK_NAN, "")
+TOKEN(TK_ID, "id")
+TOKEN(TK_NUM, "num")
+TOKEN(TK_EOF, "eof_ch")
+
+// keyword
+TOKEN(BREAK,"break")
+TOKEN(DEFAULT,"default")
+TOKEN(FUNC,"func")
+TOKEN(INTERFACE,"interface")
+TOKEN(SELECT,"select")
+TOKEN(CASE,"case")
+TOKEN(DEFER,"defer")
+TOKEN(GO,"go")
+TOKEN(MAP,"map")
+TOKEN(STRUCT,"struct")
+TOKEN(CHAN,"chan")
+TOKEN(ELSE,"else")
+TOKEN(GOTO,"goto")
+TOKEN(PACKAGE,"package")
+TOKEN(SWITCH,"switch")
+TOKEN(CONST,"const")
+TOKEN(FALLTHROUGH,"fallthrough")
+TOKEN(IF,"if")
+TOKEN(RANGE,"range")
+TOKEN(TYPE,"type")
+TOKEN(CONTINUE,"continue")
+TOKEN(FOR,"for")
+TOKEN(IMPORT,"import")
+TOKEN(RETURN,"return")
+TOKEN(VAR,"var")
+
+
+TOKEN(TK_SUM,"+")
+TOKEN(TK_DIFFERENCE,"-")
+TOKEN(TK_PRODUCT,"*")
+TOKEN(TK_QUOTIENT,"/")
+TOKEN(TK_REMAINDER,"%")
+TOKEN(TK_BITWISE_AND,"&")
+TOKEN(TK_BITWISE_OR,"|")
+TOKEN(TK_BITWISE_XOR,"^")
+TOKEN(TK_LEFT_SHIFT,"<<")
+TOKEN(TK_RIGHT_SHIFT,">>")
+TOKEN(TK_BIT_CLEAR,"&^")
+
+
+TOKEN(TK_ADD_ASSIGN,"+=")
+TOKEN(TK_MINUS_ASSIGN,"-=")
+TOKEN(TK_MUL_ASSIGN,"*=")
+TOKEN(TK_DIV_ASSIGN,"/=")
+TOKEN(TK_MOD_ASSIGN,"%=")
+TOKEN(TK_AND_ASSIGN, "&=") 
+TOKEN(TK_OR_ASSIGN, "|=")
+TOKEN(TK_XOR_ASSIGN, "^=")
+TOKEN(TK_LEFT_SHIFT_ASSIGN, "<<=")
+TOKEN(TK_RIGHT_SHIFT_ASSIGN, ">>=")
+// https://zhuanlan.zhihu.com/p/86765504
+TOKEN(TK_BIT_CLEAR_ASSIGN,"&^=")
+
+
+TOKEN(TK_CONDITIONAL_AND,"&&")
+TOKEN(TK_CONDITIONAL_OR,"||")
+
+// Receive operator
+// https://golang.org/ref/spec#assign_op
+// todo 不知道怎么处理
+TOKEN(TK_RECEIVE, "<-")
+
+// todo 怎么区分a++还是++a？
+TOKEN(TK_INC, "++")
+TOKEN(TK_DEC, "++")
+
+
+// Comparison operators
+TOKEN(TK_EQUAL,"==")
+TOKEN(TK_NOT_EQUAL,"!=")
+TOKEN(TK_LESS,"<")
+TOKEN(TK_LESS_OR_EQUAL,"<=")
+TOKEN(TK_GREATER,">")
+TOKEN(TK_GREATER_OR_EQUAL,">=")
+
+TOKEN(TK_ASSIGN, "=")
+// 没找到合适的英语名称
+// todo 是否需要为这个符号创建一个token
+TOKEN(TK_INIT_ASSIGN, ":=")
+TOKEN(TK_NOT, "!")
+
+TOKEN(TK_ELLIPSIS, "...")
+TOKEN(TK_DOT, ".")
+TOKEN(TK_LPARENTHESES, "(")
+TOKEN(TK_RPARENTHESES, ")")
+TOKEN(TK_LBRACKET, "[")
+TOKEN(TK_RBRACKET, "]")
+TOKEN(TK_LBRACE, "{")
+TOKEN(TK_RBRACE, "}")
+TOKEN(TK_DOUBLE_QUOTATION_MARK, "\"")
+TOKEN(TK_SINGLE_QUOTATION_MARK, "'")
+
+TOKEN(TK_SEMICOLON, ";")
+TOKEN(TK_COMMA, ",")
+
