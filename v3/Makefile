@@ -12,9 +12,9 @@ CC          = gcc
 LD	=	ld
 LDFLAGS		= -m elf_i386
 
-SCANNER = lex
+SCANNER = cgc
 # 包含main函数的.o文件必须放在前面。
-OBJS	= lex.o
+OBJS	= cgc.o decl.o lex.o
 #OBJS	= stmt.o lex.o expr.o decl.o
 #OBJS	= lex.o
 
@@ -31,7 +31,11 @@ ${SCANNER}:${OBJS}
 	#$(CC) ${CFLAGS}  -o ${SCANNER} ${OBJS}
 
 clean:
-	rm -f *.o lex
+	rm -f *.o lex cgc
+
+cgc.o:cgc.c
+	#${CC} ${CFLAGS} -c -o $@ $<
+	${CC} ${CFLAGS} -c cgc.c
 
 lex.o:lex.c
 	#${CC} ${CFLAGS} -c -o $@ $<
@@ -43,5 +47,5 @@ lex.o:lex.c
 #
 #expr.o:expr.c
 #	${CC} ${CFLAGS} -c -o $@ $<
-#decl.o:decl.c
-#	${CC} ${CFLAGS} -c -o $@ $<
+decl.o:decl.c
+	${CC} ${CFLAGS} -c -o $@ $<

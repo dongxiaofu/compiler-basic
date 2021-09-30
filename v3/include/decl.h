@@ -6,15 +6,10 @@
 #include "expr.h"
 
 
-AstNodePtr direct_declarator();
 
-AstNodePtr postfix_declarator();
 
-AstNodePtr declarator();
+AstNode declaration();
 
-AstNodePtr declaration();
-
-void visit_declaration(AstNodePtr pNode);
 
 
 

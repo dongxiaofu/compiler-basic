@@ -4,7 +4,7 @@
 
 #include "lex.h"
 
-int main(int argc, char *argv[])
+int main2(int argc, char *argv[])
 {
 	printf("I am a scanner\n");
 	fp = fopen("test.c", "r");

@@ -4,34 +4,82 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+AST_NODE_COMMON	./include/ast.h	29;"	d
+ArrPtr	./typedef-demo.c	/^typedef int (*ArrPtr)[4];$/;"	t	file:
+AstNode	./include/ast.h	/^} *AstNode;$/;"	t	typeref:struct:astNode
 AstNodePtr	./include/lex.h	/^} *AstNodePtr;$/;"	t	typeref:struct:astNode
 AstStmtNodePtr	./include/stmt.h	/^} *AstStmtNodePtr;$/;"	t	typeref:struct:astStmtNode
+AstTranslationUnit	./include/ast.h	/^typedef struct astTranslationUnit AstTranslationUnit;$/;"	t	typeref:struct:astTranslationUnit
 CC	./Makefile	/^CC          = gcc$/;"	m
 CFLAGS	./Makefile	/^CFLAGS	= -I .\/include -g -m32$/;"	m
+CREATE_AST_NODE	./include/ast.h	50;"	d
 DECL_H	./include/decl.h	2;"	d
-EXPECT	./include/lex.h	56;"	d
+EXPECT	./include/lex.h	62;"	d
 EXPR_H	./include/expr.h	2;"	d
 H_SRC	./Makefile	/^H_SRC			= lex.h stmt.h$/;"	m
 LD	./Makefile	/^LD	=	ld$/;"	m
 LDFLAGS	./Makefile	/^LDFLAGS		= -m elf_i386$/;"	m
 LEX_H	./include/lex.h	2;"	d
 MAX_NAME_LEN	./include/lex.h	10;"	d
-NEXT_TOKEN	./include/lex.h	55;"	d
-OBJS	./Makefile	/^OBJS	= stmt.o lex.o expr.o decl.o$/;"	m
+NEXT_TOKEN	./include/lex.h	61;"	d
+NK_ArrayDeclarator	./include/ast.h	/^	NK_StructDeclarator,    NK_PointerDeclarator,  NK_ArrayDeclarator,		$/;"	e	enum:nodeKind
+NK_BreakStatement	./include/ast.h	/^	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		$/;"	e	enum:nodeKind
+NK_CaseStatement	./include/ast.h	/^	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		$/;"	e	enum:nodeKind
+NK_CompoundStatement	./include/ast.h	/^	NK_ReturnStatement,     NK_CompoundStatement$/;"	e	enum:nodeKind
+NK_ContinueStatement	./include/ast.h	/^	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		$/;"	e	enum:nodeKind
+NK_Declaration	./include/ast.h	/^	NK_TranslationUnit,     NK_Function,           NK_Declaration,$/;"	e	enum:nodeKind
+NK_DefaultStatement	./include/ast.h	/^	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		$/;"	e	enum:nodeKind
+NK_DoStatement	./include/ast.h	/^	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		$/;"	e	enum:nodeKind
+NK_EnumSpecifier	./include/ast.h	/^	NK_TypedefName,         NK_EnumSpecifier,      NK_Enumerator,			$/;"	e	enum:nodeKind
+NK_Enumerator	./include/ast.h	/^	NK_TypedefName,         NK_EnumSpecifier,      NK_Enumerator,			$/;"	e	enum:nodeKind
+NK_Expression	./include/ast.h	/^	NK_Expression,$/;"	e	enum:nodeKind
+NK_ExpressionStatement	./include/ast.h	/^	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		$/;"	e	enum:nodeKind
+NK_ForStatement	./include/ast.h	/^	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		$/;"	e	enum:nodeKind
+NK_Function	./include/ast.h	/^	NK_TranslationUnit,     NK_Function,           NK_Declaration,$/;"	e	enum:nodeKind
+NK_FunctionDeclarator	./include/ast.h	/^	NK_FunctionDeclarator,  NK_ParameterTypeList,  NK_ParameterDeclaration,$/;"	e	enum:nodeKind
+NK_GotoStatement	./include/ast.h	/^	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		$/;"	e	enum:nodeKind
+NK_IfStatement	./include/ast.h	/^	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		$/;"	e	enum:nodeKind
+NK_InitDeclarator	./include/ast.h	/^	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,$/;"	e	enum:nodeKind
+NK_Initializer	./include/ast.h	/^	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,$/;"	e	enum:nodeKind
+NK_LabelStatement	./include/ast.h	/^	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		$/;"	e	enum:nodeKind
+NK_NameDeclarator	./include/ast.h	/^	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,$/;"	e	enum:nodeKind
+NK_ParameterDeclaration	./include/ast.h	/^	NK_FunctionDeclarator,  NK_ParameterTypeList,  NK_ParameterDeclaration,$/;"	e	enum:nodeKind
+NK_ParameterTypeList	./include/ast.h	/^	NK_FunctionDeclarator,  NK_ParameterTypeList,  NK_ParameterDeclaration,$/;"	e	enum:nodeKind
+NK_PointerDeclarator	./include/ast.h	/^	NK_StructDeclarator,    NK_PointerDeclarator,  NK_ArrayDeclarator,		$/;"	e	enum:nodeKind
+NK_ReturnStatement	./include/ast.h	/^	NK_ReturnStatement,     NK_CompoundStatement$/;"	e	enum:nodeKind
+NK_Specifiers	./include/ast.h	/^	NK_TypeName,            NK_Specifiers,         NK_Token,				$/;"	e	enum:nodeKind
+NK_StructDeclaration	./include/ast.h	/^	NK_StructSpecifier,     NK_UnionSpecifier,     NK_StructDeclaration,	$/;"	e	enum:nodeKind
+NK_StructDeclarator	./include/ast.h	/^	NK_StructDeclarator,    NK_PointerDeclarator,  NK_ArrayDeclarator,		$/;"	e	enum:nodeKind
+NK_StructSpecifier	./include/ast.h	/^	NK_StructSpecifier,     NK_UnionSpecifier,     NK_StructDeclaration,	$/;"	e	enum:nodeKind
+NK_SwitchStatement	./include/ast.h	/^	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		$/;"	e	enum:nodeKind
+NK_Token	./include/ast.h	/^	NK_TypeName,            NK_Specifiers,         NK_Token,				$/;"	e	enum:nodeKind
+NK_TranslationUnit	./include/ast.h	/^	NK_TranslationUnit,     NK_Function,           NK_Declaration,$/;"	e	enum:nodeKind
+NK_TypeName	./include/ast.h	/^	NK_TypeName,            NK_Specifiers,         NK_Token,				$/;"	e	enum:nodeKind
+NK_TypedefName	./include/ast.h	/^	NK_TypedefName,         NK_EnumSpecifier,      NK_Enumerator,			$/;"	e	enum:nodeKind
+NK_UnionSpecifier	./include/ast.h	/^	NK_StructSpecifier,     NK_UnionSpecifier,     NK_StructDeclaration,	$/;"	e	enum:nodeKind
+NK_WhileStatement	./include/ast.h	/^	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		$/;"	e	enum:nodeKind
+OBJS	./Makefile	/^OBJS	= lex.o$/;"	m
+ParseTranslationUnit	./cgc.c	/^AstTranslationUnit ParseTranslationUnit(){$/;"	f
 SCANNER	./Makefile	/^SCANNER = lex$/;"	m
 STMT_H	./include/stmt.h	2;"	d
 TOKEN	./include/lex.h	18;"	d
 TOKEN	./include/lex.h	20;"	d
 TOKEN	./include/lex.h	24;"	d
 TOKEN	./include/lex.h	26;"	d
+TOKEN	./include/lex.h	35;"	d
+TOKEN	./include/lex.h	37;"	d
 T_SRC	./Makefile	/^T_SRC			= tokens.txt$/;"	m
 Token	./include/lex.h	/^}Token;$/;"	t	typeref:struct:__anon4
 TokenInfo	./include/lex.h	/^}TokenInfo;$/;"	t	typeref:struct:__anon3
 TokenKind	./include/lex.h	/^}TokenKind;$/;"	t	typeref:enum:__anon2
 Value	./include/lex.h	/^}Value;$/;"	t	typeref:union:__anon1
+__AST_H_	./include/ast.h	2;"	d
 add_expr	./expr.c	/^AstNodePtr add_expr()$/;"	f
+arr	./typedef-demo.c	/^int arr[3][4];$/;"	v
+astNode	./include/ast.h	/^typedef struct astNode$/;"	s
 astNode	./include/lex.h	/^typedef struct astNode{$/;"	s
 astStmtNode	./include/stmt.h	/^typedef struct astStmtNode{$/;"	s
+astTranslationUnit	./include/ast.h	/^struct astTranslationUnit$/;"	s
 check_is_prefix_of_stmt	./stmt.c	/^int check_is_prefix_of_stmt(TokenKind kind)$/;"	f
 compound_stmt	./stmt.c	/^AstStmtNodePtr compound_stmt()$/;"	f
 create_ast_node	./expr.c	/^AstNodePtr create_ast_node(TokenKind op, Value value, AstNodePtr left, AstNodePtr right)$/;"	f
@@ -48,6 +96,7 @@ expect_token	./lex.c	/^void expect_token(TokenKind kind)$/;"	f
 expr	./include/stmt.h	/^	struct astNode *expr;$/;"	m	struct:astStmtNode	typeref:struct:astStmtNode::astNode
 expr_stmt	./stmt.c	/^AstStmtNodePtr expr_stmt()$/;"	f
 expression	./expr.c	/^AstNodePtr expression()$/;"	f
+extDecls	./include/ast.h	/^	AstNode extDecls;$/;"	m	struct:astTranslationUnit
 fp	./include/lex.h	/^FILE *fp;$/;"	v
 get_keyword_kind	./lex.c	/^int get_keyword_kind(char *keyword)$/;"	f
 get_next_char	./lex.c	/^void get_next_char()$/;"	f
@@ -56,24 +105,31 @@ get_token_kind	./lex.c	/^int get_token_kind(char *token_name)$/;"	f
 get_token_name	./lex.c	/^void get_token_name(char *token_name, TokenKind kind){$/;"	f
 if_stmt	./stmt.c	/^AstStmtNodePtr if_stmt()$/;"	f
 is_arithmetic_node	./expr.c	/^int is_arithmetic_node(AstNodePtr node)$/;"	f
+is_operator	./lex.c	/^int is_operator(char ch)$/;"	f
 is_whitespace	./lex.c	/^int is_whitespace(char ch)$/;"	f
 keywords	./include/lex.h	/^static TokenInfo keywords[] = {$/;"	v
 kids	./include/lex.h	/^	struct astNode *kids[2];$/;"	m	struct:astNode	typeref:struct:astNode::astNode
 kids	./include/stmt.h	/^	struct astNode *kids[2];$/;"	m	struct:astStmtNode	typeref:struct:astStmtNode::astNode
 kind	./include/lex.h	/^	TokenKind kind;$/;"	m	struct:__anon3
 kind	./include/lex.h	/^	TokenKind kind;$/;"	m	struct:__anon4
-main	./stmt.c	/^int main(int argc, char *argv[])$/;"	f
+main	./cgc.c	/^int main(int argc, char *argv[])$/;"	f
+main	./experiment/volatile-demo.c	/^int main(int argc, char *argv[])$/;"	f
+main	./lex.c	/^int main(int argc, char *argv[])$/;"	f
+main	./typedef-demo.c	/^int main(int argc, char *argv[])$/;"	f
+main3	./stmt.c	/^int main3(int argc, char *argv[])$/;"	f
 mul_expr	./expr.c	/^AstNodePtr mul_expr()$/;"	f
 name	./include/lex.h	/^	char name[MAX_NAME_LEN];$/;"	m	struct:__anon3
 new_label	./stmt.c	/^int new_label()$/;"	f
 new_label_node	./stmt.c	/^AstNodePtr new_label_node()$/;"	f
+new_tmp	./expr.c	/^int new_tmp()$/;"	f
 next	./include/stmt.h	/^	struct astStmtNode *next;$/;"	m	struct:astStmtNode	typeref:struct:astStmtNode::astStmtNode
+nodeKind	./include/ast.h	/^enum nodeKind $/;"	g
 op	./include/lex.h	/^	TokenKind op;$/;"	m	struct:astNode
 op	./include/stmt.h	/^	TokenKind op;$/;"	m	struct:astStmtNode
 postfix_declarator	./decl.c	/^AstNodePtr postfix_declarator(){$/;"	f
-prefix_of_stmt_token_kinds	./include/lex.h	/^static TokenKind prefix_of_stmt_token_kinds[] = {$/;"	v
 primary_expr	./expr.c	/^AstNodePtr primary_expr()$/;"	f
 print_token	./expr.c	/^void print_token(AstNodePtr node)$/;"	f
+ptr	./typedef-demo.c	/^ArrPtr ptr = &arr[0];$/;"	v
 stmt	./stmt.c	/^AstStmtNodePtr stmt()$/;"	f
 then_stmt	./include/stmt.h	/^	struct astStmtNode *then_stmt;$/;"	m	struct:astStmtNode	typeref:struct:astStmtNode::astStmtNode
 token_names	./include/lex.h	/^static char *token_names[] = {$/;"	v
