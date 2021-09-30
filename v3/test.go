@@ -1,1 +1,5 @@
-const Pi float64 = 3.14159265358979323846
+const (
+	size int64 = 1024;
+	eof        = 15
+	a uint = 78;
+)

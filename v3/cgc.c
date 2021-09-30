@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "decl.h"
 #include "lex.h"
 #include "ast.h"
 

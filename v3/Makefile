@@ -14,7 +14,7 @@ LDFLAGS		= -m elf_i386
 
 SCANNER = cgc
 # 包含main函数的.o文件必须放在前面。
-OBJS	= cgc.o decl.o lex.o
+OBJS	= cgc.o decl.o lex.o expr.o
 #OBJS	= stmt.o lex.o expr.o decl.o
 #OBJS	= lex.o
 
@@ -45,7 +45,7 @@ lex.o:lex.c
 #	#${CC} ${CFLAGS} -c -o $@ $<
 #	${CC} ${CFLAGS} -c stmt.c
 #
-#expr.o:expr.c
-#	${CC} ${CFLAGS} -c -o $@ $<
+expr.o:expr.c
+	${CC} ${CFLAGS} -c -o $@ $<
 decl.o:decl.c
 	${CC} ${CFLAGS} -c -o $@ $<

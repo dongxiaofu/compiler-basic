@@ -27,6 +27,15 @@ enum nodeKind
 	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		
 	NK_ReturnStatement,     NK_CompoundStatement
 };
+
+static char TypeNames[][16] = {
+	"bool",
+	"uint8","uint16","uint32","uint64","int8","int16","int32","int64",
+	"float32", "float64", "complex64", "complex128",
+	"byte","rune","uint","int","uintptr"
+};
+
+
 /**
 	kind:	the kind of node
 	next:	pointer to next node
@@ -58,6 +67,7 @@ typedef struct astTranslationUnit AstTranslationUnit;
     p->kind = NK_##k;         
 
 AstTranslationUnit ParseTranslationUnit();
+int IsDataType(char *str);
 
 #endif
 
