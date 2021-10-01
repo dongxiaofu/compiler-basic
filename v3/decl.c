@@ -48,7 +48,8 @@ AstNode ParseConstDecl(){
 	// todo 耗费了很多很多时间。
 	// while(current_token.kind == TK_SEMICOLON){
 	while(current_token.kind == TK_ID){
-		NEXT_TOKEN;	
+		// todo 不需要这个NEXT_TOKEN，留给下面的函数解析。花了很多很多时间才找出这个问题。
+		//NEXT_TOKEN;	
 		ParseConstSpec();
 		expect_semicolon;
 		// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
@@ -119,5 +120,10 @@ int IsDataType(char *str){
 	}
 
 	return 0;
+}
+
+AstNode ParseVarDecl(){
+	LOG("%s\n", "parse VarDec");
+
 }
 

@@ -4,7 +4,9 @@
 #include <stdlib.h>
 
 // 打印日志
-#define LOG	printf
+// #define LOG	printf
+#define LOG	
+#define ERROR	printf
 
 /**
 	NK:		Node Kind

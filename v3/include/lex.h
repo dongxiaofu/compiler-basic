@@ -37,6 +37,12 @@ static TokenInfo keywords[] = {
 	#undef TOKEN
 };
 
+static int Prec[] = {
+	#define OPINFO(op, prec, name, func, opcode)	prec,
+	#include "opinfo.h"
+	#undef OPINFO
+};
+
 //static TokenInfo keywords[] = {
 //	{TK_INT, "int"},
 //	{TK_IF, "if"},
