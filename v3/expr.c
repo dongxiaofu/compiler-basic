@@ -95,6 +95,10 @@ int IsPostfix(TokenKind kind){
 	return (kind == TK_DOT || kind == TK_LBRACKET || kind == TK_LPARENTHESES);
 } 
 
+/**
+ * Selector       = "." identifier .
+ * TypeAssertion  = "." "(" Type ")" .
+ */
 AstNode ParseSelectorTypeAssertion(){
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
@@ -106,8 +110,41 @@ AstNode ParseSelectorTypeAssertion(){
 	}
 }
 
+/**
+ * Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
+ * ()
+ * (abc, def)
+ * (uint abc, def,name)
+ * (uint abc, def,name) ...
+ */
 AstNode ParseArguments(){
+	expect_token(TK_LPARENTHESES);
+	
+	while(current_token.kind != TK_RPARENTHESES){
+		if(IsDataType(current_token.value.value_str) == 1){
+			NEXT_TOKEN;
+		}else{
+			ParseExpressionList();
+		}
 
+		// 第一个循环
+		while(current_token.kind == TK_COMMA){
+			NEXT_TOKEN;
+			ParseExpressionList();
+		}
+
+		// 第二个循环
+		while(current_token.kind == TK_ELLIPSIS){
+			NEXT_TOKEN;
+		}
+
+		// 第三个循环
+		while(current_token.kind == TK_COMMA){
+			NEXT_TOKEN;
+		}
+	}	
+
+	expect_token(TK_RPARENTHESES);
 }
 
 /**

@@ -44,7 +44,8 @@ void dump_token(Token token)
 
 int is_operator(char ch)
 {
-	char operators[] = {'*','/', '%', '<', '>',  '&',  '+',  '-',  '|',  '^',  '='};
+	// char operators[] = {'*','/', '%', '<', '>',  '&',  '+',  '-',  '|',  '^',  '='};
+	char operators[] = {'*','/', '%', '<', '>',  '&',  '+',  '-',  '|',  '^',  '=', '.'};
 	
 	for(int i = 0; i < sizeof(operators) / sizeof(char); i++){
 		if(ch == operators[i]){

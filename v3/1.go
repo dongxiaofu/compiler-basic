@@ -1,7 +1,8 @@
 const (
-	age  uint = 580 ^ 90 / 2 + float32(value);
-	age  uint = 580 ^ 90 / 2 + float32(value,);
-	age  uint = 580 ^ 90 / 2 + float32(value) + person.age.height.(float32);
-	age  uint = 580 ^ 90 / 2 << float32(value,);
-	age  uint = 580 ^ 90 / 2 + float32(value) + x.(int);
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...) / 100
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...);
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...);
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...);
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...);
+	age  uint = 580 ^ 90 / 2 << float32(value,) + sum(uint, a,b,c...);
 )
