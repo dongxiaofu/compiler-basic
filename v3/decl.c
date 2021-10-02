@@ -13,6 +13,7 @@ AstNode declaration(){
 	switch(kind){
 		case TK_VAR:
 			LOG("%s\n", "parse var");
+			ParseVarDecl();
 			break;
 		case TK_TYPE:
 			LOG("%s\n", "parse type");
@@ -132,8 +133,63 @@ int IsDataType(char *str){
 	return 0;
 }
 
+/**
+ * VarDecl     = "var" ( VarSpec | "(" { VarSpec ";" } ")" ) .
+VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
+ */
 AstNode ParseVarDecl(){
 	LOG("%s\n", "parse VarDec");
-
+	NEXT_TOKEN;
+	if(current_token.kind == TK_LPARENTHESES){
+		NEXT_TOKEN;
+		while(current_token.kind != TK_RPARENTHESES){
+			ParseVarSpec();
+			expect_semicolon;	
+		}
+		expect_token(TK_RPARENTHESES);
+	}else{
+		ParseVarSpec();
+	}
 }
 
+/**
+ * VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
+ */
+AstNode ParseVarSpec(){
+	LOG("%s\n", "parse VarDec");
+	ParseIdentifierList();
+	if(current_token.kind == TK_ASSIGN){
+		NEXT_TOKEN;
+		ParseExpressionList();
+	}else{
+		// 跳过Type
+		NEXT_TOKEN;
+		if(current_token.kind == TK_ASSIGN){
+			NEXT_TOKEN;
+			ParseExpressionList();
+		}
+	}
+}
+
+//AstNode ParseVarDecl(){
+//	LOG("%s\n", "parse VarDec");
+//
+//}
+//
+//
+//AstNode ParseVarDecl(){
+//	LOG("%s\n", "parse VarDec");
+//
+//}
+//
+//
+//AstNode ParseVarDecl(){
+//	LOG("%s\n", "parse VarDec");
+//
+//}
+//
+//
+//AstNode ParseVarDecl(){
+//	LOG("%s\n", "parse VarDec");
+//
+//}
