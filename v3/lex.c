@@ -35,6 +35,8 @@ void dump_token(Token token)
 	if(token.kind == TK_NUM){
 		printf("token = %d, type = %d\n", token.value.value_num, token.kind);
 	}else{// if(token.token_kind == T_)
+		// 不打印结束符。
+		if(token.kind == TK_EOF) return;
 		printf("token = %s, type = %d\n", token.value.value_str, token.kind);
 	}
 }
@@ -42,7 +44,15 @@ void dump_token(Token token)
 
 int is_operator(char ch)
 {
-	return (!isdigit(ch) && !isalpha(ch) && !is_whitespace(ch));
+	char operators[] = {'*','/', '%', '<', '>',  '&',  '+',  '-',  '|',  '^',  '='};
+	
+	for(int i = 0; i < sizeof(operators) / sizeof(char); i++){
+		if(ch == operators[i]){
+			return 1;
+		}
+	}
+	return 0;
+//	return (!isdigit(ch) && !isalpha(ch) && !is_whitespace(ch));
 }
 
 Token get_token()

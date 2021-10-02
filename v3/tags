@@ -15,13 +15,16 @@ CFLAGS	./Makefile	/^CFLAGS	= -I .\/include -g -m32$/;"	m
 CREATE_AST_NODE	./include/ast.h	67;"	d
 DECL_H	./include/decl.h	2;"	d
 ERROR	./include/ast.h	9;"	d
-EXPECT	./include/lex.h	62;"	d
+EXPECT	./include/lex.h	68;"	d
 EXPR_H	./include/expr.h	2;"	d
+ExpectDataType	./decl.c	/^void ExpectDataType(){$/;"	f
+HIGHEST_BIN_PREC	./expr.c	52;"	d	file:
 H_SRC	./Makefile	/^H_SRC			= lex.h stmt.h$/;"	m
 IsAddOp	./expr.c	/^int IsAddOp(){$/;"	f
 IsBinaryOp	./expr.c	/^int IsBinaryOp(){$/;"	f
 IsDataType	./decl.c	/^int IsDataType(char *str){$/;"	f
 IsMulOp	./expr.c	/^int IsMulOp(){$/;"	f
+IsPostfix	./expr.c	/^int IsPostfix(TokenKind kind){$/;"	f
 IsRelOp	./expr.c	/^int IsRelOp(){$/;"	f
 IsUnaryOp	./expr.c	/^int IsUnaryOp(){$/;"	f
 LD	./Makefile	/^LD	=	ld$/;"	m
@@ -29,7 +32,7 @@ LDFLAGS	./Makefile	/^LDFLAGS		= -m elf_i386$/;"	m
 LEX_H	./include/lex.h	2;"	d
 LOG	./include/ast.h	8;"	d
 MAX_NAME_LEN	./include/lex.h	10;"	d
-NEXT_TOKEN	./include/lex.h	61;"	d
+NEXT_TOKEN	./include/lex.h	67;"	d
 NK_ArrayDeclarator	./include/ast.h	/^	NK_StructDeclarator,    NK_PointerDeclarator,  NK_ArrayDeclarator,		$/;"	e	enum:nodeKind
 NK_BreakStatement	./include/ast.h	/^	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		$/;"	e	enum:nodeKind
 NK_CaseStatement	./include/ast.h	/^	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		$/;"	e	enum:nodeKind
@@ -67,11 +70,15 @@ NK_TypedefName	./include/ast.h	/^	NK_TypedefName,         NK_EnumSpecifier,     
 NK_UnionSpecifier	./include/ast.h	/^	NK_StructSpecifier,     NK_UnionSpecifier,     NK_StructDeclaration,	$/;"	e	enum:nodeKind
 NK_WhileStatement	./include/ast.h	/^	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		$/;"	e	enum:nodeKind
 OBJS	./Makefile	/^OBJS	= cgc.o decl.o lex.o expr.o$/;"	m
+OPINFO	./include/lex.h	41;"	d
+OPINFO	./include/lex.h	43;"	d
 ParseAddOp	./expr.c	/^AstNode ParseAddOp(){$/;"	f
-ParseBinaryExpr	./expr.c	/^AstNode ParseBinaryExpr(){$/;"	f
+ParseArguments	./expr.c	/^AstNode ParseArguments(){$/;"	f
+ParseBinaryExpr	./expr.c	/^AstNode ParseBinaryExpr(int prec){$/;"	f
 ParseBinaryOp	./expr.c	/^AstNode ParseBinaryOp(){$/;"	f
 ParseConstDecl	./decl.c	/^AstNode ParseConstDecl(){$/;"	f
 ParseConstSpec	./decl.c	/^AstNode ParseConstSpec(){$/;"	f
+ParseConversion	./expr.c	/^AstNode ParseConversion(){$/;"	f
 ParseExpression	./expr.c	/^AstNode ParseExpression(){$/;"	f
 ParseExpressionList	./expr.c	/^AstNode ParseExpressionList(){$/;"	f
 ParseIdentifier	./decl.c	/^AstNode ParseIdentifier(){$/;"	f
@@ -79,9 +86,11 @@ ParseIdentifierList	./decl.c	/^AstNode ParseIdentifierList(){$/;"	f
 ParseMulOp	./expr.c	/^AstNode ParseMulOp(){$/;"	f
 ParsePrimaryExpr	./expr.c	/^AstNode ParsePrimaryExpr(){$/;"	f
 ParseRelOp	./expr.c	/^AstNode ParseRelOp(){$/;"	f
+ParseSelectorTypeAssertion	./expr.c	/^AstNode ParseSelectorTypeAssertion(){$/;"	f
 ParseTranslationUnit	./cgc.c	/^AstTranslationUnit ParseTranslationUnit(){$/;"	f
 ParseUnaryExpr	./expr.c	/^AstNode ParseUnaryExpr(){$/;"	f
 ParseVarDecl	./decl.c	/^AstNode ParseVarDecl(){$/;"	f
+Prec	./include/lex.h	/^static int Prec[] = {$/;"	v
 SCANNER	./Makefile	/^SCANNER = cgc$/;"	m
 STMT_H	./include/stmt.h	2;"	d
 TOKEN	./include/lex.h	18;"	d

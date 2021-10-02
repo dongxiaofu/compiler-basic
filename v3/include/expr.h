@@ -10,6 +10,12 @@ AstNode ParseExpressionList();
 AstNode ParseExpression();
 AstNode ParseBinaryExpr(int prec);
 AstNode ParseUnaryExpr();
+
+AstNode ParseConversion();
+int IsPostfix(TokenKind kind);
+AstNode ParseSelectorTypeAssertion();
+AstNode ParseArguments();
+
 AstNode ParsePrimaryExpr();
 
 // todo 这些运算符的解析函数是否应该存在？

@@ -42,8 +42,8 @@ AstNode ParseConstDecl(){
 	expect_token(TK_CONST);
 	if(current_token.kind == TK_LPARENTHESES){
 	NEXT_TOKEN;	
-	ParseConstSpec();
-	expect_semicolon;
+//	ParseConstSpec();
+//	expect_semicolon;
 	// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 	// todo 耗费了很多很多时间。
 	// while(current_token.kind == TK_SEMICOLON){
@@ -55,6 +55,7 @@ AstNode ParseConstDecl(){
 		// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 		//expect_token(TK_SEMICOLON);
 	}
+	expect_token(TK_RPARENTHESES);
 }else{
 	ParseConstSpec();
 }
@@ -109,6 +110,15 @@ AstNode ParseIdentifier(){
 
 	return decl;
 
+}
+
+void ExpectDataType(){
+	if(IsDataType(current_token.value.value_str) == 1){
+		NEXT_TOKEN;
+	}else{
+		ERROR("%s\n", "expect a data type");
+		exit(-1);	
+	}
 }
 
 int IsDataType(char *str){

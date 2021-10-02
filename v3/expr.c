@@ -1,5 +1,6 @@
 #include "lex.h"
 #include "ast.h"
+#include "decl.h"
 #include "expr.h"
 
 /**
@@ -81,9 +82,73 @@ AstNode ParseUnaryExpr(){
 	}
 }
 
+AstNode ParseConversion(){
+	LOG("%s\n", "parse Conversion");
+	NEXT_TOKEN;
+	expect_token(TK_LPARENTHESES);
+	ParseExpression();
+	if(current_token.kind == TK_COMMA) expect_token(TK_COMMA);
+	expect_token(TK_RPARENTHESES);
+}
+
+int IsPostfix(TokenKind kind){
+	return (kind == TK_DOT || kind == TK_LBRACKET || kind == TK_LPARENTHESES);
+} 
+
+AstNode ParseSelectorTypeAssertion(){
+	NEXT_TOKEN;
+	if(current_token.kind == TK_LPARENTHESES){
+		NEXT_TOKEN;
+		ExpectDataType();
+		expect_token(TK_RPARENTHESES);
+	}else{
+		expect_token(TK_ID);
+	}
+}
+
+AstNode ParseArguments(){
+
+}
+
+/**
+ * PrimaryExpr =
+	Operand |
+	Conversion |
+	MethodExpr |
+	PrimaryExpr Selector |
+	PrimaryExpr Index |
+	PrimaryExpr Slice |
+	PrimaryExpr TypeAssertion |
+	PrimaryExpr Arguments .
+
+Selector       = "." identifier .
+Index          = "[" Expression "]" .
+Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
+                 "[" [ Expression ] ":" Expression ":" Expression "]" .
+TypeAssertion  = "." "(" Type ")" .
+Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
+ */
 AstNode ParsePrimaryExpr(){
 	LOG("%s\n", "parse PrimaryExpr");
-	NEXT_TOKEN;
+
+	if(IsDataType(current_token.value.value_str) == 1){
+		ParseConversion();
+	}else{
+		NEXT_TOKEN;
+	}
+
+	while(IsPostfix(current_token.kind)){
+		switch(current_token.kind){
+			case TK_DOT:
+				ParseSelectorTypeAssertion();
+				break; 
+			case TK_LPARENTHESES:
+				ParseArguments();
+				break; 
+			default:
+				break;
+		}		
+	}
 }
 
 

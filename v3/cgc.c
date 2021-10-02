@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
 	printf("I am a scanner\n");
-	fp = fopen("test.go", "r");
+	fp = fopen("1.go", "r");
 	if(fp == NULL){
 		perror("open file error\n");
 		return -1;

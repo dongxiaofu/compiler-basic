@@ -6,8 +6,8 @@
 #include "stmt.h"
 #include "expr.h"
 
-
-
+int IsDataType(char *str);
+void ExpectDataType();
 
 AstNode declaration();
 AstNode ParseConstDecl();
