@@ -148,6 +148,56 @@ AstNode ParseArguments(){
 }
 
 /**
+ * Index          = "[" Expression "]" .
+Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
+                 "[" [ Expression ] ":" Expression ":" Expression "]" .
+ */
+AstNode ParseIndexSlice(){
+	NEXT_TOKEN;
+	
+	int expr_count = 0;
+	// TokenKind kind = current_token.kind;	
+	TokenKind kind  = current_token.kind;	
+	while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+		ParseExpression();
+		kind  = current_token.kind;
+		expr_count++;
+	}
+
+	if(expr_count == 1 && kind == TK_RBRACKET){
+		printf("%s\n", "It is a Index");
+		expect_token(TK_RBRACKET);
+		 // NEXT_TOKEN;
+	//	expect_token();
+
+	}else if(kind == TK_COLON){
+		printf("%s\n", "It is a Slice");
+		NEXT_TOKEN;
+
+		int expr_count = 0;
+		kind = current_token.kind;	
+		// while(kind != TK_COLON){ 	
+		while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+			ParseExpression();
+			kind = current_token.kind;	
+			expr_count++;
+		}
+
+		if(kind == TK_COLON){
+			NEXT_TOKEN;
+			ParseExpression();
+			// expect_token(TK_RBRACKE);
+		}else{
+			// NEXT_TOKEN;
+			// todo 可以去掉这个else
+		}
+		expect_token(TK_RBRACKET);
+	}else{
+		ERROR("ParseIndexSlice error\n");
+	}
+}
+
+/**
  * PrimaryExpr =
 	Operand |
 	Conversion |
@@ -181,6 +231,9 @@ AstNode ParsePrimaryExpr(){
 				break; 
 			case TK_LPARENTHESES:
 				ParseArguments();
+				break; 
+			case TK_LBRACKET:
+				ParseIndexSlice();
 				break; 
 			default:
 				break;
