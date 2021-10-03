@@ -1,0 +1,114 @@
+//+    &     +=    &=     &&    ==    !=    (    )
+//-    |     -=    |=     ||    <     <=    [    ]
+//*    ^     *=    ^=     <-    >     >=    {    }
+///    <<    /=    <<=    ++    =     :=    ,    ;
+//%    >>    %=    >>=    --    !     ...   .    :
+//     &^          &^=
+
+TOKEN(TK_NAN, "")
+TOKEN(TK_ID, "id")
+TOKEN(TK_NUM, "num")
+TOKEN(TK_EOF, "eof_ch")
+
+// keyword
+TOKEN(TK_BREAK,"break")
+TOKEN(TK_DEFAULT,"default")
+TOKEN(TK_FUNC,"func")
+TOKEN(TK_INTERFACE,"interface")
+TOKEN(TK_SELECT,"select")
+TOKEN(TK_CASE,"case")
+TOKEN(TK_DEFER,"defer")
+TOKEN(TK_GO,"go")
+TOKEN(TK_MAP,"map")
+TOKEN(TK_STRUCT,"struct")
+TOKEN(TK_CHAN,"chan")
+TOKEN(TK_ELSE,"else")
+TOKEN(TK_GOTO,"goto")
+TOKEN(TK_PACKAGE,"package")
+TOKEN(TK_SWITCH,"switch")
+TOKEN(TK_CONST,"const")
+TOKEN(TK_FALLTHROUGH,"fallthrough")
+TOKEN(TK_IF,"if")
+TOKEN(TK_RANGE,"range")
+TOKEN(TK_TYPE,"type")
+TOKEN(TK_CONTINUE,"continue")
+TOKEN(TK_FOR,"for")
+TOKEN(TK_IMPORT,"import")
+TOKEN(TK_RETURN,"return")
+TOKEN(TK_VAR,"var")
+
+// 为了更方便地判断一元运算符，把这些符号集中到一起。
+// todo 像*这种两种用途的符号，怎么处理？
+// unary_op
+// todo 不知道怎么处理这几个符号。如果保留它们，计算运算符的优先级时会出错。
+// TOKEN(TK_POSITIVE,"+")
+// TOKEN(TK_NEGATIVE,"-")
+TOKEN(TK_NOT, "!")
+//TOKEN(TK_BITWISE_XOR,"^")
+// TOKEN(TK_POINTER,"*")
+// TOKEN(TK_ADDRESS,"&")
+TOKEN(TK_RECEIVE, "<-")
+
+// assign_op
+TOKEN(TK_ASSIGN, "=")
+TOKEN(TK_ADD_ASSIGN,"+=")
+TOKEN(TK_MINUS_ASSIGN,"-=")
+TOKEN(TK_MUL_ASSIGN,"*=")
+TOKEN(TK_DIV_ASSIGN,"/=")
+TOKEN(TK_MOD_ASSIGN,"%=")
+TOKEN(TK_AND_ASSIGN, "&=") 
+TOKEN(TK_OR_ASSIGN, "|=")
+TOKEN(TK_XOR_ASSIGN, "^=")
+TOKEN(TK_LEFT_SHIFT_ASSIGN, "<<=")
+TOKEN(TK_RIGHT_SHIFT_ASSIGN, ">>=")
+// https://zhuanlan.zhihu.com/p/86765504
+TOKEN(TK_BIT_CLEAR_ASSIGN,"&^=")
+// 没找到合适的英语名称
+// todo 是否需要为这个符号创建一个token
+TOKEN(TK_INIT_ASSIGN, ":=")
+
+// binary_op
+TOKEN(TK_CONDITIONAL_OR,"||")
+TOKEN(TK_CONDITIONAL_AND,"&&")
+// rel_op
+TOKEN(TK_EQUAL,"==")
+TOKEN(TK_NOT_EQUAL,"!=")
+TOKEN(TK_LESS,"<")
+TOKEN(TK_LESS_OR_EQUAL,"<=")
+TOKEN(TK_GREATER,">")
+TOKEN(TK_GREATER_OR_EQUAL,">=")
+
+// add_op
+TOKEN(TK_ADD,"+")
+TOKEN(TK_MINUS,"-")
+TOKEN(TK_BINARY_BITWISE_OR,"|")
+TOKEN(TK_BINARY_BITWISE_XOR,"^")
+
+// mul_op
+TOKEN(TK_MUL,"*")
+TOKEN(TK_DIV,"/")
+TOKEN(TK_MOD,"%")
+TOKEN(TK_LEFT_SHIFT,"<<")
+TOKEN(TK_RIGHT_SHIFT,">>")
+TOKEN(TK_BITWISE_AND,"&")
+TOKEN(TK_BITWISE_AND_NOT,"&^")
+
+// todo 怎么区分a++还是++a？
+TOKEN(TK_INC, "++")
+TOKEN(TK_DEC, "++")
+
+TOKEN(TK_ELLIPSIS, "...")
+TOKEN(TK_DOT, ".")
+TOKEN(TK_LPARENTHESES, "(")
+TOKEN(TK_RPARENTHESES, ")")
+TOKEN(TK_LBRACKET, "[")
+TOKEN(TK_RBRACKET, "]")
+TOKEN(TK_LBRACE, "{")
+TOKEN(TK_RBRACE, "}")
+TOKEN(TK_DOUBLE_QUOTATION_MARK, "\"")
+TOKEN(TK_SINGLE_QUOTATION_MARK, "'")
+
+TOKEN(TK_SEMICOLON, ";")
+TOKEN(TK_COMMA, ",")
+TOKEN(TK_COLON, ":")
+

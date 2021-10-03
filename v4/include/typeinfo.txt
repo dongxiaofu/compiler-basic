@@ -1,0 +1,18 @@
+//+    &     +=    &=     &&    ==    !=    (    )
+//-    |     -=    |=     ||    <     <=    [    ]
+//*    ^     *=    ^=     <-    >     >=    {    }
+///    <<    /=    <<=    ++    =     :=    ,    ;
+//%    >>    %=    >>=    --    !     ...   .    :
+//     &^          &^=
+
+
+// keyword
+TYPEINFO(TK_FUNC,Function)
+TYPEINFO(TK_MAP,Map)
+TYPEINFO(TK_SLICE,Slice)
+TYPEINFO(TK_STRUCT,Struct)
+TYPEINFO(TK_INTERFACE,Interface)
+TYPEINFO(TK_CHAN,Channel)
+// todo 这两个token需要特别注意。
+TYPEINFO(TK_POINTER,Pointer)
+TYPEINFO(TK_ARRAY,Array)
