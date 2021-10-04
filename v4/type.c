@@ -18,6 +18,11 @@ int isTypeKeyWord(TokenKind kind){
 		}
 			
 	}
+
+	// todo 处理指针。这种个性化处理方式太
+	// 丑陋了，寻机优化。
+	if(kind == TK_MUL) return 1;
+
 	EndPeekToken();
 	return (TK_FUNC <= kind && kind <= TK_ARRAY);
 }
@@ -152,7 +157,8 @@ AstNode ParseStructType(){
 BaseType    = Type .
  */
 AstNode ParsePointerType(){
-
+	expect_token(TK_MUL);
+	ParseType();	
 }
 
 /**
