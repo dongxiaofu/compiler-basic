@@ -1,12 +1,25 @@
 #include "ast.h"
+#include "lex.h"
 #include "type2.h"
 #include "decl.h"
 #include "expr.h"
 
-
 int isTypeKeyWord(TokenKind kind){
-
-
+	StartPeekToken();
+	if(kind == TK_LBRACKET){
+		StartPeekToken();
+		NEXT_TOKEN;
+		ParseExpression();
+		if(current_token.kind == TK_RBRACKET){
+			EndPeekToken();
+			return 1;	
+		}else{
+			
+		}
+			
+	}
+	EndPeekToken();
+	return (TK_FUNC <= kind && kind <= TK_ARRAY);
 }
 
 /**
@@ -16,6 +29,8 @@ TypeLit   = ArrayType | StructType | PointerType | FunctionType | InterfaceType 
 	    SliceType | MapType | ChannelType .
  */
 AstNode ParseType(){
+	// 跳过type关键字
+//	NEXT_TOKEN;
 	TokenKind kind = current_token.kind;
 	if(kind == TK_LPARENTHESES){
 		expect_token(TK_LPARENTHESES);
@@ -27,6 +42,7 @@ AstNode ParseType(){
 		ParseTypeLit();
 	}else{
 		// todo 处理QualifiedIdent，暂时不实现
+		printf("hi");
 	}
 }
 
@@ -36,12 +52,15 @@ AstNode ParseTypeName(){
 
 AstNode ParseTypeLit(){
  	TokenKind kind = current_token.kind;
-	if(kind == TK_CHAIN_SEND || kind == TK_CHAIN_RECEIVE){
-		kind == TK_CHAIN;
-	}else if(kind == TK_NUL) {
+	if(kind == TK_CHAN_SEND || kind == TK_CHAN_RECEIVE){
+		kind == TK_CHAN;
+	}else if(kind == TK_MUL) {
 		kind = TK_POINTER;
 	}else if(kind == TK_LBRACKET){
+		StartPeekToken();
 		NEXT_TOKEN;
+		kind = current_token.kind;
+		EndPeekToken();
 		if(kind == TK_RBRACKET){
 			kind == TK_SLICE;
 		}else{
@@ -49,7 +68,7 @@ AstNode ParseTypeLit(){
 		}
 		// todo 退回处理了的token，交给解析函数去处理。
 	}
-	return (*TypeListParsers[kind]());
+	return (TypeListParsers[kind]());
 }
 
 /**
@@ -103,7 +122,12 @@ ArrayLength = Expression .
 ElementType = Type .
  */
 AstNode ParseArrayType(){
-
+	printf("parse array\n");
+	
+	expect_token(TK_LBRACKET);	
+	ParseExpression();
+	expect_token(TK_RBRACKET);	
+	ParseType();
 }
 
 /**
@@ -113,7 +137,14 @@ EmbeddedField = [ "*" ] TypeName .
 Tag           = string_lit .
  */
 AstNode ParseStructType(){
-
+	expect_token(TK_STRUCT);
+	expect_token(TK_LBRACE);	
+	while(current_token.kind != TK_RBRACE){
+		ParseFieldDecl();
+		// 处理;
+		expect_semicolon;	
+	}
+	expect_token(TK_RBRACE);	
 }
 
 /**
@@ -150,7 +181,9 @@ AstNode ParseInterfaceType(){
  * SliceType = "[" "]" ElementType .
  */
 AstNode ParseSliceType(){
-
+	expect_token(TK_LBRACKET);	
+	expect_token(TK_RBRACKET);	
+	ParseType();
 }
 
 /**

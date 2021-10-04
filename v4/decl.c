@@ -17,6 +17,7 @@ AstNode declaration(){
 			break;
 		case TK_TYPE:
 			LOG("%s\n", "parse type");
+			ParseTypeDecl();
 			break;
 		case TK_CONST:
 			LOG("%s\n", "parse const");
@@ -31,7 +32,7 @@ AstNode declaration(){
 }
 
 // todo 寻机把这个宏放到更合适的位置。
-#define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
+// #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 /**
  * 	ConstDecl      = "const" ( ConstSpec | "(" { ConstSpec ";" } ")" ) .
 	ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .
@@ -163,7 +164,8 @@ AstNode ParseVarSpec(){
 		ParseExpressionList();
 	}else{
 		// 跳过Type
-		NEXT_TOKEN;
+		// NEXT_TOKEN;
+		ParseType();
 		if(current_token.kind == TK_ASSIGN){
 			NEXT_TOKEN;
 			ParseExpressionList();
@@ -171,6 +173,55 @@ AstNode ParseVarSpec(){
 	}
 }
 
+AstNode ParseTypeDecl(){
+	expect_token(TK_TYPE);
+	expect_token(TK_ID);
+	ParseType();
+}
+
+
+/**
+ * FieldDecl     = (IdentifierList Type | EmbeddedField) [ Tag ] .
+ */
+AstNode ParseFieldDecl(){
+	if(current_token.kind == TK_MUL){
+		ParseEmbeddedField();
+	}else{
+		ParseIdentifierList();
+		ParseType();
+	}
+	ParseTag();
+}
+
+/**
+ * EmbeddedField = [ "*" ] TypeName .
+ */
+AstNode ParseEmbeddedField(){
+	expect_token(TK_MUL);
+	ParseTypeName();
+}
+
+/**
+ * Tag           = string_lit .
+ */
+// todo 先用简单方式处理
+AstNode ParseTag(){
+//	expect_token(TK_TYPE);
+//	expect_token(TK_ID);
+//	ParseType();
+	ParseStrintLit();
+}
+
+/**
+ * string_lit             = raw_string_lit | interpreted_string_lit .
+raw_string_lit         = "`" { unicode_char | newline } "`" .
+interpreted_string_lit = `"` { unicode_value | byte_value } `"` .
+ */
+// todo 暂时用简单方式处理。
+AstNode ParseStrintLit(){
+	NEXT_TOKEN;
+
+}
 //AstNode ParseVarDecl(){
 //	LOG("%s\n", "parse VarDec");
 //

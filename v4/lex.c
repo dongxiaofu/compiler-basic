@@ -59,6 +59,7 @@ int is_operator(char ch)
 
 Token get_token()
 {
+	dump_token(current_token);
 //	printf("get token\n");
 //	Token token;
 //	token.kind = TK_NAN;
@@ -122,7 +123,7 @@ try_again:
 
 	current_token = token;
 
-	dump_token(token);
+	//dump_token(token);
 
 	return token;
 }

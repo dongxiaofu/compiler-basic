@@ -70,6 +70,9 @@ FILE *fp;
 #define NEXT_TOKEN	get_token()
 #define EXPECT(token_kind)	expect_token(token_kind)	
 
+// todo 寻机把这个宏放到更合适的位置。
+#define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
+
 void StartPeekToken();
 void EndPeekToken();
 

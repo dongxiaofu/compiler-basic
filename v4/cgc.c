@@ -19,12 +19,12 @@ int main(int argc, char *argv[])
 //	while(1){
 		get_token();
 		StartPeekToken();
-		get_token();
-		get_token();
-		get_token();
-		get_token();
-		get_token();
-		get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
 		EndPeekToken();
 		if(current_token.kind == TK_EOF) return 0;
 		ParseTranslationUnit();
