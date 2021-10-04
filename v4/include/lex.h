@@ -72,6 +72,7 @@ FILE *fp;
 
 // todo 寻机把这个宏放到更合适的位置。
 #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
+#define expect_ellipsis if(current_token.kind == TK_ELLIPSIS) expect_token(TK_ELLIPSIS);
 
 void StartPeekToken();
 void EndPeekToken();

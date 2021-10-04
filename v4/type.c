@@ -170,9 +170,39 @@ ParameterList  = ParameterDecl { "," ParameterDecl } .
 ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
  */
 AstNode ParseFunctionType(){
-
+	expect_token(TK_FUNC);
+	ParseSignature();	
 }
 
+AstNode ParseSignature(){
+	ParseParameters();
+	ParseResult();
+}
+
+AstNode ParseParameters(){
+	expect_token(TK_LPARENTHESES);
+	// todo 这样处理可选产生式是否可行？
+	ParseParameterList();
+	expect_semicolon;
+	// TK_COMMA
+	expect_token(TK_RPARENTHESES);
+}
+
+AstNode ParseResult(){
+	if(current_token.kind == TK_LPARENTHESES){
+		ParseParameters();
+	}else{
+		ParseType();
+	} 
+}
+
+AstNode ParseParameterList(){
+	ParseParameterDecl();
+	while(current_token.kind == TK_COMMA){
+		NEXT_TOKEN;
+		ParseParameterDecl();
+	}
+}
 /**
  * InterfaceType      = "interface" "{" { ( MethodSpec | InterfaceTypeName ) ";" } "}" .
 MethodSpec         = MethodName Signature .

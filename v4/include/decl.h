@@ -29,6 +29,7 @@ AstNode ParseEmbeddedField();
 AstNode ParseTag();
 AstNode ParseStrintLit();
 
+AstNode ParseParameterDecl();
 
 
 

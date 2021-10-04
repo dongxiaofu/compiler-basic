@@ -105,13 +105,14 @@ AstNode ParseIdentifierList(){
 
 AstNode ParseIdentifier(){
 	LOG("%s\n", "parse Identifier");
-
-	NEXT_TOKEN;
+	// todo 不知道有没有问题。
+	// 我想用这种方式处理[Identifier]产生式。
+	if(current_token.kind == TK_ID){
+		NEXT_TOKEN;
+	}
 
 	AstNode decl;
-
 	return decl;
-
 }
 
 void ExpectDataType(){
@@ -222,6 +223,16 @@ AstNode ParseStrintLit(){
 	NEXT_TOKEN;
 
 }
+
+/**
+ * ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
+ */
+AstNode ParseParameterDecl(){
+	ParseIdentifierList();
+	expect_ellipsis;
+	ParseType();
+}
+
 //AstNode ParseVarDecl(){
 //	LOG("%s\n", "parse VarDec");
 //

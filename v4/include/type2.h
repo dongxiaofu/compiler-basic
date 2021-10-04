@@ -4,6 +4,13 @@
 #include "ast.h"
 #include "lex.h"
 
+// todo 寻机测试一下，函数的顺序是否必要。
+AstNode ParseParameterList();
+AstNode ParseSignature();
+AstNode ParseParameters();
+AstNode ParseResult();
+
+
 // AstNode ParseType();
 AstNode ParseTypeName();
 AstNode ParseTypeLit();
