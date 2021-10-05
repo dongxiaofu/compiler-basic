@@ -1,4 +1,1 @@
-type Locker interface {
-	Write(p []byte) (n int, err error)
-	Close() error
-}
+var ptr map[*T]struct{x, y float64}

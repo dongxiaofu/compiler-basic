@@ -251,7 +251,11 @@ AstNode ParseSliceType(){
 KeyType     = Type .
  */
 AstNode ParseMapType(){
-
+	expect_token(TK_MAP);	
+	expect_token(TK_LBRACKET);	
+	ParseType();
+	expect_token(TK_RBRACKET);	
+	ParseType();
 }
 
 /**

@@ -191,7 +191,7 @@ AstNode ParseFieldDecl(){
 		ParseIdentifierList();
 		ParseType();
 	}
-	ParseTag();
+//	ParseTag();
 }
 
 /**
@@ -206,6 +206,7 @@ AstNode ParseEmbeddedField(){
  * Tag           = string_lit .
  */
 // todo 先用简单方式处理
+// todo 不知Tag在struct有什么用。它导致错误，先注释它。
 AstNode ParseTag(){
 //	expect_token(TK_TYPE);
 //	expect_token(TK_ID);

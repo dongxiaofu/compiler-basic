@@ -110,7 +110,10 @@ try_again:
 		do{
 			
 			token.value.value_str[len] = current_char;
+			char ch = current_char;
 			get_next_char();
+			// todo 没想到更好的方法，只能用这种方式修修补补。
+			if(ch == '[' && current_char == '*') break;
 			len++;
 		}while(is_operator(current_char));
 
