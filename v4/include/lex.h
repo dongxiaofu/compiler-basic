@@ -74,6 +74,9 @@ FILE *fp;
 #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 #define expect_ellipsis if(current_token.kind == TK_ELLIPSIS) expect_token(TK_ELLIPSIS);
 
+// todo 这个值不能是任何正常字符。
+#define CH_EOF 255
+
 void StartPeekToken();
 void EndPeekToken();
 

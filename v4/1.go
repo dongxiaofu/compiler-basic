@@ -1,1 +1,4 @@
-var ptr func(int, int, float64) (float64, *[5]int)
+type Locker interface {
+	Write(p []byte) (n int, err error)
+	Close() error
+}

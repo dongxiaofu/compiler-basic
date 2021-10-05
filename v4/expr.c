@@ -164,7 +164,8 @@ AstNode ParseIndexSlice(){
 		expr_count++;
 	}
 
-	if(expr_count == 1 && kind == TK_RBRACKET){
+	// if(expr_count == 1 && kind == TK_RBRACKET){
+	if(kind == TK_RBRACKET){
 		printf("%s\n", "It is a Index");
 		expect_token(TK_RBRACKET);
 		 // NEXT_TOKEN;

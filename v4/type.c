@@ -9,7 +9,7 @@ int isTypeKeyWord(TokenKind kind){
 	if(kind == TK_LBRACKET){
 		StartPeekToken();
 		NEXT_TOKEN;
-		ParseExpression();
+		if(current_token.kind != TK_RBRACKET) ParseExpression();
 		if(current_token.kind == TK_RBRACKET){
 			EndPeekToken();
 			return 1;	
@@ -65,12 +65,15 @@ AstNode ParseTypeLit(){
 		StartPeekToken();
 		NEXT_TOKEN;
 		kind = current_token.kind;
-		EndPeekToken();
+		 EndPeekToken();
 		if(kind == TK_RBRACKET){
-			kind == TK_SLICE;
+			// todo 耗时两三个小时才找出这个低级错误。
+			// kind == TK_SLICE;
+			kind = TK_SLICE;
 		}else{
 			kind = TK_ARRAY;
 		}
+		EndPeekToken();
 		// todo 退回处理了的token，交给解析函数去处理。
 	}
 	return (TypeListParsers[kind]());
@@ -210,7 +213,28 @@ MethodName         = identifier .
 InterfaceTypeName  = TypeName .
  */
 AstNode ParseInterfaceType(){
+	expect_token(TK_INTERFACE);
+	expect_token(TK_LBRACE);
+	while(current_token.kind != TK_RBRACE){
+		// todo 如何区分MethodSpec和InterfaceTypeName？
+		// todo 没有想到区分二者的方法，暂时只解析MethodSpec。
+		ParseMethodSpec();
+		expect_semicolon;	
+	}
+	expect_token(TK_RBRACE);
+}
 
+AstNode ParseMethodSpec(){
+	ParseMethodName();
+	ParseSignature();
+}
+
+AstNode ParseInterfaceTypeName(){
+	ParseTypeName();
+}
+
+AstNode ParseMethodName(){
+	ParseIdentifier();
 }
 
 /**

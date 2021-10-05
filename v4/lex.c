@@ -74,7 +74,9 @@ Token get_token()
 	}
 
 try_again:
-	if(current_char == TK_EOF){
+	// TK_EOF的值是82，R的值也是82，导致奇怪的问题。
+	// if(current_char == TK_EOF){
+	if(current_char == CH_EOF){
 		token.kind = TK_EOF;
 	
 	}else if(isalpha(current_char)){ // 是字母
@@ -131,7 +133,7 @@ try_again:
 
 int is_whitespace(char ch)
 {
-	if(ch == ' ' || ch == '\n' || ch == '\r'){
+	if(ch == ' ' || ch == '\t' || ch == '\r'){
 	//	CURSOR++;
 		return 1;
 	}

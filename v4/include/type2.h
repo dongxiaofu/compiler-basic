@@ -10,6 +10,11 @@ AstNode ParseSignature();
 AstNode ParseParameters();
 AstNode ParseResult();
 
+AstNode ParseMethodName();
+AstNode ParseInterfaceTypeName();
+AstNode ParseMethodSpec();
+AstNode ParseInterfaceType();
+
 
 // AstNode ParseType();
 AstNode ParseTypeName();
