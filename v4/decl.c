@@ -159,19 +159,27 @@ AstNode ParseVarDecl(){
  */
 AstNode ParseVarSpec(){
 	LOG("%s\n", "parse VarDec");
-	ParseIdentifierList();
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression); 
+	AstExpression expr2;
+	CREATE_AST_NODE(expr2, Expression); 
+//	ParseIdentifierList();
+	expr2 = ParseExpressionList();
 	if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
-		ParseExpressionList();
+		expr = ParseExpressionList();
 	}else{
 		// 跳过Type
 		// NEXT_TOKEN;
 		ParseType();
 		if(current_token.kind == TK_ASSIGN){
 			NEXT_TOKEN;
-			ParseExpressionList();
+			expr = ParseExpressionList();
 		}
 	}
+
+	AstDeclaration declaration;
+	CREATE_AST_NODE(declaration, Declaration);
 }
 
 AstNode ParseTypeDecl(){

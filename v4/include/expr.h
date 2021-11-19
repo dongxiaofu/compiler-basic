@@ -15,7 +15,7 @@ AstExpression ParseUnaryExpr();
 // AstExpression Parse
 // AstExpression Parse
 // AstExpression Parse
-
+AstExpression ParseOperandName();
 AstExpression ParseIntLit();
 AstExpression ParseBasicLit();
 AstExpression ParseLiteral();

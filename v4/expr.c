@@ -366,7 +366,11 @@ OperandName = identifier | QualifiedIdent .
 AstExpression ParseOperand(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
-	expr = ParseLiteral();
+	if(current_token.kind == TK_NUM){
+		expr = ParseLiteral();
+	}else if(current_token.kind == TK_ID){
+		expr = ParseOperandName();
+	}
 	return expr;
 }
 
@@ -402,6 +406,32 @@ AstExpression ParseLiteral(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	expr = ParseBasicLit();
+
+	return expr;
+}
+
+AstExpression ParseOperandName(){
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	if(current_token.kind == TK_ID){
+		expr->op = OP_ID;
+//		union value v = (void *)(current_token.value.value_str);
+//		union value v.p = (void *)(current_token.value.value_str);
+//		union value v;
+//		v.p = (void *)(current_token.value.value_str);
+//		union value v
+//		memcpy(v, current_token.value.value_str, MAX_NAME_LEN);
+//		*(expr->val.p) = *(current_token.value.value_str);
+//		Program received signal SIGSEGV, Segmentation fault
+//		*(char *)(expr->val.p) = *(current_token.value.value_str);
+//
+//		memcpy((char *)(expr->val.p), current_token.value.value_str, MAX_NAME_LEN);
+//		union value *v = &(expr->val);
+//		memcpy((char *)(v->p), current_token.value.value_str, MAX_NAME_LEN);
+		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy((char *)(expr->val.p), current_token.value.value_str);
+		NEXT_TOKEN;
+	}
 
 	return expr;
 }
