@@ -43,6 +43,28 @@ static int Prec[] = {
 	#undef OPINFO
 };
 
+enum OP
+{
+#define OPINFO(op, prec, name, func, opcode) op,
+#include "opinfo.h"
+#undef OPINFO
+};
+
+struct tokenOp {
+	int bop:16;
+	int uop:16;
+};
+
+// todo 不明白，照抄的。
+static struct tokenOp TokenOps[] =
+{
+#define TOKENOP(tok, bop, uop) {bop, uop},
+#include "tokenop.h"
+#undef  TOKENOP
+};
+
+
+
 //static TokenInfo keywords[] = {
 //	{TK_INT, "int"},
 //	{TK_IF, "if"},
@@ -73,6 +95,9 @@ FILE *fp;
 // todo 寻机把这个宏放到更合适的位置。
 #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 #define expect_ellipsis if(current_token.kind == TK_ELLIPSIS) expect_token(TK_ELLIPSIS);
+
+#define BINARY_OP       TokenOps[current_token.kind - TK_ASSIGN].bop
+#define UNARY_OP        TokenOps[current_token.kind - TK_ASSIGN].uop
 
 // todo 这个值不能是任何正常字符。
 #define CH_EOF 255

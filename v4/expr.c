@@ -7,14 +7,27 @@
  * ExpressionList = Expression { "," Expression } .
  *
  */
-AstNode ParseExpressionList(){
+AstExpression ParseExpressionList(){
 	LOG("%s\n", "parse ExpressionList");
-	
-	ParseExpression();
+
+	// todo 创建一个链表，竟然还要想比较长时间。
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	AstExpression curExpr;
+	CREATE_AST_NODE(curExpr, Expression); 
+	AstExpression preExpr;
+	CREATE_AST_NODE(preExpr, Expression); 
+
+	expr = ParseExpression();
+	preExpr = expr;
 	while(current_token.kind==TK_COMMA){
 		NEXT_TOKEN;
-		ParseExpression();
+		curExpr = ParseExpression();
+		preExpr->next = (AstNode)curExpr;
+		preExpr = curExpr;
 	}
+
+	return expr;
 }
 
 /**
@@ -27,8 +40,11 @@ add_op     = "+" | "-" | "|" | "^" .
 mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
 
 unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
+
+产生式的文档在：https://golang.org/ref/spec#Operators
+
  */
-AstNode ParseExpression(){
+AstExpression ParseExpression(){
 	LOG("%s\n", "parse Expression");
 //	ParseUnaryExpr() || ParseBinaryExpr();
 //	if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
@@ -41,45 +57,70 @@ AstNode ParseExpression(){
 //		ParseBinaryExpr();
 //
 //	}
-	ParseBinaryExpr(4);
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	// expr = ParseBinaryExpr(4);
+	// todo 参数prec如何确定？
+	expr = ParseBinaryExpr(7);
+
+	return expr;
 }
 
-AstNode ParseBinaryExpr(int prec){
+// todo 这个函数难理解。
+AstExpression ParseBinaryExpr(int prec){
 	LOG("%s\n", "parse BinaryExpr");
 //	ParseExpression();
 //	// todo 如何处理binary_op？
 //	ParseBinaryOp();
 //	ParseExpression();
 	#define HIGHEST_BIN_PREC Prec[TK_MUL - TK_CONDITIONAL_OR]	
+
+	AstExpression binExpr;
+	AstExpression expr;
+
+	CREATE_AST_NODE(binExpr, Expression);
+	CREATE_AST_NODE(expr, Expression);
 	
 	if(prec == HIGHEST_BIN_PREC){
-		ParseUnaryExpr();
+		expr = ParseUnaryExpr();
 	}else{
-		ParseBinaryExpr(prec + 1);
+		binExpr->op = BINARY_OP;
+		binExpr->kids[0] = expr;
+		NEXT_TOKEN;
+		binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+		expr = binExpr;
 	}
 
 	while(IsBinaryOp() == 1 && (Prec[current_token.kind - TK_CONDITIONAL_OR] == prec)){
 		NEXT_TOKEN;
 		if(prec == HIGHEST_BIN_PREC){
-			ParseUnaryExpr();
+			expr = ParseUnaryExpr();
 		}else{
-			ParseBinaryExpr(prec + 1);
+			binExpr->op = BINARY_OP;
+			binExpr->kids[0] = expr;
+			NEXT_TOKEN;
+			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+			expr = binExpr;
 		}
 	}
 
-	AstNode decl;
-	return decl;
+	return expr;
 }
 
-AstNode ParseUnaryExpr(){
+AstExpression ParseUnaryExpr(){
 	LOG("%s\n", "parse UnaryExpr");
+	AstExpression expr;	
+	CREATE_AST_NODE(expr, Expression);
 	// if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
 	if(IsUnaryOp() == 1){
+		expr->op = UNARY_OP;
 		NEXT_TOKEN;
-		ParseUnaryExpr();
+		expr->kids[0] = ParseUnaryExpr();
 	}else{
-		ParsePrimaryExpr();
+		expr = ParsePrimaryExpr();
 	}
+	
+	return expr;
 }
 
 AstNode ParseConversion(){
@@ -216,13 +257,17 @@ Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
 TypeAssertion  = "." "(" Type ")" .
 Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
  */
-AstNode ParsePrimaryExpr(){
+AstExpression ParsePrimaryExpr(){
 	LOG("%s\n", "parse PrimaryExpr");
 
+	AstExpression expr;	
+	CREATE_AST_NODE(expr, Expression);
 	if(IsDataType(current_token.value.value_str) == 1){
 		ParseConversion();
 	}else{
-		NEXT_TOKEN;
+//		NEXT_TOKEN;
+		// todo 解析 Operand、MethodExpr。目前，只解析Operand。
+		expr = ParseOperand();
 	}
 
 	while(IsPostfix(current_token.kind)){
@@ -240,8 +285,9 @@ AstNode ParsePrimaryExpr(){
 				break;
 		}		
 	}
-}
 
+	return expr;
+}
 
 AstNode ParseBinaryOp(){
 	LOG("%s\n", "parse binary_op");
@@ -311,4 +357,63 @@ int IsBinaryOp(){
 		);
 }
 
+/**
+ * Operand     = Literal | OperandName | "(" Expression ")" .
+Literal     = BasicLit | CompositeLit | FunctionLit .
+BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
+OperandName = identifier | QualifiedIdent .
+ */
+AstExpression ParseOperand(){
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr = ParseLiteral();
+	return expr;
+}
 
+AstExpression ParseIntLit(){
+	// todo 不完善。
+//	// todo 应该使用malloc分配内存空间才更妥当吗？
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	if(current_token.kind == TK_NUM){
+		expr = ParseBasicLit();
+	}
+	
+	return expr;
+}
+
+AstExpression ParseBasicLit(){
+//	ParseIntLit();
+//	// todo 应该使用malloc分配内存空间才更妥当吗？
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	if(current_token.kind == TK_NUM){
+		expr->op = OP_CONST;
+		union value v = {current_token.value.value_num,0};
+		expr->val = v;
+		NEXT_TOKEN;
+	}
+
+	return expr;
+}
+
+AstExpression ParseLiteral(){
+
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr = ParseBasicLit();
+
+	return expr;
+}
+
+
+// AstExpression ParseDecimalDigit(){
+// 
+// }
+// AstExpression ParseDecimalDigits(){
+// 
+// 
+// }
+// AstExpression ParseDecimalLit(){
+// 
+// }

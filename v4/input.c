@@ -11,7 +11,7 @@ struct input Input;
 void ReadSourceFile(char *file){
 
 	// 获取文件大小 size
-	Input.file = fopen("1.go", "r");
+	Input.file = fopen(file, "r");
 	if(Input.file == NULL){
 		fclose(Input.file);
 		perror("open file error\n");

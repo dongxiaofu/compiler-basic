@@ -3,20 +3,30 @@
 
 #include <assert.h>
 
+AstExpression ParseExpressionList();
+AstExpression ParseExpression();
+AstExpression ParseBinaryExpr(int prec);
+AstExpression ParseUnaryExpr();
 
+// AstExpression ParseDecimalDigit();
+// AstExpression ParseDecimalDigits();
+// AstExpression ParseDecimalLit();
+// AstExpression Parse
+// AstExpression Parse
+// AstExpression Parse
+// AstExpression Parse
 
-
-AstNode ParseExpressionList();
-AstNode ParseExpression();
-AstNode ParseBinaryExpr(int prec);
-AstNode ParseUnaryExpr();
+AstExpression ParseIntLit();
+AstExpression ParseBasicLit();
+AstExpression ParseLiteral();
+AstExpression ParseOperand();
 
 AstNode ParseConversion();
 int IsPostfix(TokenKind kind);
 AstNode ParseSelectorTypeAssertion();
 AstNode ParseArguments();
 AstNode ParseIndexSlice();
-AstNode ParsePrimaryExpr();
+AstExpression ParsePrimaryExpr();
 
 // todo 这些运算符的解析函数是否应该存在？
 AstNode ParseBinaryOp();

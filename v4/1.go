@@ -1,1 +1,1 @@
-var ptr map[*T]struct{x, y float64}
+var x,y,z int = 123,456,789

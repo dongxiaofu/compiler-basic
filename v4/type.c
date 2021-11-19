@@ -261,6 +261,17 @@ AstNode ParseMapType(){
 /**
  * ChannelType = ( "chan" | "chan" "<-" | "<-" "chan" ) ElementType .
  */
+// todo get_token不能读取chan<-这类token，因此kind == TK_CHAN_RECEIVE这种情况无法处理。
 AstNode ParseChannelType(){
-
+	TokenKind kind = current_token.kind;
+	if(kind == TK_CHAN){
+		expect_token(TK_CHAN);
+	}else if(kind == TK_CHAN_SEND){
+		expect_token(TK_CHAN_SEND);
+	}else if(kind == TK_CHAN_RECEIVE){
+		expect_token(TK_CHAN_RECEIVE);
+	}else{
+		ERROR("expect a chan\n");
+	}
+	ParseType();
 }
