@@ -36,13 +36,16 @@ TypeLit   = ArrayType | StructType | PointerType | FunctionType | InterfaceType 
 AstNode ParseType(){
 	// 跳过type关键字
 //	NEXT_TOKEN;
+	AstNode node;
+	CREATE_AST_NODE(node, Node); 
 	TokenKind kind = current_token.kind;
 	if(kind == TK_LPARENTHESES){
 		expect_token(TK_LPARENTHESES);
 		ParseType();
 		expect_token(TK_RPARENTHESES);
-	}else if(kind == TK_ID){ 
-		ParseTypeName();
+	}else if(kind == TK_ID){	// todo 不仅TK_ID应该在这里解析，TK_INT等golang内置数据类型也应该在这里解析。 
+		node = (AstNode)ParseTypeName();
+		return node;
 	}else if(isTypeKeyWord(kind) == 1){
 		ParseTypeLit();
 	}else{
@@ -51,8 +54,18 @@ AstNode ParseType(){
 	}
 }
 
-AstNode ParseTypeName(){
-	expect_token(TK_ID);
+// todo 不完善，只处理了TK_ID，没有处理TK_INT等。
+AstTypedefName ParseTypeName(){
+//	expect_token(TK_ID);
+	
+	AstTypedefName tname;
+	CREATE_AST_NODE(tname, TypedefName);
+	tname->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	strcpy(tname->id, current_token.value.value_str);
+	// todo 是否应该放在这里？
+	NEXT_TOKEN;
+	
+	return tname;
 }
 
 AstNode ParseTypeLit(){

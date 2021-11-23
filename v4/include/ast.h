@@ -21,6 +21,10 @@ enum nodeKind
 	NK_FunctionDeclarator,  NK_ParameterTypeList,  NK_ParameterDeclaration,
 	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,
 	
+	NK_Node,	
+	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
+	NK_Declarator,
+
 	NK_Expression,
 
 	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		
@@ -124,15 +128,19 @@ typedef  struct initData{
 	struct initData *next;
 } *InitData;
 
+// todo 想不到更好的命名。
+union Data {
+	AstNode initials;		// when lbrace is 1,	initializer-list
+	AstExpression expr;		// when lbrace is 0, assignment-expression
+};
+
 typedef struct astInitializer{
 	AST_NODE_COMMON
 	//  left brace  {			1/0		has or not
 	int lbrace;
-	union
-	{
-		AstNode initials;		// when lbrace is 1,	initializer-list
-		AstExpression expr;		// when lbrace is 0, assignment-expression
-	};
+//	union Data data;
+//	todo 在struct中使用union受阻，There is no member named data，先简化成不使用union。
+	AstExpression expr;		// when lbrace is 0, assignment-expression
 	// todo 语法解析时创建语法树并未使用到此成员。
 	InitData idata;
 } *AstInitializer;
@@ -162,6 +170,11 @@ typedef struct astDeclaration
 	// init-declarator-list:		id, id=300,
 	AstNode initDecs;
 } *AstDeclaration;
+
+typedef struct astTypedefName{
+	AST_NODE_COMMON
+	char *id;
+} *AstTypedefName;
 
 struct astTranslationUnit
 {

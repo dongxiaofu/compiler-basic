@@ -22,10 +22,12 @@ AstExpression ParseExpressionList(){
 	preExpr = expr;
 	while(current_token.kind==TK_COMMA){
 		NEXT_TOKEN;
+//		memset(curExpr, 0, sizeof(*curExpr));
 		curExpr = ParseExpression();
 		preExpr->next = (AstNode)curExpr;
 		preExpr = curExpr;
 	}
+	preExpr->next = NULL;
 
 	return expr;
 }

@@ -18,7 +18,7 @@ AstNode ParseIdentifierList();
 AstNode ParseIdentifier();
 
 AstNode ParseVarDecl();
-AstNode ParseVarSpec();
+AstDeclaration ParseVarSpec();
 
 AstNode ParseTypeDecl();
 

@@ -157,7 +157,7 @@ AstNode ParseVarDecl(){
 /**
  * VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
  */
-AstNode ParseVarSpec(){
+AstDeclaration ParseVarSpec(){
 	LOG("%s\n", "parse VarDec");
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression); 
@@ -165,13 +165,19 @@ AstNode ParseVarSpec(){
 	CREATE_AST_NODE(expr2, Expression); 
 //	ParseIdentifierList();
 	expr2 = ParseExpressionList();
+
+	AstNode type;
+	CREATE_AST_NODE(type, Node); 
+
 	if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
 		expr = ParseExpressionList();
 	}else{
 		// 跳过Type
 		// NEXT_TOKEN;
-		ParseType();
+	//	AstNode type;
+	//	CREATE_AST_NODE(type, Node); 
+		type = ParseType();
 		if(current_token.kind == TK_ASSIGN){
 			NEXT_TOKEN;
 			expr = ParseExpressionList();
@@ -180,6 +186,50 @@ AstNode ParseVarSpec(){
 
 	AstDeclaration declaration;
 	CREATE_AST_NODE(declaration, Declaration);
+	
+	// 是一个单链表A的第一个结点。
+	AstInitDeclarator initDecs;
+	CREATE_AST_NODE(initDecs, InitDeclarator);
+
+	AstSpecifiers specs;
+	CREATE_AST_NODE(specs, Specifiers);
+	specs->tySpecs = type;
+
+	// 遍历单链表B和C，创建A。
+	AstInitDeclarator preInitDecs = initDecs;
+	AstInitDeclarator initDecsCur = initDecs;
+
+	AstExpression exprCur = expr;
+	AstExpression expr2Cur = expr2;
+	while(exprCur != NULL){
+		// initDecsCur->dec->id = exprCur->val;	
+		// initDecsCur->dec->id = exprCur->val;	
+		AstDeclarator dec;
+		CREATE_AST_NODE(dec, Declarator);
+		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy(dec->id, expr2Cur->val.p);
+		initDecsCur->dec = dec;
+
+		AstInitializer init;
+		CREATE_AST_NODE(init, Initializer);
+		AstExpression expr;
+		CREATE_AST_NODE(expr, Expression);
+		expr->val.i[0] = exprCur->val.i[0];
+		init->expr = expr;
+		initDecsCur->init = init;
+
+		preInitDecs = initDecsCur;
+		CREATE_AST_NODE(initDecsCur, InitDeclarator);
+		preInitDecs->next = initDecsCur;
+
+		exprCur = exprCur->next;
+		expr2Cur = expr2Cur->next;
+	}
+
+	declaration->specs = specs; 
+	declaration->initDecs = initDecs; 
+
+	return declaration;
 }
 
 AstNode ParseTypeDecl(){
@@ -187,7 +237,6 @@ AstNode ParseTypeDecl(){
 	expect_token(TK_ID);
 	ParseType();
 }
-
 
 /**
  * FieldDecl     = (IdentifierList Type | EmbeddedField) [ Tag ] .
