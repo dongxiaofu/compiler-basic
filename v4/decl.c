@@ -140,18 +140,56 @@ int IsDataType(char *str){
 VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
  */
 AstNode ParseVarDecl(){
+
+	AstDeclaration declaration;
+	CREATE_AST_NODE(declaration, Declaration);
+
+	AstDeclaration curDeclaration;// = declaration;
+	CREATE_AST_NODE(curDeclaration, Declaration);
+	AstDeclaration preDeclaration;// = declaration;
+//	CREATE_AST_NODE(preDeclaration, Declaration);
+	preDeclaration = NULL;
+
 	LOG("%s\n", "parse VarDec");
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
+		AstDeclaration headDeclaration;// = declaration;
+		CREATE_AST_NODE(headDeclaration, Declaration);
+		headDeclaration->next = NULL;
 		NEXT_TOKEN;
 		while(current_token.kind != TK_RPARENTHESES){
-			ParseVarSpec();
+			// CREATE_AST_NODE(curDeclaration, Declaration);
+			// todo 耗费了很多很多时间才处理好。
+			curDeclaration = ParseVarSpec();
+			if(headDeclaration->next == NULL){
+				headDeclaration->next = (AstNode)curDeclaration;
+			}
+//			CREATE_AST_NODE(preDeclaration, Declaration);
+			if(preDeclaration == NULL){
+				preDeclaration = curDeclaration;
+			}else{
+				preDeclaration->next = (AstNode)curDeclaration;
+				preDeclaration = curDeclaration;
+			}
+// 			preDeclaration->next = (AstNode)curDeclaration;
+// 			preDeclaration = curDeclaration;
+			CREATE_AST_NODE(curDeclaration, Declaration);
+			// preDeclaration->next = (AstNode)curDeclaration;
+			// CREATE_AST_NODE(curDeclaration, Declaration);
+			// preDeclaration = curDeclaration;
+			// preDeclaration->next = curDeclaration;
 			expect_semicolon;	
 		}
+		curDeclaration->next = NULL;
 		expect_token(TK_RPARENTHESES);
+		declaration = (AstDeclaration)headDeclaration->next;
 	}else{
-		ParseVarSpec();
+//		CREATE_AST_NODE(curDeclaration, Declaration);
+//		curDeclaration = ParseVarSpec();
+		declaration = ParseVarSpec();
 	}
+
+	return declaration;
 }
 
 /**
