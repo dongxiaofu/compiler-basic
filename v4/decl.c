@@ -40,7 +40,14 @@ AstNode declaration(){
 AstNode ParseConstDecl(){
 	LOG("%s\n", "parse const decl");
 
-	AstNode decl;
+	AstDeclaration head;
+	CREATE_AST_NODE(head, Declaration);
+	head->next = NULL;
+	AstDeclaration preDeclaration = NULL;
+	AstDeclaration curDeclaration;
+	AstDeclaration declaration;
+//	AstDeclaration;
+
 	expect_token(TK_CONST);
 	if(current_token.kind == TK_LPARENTHESES){
 	NEXT_TOKEN;	
@@ -52,40 +59,110 @@ AstNode ParseConstDecl(){
 	while(current_token.kind == TK_ID){
 		// todo 不需要这个NEXT_TOKEN，留给下面的函数解析。花了很多很多时间才找出这个问题。
 		//NEXT_TOKEN;	
-		ParseConstSpec();
+		curDeclaration = ParseConstSpec();
+		if(head->next == NULL){
+			head->next = curDeclaration;
+		}
+
+		if(preDeclaration == NULL){
+			preDeclaration = curDeclaration;
+		}else{
+			preDeclaration->next = curDeclaration;
+			preDeclaration = curDeclaration;
+		}
+		// curDeclaration = ParseConstSpec();
 		expect_semicolon;
 		// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 		//expect_token(TK_SEMICOLON);
 	}
+	curDeclaration->next = NULL;
 	expect_token(TK_RPARENTHESES);
+	declaration = (AstDeclaration)head->next;
 }else{
-	ParseConstSpec();
+	declaration = ParseConstSpec();
+}
+	return declaration;
 }
 
-	return decl;
-}
-
-AstNode ParseConstSpec(){
+/**
+ * ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .
+ */
+AstDeclaration ParseConstSpec(){
 	LOG("%s\n", "parse const spec");
+//	ParseIdentifierList();
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression); 
+	expr = ParseExpressionList();
 
-	ParseIdentifierList();
+	AstExpression expr2;
+	CREATE_AST_NODE(expr2, Expression); 
+
+	AstNode type;
+	CREATE_AST_NODE(type, Node); 
 //	if(current_token.kind == TK_TYPE){
 	if(IsDataType(current_token.value.value_str) == 1){
-		NEXT_TOKEN;
+//		NEXT_TOKEN;
+		type = ParseType();
 		assert(current_token.kind == TK_ASSIGN);
 		expect_token(TK_ASSIGN);
-		ParseExpressionList();
+		expr2 = ParseExpressionList();
 	}else if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
-		ParseExpressionList();
+		expr2 = ParseExpressionList();
 	}else{
 
 		NEXT_TOKEN;
 	}
 
-	// todo 
-	AstNode decl;
-	return decl;
+
+	// 遍历expr和expr2开头的单链表，创建新的单链表。
+	AstDeclaration declaration;
+	CREATE_AST_NODE(declaration, Declaration);
+	
+	// 是一个单链表A的第一个结点。
+	AstInitDeclarator initDecs;
+	CREATE_AST_NODE(initDecs, InitDeclarator);
+
+	AstSpecifiers specs;
+	CREATE_AST_NODE(specs, Specifiers);
+	specs->tySpecs = type;
+
+	// 遍历单链表B和C，创建A。
+	// todo 照抄ParseVarSpec，寻机优化。
+	AstInitDeclarator preInitDecs = initDecs;
+	AstInitDeclarator initDecsCur = initDecs;
+
+	AstExpression exprCur = expr;
+	AstExpression expr2Cur = expr2;
+	while(exprCur != NULL){
+		// initDecsCur->dec->id = exprCur->val;	
+		// initDecsCur->dec->id = exprCur->val;	
+		AstDeclarator dec;
+		CREATE_AST_NODE(dec, Declarator);
+		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy(dec->id, exprCur->val.p);
+		initDecsCur->dec = dec;
+
+		AstInitializer init;
+		CREATE_AST_NODE(init, Initializer);
+		AstExpression expr;
+		CREATE_AST_NODE(expr, Expression);
+		expr->val.i[0] = expr2Cur->val.i[0];
+		init->expr = expr;
+		initDecsCur->init = init;
+
+		preInitDecs = initDecsCur;
+		CREATE_AST_NODE(initDecsCur, InitDeclarator);
+		preInitDecs->next = initDecsCur;
+
+		exprCur = exprCur->next;
+		expr2Cur = expr2Cur->next;
+	}
+
+	declaration->specs = specs; 
+	declaration->initDecs = initDecs; 
+
+	return declaration;
 }
 
 // IdentifierList = identifier { "," identifier }

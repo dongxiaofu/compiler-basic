@@ -13,7 +13,7 @@ void ExpectDataType();
 AstNode declaration();
 AstNode ParseConstDecl();
 
-AstNode ParseConstSpec();
+AstDeclaration ParseConstSpec();
 AstNode ParseIdentifierList();
 AstNode ParseIdentifier();
 
