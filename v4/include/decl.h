@@ -20,6 +20,7 @@ AstNode ParseIdentifier();
 AstNode ParseVarDecl();
 AstDeclaration ParseVarSpec();
 
+AstDeclaration ParseTypeSpec();
 AstNode ParseTypeDecl();
 
 // todo 很奇怪，先后顺序可能会导致错误。
