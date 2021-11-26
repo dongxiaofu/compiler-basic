@@ -7,7 +7,7 @@
 
 
 // keyword
-TYPEINFO(TK_FUNC,Function)
+// TYPEINFO(TK_FUNC,Function)
 TYPEINFO(TK_MAP,Map)
 TYPEINFO(TK_SLICE,Slice)
 TYPEINFO(TK_STRUCT,Struct)

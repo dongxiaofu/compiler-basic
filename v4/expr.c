@@ -134,8 +134,11 @@ AstNode ParseConversion(){
 	expect_token(TK_RPARENTHESES);
 }
 
+// todo 暂时不处理后缀表达式。
 int IsPostfix(TokenKind kind){
+//	return 0;
 	return (kind == TK_DOT || kind == TK_LBRACKET || kind == TK_LPARENTHESES);
+	// return (kind == TK_DOT || kind == TK_LBRACKET);
 } 
 
 /**

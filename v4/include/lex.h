@@ -95,6 +95,7 @@ FILE *fp;
 // todo 寻机把这个宏放到更合适的位置。
 #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 #define expect_ellipsis if(current_token.kind == TK_ELLIPSIS) expect_token(TK_ELLIPSIS);
+#define expect_comma if(current_token.kind == TK_COMMA) expect_token(TK_COMMA);
 
 #define BINARY_OP       TokenOps[current_token.kind - TK_ASSIGN].bop
 #define UNARY_OP        TokenOps[current_token.kind - TK_ASSIGN].uop

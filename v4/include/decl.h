@@ -23,8 +23,16 @@ AstDeclaration ParseVarSpec();
 AstDeclaration ParseTypeSpec();
 AstNode ParseTypeDecl();
 
+AstNode ParseParameterDecl();
+AstNode ParseParameterList();
+AstNode ParseParameters();
+AstNode ParseResult();
+AstNode ParseFunctionName();
+AstNode ParseSignature();
+AstNode ParseFunctionBody();
+AstNode ParseFunctionDecl();
+
 // todo 很奇怪，先后顺序可能会导致错误。
-AstNode ParseFieldDecl();
 AstNode ParseFieldDecl();
 AstNode ParseEmbeddedField();
 AstNode ParseTag();
@@ -32,6 +40,8 @@ AstNode ParseStrintLit();
 
 AstNode ParseParameterDecl();
 
+AstDeclaration ParseTypeSpec();
+AstNode ParseFunctionDecl();
 
 
 

@@ -51,6 +51,7 @@ AstTranslationUnit ParseTranslationUnit(){
 
 	if(current_token.kind == TK_FUNC){
 		LOG("parse func\n");
+		p->extDecls = declaration();
 
 	}else{
 		LOG("parse decl\n");

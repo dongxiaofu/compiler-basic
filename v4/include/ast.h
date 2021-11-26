@@ -24,6 +24,7 @@ enum nodeKind
 	NK_Node,	
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
 	NK_Declarator,
+//	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
 
 	NK_Expression,
 
@@ -175,6 +176,46 @@ typedef struct astTypedefName{
 	AST_NODE_COMMON
 	char *id;
 } *AstTypedefName;
+
+
+typedef struct astParameterDeclaration
+{
+        AST_NODE_COMMON
+        AstSpecifiers specs;
+        AstDeclarator dec;
+} *AstParameterDeclaration;
+
+typedef struct astParameterTypeList
+{
+        AST_NODE_COMMON
+        AstNode paramDecls;
+        int ellipsis;
+} *AstParameterTypeList;
+
+typedef struct astFunctionDeclarator
+{
+        AST_DECLARATOR_COMMON
+        AstParameterTypeList paramTyList;
+        AstParameterTypeList sig;
+} *AstFunctionDeclarator;
+
+#define AST_STATEMENT_COMMON AST_NODE_COMMON
+
+struct astStatement
+{
+        AST_STATEMENT_COMMON
+};
+
+typedef struct astStatement *AstStatement;
+
+typedef struct astFunction
+{
+        AST_NODE_COMMON
+        AstFunctionDeclarator fdec;
+        // compound-statement
+        AstStatement stmt;
+        int hasReturn;
+} *AstFunction;
 
 struct astTranslationUnit
 {
