@@ -14,8 +14,8 @@ AstNode declaration();
 AstNode ParseConstDecl();
 
 AstDeclaration ParseConstSpec();
-AstNode ParseIdentifierList();
-AstNode ParseIdentifier();
+AstDeclarator ParseIdentifierList();
+AstDeclarator ParseIdentifier();
 
 AstNode ParseVarDecl();
 AstDeclaration ParseVarSpec();
@@ -23,10 +23,10 @@ AstDeclaration ParseVarSpec();
 AstDeclaration ParseTypeSpec();
 AstNode ParseTypeDecl();
 
-AstNode ParseParameterDecl();
-AstNode ParseParameterList();
-AstNode ParseParameters();
-AstNode ParseResult();
+AstParameterDeclaration ParseParameterDecl(int *count);
+AstParameterDeclaration ParseParameterList();
+AstParameterDeclaration ParseParameters();
+AstParameterDeclaration ParseResult();
 AstNode ParseFunctionName();
 AstNode ParseSignature();
 AstNode ParseFunctionBody();
@@ -38,10 +38,6 @@ AstNode ParseEmbeddedField();
 AstNode ParseTag();
 AstNode ParseStrintLit();
 
-AstNode ParseParameterDecl();
-
-AstDeclaration ParseTypeSpec();
-AstNode ParseFunctionDecl();
 
 
 

@@ -17,17 +17,22 @@ AstExpression ParseExpressionList(){
 	CREATE_AST_NODE(curExpr, Expression); 
 	AstExpression preExpr;
 	CREATE_AST_NODE(preExpr, Expression); 
-
+	
+	int count = 0;
 	expr = ParseExpression();
+	// todo 有问题吗？我希望的效果是：解析出一个表达式后就统计一次次数。
+	count++;
 	preExpr = expr;
 	while(current_token.kind==TK_COMMA){
 		NEXT_TOKEN;
 //		memset(curExpr, 0, sizeof(*curExpr));
 		curExpr = ParseExpression();
+		count++;
 		preExpr->next = (AstNode)curExpr;
 		preExpr = curExpr;
 	}
 	preExpr->next = NULL;
+	expr->variable_count = count;
 
 	return expr;
 }

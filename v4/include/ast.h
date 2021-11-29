@@ -56,7 +56,8 @@ static char TypeNames[][16] = {
 #define AST_DECLARATOR_COMMON   \
     AST_NODE_COMMON             \
     struct astDeclarator *dec;  \
-    char *id;                   
+    char *id;          		\         
+    int variable_count;
 //    TypeDerivList tyDrvList;
 
 // Token Value
@@ -99,6 +100,7 @@ struct astExpression
 	int unused  : 11;
 	struct astExpression *kids[2];
 	union value val;
+	int variable_count;
 };
 
 typedef struct astExpression      *AstExpression;
@@ -188,7 +190,8 @@ typedef struct astParameterDeclaration
 typedef struct astParameterTypeList
 {
         AST_NODE_COMMON
-        AstNode paramDecls;
+        AstSpecifiers specs;
+        AstParameterDeclaration paramDecls;
         int ellipsis;
 } *AstParameterTypeList;
 

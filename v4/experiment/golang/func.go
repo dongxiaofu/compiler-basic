@@ -8,6 +8,7 @@ func main() {
    var b int = 200
    var ret *int
    var e int = test(88, )
+   test(88, )
 
    //var e float64
    // golang不支持这种变量声明方式。
@@ -36,8 +37,13 @@ func max(num1 int, num2 int) (ptr *int,  ) {
    return result
 }
 
-func test(num int,) (int,){
+// func test(num int,) (int ){		// ok
+// func test(num int,) (res2 int ){	// ok
+// func test(num int,) int{		// ok
+// func test(num int,) int,{		// error
+func test(num int,) int{
 	var res int = num
+   	fmt.Printf( "res是 : %d\n", res )
 
 	return res
 }

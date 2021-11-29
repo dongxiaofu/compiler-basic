@@ -170,29 +170,58 @@ AstDeclaration ParseConstSpec(){
 }
 
 // IdentifierList = identifier { "," identifier }
-AstNode ParseIdentifierList(){
+AstDeclarator ParseIdentifierList(){
 	LOG("%s\n", "parse IdentifierList");
 
-	ParseIdentifier();
-	while(current_token.kind == TK_COMMA ){
+	int count = 0;
+	AstDeclarator decl = ParseIdentifier();
+	if(decl == NULL){
+		CREATE_AST_NODE(decl, NameDeclarator);
+		decl->variable_count = 0;
+		return decl;
+	}
+	count++;
+	AstDeclarator *tail;
+	tail = &(decl->next);
+
+	// ParseIdentifier();
+	while(current_token.kind == TK_COMMA){
 		NEXT_TOKEN;
-		ParseIdentifier();
+		*tail = ParseIdentifier();
+		if(*tail == NULL){
+			break;
+		}
+		count++;
+		tail = &((*tail)->next);
+		
+		StartPeekToken();
+		NEXT_TOKEN;
+		if(current_token.kind != TK_COMMA){
+			EndPeekToken();
+			*tail = NULL;
+			break;
+		}
 	}
 
-	AstNode decl;
+	decl->variable_count = count;
 
 	return decl;
 }
 
-AstNode ParseIdentifier(){
+AstDeclarator ParseIdentifier(){
 	LOG("%s\n", "parse Identifier");
+	AstDeclarator decl = NULL;
+//	CREATE_AST_NODE(decl, NameDeclarator);
 	// todo 不知道有没有问题。
 	// 我想用这种方式处理[Identifier]产生式。
 	if(current_token.kind == TK_ID){
+//		NEXT_TOKEN;
+		CREATE_AST_NODE(decl, NameDeclarator);
+		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy(decl->id, current_token.value.value_str);
 		NEXT_TOKEN;
 	}
 
-	AstNode decl;
 	return decl;
 }
 
@@ -503,29 +532,134 @@ AstNode ParseTypeDecl(){
 /**
  * ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
  */
-AstNode ParseParameterDecl(){
+AstParameterDeclaration ParseParameterDecl(int *count){
+	AstParameterDeclaration decl;
+	// todo 这一语句是必需的吗？
+	CREATE_AST_NODE(decl, ParameterDeclaration);
+	AstDeclarator dec;
+	CREATE_AST_NODE(dec, Declarator);
+	decl->dec = dec;
+
+	int expr_count = 0;
+	// todo 等会再修改expr
+	AstDeclarator expr;
+	// TK_ELLIPSIS 是省略号，即...。
+	// 当前token不是省略号，也不是数据类型，把当前token当表达式解析。
+	// todo 能解析出一个表达式也不存在吗？
 	if(current_token.kind != TK_ELLIPSIS && IsDataType(current_token.value.value_str) == 0){
-		ParseExpressionList();
+		expr = ParseIdentifierList();
+		expr_count = expr->variable_count;
 	} 
 	expect_ellipsis;
-	ParseType();
+	// todo 暂时只支持int等数据类型。
+	AstTypedefName type = ParseType();
+	AstSpecifiers specs;
+        CREATE_AST_NODE(specs, Specifiers);
+        specs->tySpecs = type;
+
+	if(expr_count == 1){
+		decl->specs = specs;
+		decl->dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+		strcpy(decl->dec->id, (char *)(expr->id));
+	}else if(expr_count > 1){
+		AstParameterDeclaration *tail = &decl;
+//		AstExpression cur = expr;
+		AstDeclarator cur = expr;
+//		AstDeclarator decl;
+//		CREATE_AST_NODE(decl, NameDeclarator);
+//		AstDeclarator dec;
+//		CREATE_AST_NODE(dec, NameDeclarator);
+		// while(cur != NULL){
+//		while(cur != 345){
+////			(*tail)->specs = type;
+//			AstDeclarator dec;
+//			CREATE_AST_NODE(dec, NameDeclarator);
+//			dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+//			strcpy(dec->id, (char *)(cur->id));
+//			(*tail)->dec = cur;
+//		//	(*tail)->dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+//			// strcpy((*tail)->dec->id, (char *)(cur->val.p));
+//			// strcpy(dec->id, (char *)(cur->val.p));
+//			tail = &((*tail)->next);
+//			cur = cur->next;
+//		}
+
+		AstParameterDeclaration pre;
+		AstParameterDeclaration curDecl;
+		AstParameterDeclaration headDecl;
+		CREATE_AST_NODE(headDecl, ParameterDeclaration);
+		headDecl->next = NULL;
+		pre = NULL;
+		curDecl = decl;
+		while(cur != NULL){
+			if(headDecl->next == NULL){
+				headDecl->next = decl;
+			}	
+			
+			if(pre == NULL){
+				pre = decl;
+			}else{
+				// pre = curDecl;
+				CREATE_AST_NODE(curDecl, ParameterDeclaration);
+				pre->next = curDecl;
+				pre = curDecl;
+			}
+			curDecl->dec = cur;
+			curDecl->specs = specs;
+			cur = cur->next;
+		}
+		pre->next = NULL;
+		decl = headDecl->next;
+	}else{
+		// todo 想不明白。暂时不处理。
+		// max(int, int, int)
+		decl->specs = specs;
+		decl->dec->id = 0x0;
+	}
+
+	*count = expr_count;
+
+	return decl;
 }
 
 // ParameterList  = ParameterDecl { "," ParameterDecl } .
-AstNode ParseParameterList(){
-	ParseParameterDecl();
-	while(current_token.kind == TK_COMMA){
-		NEXT_TOKEN;
-		ParseParameterDecl();		
+AstParameterDeclaration ParseParameterList(){
+	
+	AstParameterDeclaration decl;
+	int *count = (int *)malloc(sizeof(int));;
+	*count = 0;
+	decl = ParseParameterDecl(count);
+	AstParameterDeclaration *tail = &(decl->next);
+
+	// todo 当count是0时，也使用下面的代码处理吗？
+	if(*count <= 1){
+		// AstParameterDeclaration *tail = &(decl->next);
+		int *count_useless = (int *)malloc(sizeof(int));
+		*count_useless = 0;
+		while(current_token.kind == TK_COMMA){
+			NEXT_TOKEN;
+			*tail = ParseParameterDecl(count_useless);		
+			tail = &((*tail)->next);
+		}
+		*tail = NULL;
+	}else{
+		// todo 这种情况下，似乎不用进行任何处理。
+//		AstParameterDeclaration current = decl->next;
+//		while(current != NULL){
+//			*tail = current;	
+//			current = current->next;
+//		}
 	}
+
+	return decl;
 }
 
 /**
  * Parameters     = "(" [ ParameterList [ "," ] ] ")" .
  */
-AstNode ParseParameters(){
+AstParameterDeclaration ParseParameters(){
 	expect_token(TK_LPARENTHESES);
-	AstNode parameterList = ParseParameterList();	
+	AstParameterDeclaration parameterList = ParseParameterList();
 	expect_comma;
 //	while(current_token.kind != TK_RPARENTHESES){
 //
@@ -535,12 +669,30 @@ AstNode ParseParameters(){
 	return parameterList;
 }
 
-AstNode ParseResult(){
+// Result         = Parameters | Type .
+// 很奇特的产生式。只要Parameters就能表示所有的返回值情况，为啥要一个Type呢？
+// 为了处理只有一个返回值的情况。能处理没有返回值的情况吗？
+// 这取决于Type是否可能为空值。
+AstParameterDeclaration ParseResult(){
+	AstParameterDeclaration parameterList;
 	if(current_token.kind == TK_LPARENTHESES){
-		ParseParameters();
+		parameterList = ParseParameters();
+	}else if(current_token.kind == TK_LBRACE){
+		// 当参数后的token是{时，说明没有返回值。
+		// todo 可在没有函数体时，这样又不正确。
+		// TK_LBRACE 是 {
+//		CREATE_AST_NODE(parameterList, ParameterDeclaration);
+//		// todo 没有返回值时如何处理？暂时没有实现。	
+//		parameterList->specs = ParseType();
+		parameterList = NULL;
 	}else{
-		ParseType();
+		CREATE_AST_NODE(parameterList, ParameterDeclaration);
+		// todo 没有返回值时如何处理？暂时没有实现。	
+		parameterList->specs = ParseType();
+		parameterList->dec = NULL;
 	}	
+
+	return parameterList;
 }
 
 AstNode ParseFunctionName(){
@@ -567,6 +719,29 @@ AstNode ParseFunctionBody(){
 
 }
 
+
+void PrintFdec(AstFunctionDeclarator fdec){
+	AstParameterTypeList paramTypeList = fdec->paramTyList;
+	AstParameterDeclaration pdec = (AstParameterDeclaration)fdec->paramTyList->paramDecls;	
+	int count = 0;
+	while(pdec != NULL){
+		printf("data-type%d = %s\n", count, ((AstTypedefName)pdec->specs->tySpecs)->id);
+		printf("param%d = %s\n", count, ((AstParameterDeclaration)(pdec))->dec->id);
+		pdec = (AstParameterDeclaration)pdec->next;
+		count++;
+	}
+
+	AstParameterTypeList sig = fdec->sig;
+	AstParameterDeclaration rdec = (AstParameterDeclaration)sig->paramDecls;	
+	int rcount = 0;
+	while(rdec != NULL){
+		printf("pdata-type%d = %s\n", rcount, ((AstTypedefName)rdec->specs->tySpecs)->id);
+		printf("return%d = %s\n", rcount, ((AstParameterDeclaration)(rdec))->dec->id);
+		rdec = (AstParameterDeclaration)rdec->next;
+		rcount++;
+	}
+}
+
 /**
  * FunctionDecl = "func" FunctionName Signature [ FunctionBody ] .
  */
@@ -580,15 +755,29 @@ AstNode ParseFunctionDecl(){
 	AstNode functionName = ParseFunctionName();
 	fdec->dec = functionName;
 
-	AstParameterTypeList params;
-//	CREATE_AST_NODE(params, ParameterTypeList);
-	params = ParseParameters(); 
-	fdec->paramTyList = params;
+	AstParameterTypeList paramTypeList;
+	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
+	AstParameterDeclaration params = ParseParameters(); 
+	paramTypeList->paramDecls = params;
+	fdec->paramTyList = paramTypeList;
+	// todo 测试，打印数据。
+//	PrintFdec(fdec);
+//	printf("data-type = %s\n", ((AstTypedefName)fdec->paramTyList->paramDecls->specs->tySpecs)->id);
+//	printf("param2 = %s\n", ((AstParameterDeclaration)(fdec->paramTyList->paramDecls->next))->dec->id);
 	
 	AstParameterTypeList signature;
 	CREATE_AST_NODE(signature, ParameterTypeList);
-	signature = ParseResult(); 
+	AstParameterDeclaration result = ParseResult(); 
+	signature->paramDecls = result;
 	fdec->sig = signature;
+//	printf("return data-type = %s\n", ((AstTypedefName)fdec->sig->paramDecls->specs->tySpecs)->id);
+//	printf("return2 = %s\n", ((AstParameterDeclaration)(fdec->sig->paramDecls->next))->dec->id);
+
+
+	
+	// todo 测试，打印数据。
+	PrintFdec(fdec);
+	
 		
 	AstFunction func;
 	CREATE_AST_NODE(func, Function);
