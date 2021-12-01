@@ -690,8 +690,13 @@ AstParameterDeclaration ParseResult(){
 	}else{
 		CREATE_AST_NODE(parameterList, ParameterDeclaration);
 		// todo 没有返回值时如何处理？暂时没有实现。	
-		parameterList->specs = ParseType();
+		AstSpecifiers specs;
+		CREATE_AST_NODE(specs, Specifiers); 
+		specs->tySpecs = ParseType();
+		parameterList->specs = specs;
+		// parameterList->specs = ParseType();
 		parameterList->dec = NULL;
+		parameterList->next = NULL;
 	}	
 
 	return parameterList;
@@ -804,8 +809,15 @@ void PrintFdec(AstFunctionDeclarator fdec){
 	AstParameterDeclaration rdec = (AstParameterDeclaration)sig->paramDecls;	
 	int rcount = 0;
 	while(rdec != NULL){
-		printf("pdata-type%d = %s\n", rcount, ((AstTypedefName)rdec->specs->tySpecs)->id);
-		printf("return%d = %s\n", rcount, ((AstParameterDeclaration)(rdec))->dec->id);
+		printf("rdata-type%d = %s\n", rcount, ((AstTypedefName)rdec->specs->tySpecs)->id);
+		char return_value[10];
+		if((AstParameterDeclaration)(rdec)->dec == NULL || ((AstParameterDeclaration)(rdec))->dec->id == 0){
+//			*return_value = "no-return";
+			strcpy(return_value, "no-return");
+		}else{
+			strcpy(return_value, ((AstParameterDeclaration)(rdec))->dec->id);
+		}
+		printf("return%d = %s\n", rcount, return_value);
 		rdec = (AstParameterDeclaration)rdec->next;
 		rcount++;
 	}

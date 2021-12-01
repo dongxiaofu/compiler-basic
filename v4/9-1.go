@@ -1,1 +1,1 @@
-func max(num1, num2 int) (int, float32)
+func max(num1, num2 int) int
