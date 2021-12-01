@@ -60,7 +60,7 @@ int is_operator(char ch)
 Token get_token()
 {
 //	todo 暂时不打印token
-//	dump_token(current_token);
+	dump_token(current_token);
 //	printf("get token\n");
 //	Token token;
 //	token.kind = TK_NAN;
@@ -123,7 +123,19 @@ try_again:
 				//get_next_char();
 			}else{
 				printf("There is no token any more 101\n");
-				goto try_again;
+				token.kind = TK_EOF;
+			//	char is_go_to_try = 1;
+			//	char arr[] = {TK_LBRACE, TK_RBRACE};
+			//	for(int i = 0; i < sizeof(arr) / sizeof(char); i++){
+			//		if(token.kind == arr[i]){
+			//			is_go_to_try = 0;
+			//			break;
+			//		} 
+			//	}
+			//	if(is_go_to_try == 1){
+			//		goto try_again;
+			//	}
+				
 			}
 	}	
 

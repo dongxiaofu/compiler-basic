@@ -49,13 +49,16 @@ AstTranslationUnit ParseTranslationUnit(){
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
 
-	if(current_token.kind == TK_FUNC){
-		LOG("parse func\n");
-		p->extDecls = declaration();
-
-	}else{
-		LOG("parse decl\n");
-		p->extDecls = declaration();
+	while(current_token.kind != TK_EOF){
+		if(current_token.kind == TK_FUNC){
+			LOG("parse func\n");
+			p->extDecls = declaration();
+	
+		}else{
+			LOG("parse decl\n");
+			p->extDecls = declaration();
+		}
+		LOG("parse loop\n");
 	}
 
 	LOG("parse unit over\n");

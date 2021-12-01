@@ -1,6 +1,8 @@
 #include "ast.h"
+#include "stmt.h"
 #include "decl.h"
 #include "expr.h"
+// #include "stmt.h"
 
 
 AstNode declaration(){
@@ -715,9 +717,76 @@ AstNode ParseSignature(){
 
 }
 
-AstNode ParseFunctionBody(){
-
+AstStatement ParseFunctionBody(){
+	AstNode body = NULL;
+	// 因为函数体是可选的。
+	if(current_token.kind == TK_LBRACE){
+		EXPECT(TK_LBRACE);
+	 	body = (AstNode)ParseCompoundStatement(); 	
+		EXPECT(TK_RBRACE);
+	}
+	return body;
 }
+
+// todo 返回值的数据类型应该用AstStatement吗？
+// AstNode ParseFunctionBody(){
+// TODO 移动到了stmt.c中，择机删除这些代码。
+// AstStatement ParseFunctionBody(){
+// 	// 找这个函数和{的代号，花了点时间。若经常用，花点时间记下来是不是能加快速度？
+// 	EXPECT(TK_LBRACE);	
+// 
+// 	AstCompoundStatement compoundStmt;	
+// 	CREATE_AST_NODE(compoundStmt, CompoundStatement); 
+// 	// 处理函数体中的声明。
+// 	// AstDeclarator decHead = NULL;	
+// 	AstDeclarator decHead;	
+// 	CREATE_AST_NODE(decHead, Declarator);
+// 	decHead->next = NULL;
+// 	AstDeclarator preDec = NULL;	
+// 	AstDeclarator curDec;	
+// 	// 当前token是声明字符集&&不是结束符&&不是}
+// 	while(CurrentTokenIn(FIRST_Declaration) && (current_token.kind != TK_RBRACE)){
+// 		curDec = declaration();
+// 		if(preDec == NULL){
+// 			preDec = curDec;
+// 		}else{
+// 			preDec->next = (AstNode)curDec;	
+// 			preDec = curDec;
+// 		}
+// 
+// 		if(decHead->next == NULL){
+// 			decHead->next = (AstNode)curDec;
+// 		}
+// 	}
+// 	compoundStmt->decls = decHead->next;
+// 
+// 	// 处理函数体中的语句。
+// 	AstStatement headStmt;
+// 	CREATE_AST_NODE(headStmt, Statement);
+// 	headStmt->next = NULL;	
+// 	// 当前token属于语句字符集 && 不是结束符 && 不是}
+// 	AstStatement preStmt;
+// 	AstStatement curStmt;
+// 	while(current_token.kind != TK_RBRACE){
+// 		// todo 未实现。
+// 		curStmt = ParseStatement();
+// 		if(preStmt == NULL){
+// 			preStmt = curStmt;
+// 		}else{
+// 			preStmt->next = (AstNode)curStmt;
+// 			preStmt = curStmt;
+// 		}
+// 
+// 		if(headStmt->next == NULL){
+// 			headStmt->next = (AstNode)curStmt;
+// 		}
+// 	}
+// 	compoundStmt->stmt = headStmt->next;
+// 
+// 	EXPECT(TK_RBRACE);	
+// 
+// 	return compoundStmt;
+// }
 
 
 void PrintFdec(AstFunctionDeclarator fdec){
@@ -760,20 +829,12 @@ AstNode ParseFunctionDecl(){
 	AstParameterDeclaration params = ParseParameters(); 
 	paramTypeList->paramDecls = params;
 	fdec->paramTyList = paramTypeList;
-	// todo 测试，打印数据。
-//	PrintFdec(fdec);
-//	printf("data-type = %s\n", ((AstTypedefName)fdec->paramTyList->paramDecls->specs->tySpecs)->id);
-//	printf("param2 = %s\n", ((AstParameterDeclaration)(fdec->paramTyList->paramDecls->next))->dec->id);
 	
 	AstParameterTypeList signature;
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
 	fdec->sig = signature;
-//	printf("return data-type = %s\n", ((AstTypedefName)fdec->sig->paramDecls->specs->tySpecs)->id);
-//	printf("return2 = %s\n", ((AstParameterDeclaration)(fdec->sig->paramDecls->next))->dec->id);
-
-
 	
 	// todo 测试，打印数据。
 	PrintFdec(fdec);
@@ -781,10 +842,26 @@ AstNode ParseFunctionDecl(){
 		
 	AstFunction func;
 	CREATE_AST_NODE(func, Function);
-	
 	func->fdec = fdec;
+	// return (AstNode)func;
 
-	// todo 暂时不处理FunctionBody
+	// 处理FunctionBody
+	AstStatement stmt = ParseFunctionBody();
+	// CREATE_AST_NODE(stmt, Statement);
+	func->stmt = stmt;
 	
 	return (AstNode)func;
+}
+
+int CurrentTokenIn(int toks[]){
+	int *p = toks;
+	
+	while(*p){
+		if(*p == current_token.kind){
+			return 1;
+		}
+		p++;
+	}
+
+	return 0;
 }

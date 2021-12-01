@@ -2,6 +2,7 @@
 #define __AST_H_
 
 #include <stdlib.h>
+#include "grammer.h"
 
 // 打印日志
 // #define LOG	printf
@@ -27,6 +28,8 @@ enum nodeKind
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
 
 	NK_Expression,
+
+	NK_Statement,
 
 	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		
 	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		
