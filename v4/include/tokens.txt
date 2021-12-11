@@ -17,8 +17,10 @@ TOKEN(TK_SLICE,"Slice")
 TOKEN(TK_STRUCT,"struct")
 TOKEN(TK_INTERFACE,"interface")
 TOKEN(TK_CHAN,"chan")
-TOKEN(TK_CHAN_SEND,"chan<-")
-TOKEN(TK_CHAN_RECEIVE,"<-chan")
+// TOKEN(TK_CHAN_SEND,"chan<-")
+// TOKEN(TK_CHAN_RECEIVE,"<-chan")
+// todo 这个符号应该存在吗？
+// TOKEN(TK_SEND_RECEIVE, "<-")
 // todo 这两个token需要特别注意。
 TOKEN(TK_POINTER,"pointer")
 TOKEN(TK_ARRAY,"Array")

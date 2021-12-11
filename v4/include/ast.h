@@ -30,6 +30,8 @@ enum nodeKind
 	NK_Expression,
 
 	NK_Statement,
+	NK_SendStmt, NK_IncDecStmt, NK_LabelStmt, NK_DeferStmt, NK_FallthroughStmt, NK_SelectStmt, 
+	NK_GoStmt,
 
 	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		
 	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		

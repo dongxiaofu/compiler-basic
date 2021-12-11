@@ -11,6 +11,7 @@ AstNode declaration(){
 	Value value = current_token.value;
 
 	AstNode decl;
+	CREATE_AST_NODE(decl, Node);
 
 	switch(kind){
 		case TK_VAR:

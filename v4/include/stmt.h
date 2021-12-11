@@ -5,6 +5,7 @@
 #include "lex.h"
 #include "type2.h"
 #include "expr.h"
+#include <string.h>
 
 // #define AST_STATEMENT_COMMON AST_NODE_COMMON
 
@@ -66,6 +67,17 @@ typedef struct astCaseStatement
 	struct astCaseStatement *nextCase;
 //	BBlock respBB;
 } *AstCaseStatement;
+
+typedef struct astSelectCaseStatement
+{
+	AST_STATEMENT_COMMON
+	AstStatement  caseStmt;
+	AstStatement  stmt;
+// todo 这句是重复的吗？
+// AST_STATEMENT_COMMON 有next成员。
+//	struct astCaseStatement *nextCase;
+//	BBlock respBB;
+} *AstSelectCaseStatement;
 // default:		statement
 typedef struct astDefaultStatement
 {
@@ -80,6 +92,8 @@ typedef struct astDefaultStatement
 typedef struct astIfStatement
 {
 	AST_STATEMENT_COMMON
+	// 本想把simpleStmt放到expr中，但不怎么方便。
+	AstStatement simpleStmt;
 	AstExpression expr;
 	AstStatement  thenStmt;
 	AstStatement  elseStmt;
@@ -145,18 +159,22 @@ typedef struct astGotoStatement
 	AST_STATEMENT_COMMON
 	char *id;
 //	Label label;
+	char *label;
+	AstStatement target;
 } *AstGotoStatement;
 //	break;
 typedef struct astBreakStatement
 {
 	AST_STATEMENT_COMMON
 	AstStatement target;
+	char *label;
 } *AstBreakStatement;
 // continue;
 typedef struct astContinueStatement
 {   
 	AST_STATEMENT_COMMON
 	AstLoopStatement target;
+	char *label;
 } *AstContinueStatement;
 // return [expression];
 typedef struct astReturnStatement
@@ -179,6 +197,57 @@ typedef struct astCompoundStatement
 //	Vector ilocals;
 } *AstCompoundStatement;
 
+typedef struct astSendStmt{
+	AST_STATEMENT_COMMON
+	AstExpression channel;
+	AstExpression expr;
+} *AstSendStmt;
+
+typedef struct astRecvStmt{
+	AST_STATEMENT_COMMON
+	AstExpression channel;
+	AstExpression receiver;
+} *AstRecvStmt;
+
+typedef struct astIncDecStmt{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+	// todo token kind用int表示是最好的方式吗？
+	int op;	
+} *AstIncDecStmt;
+
+// 这是一个很重要的数据结构，差点漏掉。
+typedef struct astLabeledStmt{
+	AST_STATEMENT_COMMON
+	char *label;
+	AstStatement stmt;
+} *AstLabeledStmt;
+
+typedef struct astDeferStmt{
+	AST_STATEMENT_COMMON
+	AstStatement stmt;
+} *AstDeferStmt;
+
+typedef struct astGoStmt
+{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+} *AstGoStmt;
+
+typedef struct astFallthroughStmt{
+	AST_STATEMENT_COMMON
+} *AstFallthroughStmt;
+
+typedef struct astAssignmentsStmt{
+	AST_STATEMENT_COMMON
+	AstExpression expr;
+} *AstAssignmentsStmt;
+
+typedef struct astSelectStmt{
+	AST_STATEMENT_COMMON
+	AstSelectCaseStatement stmt;
+} *AstSelectStmt;
+
 // 简化代码，应学习。
 #define AsExpr(stmt)   ((AstExpressionStatement)stmt)
 #define AsLabel(stmt)  ((AstLabelStatement)stmt)
@@ -195,6 +264,51 @@ typedef struct astCompoundStatement
 #define AsComp(stmt)   ((AstCompoundStatement)stmt)
 
 AstStatement CheckCompoundStatement(AstStatement stmt);
+
+// 解析AstAssignmentsStmt中的运算符。
+int ParseAssignmentsOp();
+AstAssignmentsStmt ParseAstAssignmentsStmt(); 
+AstFallthroughStmt ParseFallthroughStmt();
+AstGoStmt ParseGoStmt();
+AstBreakStatement ParseBreakStatement();
+AstContinueStatement ParseContinueStatement();
+AstGotoStatement ParseGotoStatement();
+AstRecvStmt ParseRecvStmt();
+AstSendStmt ParseSendStmt();
+AstIncDecStmt ParseIncDecStmt();
+AstLabeledStmt ParseLabeledStmt();
+AstDeferStmt ParseDeferStmt();
+
+int getStmtType();
+AstStatement ParseStatementList();
+AstSelectCaseStatement ParseAstSelectCaseStmt();
+AstSelectStmt ParseAstSelectStmt();
+
+// TODO 寻机改把返回值改成更合适的数据类型。
+AstExpression ParseRangeExpr();
+AstExpression ParseCondition();
+AstStatement ParseForClause();
+AstStatement ParseRangeClause();
+AstStatement ParseForStmt();
+
+// switch
+// AstStatement Parse();
+// AstStatement Parse();
+// TODO 这是一个很特殊的产生式。暂时先放在这里。
+AstNode ParseTypeList();
+AstStatement ParseTypeSwitchCase();
+AstStatement ParseTypeCaseClause();
+AstStatement ParseTypeSwitchGuard();
+
+AstStatement ParseExprSwitchCase();
+AstStatement ParseExprCaseClause();
+AstStatement ParseTypeSwitchStmt();
+AstStatement ParseExprSwitchStmt();
+AstStatement ParseSwitchStmt();
+
+// AstStatement ParseSimpleStatement();
+// AstStatement ParseSimpleStatement();
+// AstStatement ParseSimpleStatement();
 
 AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();

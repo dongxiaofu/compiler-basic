@@ -24,7 +24,10 @@ func main() {
 }
 
 /* 函数返回两个数的最大值 */
-func max(num1 int, num2 int) (ptr *int,  ) {
+//func max(num1 int, num2 int) (ptr *int,  ) {
+// func max(num1 , num2 int) (ptr *int,  ) {
+// func max(num1 , num2 int) ( *int,  ) {
+func max(num1 , num2 int) ( *int ) {
    /* 声明局部变量 */
    var result *int
    //var t float64 = 7

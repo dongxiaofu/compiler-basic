@@ -70,7 +70,8 @@ AstTypedefName ParseTypeName(){
 
 AstNode ParseTypeLit(){
  	TokenKind kind = current_token.kind;
-	if(kind == TK_CHAN_SEND || kind == TK_CHAN_RECEIVE){
+	// TODO 第一个条件判断不应该存在。
+	if(kind == TK_CHAN){
 		kind == TK_CHAN;
 	}else if(kind == TK_MUL) {
 		kind = TK_POINTER;
@@ -279,10 +280,10 @@ AstNode ParseChannelType(){
 	TokenKind kind = current_token.kind;
 	if(kind == TK_CHAN){
 		expect_token(TK_CHAN);
-	}else if(kind == TK_CHAN_SEND){
-		expect_token(TK_CHAN_SEND);
-	}else if(kind == TK_CHAN_RECEIVE){
-		expect_token(TK_CHAN_RECEIVE);
+//	}else if(kind == TK_CHAN_SEND){
+//		expect_token(TK_CHAN_SEND);
+//	}else if(kind == TK_CHAN_RECEIVE){
+//		expect_token(TK_CHAN_RECEIVE);
 	}else{
 		ERROR("expect a chan\n");
 	}
