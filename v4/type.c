@@ -162,6 +162,7 @@ AstNode ParseStructType(){
 	expect_token(TK_STRUCT);
 	expect_token(TK_LBRACE);	
 	while(current_token.kind != TK_RBRACE){
+		NO_TOKEN;
 		ParseFieldDecl();
 		// 处理;
 		expect_semicolon;	
@@ -230,6 +231,7 @@ AstNode ParseInterfaceType(){
 	expect_token(TK_INTERFACE);
 	expect_token(TK_LBRACE);
 	while(current_token.kind != TK_RBRACE){
+		NO_TOKEN;
 		// todo 如何区分MethodSpec和InterfaceTypeName？
 		// todo 没有想到区分二者的方法，暂时只解析MethodSpec。
 		ParseMethodSpec();

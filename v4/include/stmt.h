@@ -267,7 +267,7 @@ AstStatement CheckCompoundStatement(AstStatement stmt);
 
 // 解析AstAssignmentsStmt中的运算符。
 int ParseAssignmentsOp();
-AstAssignmentsStmt ParseAstAssignmentsStmt(); 
+AstAssignmentsStmt ParseAssignmentsStmt(); 
 AstFallthroughStmt ParseFallthroughStmt();
 AstGoStmt ParseGoStmt();
 AstBreakStatement ParseBreakStatement();
@@ -314,6 +314,7 @@ AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();
 AstIfStatement ParseIfStatement();
 AstCompoundStatement ParseCompoundStatement();
+AstStatement ParseLabelStatement();
 AstStatement ParseStatement();
 
 #endif

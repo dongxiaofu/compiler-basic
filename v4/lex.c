@@ -116,7 +116,8 @@ try_again:
 			// todo 没想到更好的方法，只能用这种方式修修补补。
 			if(ch == '[' && current_char == '*') break;
 			len++;
-		}while(is_operator(current_char));
+		// }while(is_operator(current_char));
+		}while(len == 0);
 
 		token.kind = get_token_kind(token.value.value_str);
 			if(token.kind != TK_NAN){
@@ -231,13 +232,81 @@ void get_token_name(char *token_name, TokenKind kind){
 
 // 回退token
 void StartPeekToken(){
-	start_token = current_token;
-	start_cursor = CURSOR;
-	start_char = current_char;
+//	start_token = current_token;
+//	start_cursor = CURSOR;
+//	start_char = current_char;
+
+
+	if(cursor_tail->start_cursor == NULL){
+		cursor_tail->start_cursor = CURSOR;
+		char_tail->start_char = current_char;
+		current_token_tail->token = &current_token;
+	}else{
+	//	START_CURSOR_LINK cursor_tail_cur = (START_CURSOR_LINK)malloc(sizeof(*START_CURSOR_LINK));
+	//	START_CHAR_LINK char_tail_cur = (START_CHAR_LINK)malloc(sizeof(*START_CHAR_LINK));		
+	//	TOKEN_LINK current_token_tail_cur = (TOKEN_LINK)malloc(*TOKEN_LINK);
+//		START_CURSOR_LINK cursor_tail_cur = (START_CURSOR_LINK)malloc(sizeof(cursor_tail));
+//		START_CHAR_LINK char_tail_cur = (START_CHAR_LINK)malloc(sizeof(char_tail));		
+//		TOKEN_LINK current_token_tail_cur = (TOKEN_LINK)malloc(current_token_tail);
+
+		START_CURSOR_LINK cursor_tail_cur = (START_CURSOR_LINK)malloc(sizeof(struct start_cursor_link));
+		START_CHAR_LINK char_tail_cur = (START_CHAR_LINK)malloc(sizeof(struct start_char_link));		
+		TOKEN_LINK current_token_tail_cur = (TOKEN_LINK)malloc(sizeof(struct token_link));
+
+		cursor_tail_cur->start_cursor = CURSOR;
+		cursor_tail_cur->pre = cursor_tail;
+		cursor_tail->next = cursor_tail_cur;
+		cursor_tail = cursor_tail_cur;
+
+		char_tail_cur->start_char = current_char;
+		char_tail_cur->pre = char_tail;
+		char_tail->next = char_tail_cur;
+		char_tail = char_tail_cur;
+
+		// TODO 注意这里，耗时很久！
+		// 创建双链表不是很难，难点在于这几行代码。
+		// current_token_tail_cur->token = &current_token;
+		// *(current_token_tail_cur->token) = current_token;
+		Token *token = (Token *)malloc(sizeof(Token));
+		*token = current_token;
+		current_token_tail_cur->token = token;	
+		current_token_tail_cur->pre = current_token_tail;
+		current_token_tail->next = current_token_tail_cur;
+		current_token_tail = current_token_tail_cur;
+	}
 }
 
 void EndPeekToken(){
-	current_token = start_token;
-	CURSOR = start_cursor;
-	current_char = start_char;
+//	current_token = start_token;
+//	CURSOR = start_cursor;
+//	current_char = start_char;
+
+
+//	if(cursor_tail->pre == NULL){
+//		return;
+//	}	
+
+	if(cursor_tail->start_cursor == NULL){
+		ERROR("%s\n", "Must use StartPeekToken at first");
+		return;
+	}
+	current_token = *(current_token_tail->token);	
+	CURSOR = cursor_tail->start_cursor;
+	current_char = char_tail->start_char;
+
+	if(cursor_tail->pre == NULL){
+		return;
+	}	
+
+	current_token_tail = current_token_tail->pre;
+	free(current_token_tail->next);
+	current_token_tail->next = NULL;
+	
+	cursor_tail = cursor_tail->pre;
+	free(cursor_tail->next);
+	cursor_tail->next = NULL;
+
+	char_tail = char_tail->pre;
+	free(char_tail->next);
+	char_tail->next = NULL;
 }

@@ -8,6 +8,12 @@
 //#include <stdlib.h>
 
 #define MAX_NAME_LEN	15
+// 打印日志
+#define LOG	printf
+// #define LOG	
+#define ERROR	printf
+#define NO_TOKEN	if(current_token.kind == TK_EOF){break;}
+// #define NO_TOKEN 
 
 typedef union{
 	char value_str[MAX_NAME_LEN];
@@ -76,15 +82,41 @@ static struct tokenOp TokenOps[] =
 //	TK_INT, TK_ID, TK_IF, TK_WHILE,TK_LBRACE
 //};
 
-typedef struct{
+typedef struct token{
 	Value value;
 	TokenKind kind;
 }Token;
+
+typedef struct token_link{
+	Token *token;
+	struct token_link *pre;
+	struct token_link *next;
+}*TOKEN_LINK;
 
 Token current_token;
 Token start_token;
 char *start_cursor;
 char start_char;
+
+typedef struct start_cursor_link{
+	char *start_cursor;
+	struct start_cursor_link *pre;
+	struct start_cursor_link *next;
+}*START_CURSOR_LINK;
+
+typedef struct start_char_link{
+	char *start_char;
+	struct start_char_link *pre;
+	struct start_char_link *next;
+}*START_CHAR_LINK;
+
+// static START_CURSOR_LINK cursor_tail;
+// static START_CHAR_LINK char_tail;
+// static TOKEN_LINK current_token_tail;
+START_CURSOR_LINK cursor_tail;
+START_CHAR_LINK char_tail;
+TOKEN_LINK current_token_tail;
+
 static char current_char = -1;
 FILE *fp;
 

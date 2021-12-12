@@ -32,6 +32,7 @@ AstNode declaration(){
 			break;
 		default:
 			LOG("%s\n", "parse decl error");
+			exit(-2);
 			break;
 	}
 
@@ -197,16 +198,19 @@ AstDeclarator ParseIdentifierList(){
 		count++;
 		tail = &((*tail)->next);
 		
-		StartPeekToken();
-		NEXT_TOKEN;
-		if(current_token.kind != TK_COMMA){
-			EndPeekToken();
-			*tail = NULL;
-			break;
-		}
+//		StartPeekToken();
+//		NEXT_TOKEN;
+//		if(current_token.kind != TK_COMMA){
+//			EndPeekToken();
+//			*tail = NULL;
+//			break;
+//		}else{
+//			EndPeekToken();
+//		}
 	}
 
 	decl->variable_count = count;
+	decl->next = NULL;		// 不能少了这一句。
 
 	return decl;
 }
@@ -353,6 +357,7 @@ AstDeclaration ParseVarSpec(){
 	AstExpression exprCur = expr;
 	AstExpression expr2Cur = expr2;
 	while(exprCur != NULL){
+		NO_TOKEN;
 		// initDecsCur->dec->id = exprCur->val;	
 		// initDecsCur->dec->id = exprCur->val;	
 		AstDeclarator dec;

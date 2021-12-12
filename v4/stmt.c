@@ -12,7 +12,8 @@ AstStatement ParseStatement(){
 		case TK_ID:
 			// TODO
 			LOG("%s\n", "parse ID stmt");
-			ParseSimpleStatement();
+			// stmt = ParseSimpleStatement();
+			stmt = ParseLabelStatement();
 			break;
 		case TK_IF:
 			// TODO
@@ -23,12 +24,48 @@ AstStatement ParseStatement(){
 			LOG("%s\n", "parse return stmt");
 			stmt = (AstStatement)ParseReturnStatement();	
 			break;
+		case TK_SELECT:
+			// TODO
+			LOG("%s\n", "parse select stmt");
+			stmt = (AstStatement)ParseAstSelectStmt();	
+			break;
+		case TK_SWITCH:
+			// TODO
+			LOG("%s\n", "parse switch stmt");
+			stmt = (AstStatement)ParseSwitchStmt();	
+			break;
 		default:
 			LOG("%s\n", "parse default stmt");
 			stmt = (AstStatement)ParseCompoundStatement();	
 			break;
 	}
 
+	return stmt;
+}
+
+AstStatement ParseLabelStatement(){
+	// 判断是不是赋值语句。
+	char assign_flag = 0;
+	StartPeekToken();
+	while(1){
+		NO_TOKEN;
+		// if(current_token.kind == TK_EQUAL){
+		if(current_token.kind == TK_ASSIGN){
+			assign_flag = 1;
+			break;
+		}
+		NEXT_TOKEN;
+	}
+	EndPeekToken();
+
+	if(assign_flag == 1){
+		ParseAssignmentsStmt();
+	}else{
+		ParseSimpleStatement();
+	}
+
+	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 	return stmt;
 }
 
@@ -67,6 +104,7 @@ AstIfStatement ParseIfStatement(){
 	char semicolon_flag = 0;
 	StartPeekToken;
 	while(current_token.kind != TK_LBRACE){
+		NO_TOKEN;
 		if(current_token.kind == TK_SEMICOLON){
 			semicolon_flag = 1;
 			break;
@@ -122,6 +160,7 @@ AstCompoundStatement ParseCompoundStatement(){
 	AstDeclarator curDec;	
 	// 当前token是声明字符集&&不是结束符&&不是}
 	while(CurrentTokenIn(FIRST_Declaration) && (current_token.kind != TK_RBRACE)){
+		NO_TOKEN;
 		curDec = declaration();
 		if(preDec == NULL){
 			preDec = curDec;
@@ -145,7 +184,9 @@ AstCompoundStatement ParseCompoundStatement(){
 	// 当前token属于语句字符集 && 不是结束符 && 不是}
 	AstStatement preStmt = NULL;
 	AstStatement curStmt;
-	while(current_token.kind != TK_RBRACE){
+	// while(current_token.kind != TK_RBRACE){
+	while(current_token.kind != TK_RBRACE && current_token.kind != TK_CASE && current_token.kind !=TK_DEFAULT){
+		NO_TOKEN;
 		//if(current_token.kind == TK_RBRACE){
 		//	NEXT_TOKEN;
 		//	break;
@@ -276,6 +317,7 @@ AstRecvStmt ParseRecvStmt(){
 	int pre_token = -1;
 	// TODO 如果没有<-，就一直循环下去吗？效率太低，想办法优化。
 	while(current_token.kind != TK_LESS || flag_less == 0){
+		NO_TOKEN;
 		tokens[++i] = current_token.kind;
 		pre_token = current_token.kind;
 		NEXT_TOKEN;
@@ -457,7 +499,7 @@ assign_op = [ add_op | mul_op ] "=" .
 add_op     = "+" | "-" | "|" | "^" .
 mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
  */
-AstAssignmentsStmt ParseAstAssignmentsStmt(){
+AstAssignmentsStmt ParseAssignmentsStmt(){
 	
 	AstExpression left_expr = ParseExpressionList();
 	int op = ParseAssignmentsOp();
@@ -470,6 +512,7 @@ AstAssignmentsStmt ParseAstAssignmentsStmt(){
 	expr->kids[1] = right_expr;
 
 	AstAssignmentsStmt stmt;
+	CREATE_AST_NODE(stmt, AssignmentsStmt);
 	stmt->expr = expr;
 
 	return stmt;
@@ -501,6 +544,7 @@ int getStmtType(){
 	int i = -1;
 	StartPeekToken(); 
 	while(1){
+		NO_TOKEN;
 		// tokens[i++] = current_token.kind;
 		tokens[++i] = current_token.kind;
 		if(flag == 1){
@@ -571,8 +615,14 @@ AstStatement ParseStatementList(){
 	CREATE_AST_NODE(headStmt, Statement);
 	headStmt->next = NULL;
 
-	while(current_token.kind != TK_SEMICOLON){
-			
+	// while(current_token.kind != TK_SEMICOLON){
+	// TODO 测试出来的。处理switch时需要这样做。非switch这样做有问题吗？
+	while(current_token.kind != TK_SEMICOLON && current_token.kind != TK_CASE && current_token.kind != TK_DEFAULT){
+		NO_TOKEN;	
+		if(current_token.kind == TK_RBRACE){
+			break;
+		}
+
 		AstStatement curStmt = ParseStatement();
 		if(preStmt == NULL){
 			preStmt = curStmt;
@@ -585,7 +635,13 @@ AstStatement ParseStatementList(){
 			headStmt->next = curStmt;
 		}
 
-		NEXT_TOKEN;
+		// 断点调试出来的。
+		if(current_token.kind == TK_CASE || current_token.kind == TK_DEFAULT){
+			break;
+		}
+		// NEXT_TOKEN;
+		// expect_token(TK_SEMICOLON);
+		expect_semicolon;
 	}
 
 	return headStmt->next;
@@ -631,6 +687,7 @@ AstStatement ParseRangeClause(){
 	int tokens[200];
 	StartPeekToken();
 	while(1){
+		NO_TOKEN;
 		tokens[++i] = current_token.kind;
 		if(current_token.kind == TK_RANGE){
 			break;
@@ -684,6 +741,7 @@ AstStatement ParseForStmt(){
 	int type = -1;
 	char flag_semicolon = 0;
 	while(1){
+		NO_TOKEN;
 		if(current_token.kind == TK_RANGE){
 			type = 1;
 			NEXT_TOKEN;
@@ -778,6 +836,7 @@ AstStatement ParseTypeSwitchGuard(){
 	char colon_flag = 0;
 	char colon_equal_flag = 0;
 	while(current_token.kind != TK_DOT){
+		NO_TOKEN;
 	//	if(current_token.kind == TK_COLON){
 	//		colon_flag = 1;
 	//	}
@@ -829,6 +888,7 @@ AstStatement ParseExprSwitchCase(){
 	}
 
 	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 	return stmt;
 }
 
@@ -841,6 +901,7 @@ AstStatement ParseExprCaseClause(){
 	}
 
 	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 
 	return stmt;
 }
@@ -856,10 +917,12 @@ AstStatement ParseTypeSwitchStmt(){
 	char semicolon_flag = 0;
 	StartPeekToken();
 	while(current_token.kind != TK_DOT){
+		NO_TOKEN;
 		if(current_token.kind == TK_SEMICOLON){
 			semicolon_flag = 1;
 			break;
 		}
+		NEXT_TOKEN;
 	}
 	EndPeekToken();
 
@@ -890,6 +953,7 @@ AstStatement ParseExprSwitchStmt(){
 	char flag = 0;
 	StartPeekToken();
 	while(current_token.kind != TK_LBRACE){ // {
+		NO_TOKEN;
 		tokens[++i] = current_token.kind;
 		NEXT_TOKEN;
 		if(current_token.kind == TK_LBRACE){ // {
@@ -949,6 +1013,7 @@ AstStatement ParseExprSwitchStmt(){
 	expect_token(TK_RBRACE);
 	
 	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 	
 	return stmt;
 }
@@ -962,6 +1027,7 @@ AstStatement ParseSwitchStmt(){
 	StartPeekToken();
 	char dot_flag = 0;
 	while(current_token.kind != TK_LBRACE){
+		NO_TOKEN;
 		if(current_token.kind == TK_DOT){ // .
 			StartPeekToken();
 			dot_flag = 1;
@@ -995,6 +1061,7 @@ AstStatement ParseSwitchStmt(){
 	}
 
 	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 
 	return stmt;
 }

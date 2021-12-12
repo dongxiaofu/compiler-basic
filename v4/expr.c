@@ -65,7 +65,7 @@ AstExpression ParseExpression(){
 //
 //	}
 	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression);
+//	CREATE_AST_NODE(expr, Expression);
 	// expr = ParseBinaryExpr(4);
 	// todo 参数prec如何确定？
 	expr = ParseBinaryExpr(7);
@@ -210,6 +210,7 @@ AstNode ParseIndexSlice(){
 	// TokenKind kind = current_token.kind;	
 	TokenKind kind  = current_token.kind;	
 	while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+		NO_TOKEN;
 		ParseExpression();
 		kind  = current_token.kind;
 		expr_count++;
@@ -230,6 +231,7 @@ AstNode ParseIndexSlice(){
 		kind = current_token.kind;	
 		// while(kind != TK_COLON){ 	
 		while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+			NO_TOKEN;
 			ParseExpression();
 			kind = current_token.kind;	
 			expr_count++;
