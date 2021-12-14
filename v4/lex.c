@@ -107,19 +107,29 @@ try_again:
 	//		printf("There is no token any more 100\n");
 	//		exit(100);
 	//	}
-		int len = 0;
-		do{
-			
-			token.value.value_str[len] = current_char;
-			char ch = current_char;
-			get_next_char();
-			// todo 没想到更好的方法，只能用这种方式修修补补。
-			if(ch == '[' && current_char == '*') break;
-			len++;
-		// }while(is_operator(current_char));
-		}while(len == 0);
+//		int len = 0;
+//		do{
+//			
+//			token.value.value_str[len] = current_char;
+//			char ch = current_char;
+//			get_next_char();
+//			// todo 没想到更好的方法，只能用这种方式修修补补。
+//			if(ch == '[' && current_char == '*') break;
+//			len++;
+//		// }while(is_operator(current_char));
+//		}while(len == 0);
 
-		token.kind = get_token_kind(token.value.value_str);
+			
+		//TODO current_char 不是运算符时怎么办？
+		// int token_kind = scanners[current_char];
+//		int token_kind = scanners[current_char]();
+//		token.kind = token_kind;	
+//		strcpy(token.value.value_str, token_names[token_kind]);
+
+		// 处理运算符等token。
+		token = *(ScanToken());
+
+//		token.kind = get_token_kind(token.value.value_str);
 			if(token.kind != TK_NAN){
 				//get_next_char();
 			}else{
@@ -309,4 +319,196 @@ void EndPeekToken(){
 	char_tail = char_tail->pre;
 	free(char_tail->next);
 	char_tail->next = NULL;
+}
+
+
+void setupScanner(){
+	
+	scanners['='] = ScanEqual;
+	scanners['*'] = ScanStar;
+	scanners['+'] = ScanPlus;
+	scanners['-'] = ScanMinus;
+	scanners['%'] = ScanPercent;
+	scanners['/'] = ScanSlash;
+	scanners['<'] = ScanLess;
+	scanners['>'] = ScanGreat;
+	scanners['"'] = ScanStrintLiterals;
+}
+
+int ScanEqual(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_EQUAL;	// ==
+	}else{
+		return TK_ASSIGN;		// =
+	}
+}
+
+int ScanStar(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_MUL_ASSIGN;	// *=
+	}else{
+		return TK_MUL;		// *
+	}
+}
+
+int ScanPlus(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_ADD_ASSIGN;	// +=
+	}else if(current_char == '+'){
+		get_next_char();	
+		return TK_INC;		// ++
+	}else{
+		return TK_ADD;		// +
+	}
+}
+
+int ScanMinus(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_MINUS_ASSIGN;	// -=
+	}else if(current_char == '='){
+		get_next_char();	
+		return TK_DEC;	// --
+	}else{
+		return TK_MINUS;		// -
+	}
+}
+
+int ScanPercent(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_MOD_ASSIGN;	// %=
+	}else{
+		return TK_MOD;		// %
+	}
+}
+
+int ScanSlash(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_DIV_ASSIGN;	// /=
+	}else{
+		return TK_DIV;		// /
+	}
+}
+
+int ScanLess(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_LESS_OR_EQUAL;	// <=
+	}else if(current_char == '<'){	
+		int token = TK_LEFT_SHIFT;	// <<
+		get_next_char();	
+		if(current_char == '='){
+			get_next_char();	
+			token = TK_LEFT_SHIFT_ASSIGN;	// <<= 
+		}
+		return token;
+	}else{
+		return TK_LESS;		// <
+	}
+}
+
+int ScanGreat(){
+	get_next_char();	
+	if(current_char == '='){
+		get_next_char();	
+		return TK_GREATER_OR_EQUAL;	// >=
+	}else if(current_char == '>'){
+		get_next_char();	
+		int token = TK_RIGHT_SHIFT;	// >>
+		if(current_char == '='){
+			token = TK_RIGHT_SHIFT_ASSIGN;	// >>= 
+		} 
+		return token;
+	}else{
+		return TK_MUL;		// *
+	}
+}
+
+// TODO 全局变量有点可怕。需进入函数才知道是怎么回事。
+// void ScanToken(){
+Token *ScanToken(){
+	Token *token = (Token *)malloc(sizeof(Token));
+	memset(token, 0, sizeof(Token));
+
+	char flag = 0;
+	for(int i = 0; i < 256; i++){
+		// if(scanners[i] != 0){
+		if(i == current_char && scanners[i] != 0){
+			flag = 1;
+			break;
+		}	
+	}
+
+	if(flag == 1){
+		//TODO current_char 不是运算符时怎么办？
+		// int token_kind = scanners[current_char];
+		int token_kind = scanners[current_char]();
+		token->kind = token_kind;	
+		// TODO 寻机优化这种特殊处理的方式。
+		if(token_kind != TK_STRING){
+			strcpy(token->value.value_str, token_names[token_kind]);
+		}else{
+			strcpy(token->value.value_str, current_token_value.value_str);
+		}
+	}else{
+		int len = 0;
+		do{
+			token->value.value_str[len] = current_char;
+			char ch = current_char;
+			get_next_char();
+			// todo 没想到更好的方法，只能用这种方式修修补补。
+			if(ch == '[' && current_char == '*') break;
+			len++;
+		// }while(is_operator(current_char));
+		}while(len == 0);
+		token->kind = get_token_kind(token->value.value_str);
+	}
+
+	return token;
+}
+
+int ScanStrintLiterals(){
+	get_next_char();
+	char temp[512];
+	memset(temp, 0, 512);
+	int len = -1;
+
+//	while(current_char != TK_DOUBLE_QUOTATION_MARK){
+	while(current_char != '"'){
+//	while(*CURSOR != '"'){
+		// if(*CURSOR == '\n'){
+		if(current_char == '\n'){
+			// temp[++len] = current_char;	
+			// temp[++len] = *CURSOR;	
+			// get_next_char();
+			break;
+		}
+		temp[++len] = current_char;	
+		// temp[++len] = *CURSOR;	
+		get_next_char();
+	}
+
+	// if(current_char != TK_DOUBLE_QUOTATION_MARK){
+	if(current_char != '"'){
+//	if(*CURSOR != '"'){
+		EXPECT(TK_DOUBLE_QUOTATION_MARK);
+	}	
+	
+	get_next_char();
+	
+	strcpy(current_token_value.value_str, temp);
+
+	return TK_STRING;
 }

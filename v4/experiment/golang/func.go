@@ -8,6 +8,10 @@ func main() {
    var b int = 200
    var ret *int
    var e int = test(88, )
+   // var d,f,k int;
+   // d = f = k = 20;
+   var d int;
+   d  = 20;
    test(88, )
 
    //var e float64
@@ -19,8 +23,8 @@ func main() {
 
    fmt.Printf( "最大值是 : %d\n", *ret )
    fmt.Printf( "e是 : %d\n", e )
-
-
+   // fmt.Printf( "d是 : %d, f = %d, k = %d\n", d, f, k )
+   fmt.Printf( "d是 : %d, f = %d, k = %d\n", d )
 }
 
 /* 函数返回两个数的最大值 */

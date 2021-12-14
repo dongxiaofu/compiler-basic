@@ -30,9 +30,12 @@ AstStatement ParseStatement(){
 			stmt = (AstStatement)ParseAstSelectStmt();	
 			break;
 		case TK_SWITCH:
-			// TODO
 			LOG("%s\n", "parse switch stmt");
 			stmt = (AstStatement)ParseSwitchStmt();	
+			break;
+		case TK_FOR:
+			LOG("%s\n", "parse for stmt");
+			stmt = (AstStatement)ParseForStmt();	
 			break;
 		default:
 			LOG("%s\n", "parse default stmt");
@@ -102,7 +105,7 @@ AstIfStatement ParseIfStatement(){
 
 	// 处理[ SimpleStmt ";" ]
 	char semicolon_flag = 0;
-	StartPeekToken;
+	StartPeekToken();
 	while(current_token.kind != TK_LBRACE){
 		NO_TOKEN;
 		if(current_token.kind == TK_SEMICOLON){
@@ -111,7 +114,7 @@ AstIfStatement ParseIfStatement(){
 		}
 		NEXT_TOKEN;
 	}
-	EndPeekToken;
+	EndPeekToken();
 
 	if(semicolon_flag == 1){
 		simpleStmt = ParseSimpleStatement();
@@ -779,6 +782,7 @@ AstStatement ParseForStmt(){
 
 	// TODO 没有建立AST	
 	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
 
 	return stmt;
 }

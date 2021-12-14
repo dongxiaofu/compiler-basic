@@ -23,6 +23,10 @@ int main(int argc, char *argv[])
 
 	ReadSourceFile(argv[1]);	
 
+
+	// 初始化扫描器
+	setupScanner();
+
 	Token token;
 	int i = 0;
 
@@ -42,6 +46,17 @@ int main(int argc, char *argv[])
 	current_token_tail = (TOKEN_LINK)malloc(sizeof(struct token_link));
 	// error: incompatible types when assigning to type 'Token' {aka 'struct token'} from type 'void *'
 	current_token_tail->pre = current_token_tail->next = current_token_tail->token = NULL;
+
+
+	int loop_counter = 0;
+	while(1){
+		if(++loop_counter > 80){
+			break;
+		}
+		get_token();
+	}
+	printf("scan token over\n");
+	exit(3);
 	
 //	while(1){
 		get_token();
@@ -85,5 +100,3 @@ AstTranslationUnit ParseTranslationUnit(){
 
 	LOG("parse unit over\n");
 }
-
-

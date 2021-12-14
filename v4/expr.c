@@ -68,7 +68,9 @@ AstExpression ParseExpression(){
 //	CREATE_AST_NODE(expr, Expression);
 	// expr = ParseBinaryExpr(4);
 	// todo 参数prec如何确定？
-	expr = ParseBinaryExpr(7);
+//	expr = ParseBinaryExpr(2);
+	// expr = ParseBinaryExpr(7);
+	expr = ParseBinaryExpr(Prec[OP_OR]);
 
 	return expr;
 }
@@ -80,7 +82,10 @@ AstExpression ParseBinaryExpr(int prec){
 //	// todo 如何处理binary_op？
 //	ParseBinaryOp();
 //	ParseExpression();
-	#define HIGHEST_BIN_PREC Prec[TK_MUL - TK_CONDITIONAL_OR]	
+	// #define HIGHEST_BIN_PREC Prec[TK_MUL - TK_CONDITIONAL_OR]	
+	#define HIGHEST_BIN_PREC Prec[OP_MUL]	
+
+	printf("HIGHEST_BIN_PREC:%d\n", HIGHEST_BIN_PREC);
 
 	AstExpression binExpr;
 	AstExpression expr;

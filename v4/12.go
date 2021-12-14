@@ -16,6 +16,10 @@ func test(age ,height float64) (int,float32){
       case 50,60,70 : var grade string = C
       default: grade = D
    }
+	
+	for i := 0; i < 10; i {
+		a =  899
+	}	
   }
   var hei float32 = height
   var hei float32 = height

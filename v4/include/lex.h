@@ -9,11 +9,15 @@
 
 #define MAX_NAME_LEN	15
 // 打印日志
-#define LOG	printf
-// #define LOG	
+// #define LOG	printf
+#define LOG	
 #define ERROR	printf
 #define NO_TOKEN	if(current_token.kind == TK_EOF){break;}
 // #define NO_TOKEN 
+
+// 扫描token的函数指针数组
+typedef int (*Scanner)(void);
+static Scanner scanners[256];
 
 typedef union{
 	char value_str[MAX_NAME_LEN];
@@ -94,6 +98,8 @@ typedef struct token_link{
 }*TOKEN_LINK;
 
 Token current_token;
+// ScanStringLiterals中需要这样做。
+Value current_token_value;
 Token start_token;
 char *start_cursor;
 char start_char;
@@ -159,6 +165,19 @@ void dump_token(Token token);
 void get_token_name(char *token_name, TokenKind kind);
 
 void expect_token(TokenKind kind);
+
+int ScanEqual();
+int ScanStar();
+int ScanPlus();
+int ScanMinus();
+int ScanPercent();
+int ScanSlash();
+int ScanLess();
+int ScanGreat();
+int ScanStrintLiterals();
+Token *ScanToken();
+void setupScanner();
+
 
 typedef struct astNode2{
 	TokenKind op;
