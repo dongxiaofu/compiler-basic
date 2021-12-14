@@ -333,6 +333,12 @@ void setupScanner(){
 	scanners['<'] = ScanLess;
 	scanners['>'] = ScanGreat;
 	scanners['"'] = ScanStrintLiterals;
+	scanners[':'] = ScanColon;
+	scanners['|'] = ScanBar;
+	scanners['!'] = ScanExclamation;
+	scanners['&'] = ScanAmpersand;
+	scanners['^'] = ScanCaret;
+	scanners['.'] = ScanDot;
 }
 
 int ScanEqual(){
@@ -373,7 +379,7 @@ int ScanMinus(){
 	if(current_char == '='){
 		get_next_char();	
 		return TK_MINUS_ASSIGN;	// -=
-	}else if(current_char == '='){
+	}else if(current_char == '-'){
 		get_next_char();	
 		return TK_DEC;	// --
 	}else{
@@ -414,6 +420,9 @@ int ScanLess(){
 			token = TK_LEFT_SHIFT_ASSIGN;	// <<= 
 		}
 		return token;
+	}else if(current_char == '-'){
+		get_next_char();	
+		return TK_RECEIVE;
 	}else{
 		return TK_LESS;		// <
 	}
@@ -429,10 +438,11 @@ int ScanGreat(){
 		int token = TK_RIGHT_SHIFT;	// >>
 		if(current_char == '='){
 			token = TK_RIGHT_SHIFT_ASSIGN;	// >>= 
+			get_next_char();	
 		} 
 		return token;
 	}else{
-		return TK_MUL;		// *
+		return TK_GREATER;		// >
 	}
 }
 
@@ -511,4 +521,87 @@ int ScanStrintLiterals(){
 	strcpy(current_token_value.value_str, temp);
 
 	return TK_STRING;
+}
+
+// :
+int ScanColon(){
+	get_next_char();
+	if(current_char == '='){
+		get_next_char();
+		return TK_INIT_ASSIGN;
+	}
+	
+	return TK_COLON;
+}
+
+// &
+int ScanAmpersand(){
+	get_next_char();
+	if(current_char == '='){
+		get_next_char();
+		return TK_AND_ASSIGN;
+	}else if(current_char == '&'){
+		get_next_char();
+		return TK_CONDITIONAL_AND;
+	}else if(current_char == '^'){
+		get_next_char();
+		int token = TK_BITWISE_AND_NOT;
+		if(current_char == '='){
+			get_next_char();
+			token = TK_BIT_CLEAR_ASSIGN;
+		} 
+		return token;
+	}
+
+	return TK_BITWISE_AND;
+}
+
+// !
+int ScanExclamation(){
+	get_next_char();
+	if(current_char == '='){
+		get_next_char();
+		return TK_NOT_EQUAL;
+	}
+	
+	return TK_NOT;
+}
+
+// |
+int ScanBar(){
+	get_next_char();
+	if(current_char == '|'){
+		get_next_char();
+		return TK_CONDITIONAL_OR;
+	}else if(current_char == '='){
+		get_next_char();
+		return TK_OR_ASSIGN;
+	}
+	
+	return TK_BINARY_BITWISE_OR;	
+}
+
+// ^
+int ScanCaret(){
+	get_next_char();
+	if(current_char == '='){
+		get_next_char();
+		return TK_XOR_ASSIGN;
+	}
+	
+	return TK_BITWISE_XOR;
+}
+
+// .
+int ScanDot(){
+	get_next_char();
+	if(current_char == '.'){
+		get_next_char();
+		if(current_char == '.'){
+			get_next_char();
+			return TK_ELLIPSIS;
+		}
+	}
+	
+	return TK_DOT;
 }

@@ -175,6 +175,12 @@ int ScanSlash();
 int ScanLess();
 int ScanGreat();
 int ScanStrintLiterals();
+int ScanColon();
+int ScanBar();
+int ScanExclamation();
+int ScanAmpersand();
+int ScanCaret();
+int ScanDot();
 Token *ScanToken();
 void setupScanner();
 
