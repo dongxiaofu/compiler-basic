@@ -53,7 +53,9 @@ AstStatement ParseLabelStatement(){
 	while(1){
 		NO_TOKEN;
 		// if(current_token.kind == TK_EQUAL){
-		if(current_token.kind == TK_ASSIGN){
+		// IsAssignOp
+		// if(current_token.kind == TK_ASSIGN){
+		if(IsAssignOp(current_token.kind) == 1){
 			assign_flag = 1;
 			break;
 		}
@@ -311,27 +313,27 @@ RecvExpr   = Expression .
  */
 AstRecvStmt ParseRecvStmt(){
 	// 先识别<-前面的token是不是=或:=。
-	StartPeekToken();	
-	char type = -1;
-	char flag_less = 0;
-	int tokens[200];
-	int i = -1;
-	int flag_chan = 0;
-	int pre_token = -1;
+//	StartPeekToken();	
+//	char type = -1;
+//	char flag_less = 0;
+//	int tokens[200];
+//	int i = -1;
+//	int flag_chan = 0;
+//	int pre_token = -1;
 	// TODO 如果没有<-，就一直循环下去吗？效率太低，想办法优化。
-	while(current_token.kind != TK_LESS || flag_less == 0){
-		NO_TOKEN;
-		tokens[++i] = current_token.kind;
-		pre_token = current_token.kind;
-		NEXT_TOKEN;
-		if(pre_token == TK_LESS && current_token.kind == TK_MINUS){
-			flag_chan = 1;
-			tokens[++i] = current_token.kind;
-			break;
-		}else{
-			pre_token = -1;
-		}
-	}
+//	while(current_token.kind != TK_LESS || flag_less == 0){
+//		NO_TOKEN;
+//		tokens[++i] = current_token.kind;
+//		pre_token = current_token.kind;
+//		NEXT_TOKEN;
+//		if(pre_token == TK_LESS && current_token.kind == TK_MINUS){
+//			flag_chan = 1;
+//			tokens[++i] = current_token.kind;
+//			break;
+//		}else{
+//			pre_token = -1;
+//		}
+//	}
 
 //	char type = -1;
 //	if(flag_chan == 1){
@@ -345,27 +347,44 @@ AstRecvStmt ParseRecvStmt(){
 //		}
 //	}
 
-	if(flag_chan == 1 && i > 2 && tokens[i-2] == TK_EQUAL){
-		type = 1;
-		if(tokens[i-3] == TK_COLON){
-			type = 2;
+	StartPeekToken();	
+	char type = -1;
+	int flag_chan = 0;
+
+	while(current_token.kind != TK_COLON){
+		NO_TOKEN;
+		tokens[++i] = current_token.kind;
+		if(current_token.kind == TK_RECEIVE){
+			flag_chan  = 1;
+		}else if(current_token.kind == TK_ASSIGN){
+			type = 1;
+		}else if(current_token.kind == TK_INIT_ASSIGN){
+			type = 2;	
 		}
+		NEXT_TOKEN;
 	}
 	
 	EndPeekToken();
+	
+	if(flag_chan == 0){
+		ERROR("%s\n", "Expect a <-");
+		// TODO 寻机优化成在ERROR中退出。
+		exit(2);
+	}
 
 	if(type == 1){
 		ParseExpressionList();
 	}else if(type == 2){
 		ParseIdentifierList();
 	}else{
-
+		// TODO 什么都不需要做吗？
 		// ERROR("%s\n", "Expect a RecvStmt");
 	}	
 
 	// 处理<-
-	expect_token(TK_LESS);
-	expect_token(TK_MINUS);
+//	expect_token(TK_LESS);
+//	expect_token(TK_MINUS);
+	EXPECT(TK_RECEIVE);
 	// TODO 是sender还是receiver？
 	AstExpression expr = ParseExpression();
 	
@@ -383,10 +402,7 @@ AstRecvStmt ParseRecvStmt(){
 AstSendStmt ParseSendStmt(){
 	AstExpression channel = ParseExpression();
 
-	// todo <- 这种符号应该作为一个单独的token吗？
-	// 先不作为单独的token试试。
-	expect_token(TK_LESS);	
-	expect_token(TK_MINUS);	
+	EXPECT(TK_RECEIVE);
 
 	AstExpression sender = ParseExpression();
 
@@ -418,6 +434,7 @@ AstIncDecStmt ParseIncDecStmt(){
  * LabeledStmt = Label ":" Statement .
    Label       = identifier .
  */
+// TODO 有没有和 ParseLabelStatement 重复？
 AstLabeledStmt ParseLabeledStmt(){
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
 	AstDeclarator decl = ParseIdentifier();	
@@ -476,24 +493,30 @@ add_op     = "+" | "-" | "|" | "^" .
 mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
  */
 int ParseAssignmentsOp(){
-	
-	int op = TK_ASSIGN;
-	// 除等号外是否有其他符号。 
-	char has_other_op = 1;
-	if(IsMulOp() == 1){
-		op = ParseMulOp();
-	}else if(IsAddOp() == 1){
-		op = ParseAddOp();
-	}else{
-		has_other_op = 0;
-		expect_token(TK_ASSIGN);	
-	}
-	
-	if(has_other_op == 1){
-		expect_token(TK_ASSIGN);
-	}
+	// int op = TK_ASSIGN;
+	// // 除等号外是否有其他符号。 
+	// char has_other_op = 1;
+	// if(IsMulOp() == 1){
+	// 	op = ParseMulOp();
+	// }else if(IsAddOp() == 1){
+	// 	op = ParseAddOp();
+	// }else{
+	// 	has_other_op = 0;
+	// 	expect_token(TK_ASSIGN);	
+	// }
+	// 
+	// if(has_other_op == 1){
+	// 	expect_token(TK_ASSIGN);
+	// }
+
+	int op = current_token.kind;
+	NEXT_TOKEN;	
 
 	return op;
+}
+
+int IsAssignOp(int token_kind){
+	return (TK_ASSIGN <= token_kind && token_kind <= TK_BIT_CLEAR_ASSIGN);
 }
 
 /**
@@ -540,42 +563,97 @@ AstSelectStmt ParseAstSelectStmt(){
 
 // 获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
 int getStmtType(){
-
-	char stmt_type = -1;
-	char tokens[200];
-	char flag = 0;
+	int tokens[200];
 	int i = -1;
-	StartPeekToken(); 
-	while(1){
+	int receive_operator_index = -1;
+	int assign_operator_index = -1;
+	int assign_init_operator_index = -1;
+	char stmt_type = -1;
+	
+	StartPeekToken();
+	while(current_token.kind != TK_COLON){
 		NO_TOKEN;
-		// tokens[i++] = current_token.kind;
 		tokens[++i] = current_token.kind;
-		if(flag == 1){
-			if(current_token.kind == TK_MINUS){
-				break;
-			}else{
-				flag == 0;
-			}
+		if(current_token.kind == TK_RECEIVE){
+			receive_operator_index = i;
+			break;
+		}else if(current_token.kind == TK_ASSIGN){
+			assign_operator_index = i;
+		}else if(current_token.kind == TK_INIT_ASSIGN){
+			assign_init_operator_index = i;
 		}
-		if(flag == 0 && current_token.kind == TK_LESS){
-			flag = 1;	
-		}	
 		NEXT_TOKEN;
 	}
-
-	if(flag == 1 && i >= 2){
-		int idx = i - 2;
-		if(tokens[idx] == TK_EQUAL){
-			stmt_type = 2;
-		}else{
-			stmt_type = 1;
-		}
+	EndPeekToken();
+	
+	// TODO 下面的一系列代码写得太难看，寻机优化。
+	// 没有<-，报错。
+	if(receive_operator_index == -1){
+		EXPECT(TK_RECEIVE);
 	}	
 
-	EndPeekToken(); 
+	// case后面紧邻<-，一定是接收语句。
+	if(receive_operator_index == 0){
+		stmt_type = 2;
+	}
 
+	// = <- ch 这种，是接收语句。
+	if(assign_operator_index != -1){
+		stmt_type = 2;
+	}
+
+	// := <- ch 这种，是接收语句。
+	if(assign_init_operator_index != -1){
+		stmt_type = 2;
+	}
+
+	// SendStmt = Channel "<-" Expression .
+	// Channel  = Expression .
+	if(assign_operator_index == -1 && assign_init_operator_index == -1 && receive_operator_index > 0){
+		stmt_type = 1;
+	}
+	
 	return stmt_type;
 }
+
+// 获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
+// int getStmtType(){
+// 
+// 	char stmt_type = -1;
+// 	char tokens[200];
+// 	char flag = 0;
+// 	int i = -1;
+// 	StartPeekToken(); 
+// 	while(1){
+// 		NO_TOKEN;
+// 		// tokens[i++] = current_token.kind;
+// 		tokens[++i] = current_token.kind;
+// 		if(flag == 1){
+// 			if(current_token.kind == TK_MINUS){
+// 				break;
+// 			}else{
+// 				flag == 0;
+// 			}
+// 		}
+// 		if(flag == 0 && current_token.kind == TK_LESS){
+// 			flag = 1;	
+// 		}	
+// 		NEXT_TOKEN;
+// 	}
+// 
+// 	if(flag == 1 && i >= 2){
+// 		int idx = i - 2;
+// 		if(tokens[idx] == TK_EQUAL){
+// 			stmt_type = 2;
+// 		}else{
+// 			stmt_type = 1;
+// 		}
+// 	}	
+// 
+// 	EndPeekToken(); 
+// 
+// 	return stmt_type;
+// }
 
 AstSelectCaseStatement ParseAstSelectCaseStmt(){
 	// 跳过select
@@ -685,25 +763,38 @@ AstExpression ParseRangeExpr(){
 AstStatement ParseRangeClause(){
 	// 处理[ ExpressionList "=" | IdentifierList ":=" ]
 	// 识别是表达式列表还是标识符列表。
-	char type = -1;
-	int i = -1;
-	int tokens[200];
+//	char type = -1;
+//	int i = -1;
+//	int tokens[200];
+//	StartPeekToken();
+//	while(1){
+//		NO_TOKEN;
+//		tokens[++i] = current_token.kind;
+//		if(current_token.kind == TK_RANGE){
+//			break;
+//		}	
+//		NEXT_TOKEN;
+//	}
+//	EndPeekToken();
+//	if(tokens[i-1] == TK_EQUAL){
+//		type = 1;
+//		if(tokens[i-1] == TK_SEMICOLON){
+//			type = 2;
+//		}
+//	}
+
+	int type = -1;
 	StartPeekToken();
-	while(1){
+	while(current_token.kind != TK_RANGE){
 		NO_TOKEN;
-		tokens[++i] = current_token.kind;
-		if(current_token.kind == TK_RANGE){
-			break;
-		}	
+		if(current_token.kind == TK_ASSIGN){
+			type = 1;
+		}else if(current_token.kind == TK_INIT_ASSIGN){
+			type = 2;
+		}
 		NEXT_TOKEN;
 	}
 	EndPeekToken();
-	if(tokens[i-1] == TK_EQUAL){
-		type = 1;
-		if(tokens[i-1] == TK_SEMICOLON){
-			type = 2;
-		}
-	}
 
 	if(type == 1){
 		ParseExpressionList();
@@ -743,6 +834,7 @@ AstStatement ParseForStmt(){
 	StartPeekToken();	
 	int type = -1;
 	char flag_semicolon = 0;
+	// TODO 循环条件能改成 != TK_RBRACE  吗？
 	while(1){
 		NO_TOKEN;
 		if(current_token.kind == TK_RANGE){

@@ -265,6 +265,7 @@ typedef struct astSelectStmt{
 
 AstStatement CheckCompoundStatement(AstStatement stmt);
 
+int IsAssignOp(int token_kind);
 // 解析AstAssignmentsStmt中的运算符。
 int ParseAssignmentsOp();
 AstAssignmentsStmt ParseAssignmentsStmt(); 
