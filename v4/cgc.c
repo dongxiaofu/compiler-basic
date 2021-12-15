@@ -49,14 +49,14 @@ int main(int argc, char *argv[])
 
 
 	int loop_counter = 0;
-	while(1){
-		if(++loop_counter > 80){
-			break;
-		}
-		get_token();
-	}
-	printf("scan token over\n");
-	exit(3);
+//	while(1){
+//		if(++loop_counter > 80){
+//			break;
+//		}
+//		get_token();
+//	}
+//	printf("scan token over\n");
+//	exit(3);
 	
 //	while(1){
 		get_token();
@@ -85,6 +85,9 @@ AstTranslationUnit ParseTranslationUnit(){
 	AstTranslationUnit *p;
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
+	ParseExpression();
+
+	return *p;
 
 	while(current_token.kind != TK_EOF){
 		if(current_token.kind == TK_FUNC){

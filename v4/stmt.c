@@ -353,7 +353,7 @@ AstRecvStmt ParseRecvStmt(){
 
 	while(current_token.kind != TK_COLON){
 		NO_TOKEN;
-		tokens[++i] = current_token.kind;
+	//	tokens[++i] = current_token.kind;
 		if(current_token.kind == TK_RECEIVE){
 			flag_chan  = 1;
 		}else if(current_token.kind == TK_ASSIGN){
@@ -388,8 +388,6 @@ AstRecvStmt ParseRecvStmt(){
 	// TODO 是sender还是receiver？
 	AstExpression expr = ParseExpression();
 	
-
-
 	// TODO 解析完了RecvStmt，但没有建立AST。返回值是不正确的。
 	return expr;
 }
@@ -420,9 +418,9 @@ AstIncDecStmt ParseIncDecStmt(){
 	CREATE_AST_NODE(stmt, IncDecStmt);
 	// todo 要处理expr是空的情况吗？
 	AstExpression expr = ParseExpression();
-	StartPeekToken();	
+//	StartPeekToken();	
 	if(current_token.kind != TK_INC && current_token.kind != TK_DEC){
-		EndPeekToken();
+//		EndPeekToken();
 		expect_token(TK_INC);
 	}
 	stmt->expr = expr;
@@ -740,6 +738,7 @@ PostStmt = SimpleStmt .
  */
 AstStatement ParseForClause(){
 
+	// TODO [ InitStmt ] 等都是可选的。此处的代码把它们按照必选处理。寻机再完善。
 	ParseSimpleStatement();
 	expect_token(TK_SEMICOLON);
 	ParseCondition();
@@ -928,34 +927,50 @@ AstStatement ParseTypeCaseClause(){
  */
 AstStatement ParseTypeSwitchGuard(){
 
+//	StartPeekToken();
+//	char colon_flag = 0;
+//	char colon_equal_flag = 0;
+//	while(current_token.kind != TK_DOT){
+//		NO_TOKEN;
+//	//	if(current_token.kind == TK_COLON){
+//	//		colon_flag = 1;
+//	//	}
+//		if(colon_flag == 1){
+//			if(current_token.kind == TK_EQUAL){
+//				colon_equal_flag = 1;
+//				break;
+//			}else{
+//				colon_flag = 0;
+//			}
+//		}	
+//		if(current_token.kind == TK_COLON){
+//			colon_flag = 1;
+//		}
+//		
+//		NEXT_TOKEN;
+//	}
+//	EndPeekToken();
+//
+//	if(colon_flag == 1){
+//		ParseIdentifier();
+//		expect_token(TK_COLON);
+//		expect_token(TK_EQUAL);
+//	}
+
+
 	StartPeekToken();
-	char colon_flag = 0;
 	char colon_equal_flag = 0;
 	while(current_token.kind != TK_DOT){
-		NO_TOKEN;
-	//	if(current_token.kind == TK_COLON){
-	//		colon_flag = 1;
-	//	}
-		if(colon_flag == 1){
-			if(current_token.kind == TK_EQUAL){
-				colon_equal_flag = 1;
-				break;
-			}else{
-				colon_flag = 0;
-			}
-		}	
-		if(current_token.kind == TK_COLON){
-			colon_flag = 1;
+		if(current_token.kind == TK_INIT_ASSIGN){
+			colon_equal_flag = 1;
 		}
-		
 		NEXT_TOKEN;
 	}
 	EndPeekToken();
 
-	if(colon_flag == 1){
+	if(colon_equal_flag == 1){
 		ParseIdentifier();
-		expect_token(TK_COLON);
-		expect_token(TK_EQUAL);
+		EXPECT(TK_INIT_ASSIGN);
 	}
 
 	ParsePrimaryExpr();
@@ -1083,7 +1098,6 @@ AstStatement ParseExprSwitchStmt(){
 			type = 3;
 		}
 	}else{
-
 		if(i >= 0){
 			type = 2;
 		}
@@ -1128,11 +1142,11 @@ AstStatement ParseSwitchStmt(){
 			StartPeekToken();
 			dot_flag = 1;
 			NEXT_TOKEN;
-			if(current_token.kind == TK_LBRACE){ // {
+			if(current_token.kind == TK_LPARENTHESES){ // (
 				NEXT_TOKEN;
 				if(current_token.kind == TK_TYPE){ // type
 					NEXT_TOKEN;
-					if(current_token.kind == TK_RBRACE){ // }
+					if(current_token.kind == TK_RPARENTHESES){ // )
 						switch_type = 2;
 						break;
 					}
@@ -1161,5 +1175,3 @@ AstStatement ParseSwitchStmt(){
 
 	return stmt;
 }
-
-

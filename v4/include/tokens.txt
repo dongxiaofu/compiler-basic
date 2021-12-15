@@ -46,21 +46,6 @@ TOKEN(TK_IMPORT,"import")
 TOKEN(TK_RETURN,"return")
 TOKEN(TK_VAR,"var")
 
-// 为了更方便地判断一元运算符，把这些符号集中到一起。
-// todo 像*这种两种用途的符号，怎么处理？
-// unary_op
-/**
- * unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
- */
-// todo 不知道怎么处理这几个符号。如果保留它们，计算运算符的优先级时会出错。
-TOKEN(TK_POSITIVE,"+")
-TOKEN(TK_NEGATIVE,"-")
-TOKEN(TK_NOT, "!")
-TOKEN(TK_BITWISE_XOR,"^")
-// TOKEN(TK_POINTER,"*")
-// TOKEN(TK_ADDRESS,"&")
-TOKEN(TK_RECEIVE, "<-")
-
 // assign_op
 /**
  * add_op     = "+" | "-" | "|" | "^" .
@@ -120,6 +105,22 @@ TOKEN(TK_BITWISE_AND_NOT,"&^")
 // 不用区分。只支持a++。
 TOKEN(TK_INC, "++")
 TOKEN(TK_DEC, "--")
+
+// 为了更方便地判断一元运算符，把这些符号集中到一起。
+// todo 像*这种两种用途的符号，怎么处理？
+// unary_op
+/**
+ * unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
+ */
+// todo 不知道怎么处理这几个符号。如果保留它们，计算运算符的优先级时会出错。
+// TOKEN(TK_POSITIVE,"+")
+// TOKEN(TK_NEGATIVE,"-")
+TOKEN(TK_NOT, "!")
+// TOKEN(TK_BITWISE_XOR,"^")
+// TOKEN(TK_POINTER,"*")
+// TOKEN(TK_ADDRESS,"&")
+TOKEN(TK_RECEIVE, "<-")
+
 
 TOKEN(TK_ELLIPSIS, "...")
 TOKEN(TK_DOT, ".")
