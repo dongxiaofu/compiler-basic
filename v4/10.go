@@ -1,6 +1,7 @@
 func test(age ,height float64) (int,float32){
   var res int = age
   var hei float32 = height
+var c int = a - b/d
 
 
 	switch i := x.(type) {

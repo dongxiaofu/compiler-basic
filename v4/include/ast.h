@@ -240,7 +240,8 @@ typedef struct astTranslationUnit AstTranslationUnit;
 
 #define CREATE_AST_NODE(p, k) \
     p = (void *)malloc(sizeof(*p));              \
-    p->kind = NK_##k;         
+    p->kind = NK_##k;        \
+    p->next = NULL; 
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

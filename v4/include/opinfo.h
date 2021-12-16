@@ -46,3 +46,6 @@ OPINFO(OP_INC,7, "++",      Assignment,     NOP)
 OPINFO(OP_DEC,7, "--",      Assignment,     NOP)
 // TODO 不知道优先级
 OPINFO(OP_RECEIVE,8, "<-",      Assignment,     NOP)
+
+
+OPINFO(OP_NONE,          17,   "nop",    Error,          NOP)

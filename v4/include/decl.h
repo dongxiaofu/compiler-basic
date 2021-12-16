@@ -33,7 +33,8 @@ AstNode ParseConstDecl();
 AstDeclaration ParseConstSpec();
 AstDeclarator ParseIdentifierList();
 AstDeclarator ParseIdentifier();
-
+// TODO 找机会做得更完善。
+AstNode ParseShortVarDecl();
 AstNode ParseVarDecl();
 AstDeclaration ParseVarSpec();
 

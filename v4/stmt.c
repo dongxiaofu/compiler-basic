@@ -76,7 +76,45 @@ AstStatement ParseLabelStatement(){
 
 AstStatement ParseSimpleStatement(){
 	AstStatement stmt;
-	stmt = (AstStatement)ParseExpression();
+
+	int type = -1;		// EmptyStmt
+	StartPeekToken();
+	// TODO 很低效的方法。想不到其他更好的方法。
+	//while(1){
+	//分析SimpleStmt出现的地方总结出这个结论。
+	while(current_token.kind != TK_SEMICOLON && current_token.kind != TK_LBRACE){
+		NO_TOKEN;
+		if(current_token.kind == TK_INIT_ASSIGN){
+			type = 1;	// ShortVarDecl
+			break;
+		}else if(current_token.kind == TK_RECEIVE){
+			type = 2;	// SendStmt
+			break;
+		}else if(current_token.kind == TK_DEC || current_token.kind == TK_INC){
+			type =3 ;	// IncDecStmt
+			break;
+		}else{
+			type = 5;	// ExpressionStmt
+		}
+
+		NEXT_TOKEN;
+	}
+	EndPeekToken();
+
+	if(type == 1){
+		stmt = (AstStatement)ParseShortVarDecl();
+	}else if(type == 2){
+
+	}else if(type == 3){
+		stmt = (AstStatement)ParseIncDecStmt();
+	}else if(type == 4){
+
+	}else if(type == 5){
+		stmt = (AstStatement)ParseExpression();
+	}else{
+
+	}
+
 	return stmt;
 }
 
@@ -419,10 +457,15 @@ AstIncDecStmt ParseIncDecStmt(){
 	// todo 要处理expr是空的情况吗？
 	AstExpression expr = ParseExpression();
 //	StartPeekToken();	
-	if(current_token.kind != TK_INC && current_token.kind != TK_DEC){
+//	if(current_token.kind != TK_INC && current_token.kind != TK_DEC){
 //		EndPeekToken();
-		expect_token(TK_INC);
-	}
+//		expect_token(TK_INC);
+		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
+			NEXT_TOKEN;
+		}else{
+			expect_token(TK_INC);
+		}
+//	}
 	stmt->expr = expr;
 	stmt->op = current_token.kind;	
 	return stmt;

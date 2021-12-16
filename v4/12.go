@@ -18,7 +18,8 @@ func test(age ,height float64) (int,float32){
    }
 	
 	for i := 0; i < 10; i {
-		a =  899
+		var a int =  899
+		gender += 125
 	}	
   }
   var hei float32 = height

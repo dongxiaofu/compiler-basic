@@ -27,11 +27,13 @@ AstExpression ParseExpressionList(){
 		NEXT_TOKEN;
 //		memset(curExpr, 0, sizeof(*curExpr));
 		curExpr = ParseExpression();
+		curExpr->next = NULL;
 		count++;
 		preExpr->next = (AstNode)curExpr;
 		preExpr = curExpr;
 	}
-	preExpr->next = NULL;
+	// preExpr->next = NULL;
+	
 	expr->variable_count = count;
 
 	return expr;
@@ -70,7 +72,9 @@ AstExpression ParseExpression(){
 	// todo 参数prec如何确定？
 //	expr = ParseBinaryExpr(2);
 	// expr = ParseBinaryExpr(7);
-	expr = ParseBinaryExpr(Prec[OP_OR]);
+	// OP_CONDITIONAL_OR 是优先级最低的二元运算符号。
+	expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+//	expr = ParseBinaryExpr(4);
 
 	return expr;
 }
@@ -83,34 +87,36 @@ AstExpression ParseBinaryExpr(int prec){
 //	ParseBinaryOp();
 //	ParseExpression();
 	// #define HIGHEST_BIN_PREC Prec[TK_MUL - TK_CONDITIONAL_OR]	
+	// OP_MUL是优先级最高的二元运算符号。
 	#define HIGHEST_BIN_PREC Prec[OP_MUL]	
-
-	printf("HIGHEST_BIN_PREC:%d\n", HIGHEST_BIN_PREC);
 
 	AstExpression binExpr;
 	AstExpression expr;
 
 	CREATE_AST_NODE(binExpr, Expression);
 	CREATE_AST_NODE(expr, Expression);
-	
+
+	//dump_token_number();	
+
 	if(prec == HIGHEST_BIN_PREC){
 		expr = ParseUnaryExpr();
 	}else{
-		binExpr->op = BINARY_OP;
-		binExpr->kids[0] = expr;
-		NEXT_TOKEN;
-		binExpr->kids[1] = ParseBinaryExpr(prec + 1);
-		expr = binExpr;
+	//	binExpr->op = BINARY_OP;
+	//	binExpr->kids[0] = expr;
+	//	NEXT_TOKEN;
+	//	binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+	//	expr = binExpr;
+		ParseBinaryExpr(prec + 1);
 	}
 
-	while(IsBinaryOp() == 1 && (Prec[current_token.kind - TK_CONDITIONAL_OR] == prec)){
+	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){
 		NEXT_TOKEN;
 		if(prec == HIGHEST_BIN_PREC){
 			expr = ParseUnaryExpr();
 		}else{
 			binExpr->op = BINARY_OP;
 			binExpr->kids[0] = expr;
-			NEXT_TOKEN;
+//			NEXT_TOKEN;
 			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
 			expr = binExpr;
 		}
@@ -118,20 +124,47 @@ AstExpression ParseBinaryExpr(int prec){
 
 	return expr;
 }
-
+/**
+ * UnaryExpr  = PrimaryExpr | unary_op UnaryExpr .
+ * unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
+ */
 AstExpression ParseUnaryExpr(){
+	//dump_token_number();	
+
+//	LOG("%s\n", "parse UnaryExpr");
+//	AstExpression expr;	
+//	CREATE_AST_NODE(expr, Expression);
+//	// if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
+//	// TODO IsUnaryOp 需要重构。有可能根本就不正确。
+//	// if(IsUnaryOp() == 1){
+//	char flag = 0;
+//	if(flag == 1){
+//		expr->op = UNARY_OP;
+//		NEXT_TOKEN;
+//		expr->kids[0] = ParseUnaryExpr();
+//	}else{
+//		expr = ParsePrimaryExpr();
+//	}
+
 	LOG("%s\n", "parse UnaryExpr");
 	AstExpression expr;	
 	CREATE_AST_NODE(expr, Expression);
-	// if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
-	if(IsUnaryOp() == 1){
-		expr->op = UNARY_OP;
-		NEXT_TOKEN;
-		expr->kids[0] = ParseUnaryExpr();
-	}else{
-		expr = ParsePrimaryExpr();
+
+	switch (current_token.kind){
+		case TK_ADD:			// +
+		case TK_MINUS:			// -
+		case TK_NOT:			// !
+		case TK_BINARY_BITWISE_XOR:	// ^
+		case TK_MUL:			// *
+		case TK_BITWISE_AND:		// &
+		case TK_RECEIVE:		// <-
+			expr->op = UNARY_OP;
+			NEXT_TOKEN;
+			expr->kids[0] = ParseUnaryExpr();
+			break;
+		default:
+			expr = ParsePrimaryExpr();
 	}
-	
 	return expr;
 }
 
@@ -277,6 +310,8 @@ Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." 
 AstExpression ParsePrimaryExpr(){
 	LOG("%s\n", "parse PrimaryExpr");
 
+//	//dump_token_number();	
+
 	AstExpression expr;	
 	CREATE_AST_NODE(expr, Expression);
 	if(IsDataType(current_token.value.value_str) == 1){
@@ -308,11 +343,13 @@ AstExpression ParsePrimaryExpr(){
 
 AstNode ParseBinaryOp(){
 	LOG("%s\n", "parse binary_op");
-	if(TK_CONDITIONAL_AND <= current_token.kind && current_token.kind <= TK_CONDITIONAL_OR){
+	// return (TK_CONDITIONAL_OR <= current_token.kind && current_token.kind <= TK_BITWISE_AND_NOT);
+	if(TK_CONDITIONAL_AND <= current_token.kind && current_token.kind <= TK_BITWISE_AND_NOT){
 		NEXT_TOKEN;
 	}else{
-		ParseRelOp() || ParseAddOp() || ParseMulOp(); 
-		// ERROR("expect a binary op, but give %d\n", current_token.kind);
+		// TODO 这是啥意思？
+//		ParseRelOp() || ParseAddOp() || ParseMulOp(); 
+		ERROR("expect a binary op, but give %d\n", current_token.kind);
 	}
 }
 
@@ -363,15 +400,16 @@ int IsUnaryOp(){
 }
 
 int IsBinaryOp(){
-	return ((TK_CONDITIONAL_AND <= current_token.kind && current_token.kind <= TK_CONDITIONAL_OR)
-		|| (IsRelOp() == 1)
-		|| (IsAddOp() == 1)
-		|| (IsMulOp() == 1)
+	return (TK_CONDITIONAL_OR <= current_token.kind && current_token.kind <= TK_BITWISE_AND_NOT);
+//	return ((TK_CONDITIONAL_AND <= current_token.kind && current_token.kind <= TK_CONDITIONAL_OR)
+//		|| (IsRelOp() == 1)
+//		|| (IsAddOp() == 1)
+//		|| (IsMulOp() == 1)
 	//	|| current_token.kind == TK_POSITIVE
 	//	|| current_token.kind == TK_NEGATIVE
 	//	|| current_token.kind == TK_POINTER
 	//	|| current_token.kind == TK_ADDRESS
-		);
+//		);
 }
 
 /**
@@ -381,6 +419,7 @@ BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
 OperandName = identifier | QualifiedIdent .
  */
 AstExpression ParseOperand(){
+	// dump_token_number();	
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_NUM){
@@ -404,12 +443,15 @@ AstExpression ParseIntLit(){
 }
 
 AstExpression ParseBasicLit(){
+	//dump_token_number();	
 //	ParseIntLit();
 //	// todo 应该使用malloc分配内存空间才更妥当吗？
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_NUM){
-		expr->op = OP_CONST;
+		// expr->op = OP_CONST;
+		// TODO 这是不正确的。临时这样做。
+		expr->op = OP_NONE;
 		union value v = {current_token.value.value_num,0};
 		expr->val = v;
 		NEXT_TOKEN;
@@ -420,6 +462,7 @@ AstExpression ParseBasicLit(){
 
 AstExpression ParseLiteral(){
 
+	//dump_token_number();	
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	expr = ParseBasicLit();
@@ -428,10 +471,13 @@ AstExpression ParseLiteral(){
 }
 
 AstExpression ParseOperandName(){
+	//dump_token_number();	
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_ID){
-		expr->op = OP_ID;
+		// expr->op = OP_ID;
+		// TODO 这是不正确的。临时这样做。
+		expr->op = OP_NONE;
 //		union value v = (void *)(current_token.value.value_str);
 //		union value v.p = (void *)(current_token.value.value_str);
 //		union value v;

@@ -4,7 +4,7 @@ import "fmt"
 
 func main() {
    /* 定义局部变量 */
-   var a int = 100
+   var a int = 100;
    var b int = 200
    var ret *int
    var e int = test(88, )

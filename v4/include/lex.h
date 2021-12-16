@@ -15,6 +15,9 @@
 #define NO_TOKEN	if(current_token.kind == TK_EOF){break;}
 // #define NO_TOKEN 
 
+#define BINARY 		TokenOps[current_token.kind - TK_ASSIGN].bop	
+#define UNARY 		TokenOps[current_token.kind - TK_ASSIGN].uop	
+
 // 扫描token的函数指针数组
 typedef int (*Scanner)(void);
 static Scanner scanners[256];
@@ -125,6 +128,7 @@ TOKEN_LINK current_token_tail;
 
 static char current_char = -1;
 FILE *fp;
+char is_dump_token;
 
 //#define NEXT_TOKEN	get_token
 #define NEXT_TOKEN	get_token()
@@ -159,6 +163,9 @@ int is_operator(char ch);
 
 Token get_token();
 
+// 调试表达式使用。
+static int token_number = 0;
+void dump_token_number();
 void dump_token(Token token);
 
 // char *get_token_name(TokenKind kind);

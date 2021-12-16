@@ -30,9 +30,19 @@ int main2(int argc, char *argv[])
 	return 0;
 }
 
+void dump_token_number(){
+	printf("token no:%d####", token_number);
+	token_number++;
+	Token token = current_token;
+	dump_token(token);
+}
 
 void dump_token(Token token)
 {
+	if(is_dump_token == 1){
+//		return;
+	}
+
 	if(token.kind == TK_NUM){
 		printf("token = %d, type = %d\n", token.value.value_num, token.kind);
 	}else{// if(token.token_kind == T_)
@@ -60,7 +70,9 @@ int is_operator(char ch)
 Token get_token()
 {
 //	todo 暂时不打印token
-	dump_token(current_token);
+	if(is_dump_token == 0){
+		dump_token(current_token);
+	}
 //	printf("get token\n");
 //	Token token;
 //	token.kind = TK_NAN;
@@ -133,7 +145,9 @@ try_again:
 			if(token.kind != TK_NAN){
 				//get_next_char();
 			}else{
-				printf("There is no token any more 101\n");
+				if(is_dump_token == 0){
+					printf("There is no token any more 101\n");
+				}
 				token.kind = TK_EOF;
 			//	char is_go_to_try = 1;
 			//	char arr[] = {TK_LBRACE, TK_RBRACE};
@@ -246,11 +260,13 @@ void StartPeekToken(){
 //	start_cursor = CURSOR;
 //	start_char = current_char;
 
-
+	is_dump_token = 1;
 	if(cursor_tail->start_cursor == NULL){
 		cursor_tail->start_cursor = CURSOR;
 		char_tail->start_char = current_char;
-		current_token_tail->token = &current_token;
+		// current_token_tail->token = &current_token;
+		// *(current_token_tail->token) = current_token;
+		memcpy(current_token_tail->token, &current_token, sizeof(current_token));
 	}else{
 	//	START_CURSOR_LINK cursor_tail_cur = (START_CURSOR_LINK)malloc(sizeof(*START_CURSOR_LINK));
 	//	START_CHAR_LINK char_tail_cur = (START_CHAR_LINK)malloc(sizeof(*START_CHAR_LINK));		
@@ -319,6 +335,8 @@ void EndPeekToken(){
 	char_tail = char_tail->pre;
 	free(char_tail->next);
 	char_tail->next = NULL;
+
+	is_dump_token = 0;
 }
 
 
@@ -589,7 +607,7 @@ int ScanCaret(){
 		return TK_XOR_ASSIGN;
 	}
 	
-	return TK_BITWISE_XOR;
+	return TK_BINARY_BITWISE_XOR;
 }
 
 // .

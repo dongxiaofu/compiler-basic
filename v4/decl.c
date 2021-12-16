@@ -318,8 +318,8 @@ AstDeclaration ParseVarSpec(){
 	CREATE_AST_NODE(expr, Expression); 
 	AstExpression expr2;
 	CREATE_AST_NODE(expr2, Expression); 
-//	ParseIdentifierList();
-	expr2 = ParseExpressionList();
+	AstDeclarator decl = ParseIdentifierList();
+	// expr2 = ParseExpressionList();
 
 	AstNode type;
 	CREATE_AST_NODE(type, Node); 
@@ -355,7 +355,9 @@ AstDeclaration ParseVarSpec(){
 	AstInitDeclarator initDecsCur = initDecs;
 
 	AstExpression exprCur = expr;
-	AstExpression expr2Cur = expr2;
+	// AstExpression expr2Cur = expr2;
+	// AstDeclaration expr2Cur = decl;
+	AstDeclarator expr2Cur = decl;
 	while(exprCur != NULL){
 		NO_TOKEN;
 		// initDecsCur->dec->id = exprCur->val;	
@@ -363,7 +365,8 @@ AstDeclaration ParseVarSpec(){
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
 		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy(dec->id, expr2Cur->val.p);
+		// strcpy(dec->id, expr2Cur->val.p);
+		strcpy(dec->id, expr2Cur->id);
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
@@ -882,4 +885,18 @@ int CurrentTokenIn(int toks[]){
 	}
 
 	return 0;
+}
+
+/**
+ * ShortVarDecl = IdentifierList ":=" ExpressionList .
+ */
+AstNode ParseShortVarDecl(){
+	ParseIdentifierList();
+	EXPECT(TK_INIT_ASSIGN);
+	ParseExpressionList();	
+	
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+	
+	return node;
 }

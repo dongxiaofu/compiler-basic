@@ -44,8 +44,21 @@ int main(int argc, char *argv[])
 
 	// current_token_tail = (TOKEN_LINK)malloc(sizeof(*TOKEN_LINK));
 	current_token_tail = (TOKEN_LINK)malloc(sizeof(struct token_link));
+//	Token *tokenPtr = (Token *)malloc(sizeof(Token));
+//	if(tokenPtr == NULL){
+//		perror("init tokenPtr error\n");
+//		exit(-1);
+//	}
+//	current_token_tail->token = tokenPtr;
+//	current_token_tail->token = (Token *)malloc(sizeof(Token));
 	// error: incompatible types when assigning to type 'Token' {aka 'struct token'} from type 'void *'
 	current_token_tail->pre = current_token_tail->next = current_token_tail->token = NULL;
+	Token *tokenPtr = (Token *)malloc(sizeof(Token));
+	if(tokenPtr == NULL){
+		perror("init tokenPtr error\n");
+		exit(-1);
+	}
+	current_token_tail->token = tokenPtr;
 
 
 	int loop_counter = 0;
@@ -60,14 +73,14 @@ int main(int argc, char *argv[])
 	
 //	while(1){
 		get_token();
-		StartPeekToken();
+	//	StartPeekToken();
 	//	get_token();
 	//	get_token();
 	//	get_token();
 	//	get_token();
 	//	get_token();
 	//	get_token();
-		EndPeekToken();
+	//	EndPeekToken();
 		if(current_token.kind == TK_EOF) return 0;
 		ParseTranslationUnit();
 //	}
@@ -85,9 +98,9 @@ AstTranslationUnit ParseTranslationUnit(){
 	AstTranslationUnit *p;
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
-	ParseExpression();
+//	ParseExpression();
 
-	return *p;
+//	return *p;
 
 	while(current_token.kind != TK_EOF){
 		if(current_token.kind == TK_FUNC){
