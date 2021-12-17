@@ -3,6 +3,11 @@
 
 #include <assert.h>
 
+AstNode ParseKeyedElement();
+AstNode ParseElementList();
+AstNode ParseLiteralValue();
+AstNode ParseCompositeLit();
+
 AstExpression ParseExpressionList();
 AstExpression ParseExpression();
 AstExpression ParseBinaryExpr(int prec);
@@ -15,9 +20,11 @@ AstExpression ParseUnaryExpr();
 // AstExpression Parse
 // AstExpression Parse
 // AstExpression Parse
+AstExpression ParseFunctionLit();
 AstExpression ParseOperandName();
 AstExpression ParseIntLit();
 AstExpression ParseBasicLit();
+unsigned char IsCompositeLit();
 AstExpression ParseLiteral();
 AstExpression ParseOperand();
 

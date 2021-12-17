@@ -10,6 +10,13 @@
 // AstNode ParseParameters();
 // AstNode ParseResult();
 
+enum LITERAL_TYPE{
+	ARRAY, SLICE, STRUCT, MAP, ELEMENT, NAME 
+};
+
+// 获取数据类型的种类，例如数组、结构体等。
+int GetTypeKind();
+
 AstNode ParseMethodName();
 AstNode ParseInterfaceTypeName();
 AstNode ParseMethodSpec();
@@ -28,6 +35,8 @@ AstNode ParseInterfaceType();
 AstNode ParseSliceType();
 AstNode ParseMapType();
 AstNode ParseChannelType();
+
+AstNode ParseLiteralType();
 
 AstNode ParseType();
 

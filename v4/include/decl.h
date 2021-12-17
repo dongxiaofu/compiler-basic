@@ -20,6 +20,7 @@ static int FIRST_Function[]            = { FIRST_DECLARATION, TK_LBRACE, 0};
 static int FIRST_ExternalDeclaration[] = { FIRST_DECLARATION, TK_MUL, TK_LPARENTHESES, TK_SEMICOLON,0};
 
 static int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
+static int FIRST_Expression[] = { FIRST_EXPRESSION, 0};
 
 
 int CurrentTokenIn(int *toks);

@@ -143,13 +143,19 @@ AstNode ParseQualifiedIdent(){
 ArrayLength = Expression .
 ElementType = Type .
  */
+// TODO 没有建立AST
 AstNode ParseArrayType(){
 	printf("parse array\n");
 	
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
 	expect_token(TK_LBRACKET);	
 	ParseExpression();
 	expect_token(TK_RBRACKET);	
 	ParseType();
+
+	return node;
 }
 
 /**
@@ -159,6 +165,9 @@ EmbeddedField = [ "*" ] TypeName .
 Tag           = string_lit .
  */
 AstNode ParseStructType(){
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
 	expect_token(TK_STRUCT);
 	expect_token(TK_LBRACE);	
 	while(current_token.kind != TK_RBRACE){
@@ -168,6 +177,8 @@ AstNode ParseStructType(){
 		expect_semicolon;	
 	}
 	expect_token(TK_RBRACE);	
+
+	return node;
 }
 
 /**
@@ -290,4 +301,72 @@ AstNode ParseChannelType(){
 		ERROR("expect a chan\n");
 	}
 	ParseType();
+}
+
+// 获取数据类型的种类，例如数组、结构体等。
+// TODO 这只是一部分，还有其他数据类型的种类。
+int GetTypeKind(){
+	enum LITERAL_TYPE type;
+
+	StartPeekToken();
+	if(current_token.kind == TK_STRUCT){
+		type = STRUCT;
+	}else if(current_token.kind == TK_MAP){
+		type = MAP;
+	}else if(current_token.kind == TK_LBRACKET){
+		NEXT_TOKEN;
+		if(current_token.kind == TK_RBRACKET){
+			type = SLICE;
+		}else if(current_token.kind == TK_ELLIPSIS){
+			// TODO 需要判断第三个token吗？
+			type = ELEMENT;
+		}else{
+			type = ARRAY;
+		}
+	}
+	
+//	else if(){
+//
+//	}else if(){
+	EndPeekToken();
+
+	return type;
+}
+
+/**
+ * LiteralType   = StructType | ArrayType | "[" "..." "]" ElementType |
+                SliceType | MapType | TypeName .
+ */
+AstNode ParseLiteralType(){
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+	
+	// TODO 能这样使用enum吗？
+	enum LITERAL_TYPE type = GetTypeKind();	
+	switch(type){
+		case	ARRAY:
+			node = ParseArrayType();
+			break;
+		case	SLICE:
+			node = ParseSliceType();
+			break;
+		case	STRUCT:
+			node = ParseStructType();
+			break;
+		case	MAP:
+			node = ParseMapType();
+			break;
+		case	NAME:
+			node = ParseTypeName();
+			break;
+		case	ELEMENT:
+			node = ParseType();
+			break;
+		default:
+			// TODO 暂时什么也不做。
+			// 神奇！default的break也不能缺少。
+			break;
+	}
+ 
+	return node;
 }

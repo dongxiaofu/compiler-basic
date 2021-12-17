@@ -74,6 +74,10 @@ AstStatement ParseLabelStatement(){
 	return stmt;
 }
 
+/**
+ * SimpleStmt = EmptyStmt | ExpressionStmt | SendStmt | IncDecStmt | Assignment | ShortVarDecl .
+ *
+ */
 AstStatement ParseSimpleStatement(){
 	AstStatement stmt;
 
@@ -93,6 +97,9 @@ AstStatement ParseSimpleStatement(){
 		}else if(current_token.kind == TK_DEC || current_token.kind == TK_INC){
 			type =3 ;	// IncDecStmt
 			break;
+		}else if(current_token.kind == TK_ASSIGN){
+			type = 4;	// Assignment
+			break;
 		}else{
 			type = 5;	// ExpressionStmt
 		}
@@ -104,11 +111,11 @@ AstStatement ParseSimpleStatement(){
 	if(type == 1){
 		stmt = (AstStatement)ParseShortVarDecl();
 	}else if(type == 2){
-
+		stmt = (AstStatement)ParseSendStmt();
 	}else if(type == 3){
 		stmt = (AstStatement)ParseIncDecStmt();
 	}else if(type == 4){
-
+		stmt = (AstStatement)ParseAssignmentsStmt();
 	}else if(type == 5){
 		stmt = (AstStatement)ParseExpression();
 	}else{

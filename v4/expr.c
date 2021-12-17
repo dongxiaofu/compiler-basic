@@ -168,12 +168,13 @@ AstExpression ParseUnaryExpr(){
 	return expr;
 }
 
+// Conversion = Type "(" Expression [ "," ] ")" .
 AstNode ParseConversion(){
-	LOG("%s\n", "parse Conversion");
-	NEXT_TOKEN;
+	// NEXT_TOKEN;
+	ParseType();
 	expect_token(TK_LPARENTHESES);
 	ParseExpression();
-	if(current_token.kind == TK_COMMA) expect_token(TK_COMMA);
+	expect_comma;
 	expect_token(TK_RPARENTHESES);
 }
 
@@ -422,11 +423,17 @@ AstExpression ParseOperand(){
 	// dump_token_number();	
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
-	if(current_token.kind == TK_NUM){
-		expr = ParseLiteral();
-	}else if(current_token.kind == TK_ID){
+
+	if(current_token.kind == TK_ID){
 		expr = ParseOperandName();
+	}else if(current_token.kind == TK_LPARENTHESES ){
+		EXPECT(TK_LPARENTHESES);
+		expr = ParseExpression();
+		EXPECT(TK_RPARENTHESES);
+	}else{
+		expr = ParseLiteral();
 	}
+
 	return expr;
 }
 
@@ -442,9 +449,11 @@ AstExpression ParseIntLit(){
 	return expr;
 }
 
+/**
+ * BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
+ */
+// TODO 这个函数很复杂，工作量非常大，后期再处理。
 AstExpression ParseBasicLit(){
-	//dump_token_number();	
-//	ParseIntLit();
 //	// todo 应该使用malloc分配内存空间才更妥当吗？
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
@@ -460,44 +469,220 @@ AstExpression ParseBasicLit(){
 	return expr;
 }
 
-AstExpression ParseLiteral(){
+// 不用写注释吧？
+unsigned char IsCompositeLit(){
 
-	//dump_token_number();	
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression);
-	expr = ParseBasicLit();
+	// 为啥不写出用||连接的语句？为了书写方便。
+	if(current_token.kind == TK_MAP){
+		return 1;
+	}
 
-	return expr;
+ 	if(current_token.kind == TK_STRUCT){
+		return 1;
+	}
+
+	if(current_token.kind == TK_LBRACE){
+		return 1;
+	}
+
+	return 0;
 }
 
-AstExpression ParseOperandName(){
-	//dump_token_number();	
+/**
+ * Literal     = BasicLit | CompositeLit | FunctionLit .
+ * BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
+ *
+ */
+AstExpression ParseLiteral(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
-	if(current_token.kind == TK_ID){
-		// expr->op = OP_ID;
-		// TODO 这是不正确的。临时这样做。
-		expr->op = OP_NONE;
-//		union value v = (void *)(current_token.value.value_str);
-//		union value v.p = (void *)(current_token.value.value_str);
-//		union value v;
-//		v.p = (void *)(current_token.value.value_str);
-//		union value v
-//		memcpy(v, current_token.value.value_str, MAX_NAME_LEN);
-//		*(expr->val.p) = *(current_token.value.value_str);
-//		Program received signal SIGSEGV, Segmentation fault
-//		*(char *)(expr->val.p) = *(current_token.value.value_str);
-//
-//		memcpy((char *)(expr->val.p), current_token.value.value_str, MAX_NAME_LEN);
-//		union value *v = &(expr->val);
-//		memcpy((char *)(v->p), current_token.value.value_str, MAX_NAME_LEN);
-		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy((char *)(expr->val.p), current_token.value.value_str);
-		NEXT_TOKEN;
+
+	// 怎么识别CompositeLit？
+	// CompositeLit  = LiteralType LiteralValue .
+	// 只需判断LiteralType的类型。
+	// 第一个token是TK_STRUCT、TK_MAP、TK_LBRACE中的第一个即可。
+	// 当然，这是在本函数中，是有具体上下文的。
+
+	if(current_token.kind == TK_FUNC){
+		expr = ParseFunctionLit();
+	}else if(IsCompositeLit() == 1){
+		expr = ParseCompositeLit(); 
+	}else{
+		expr = ParseBasicLit();
 	}
 
 	return expr;
 }
+
+/**
+ * OperandName = identifier | QualifiedIdent .
+ * QualifiedIdent = PackageName "." identifier .
+ * PackageName    = identifier .
+ */
+AstExpression ParseOperandName(){
+	char type = -1;
+	StartPeekToken();
+	// 最多只需要遍历三个token。
+	for(unsigned char i = 0; i < 3; i++){
+		if(i == 1 && current_token.kind == TK_DOT){
+			type = 2;
+			break;
+		}
+		type = 1;
+	}
+	EndPeekToken();
+
+ 	AstExpression expr;
+ 	CREATE_AST_NODE(expr, Expression);
+
+	if(type == 1){
+		AstDeclarator decl = ParseIdentifier();
+		if(decl == NULL){
+			// TODO decl为空时，expr不是有意义的数据，直接返回可以吗？但我不知道应该怎么做。 			
+			return expr;
+		}
+ 		expr->op = OP_NONE;
+ 		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
+ 		strcpy((char *)(expr->val.p), decl->id);
+	}else if(type == 2){
+		ParseQualifiedIdent();
+	}else{
+		expect_token(TK_ID);
+	}
+}
+
+/**
+ * FunctionLit = "func" Signature FunctionBody .
+ */
+AstExpression ParseFunctionLit(){
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+
+	EXPECT(TK_FUNC);
+
+	AstParameterDeclaration paramTyList = ParseParameters();
+	AstParameterDeclaration result = ParseResult();
+	AstStatement body = ParseFunctionBody();
+
+	AstFunctionDeclarator fdecl;
+	CREATE_AST_NODE(fdecl, FunctionDeclarator);
+	fdecl->paramTyList = paramTyList;
+	fdecl->sig = result;
+
+	// TODO FunctionLit是否应该放到声明中？
+	// 用函数AST存储表达式结构，合适吗？
+	return (AstExpression)fdecl;
+}
+
+/**
+ * CompositeLit  = LiteralType LiteralValue .
+ */
+// TODO 没有建立AST。
+AstNode ParseCompositeLit(){
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+	
+	ParseLiteralType();
+	ParseLiteralValue();	
+ 
+	return node;
+}
+
+/**
+ * LiteralValue  = "{" [ ElementList [ "," ] ] "}" .
+ElementList   = KeyedElement { "," KeyedElement } .
+KeyedElement  = [ Key ":" ] Element .
+Key           = FieldName | Expression | LiteralValue .
+FieldName     = identifier .
+Element       = Expression | LiteralValue .
+ */
+// TODO 没有组建AST
+// 创建层层分解的函数，代码变得简洁，复杂度降低，可是建立AST时可能会有许多不方便。怎么办？
+AstNode ParseLiteralValue(){
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	ParseElementList();
+	expect_comma;
+
+	return node;
+}
+
+// TODO 没有组建AST
+AstNode ParseElementList(){
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	ParseKeyedElement();
+	while(current_token.kind == TK_COMMA){
+		NEXT_TOKEN;
+		ParseKeyedElement();
+	}
+
+	return node;
+}
+
+/**
+ * KeyedElement  = [ Key ":" ] Element .
+Key           = FieldName | Expression | LiteralValue .
+FieldName     = identifier .
+Element       = Expression | LiteralValue .
+ */
+// TODO 没有建立AST。
+AstNode ParseKeyedElement(){
+
+	// 这是唯一的难点。
+	unsigned char flag = 0;
+	StartPeekToken();
+	while(current_token.kind == TK_RBRACE){
+		if(current_token.kind == TK_COLON){
+			flag = 1;
+			break;
+		}
+	}
+	EndPeekToken();
+
+	// Key           = FieldName | Expression | LiteralValue .
+	if(flag == 1){
+		if(current_token.kind == TK_LBRACE){
+			ParseLiteralValue();
+		}else{
+			if(CurrentTokenIn(FIRST_Expression) == 1){
+				ParseExpression();
+			}else{	// FieldName
+				ParseIdentifier();
+			}	
+		}
+	}
+
+	if(current_token.kind == TK_LBRACE){
+		ParseLiteralValue();
+	}else{
+		ParseExpression();
+	}
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	return node;
+}
+
+// TODO 这个函数很复杂，工作量非常大，后期再处理。
+
+// AstExpression ParseOperandName(){
+// 	//dump_token_number();	
+// 	AstExpression expr;
+// 	CREATE_AST_NODE(expr, Expression);
+// 	if(current_token.kind == TK_ID){
+// 		// TODO 这是不正确的。临时这样做。
+// 		expr->op = OP_NONE;
+// 		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		strcpy((char *)(expr->val.p), current_token.value.value_str);
+// 		NEXT_TOKEN;
+// 	}
+// 
+// 	return expr;
+// }
 
 
 // AstExpression ParseDecimalDigit(){
