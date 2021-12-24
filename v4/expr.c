@@ -110,6 +110,12 @@ AstExpression ParseBinaryExpr(int prec){
 	}
 
 	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){
+//		AstExpression binExpr;
+//		AstExpression expr;
+
+//		CREATE_AST_NODE(binExpr, Expression);
+//		CREATE_AST_NODE(expr, Expression);
+
 		NEXT_TOKEN;
 		if(prec == HIGHEST_BIN_PREC){
 			expr = ParseUnaryExpr();
@@ -117,7 +123,8 @@ AstExpression ParseBinaryExpr(int prec){
 			binExpr->op = BINARY_OP;
 			binExpr->kids[0] = expr;
 //			NEXT_TOKEN;
-			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+			// binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+			ParseBinaryExpr(prec + 1);
 			expr = binExpr;
 		}
 	}
@@ -544,6 +551,7 @@ AstExpression ParseOperandName(){
  		expr->op = OP_NONE;
  		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
  		strcpy((char *)(expr->val.p), decl->id);
+		return expr;
 	}else if(type == 2){
 		ParseQualifiedIdent();
 	}else{

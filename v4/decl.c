@@ -98,9 +98,12 @@ AstNode ParseConstDecl(){
 AstDeclaration ParseConstSpec(){
 	LOG("%s\n", "parse const spec");
 //	ParseIdentifierList();
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression); 
-	expr = ParseExpressionList();
+//	AstExpression expr;
+//	CREATE_AST_NODE(expr, Expression); 
+//	expr = ParseExpressionList();
+	AstDeclarator decl;
+	CREATE_AST_NODE(decl, Declarator);
+	decl = ParseIdentifierList();
 
 	AstExpression expr2;
 	CREATE_AST_NODE(expr2, Expression); 
@@ -140,7 +143,8 @@ AstDeclaration ParseConstSpec(){
 	AstInitDeclarator preInitDecs = initDecs;
 	AstInitDeclarator initDecsCur = initDecs;
 
-	AstExpression exprCur = expr;
+	// TODO 不应该这样命名，只是为了兼容之前的错误写法。
+	AstDeclarator exprCur = decl;
 	AstExpression expr2Cur = expr2;
 	while(exprCur != NULL){
 		// initDecsCur->dec->id = exprCur->val;	
@@ -148,7 +152,7 @@ AstDeclaration ParseConstSpec(){
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
 		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy(dec->id, exprCur->val.p);
+		strcpy(dec->id, exprCur->id);
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
@@ -210,7 +214,8 @@ AstDeclarator ParseIdentifierList(){
 	}
 
 	decl->variable_count = count;
-	decl->next = NULL;		// 不能少了这一句。
+//	decl->next = NULL;		// 不能少了这一句。
+//	(*tail)->next = NULL;
 
 	return decl;
 }
@@ -401,10 +406,12 @@ TypeDef = identifier Type .
  */
 AstDeclaration ParseTypeSpec(){
 	LOG("%s\n", "parse TypeSpec");
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression); 
-	// expr = ParseExpressionList();
-	expr = ParseExpression();
+//	AstExpression expr;
+//	CREATE_AST_NODE(expr, Expression); 
+//	// expr = ParseExpressionList();
+//	expr = ParseExpression();
+
+	AstDeclarator decl = ParseIdentifier();
 
 	AstNode type;
 	CREATE_AST_NODE(type, Node); 
@@ -412,10 +419,11 @@ AstDeclaration ParseTypeSpec(){
 	if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
 		// expr = ParseExpressionList();
-		expr = ParseExpression();
+//		expr = ParseExpression();
 	}else{
-		type = ParseType();
+//		type = ParseType();
 	}
+	type = ParseType();
 
 	AstDeclaration declaration;
 	CREATE_AST_NODE(declaration, Declaration);
@@ -426,7 +434,8 @@ AstDeclaration ParseTypeSpec(){
 	AstDeclarator dec;
 	CREATE_AST_NODE(dec, Declarator);
 	dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-	strcpy(dec->id, expr->val.p);
+	strcpy(dec->id, decl->id);
+//	strcpy(dec->id, expr->val.p);
 	initDecs->dec = dec;
 
 	AstSpecifiers specs;

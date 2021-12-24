@@ -1070,7 +1070,7 @@ AstStatement ParseExprCaseClause(){
 AstStatement ParseTypeSwitchStmt(){
 
 	// 跳过switch
-	NEXT_TOKEN;
+//	NEXT_TOKEN;
 	
 	// 处理 [ SimpleStmt ";" ]
 	// 很容易。在TK_DOT前发现了分号，则存在SimpleStmt。
@@ -1106,7 +1106,7 @@ AstStatement ParseTypeSwitchStmt(){
 
 AstStatement ParseExprSwitchStmt(){
 	// 跳过switch
-	NEXT_TOKEN;
+//	NEXT_TOKEN;
 
 	// 处理[ SimpleStmt ";" ] [ Expression ]	
 	int tokens[200];
