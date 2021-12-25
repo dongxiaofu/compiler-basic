@@ -103,6 +103,10 @@ AstTranslationUnit ParseTranslationUnit(){
 //	return *p;
 
 	while(current_token.kind != TK_EOF){
+		// 测试 start
+		ParseType();
+		continue;
+		// 测试 end
 		if(current_token.kind == TK_FUNC){
 			LOG("parse func\n");
 			p->extDecls = declaration();

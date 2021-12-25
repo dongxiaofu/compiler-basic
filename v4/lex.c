@@ -234,6 +234,10 @@ int get_keyword_kind(char *keyword)
 // 只担心关键字类型。
 void expect_token(TokenKind kind)
 {
+//	if(is_dump_token == 0){
+//		dump_token(current_token);
+//	}
+
 	TokenKind cur_kind = current_token.kind;
 	// todo 又是一个常见问题。此处的token_name设置为多大合适?
 	char token_name[30];

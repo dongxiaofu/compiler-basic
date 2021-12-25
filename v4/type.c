@@ -14,16 +14,17 @@ int isTypeKeyWord(TokenKind kind){
 			EndPeekToken();
 			return 1;	
 		}else{
-			
+			EndPeekToken();
 		}
 			
 	}
-
+			
+	EndPeekToken();
 	// todo 处理指针。这种个性化处理方式太
 	// 丑陋了，寻机优化。
 	if(kind == TK_MUL) return 1;
 
-	EndPeekToken();
+	// EndPeekToken();
 	return (TK_FUNC <= kind && kind <= TK_ARRAY);
 }
 
@@ -90,7 +91,8 @@ AstNode ParseTypeLit(){
 		EndPeekToken();
 		// todo 退回处理了的token，交给解析函数去处理。
 	}
-	return (TypeListParsers[kind]());
+	// return (TypeListParsers[kind]());
+	return (TypeListParsers[kind - TK_MAP]());
 }
 
 /**
