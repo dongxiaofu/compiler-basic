@@ -12,6 +12,7 @@ int isTypeKeyWord(TokenKind kind){
 		if(current_token.kind != TK_RBRACKET) ParseExpression();
 		if(current_token.kind == TK_RBRACKET){
 			EndPeekToken();
+			EndPeekToken();
 			return 1;	
 		}else{
 			EndPeekToken();
@@ -76,19 +77,23 @@ AstNode ParseTypeLit(){
 		kind == TK_CHAN;
 	}else if(kind == TK_MUL) {
 		kind = TK_POINTER;
+	}else if(kind == TK_STRUCT){
+			kind = TK_STRUCT;
 	}else if(kind == TK_LBRACKET){
 		StartPeekToken();
 		NEXT_TOKEN;
 		kind = current_token.kind;
-		 EndPeekToken();
+		EndPeekToken();
 		if(kind == TK_RBRACKET){
 			// todo 耗时两三个小时才找出这个低级错误。
 			// kind == TK_SLICE;
 			kind = TK_SLICE;
+//			NEXT_TOKEN;
+//			expect_token(TK_STRUCT);
 		}else{
 			kind = TK_ARRAY;
 		}
-		EndPeekToken();
+		// EndPeekToken();
 		// todo 退回处理了的token，交给解析函数去处理。
 	}
 	// return (TypeListParsers[kind]());

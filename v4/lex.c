@@ -324,6 +324,9 @@ void EndPeekToken(){
 	CURSOR = cursor_tail->start_cursor;
 	current_char = char_tail->start_char;
 
+	// 注意这行代码的位置，必须在此函数返回前。
+	is_dump_token = 0;
+
 	if(cursor_tail->pre == NULL){
 		return;
 	}	
@@ -340,7 +343,7 @@ void EndPeekToken(){
 	free(char_tail->next);
 	char_tail->next = NULL;
 
-	is_dump_token = 0;
+	// is_dump_token = 0;
 }
 
 
