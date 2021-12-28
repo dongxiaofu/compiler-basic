@@ -88,6 +88,8 @@ AstNode ParseTypeLit(){
 			kind = TK_STRUCT;
 	}else if(kind == TK_FUNC){
 			kind = TK_FUNC;
+	}else if(kind == TK_INTERFACE){
+			kind = TK_INTERFACE;
 	}else if(kind == TK_LBRACKET){
 		StartPeekToken();
 		NEXT_TOKEN;
@@ -261,7 +263,21 @@ AstNode ParseInterfaceType(){
 		NO_TOKEN;
 		// todo 如何区分MethodSpec和InterfaceTypeName？
 		// todo 没有想到区分二者的方法，暂时只解析MethodSpec。
-		ParseMethodSpec();
+		unsigned char type = 0;
+		StartPeekToken();
+		while(current_token.kind != TK_RBRACE){
+			if(current_token.kind == TK_LPARENTHESES){
+				type = 1;
+				break;
+			}
+			NEXT_TOKEN;
+		}
+		EndPeekToken();
+		if(type == 1){
+			ParseMethodSpec();
+		}else{
+			ParseInterfaceTypeName();
+		}
 		expect_semicolon;	
 	}
 	expect_token(TK_RBRACE);
@@ -269,7 +285,19 @@ AstNode ParseInterfaceType(){
 
 AstNode ParseMethodSpec(){
 	ParseMethodName();
-	ParseSignature();
+
+	AstParameterTypeList paramTypeList;
+	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
+	AstParameterDeclaration params = ParseParameters(); 
+	paramTypeList->paramDecls = params;
+//	fdec->paramTyList = paramTypeList;
+	
+	AstParameterTypeList signature;
+	CREATE_AST_NODE(signature, ParameterTypeList);
+	AstParameterDeclaration result = ParseResult(); 
+	signature->paramDecls = result;
+//	fdec->sig = signature;
+//	ParseSignature();
 }
 
 AstNode ParseInterfaceTypeName(){
