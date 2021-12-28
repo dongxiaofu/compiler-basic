@@ -650,27 +650,14 @@ AstParameterDeclaration ParseParameterList(){
 	*count = 0;
 	decl = ParseParameterDecl(count);
 	AstParameterDeclaration *tail = &(decl->next);
-
-	// todo 当count是0时，也使用下面的代码处理吗？
-	if(*count <= 1){
-		// AstParameterDeclaration *tail = &(decl->next);
-		int *count_useless = (int *)malloc(sizeof(int));
-		*count_useless = 0;
-		while(current_token.kind == TK_COMMA){
-			NEXT_TOKEN;
-			*tail = ParseParameterDecl(count_useless);		
-			tail = &((*tail)->next);
-		}
-		*tail = NULL;
-	}else{
-		// todo 这种情况下，似乎不用进行任何处理。
-//		AstParameterDeclaration current = decl->next;
-//		while(current != NULL){
-//			*tail = current;	
-//			current = current->next;
-//		}
+	int *count_useless = (int *)malloc(sizeof(int));
+	*count_useless = 0;
+	while(current_token.kind == TK_COMMA){
+		NEXT_TOKEN;
+		*tail = ParseParameterDecl(count_useless);		
+		tail = &((*tail)->next);
 	}
-
+	*tail = NULL;
 	return decl;
 }
 

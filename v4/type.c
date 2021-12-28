@@ -70,8 +70,15 @@ AstTypedefName ParseTypeName(){
 	return tname;
 }
 
+/**
+ * Type      = TypeName | TypeLit | "(" Type ")" .
+TypeName  = identifier | QualifiedIdent .
+TypeLit   = ArrayType | StructType | PointerType | FunctionType | InterfaceType |
+	    SliceType | MapType | ChannelType .
+ */
 AstNode ParseTypeLit(){
  	TokenKind kind = current_token.kind;
+//	enum LITERAL_TYPE type = GetTypeKind();	
 	// TODO 第一个条件判断不应该存在。
 	if(kind == TK_CHAN){
 		kind == TK_CHAN;
@@ -79,6 +86,8 @@ AstNode ParseTypeLit(){
 		kind = TK_POINTER;
 	}else if(kind == TK_STRUCT){
 			kind = TK_STRUCT;
+	}else if(kind == TK_FUNC){
+			kind = TK_FUNC;
 	}else if(kind == TK_LBRACKET){
 		StartPeekToken();
 		NEXT_TOKEN;
@@ -97,7 +106,7 @@ AstNode ParseTypeLit(){
 		// todo 退回处理了的token，交给解析函数去处理。
 	}
 	// return (TypeListParsers[kind]());
-	return (TypeListParsers[kind - TK_MAP]());
+	return (TypeListParsers[kind - TK_FUNC]());
 }
 
 /**
@@ -376,4 +385,48 @@ AstNode ParseLiteralType(){
 	}
  
 	return node;
+}
+
+/**
+ * FunctionType   = "func" Signature .
+Signature      = Parameters [ Result ] .
+Result         = Parameters | Type .
+Parameters     = "(" [ ParameterList [ "," ] ] ")" .
+ParameterList  = ParameterDecl { "," ParameterDecl } .
+ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
+ */
+AstNode ParseFunctionType(){
+
+	NEXT_TOKEN;
+
+	AstFunctionDeclarator fdec;
+	CREATE_AST_NODE(fdec, FunctionDeclarator);
+
+	AstParameterTypeList paramTypeList;
+	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
+	AstParameterDeclaration params = ParseParameters(); 
+	paramTypeList->paramDecls = params;
+	fdec->paramTyList = paramTypeList;
+	
+	AstParameterTypeList signature;
+	CREATE_AST_NODE(signature, ParameterTypeList);
+	AstParameterDeclaration result = ParseResult(); 
+	signature->paramDecls = result;
+	fdec->sig = signature;
+	
+	// todo 测试，打印数据。
+//	PrintFdec(fdec);
+	
+		
+	AstFunction func;
+	CREATE_AST_NODE(func, Function);
+	func->fdec = fdec;
+	// return (AstNode)func;
+
+	// 处理FunctionBody
+	AstStatement stmt;// = ParseFunctionBody();
+	CREATE_AST_NODE(stmt, Statement);
+	func->stmt = stmt;
+
+	return (AstNode)func;
 }
