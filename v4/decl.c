@@ -233,6 +233,12 @@ AstDeclarator ParseIdentifier(){
 		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 		strcpy(decl->id, current_token.value.value_str);
 		NEXT_TOKEN;
+	}if(current_token.kind == TK_UNDERSCORE){
+		// TODO 不一定正确。为了程序能正常运行，只能这样做。
+		CREATE_AST_NODE(decl, NameDeclarator);
+		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy(decl->id, "_");
+		NEXT_TOKEN;
 	}
 
 	return decl;
