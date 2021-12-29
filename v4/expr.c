@@ -471,6 +471,12 @@ AstExpression ParseBasicLit(){
 		union value v = {current_token.value.value_num,0};
 		expr->val = v;
 		NEXT_TOKEN;
+	}else if(current_token.kind == TK_STRING){
+		// TODO 可能不正确。临时这样做。
+		expr->op = OP_NONE;
+		expr->val.p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);;
+		strcpy(expr->val.p, current_token.value.value_str);
+		NEXT_TOKEN;
 	}
 
 	return expr;

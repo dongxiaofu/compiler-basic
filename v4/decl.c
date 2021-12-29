@@ -32,7 +32,8 @@ AstNode declaration(){
 			break;
 		default:
 			LOG("%s\n", "parse decl error");
-			exit(-2);
+			printf("parse decl error\n");
+			exit(-3);
 			break;
 	}
 
@@ -122,7 +123,7 @@ AstDeclaration ParseConstSpec(){
 		expr2 = ParseExpressionList();
 	}else{
 
-		NEXT_TOKEN;
+	//	NEXT_TOKEN;
 	}
 
 

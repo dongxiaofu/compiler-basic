@@ -7,7 +7,7 @@
 //#include <ctype.h>
 //#include <stdlib.h>
 
-#define MAX_NAME_LEN	15
+#define MAX_NAME_LEN	200
 // 打印日志
 // #define LOG	printf
 #define LOG	
