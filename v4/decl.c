@@ -574,8 +574,8 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 	// todo 暂时只支持int等数据类型。
 	AstTypedefName type = ParseType();
 	AstSpecifiers specs;
-        CREATE_AST_NODE(specs, Specifiers);
-        specs->tySpecs = type;
+    CREATE_AST_NODE(specs, Specifiers);
+    specs->tySpecs = type;
 
 	if(expr_count == 1){
 		decl->specs = specs;

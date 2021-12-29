@@ -18,6 +18,8 @@ int isTypeKeyWord(TokenKind kind){
 			EndPeekToken();
 		}
 			
+	}else if(kind == TK_RECEIVE){
+			kind = TK_CHAN;
 	}
 			
 	EndPeekToken();
@@ -90,6 +92,10 @@ AstNode ParseTypeLit(){
 			kind = TK_FUNC;
 	}else if(kind == TK_INTERFACE){
 			kind = TK_INTERFACE;
+	}else if(kind == TK_MAP){
+			kind = TK_MAP;
+	}else if(kind == TK_CHAN || kind == TK_RECEIVE){
+			kind = TK_CHAN;
 	}else if(kind == TK_LBRACKET){
 		StartPeekToken();
 		NEXT_TOKEN;
@@ -332,15 +338,22 @@ AstNode ParseMapType(){
 /**
  * ChannelType = ( "chan" | "chan" "<-" | "<-" "chan" ) ElementType .
  */
-// todo get_token不能读取chan<-这类token，因此kind == TK_CHAN_RECEIVE这种情况无法处理。
 AstNode ParseChannelType(){
 	TokenKind kind = current_token.kind;
 	if(kind == TK_CHAN){
 		expect_token(TK_CHAN);
-//	}else if(kind == TK_CHAN_SEND){
-//		expect_token(TK_CHAN_SEND);
-//	}else if(kind == TK_CHAN_RECEIVE){
-//		expect_token(TK_CHAN_RECEIVE);
+		unsigned char is_chan = 0;
+		StartPeekToken();
+		if(current_token.kind == TK_RECEIVE){
+			is_chan = 1;
+		}	
+		EndPeekToken();
+		if(is_chan == 1){
+			expect_token(TK_RECEIVE);
+		}
+	}else if(kind == TK_RECEIVE){
+		expect_token(TK_RECEIVE);
+		expect_token(TK_CHAN);
 	}else{
 		ERROR("expect a chan\n");
 	}
