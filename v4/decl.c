@@ -28,7 +28,7 @@ AstNode declaration(){
 			break;
 		case TK_FUNC:
 			LOG("%s\n", "parse func");
-			ParseFunctionDecl();
+			ParseMethodDeclOrFunctionDecl();
 			break;
 		default:
 			LOG("%s\n", "parse decl error");
@@ -492,6 +492,10 @@ AstNode ParseStrintLit(){
 
 }
 
+/**
+ * TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
+TypeSpec = AliasDecl | TypeDef .
+ */
 AstNode ParseTypeDecl(){
 //	expect_token(TK_TYPE);
 //	expect_token(TK_ID);
@@ -895,4 +899,58 @@ AstNode ParseShortVarDecl(){
 	CREATE_AST_NODE(node, Node);
 	
 	return node;
+}
+
+/**
+ * MethodDecl = "func" Receiver MethodName Signature [ FunctionBody ] .
+Receiver   = Parameters .
+ */
+AstNode ParseMethodDecl(){
+
+	NEXT_TOKEN;
+
+	// Receiver
+	AstParameterTypeList paramTypeList2;
+	CREATE_AST_NODE(paramTypeList2, ParameterTypeList);
+	AstParameterDeclaration params2 = ParseParameters(); 
+	paramTypeList2->paramDecls = params2;
+
+	AstNode functionName = ParseFunctionName();
+
+	AstParameterTypeList paramTypeList;
+	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
+	AstParameterDeclaration params = ParseParameters(); 
+	paramTypeList->paramDecls = params;
+//	fdec->paramTyList = paramTypeList;
+	
+	AstParameterTypeList signature;
+	CREATE_AST_NODE(signature, ParameterTypeList);
+	AstParameterDeclaration result = ParseResult(); 
+	signature->paramDecls = result;
+//	fdec->sig = signature;
+	
+		
+//	AstFunction func;
+//	CREATE_AST_NODE(func, Function);
+//	func->fdec = fdec;
+	// return (AstNode)func;
+
+	// 处理FunctionBody
+	AstStatement stmt = ParseFunctionBody();
+}
+
+AstNode ParseMethodDeclOrFunctionDecl(){
+	unsigned char type = 0;
+	StartPeekToken();	
+	NEXT_TOKEN;
+	if(current_token.kind == TK_LPARENTHESES){
+		type = 1;
+	}
+	EndPeekToken();	
+	
+	if(type == 0){
+		ParseFunctionDecl();
+	}else{
+		ParseMethodDecl();
+	}
 }

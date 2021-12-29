@@ -28,7 +28,7 @@ int CurrentTokenIn(int *toks);
 int IsDataType(char *str);
 void ExpectDataType();
 
-AstNode declaration();
+// AstNode declaration();
 AstNode ParseConstDecl();
 
 AstDeclaration ParseConstSpec();
@@ -50,6 +50,8 @@ AstNode ParseFunctionName();
 AstNode ParseSignature();
 AstStatement ParseFunctionBody();
 AstNode ParseFunctionDecl();
+AstNode ParseMethodDecl();
+AstNode ParseMethodDeclOrFunctionDecl();
 
 // todo 很奇怪，先后顺序可能会导致错误。
 AstNode ParseFieldDecl();
@@ -57,6 +59,7 @@ AstNode ParseEmbeddedField();
 AstNode ParseTag();
 AstNode ParseStrintLit();
 
+AstNode declaration();
 
 
 
