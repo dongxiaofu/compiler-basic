@@ -370,6 +370,8 @@ int GetTypeKind(){
 		type = STRUCT;
 	}else if(current_token.kind == TK_MAP){
 		type = MAP;
+	}else if(current_token.kind == TK_ID){
+		type = NAME;
 	}else if(current_token.kind == TK_LBRACKET){
 		NEXT_TOKEN;
 		if(current_token.kind == TK_RBRACKET){
@@ -417,7 +419,7 @@ AstNode ParseLiteralType(){
 			node = ParseTypeName();
 			break;
 		case	ELEMENT:
-			node = ParseType();
+			node = ParseElementType();
 			break;
 		default:
 			// TODO 暂时什么也不做。
@@ -471,3 +473,18 @@ AstNode ParseFunctionType(){
 
 	return (AstNode)func;
 }
+
+// "[" "..." "]" ElementType
+AstNode ParseElementType(){
+	EXPECT(TK_LBRACKET);
+	EXPECT(TK_ELLIPSIS);
+	EXPECT(TK_RBRACKET);
+
+	ParseType();
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	return node;
+}
+

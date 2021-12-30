@@ -104,7 +104,9 @@ AstTranslationUnit ParseTranslationUnit(){
 
 	while(current_token.kind != TK_EOF){
 		// 测试 start
-		declaration();
+//		ParseCompositeLit();
+		ParseExpression();
+//		declaration();
 		// ParseType();
 		continue;
 		// 测试 end

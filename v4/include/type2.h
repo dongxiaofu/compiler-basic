@@ -36,6 +36,7 @@ AstNode ParseSliceType();
 AstNode ParseMapType();
 AstNode ParseChannelType();
 
+AstNode ParseElementType();
 AstNode ParseLiteralType();
 
 AstNode ParseType();

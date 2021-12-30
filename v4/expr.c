@@ -615,9 +615,11 @@ Element       = Expression | LiteralValue .
 AstNode ParseLiteralValue(){
 	AstNode node;
 	CREATE_AST_NODE(node, Node);
-
+	
+	EXPECT(TK_LBRACE);
 	ParseElementList();
 	expect_comma;
+	EXPECT(TK_RBRACE);
 
 	return node;
 }
@@ -647,17 +649,20 @@ AstNode ParseKeyedElement(){
 
 	// 这是唯一的难点。
 	unsigned char flag = 0;
-	StartPeekToken();
-	while(current_token.kind == TK_RBRACE){
-		if(current_token.kind == TK_COLON){
-			flag = 1;
-			break;
-		}
-	}
-	EndPeekToken();
+//	StartPeekToken();
+//	// while(current_token.kind == TK_RBRACE){
+//	while(current_token.kind != TK_COMMA){
+//		if(current_token.kind == TK_COLON){
+//	//		flag = 1;
+//			break;
+//		}
+//
+//		NEXT_TOKEN;
+//	}
+//	EndPeekToken();
 
 	// Key           = FieldName | Expression | LiteralValue .
-	if(flag == 1){
+//	if(flag == 1){
 		if(current_token.kind == TK_LBRACE){
 			ParseLiteralValue();
 		}else{
@@ -667,6 +672,18 @@ AstNode ParseKeyedElement(){
 				ParseIdentifier();
 			}	
 		}
+
+		// 处理:
+//		EXPECT(TK_COLON);
+		if(current_token.kind == TK_COLON){
+			flag = 1;
+			EXPECT(TK_COLON);
+		}
+//	}
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+	if(flag == 0){
+		return node;
 	}
 
 	if(current_token.kind == TK_LBRACE){
@@ -675,8 +692,8 @@ AstNode ParseKeyedElement(){
 		ParseExpression();
 	}
 
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+//	AstNode node;
+//	CREATE_AST_NODE(node, Node);
 
 	return node;
 }
