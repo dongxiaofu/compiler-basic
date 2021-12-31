@@ -61,6 +61,14 @@ AstNode ParseType(){
 // todo 不完善，只处理了TK_ID，没有处理TK_INT等。
 AstTypedefName ParseTypeName(){
 //	expect_token(TK_ID);
+//	type：0--identifier，1--QualifiedIdent。
+	unsigned char type = 0;
+	StartPeekToken();
+	ParseIdentifier();
+	if(current_token.kind == TK_DOT){
+		type = 1;
+	}
+	EndPeekToken();
 	
 	AstTypedefName tname;
 	CREATE_AST_NODE(tname, TypedefName);

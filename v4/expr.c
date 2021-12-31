@@ -200,11 +200,18 @@ AstNode ParseSelectorTypeAssertion(){
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
 		NEXT_TOKEN;
-		ExpectDataType();
+		ParseType();
+	//	ExpectDataType();
 		expect_token(TK_RPARENTHESES);
 	}else{
-		expect_token(TK_ID);
+	//	expect_token(TK_ID);
+		ParseIdentifier();
 	}
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	return node;
 }
 
 /**
@@ -216,33 +223,84 @@ AstNode ParseSelectorTypeAssertion(){
  */
 AstNode ParseArguments(){
 	expect_token(TK_LPARENTHESES);
-	
-	while(current_token.kind != TK_RPARENTHESES){
-		if(IsDataType(current_token.value.value_str) == 1){
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	if(current_token.kind == TK_ELLIPSIS){
+		NEXT_TOKEN;
+	}
+
+	if(current_token.kind == TK_COMMA){
+		NEXT_TOKEN;
+		return node;
+	}
+
+	// TODO 这段代码可以简化。 
+	if(CurrentTokenIn(FIRST_Expression) == 1){
+		ParseExpressionList();
+	}else{
+		ParseType();
+		if(current_token.kind == TK_COMMA){
 			NEXT_TOKEN;
-		}else{
 			ParseExpressionList();
 		}
+	}
 
-		// 第一个循环
-		while(current_token.kind == TK_COMMA){
-			NEXT_TOKEN;
-			ParseExpressionList();
-		}
+	if(current_token.kind == TK_ELLIPSIS){
+		NEXT_TOKEN;
+	}
 
-		// 第二个循环
-		while(current_token.kind == TK_ELLIPSIS){
-			NEXT_TOKEN;
-		}
-
-		// 第三个循环
-		while(current_token.kind == TK_COMMA){
-			NEXT_TOKEN;
-		}
-	}	
+	if(current_token.kind == TK_COMMA){
+		NEXT_TOKEN;
+	}
 
 	expect_token(TK_RPARENTHESES);
+	
+	return node;
 }
+
+// /**
+//  * Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" .
+//  * ()
+//  * (abc, def)
+//  * (uint abc, def,name)
+//  * (uint abc, def,name) ...
+//  */
+// AstNode ParseArguments(){
+// 	expect_token(TK_LPARENTHESES);
+// 	
+// 	while(current_token.kind != TK_RPARENTHESES){
+// 		if(IsDataType(current_token.value.value_str) == 1){
+// 			NEXT_TOKEN;
+// 		}else{
+// 			ParseExpressionList();
+// 		}
+// 
+// 		// 第一个循环
+// 		while(current_token.kind == TK_COMMA){
+// 			NEXT_TOKEN;
+// 			ParseExpressionList();
+// 		}
+// 
+// 		// 第二个循环
+// 		while(current_token.kind == TK_ELLIPSIS){
+// 			NEXT_TOKEN;
+// 		}
+// 
+// 		// 第三个循环
+// 		while(current_token.kind == TK_COMMA){
+// 			NEXT_TOKEN;
+// 		}
+// 	}	
+// 
+// 	expect_token(TK_RPARENTHESES);
+// 
+// 	AstNode node;
+// 	CREATE_AST_NODE(node, Node);
+// 
+// 	return node;
+// }
 
 /**
  * Index          = "[" Expression "]" .
@@ -251,51 +309,88 @@ Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
  */
 AstNode ParseIndexSlice(){
 	NEXT_TOKEN;
-	
-	int expr_count = 0;
-	// TokenKind kind = current_token.kind;	
-	TokenKind kind  = current_token.kind;	
-	while(kind != TK_RBRACKET && kind != TK_COLON){ 	
-		NO_TOKEN;
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
+
+	if(current_token.kind != TK_COLON){
 		ParseExpression();
-		kind  = current_token.kind;
-		expr_count++;
 	}
 
-	// if(expr_count == 1 && kind == TK_RBRACKET){
-	if(kind == TK_RBRACKET){
-		printf("%s\n", "It is a Index");
-		expect_token(TK_RBRACKET);
-		 // NEXT_TOKEN;
-	//	expect_token();
-
-	}else if(kind == TK_COLON){
-		printf("%s\n", "It is a Slice");
+	if(current_token.kind == TK_RBRACKET){
 		NEXT_TOKEN;
-
-		int expr_count = 0;
-		kind = current_token.kind;	
-		// while(kind != TK_COLON){ 	
-		while(kind != TK_RBRACKET && kind != TK_COLON){ 	
-			NO_TOKEN;
-			ParseExpression();
-			kind = current_token.kind;	
-			expr_count++;
-		}
-
-		if(kind == TK_COLON){
-			NEXT_TOKEN;
-			ParseExpression();
-			// expect_token(TK_RBRACKE);
-		}else{
-			// NEXT_TOKEN;
-			// todo 可以去掉这个else
-		}
-		expect_token(TK_RBRACKET);
-	}else{
-		ERROR("ParseIndexSlice error\n");
+		return node;
 	}
+
+	EXPECT(TK_COLON);
+
+	if(current_token.kind == TK_RBRACKET){
+		NEXT_TOKEN;
+		return node;
+	}
+	
+	ParseExpression();
+	if(current_token.kind == TK_COLON){
+		EXPECT(TK_COLON);
+		ParseExpression();
+	}
+	EXPECT(TK_RBRACKET);
+
+	return node;
 }
+
+// /**
+//  * Index          = "[" Expression "]" .
+// Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
+//                  "[" [ Expression ] ":" Expression ":" Expression "]" .
+//  */
+// AstNode ParseIndexSlice(){
+// 	NEXT_TOKEN;
+// 	
+// 	int expr_count = 0;
+// 	// TokenKind kind = current_token.kind;	
+// 	TokenKind kind  = current_token.kind;	
+// 	while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+// 		NO_TOKEN;
+// 		ParseExpression();
+// 		kind  = current_token.kind;
+// 		expr_count++;
+// 	}
+// 
+// 	// if(expr_count == 1 && kind == TK_RBRACKET){
+// 	if(kind == TK_RBRACKET){
+// 		printf("%s\n", "It is a Index");
+// 		expect_token(TK_RBRACKET);
+// 		 // NEXT_TOKEN;
+// 	//	expect_token();
+// 
+// 	}else if(kind == TK_COLON){
+// 		printf("%s\n", "It is a Slice");
+// 		NEXT_TOKEN;
+// 
+// 		int expr_count = 0;
+// 		kind = current_token.kind;	
+// 		// while(kind != TK_COLON){ 	
+// 		while(kind != TK_RBRACKET && kind != TK_COLON){ 	
+// 			NO_TOKEN;
+// 			ParseExpression();
+// 			kind = current_token.kind;	
+// 			expr_count++;
+// 		}
+// 
+// 		if(kind == TK_COLON){
+// 			NEXT_TOKEN;
+// 			ParseExpression();
+// 			// expect_token(TK_RBRACKE);
+// 		}else{
+// 			// NEXT_TOKEN;
+// 			// todo 可以去掉这个else
+// 		}
+// 		expect_token(TK_RBRACKET);
+// 	}else{
+// 		ERROR("ParseIndexSlice error\n");
+// 	}
+// }
 
 /**
  * PrimaryExpr =
@@ -327,10 +422,42 @@ AstExpression ParsePrimaryExpr(){
 	}else{
 //		NEXT_TOKEN;
 		// todo 解析 Operand、MethodExpr。目前，只解析Operand。
-		expr = ParseOperand();
+		// 区分Operand和MethodExpr。
+		// 1：MethodExpr；0：Oprand。
+		unsigned char type = 0;
+		StartPeekToken();
+		if(current_token.kind == TK_ID){
+//			ParseTypeName();
+			ParseOperandName();
+			if(current_token.kind == TK_DOT){
+				type = 1;
+			}
+		}else if(current_token.kind == TK_LPARENTHESES){
+			NEXT_TOKEN;
+			if(CurrentTokenIn(FIRST_Expression) == 0){
+				type = 1;
+			}
+		}else if(current_token.kind == TK_FUNC){
+			NEXT_TOKEN;
+			ParseParameters();
+			ParseResult();		
+			if(current_token.kind != TK_LBRACE){
+				type = 1;
+			}
+		}else if(isTypeKeyWord(current_token.kind) == 1){
+			type = 1;
+		}
+
+		EndPeekToken();
+		if(type == 1){
+			expr = ParseMethodExpr();
+		}else{
+			expr = ParseOperand();
+		}
 	}
 
-	while(IsPostfix(current_token.kind)){
+	// TODO 不理解这里的逻辑，参考ucc的ParsePostfixExpression函数写的。
+	while(1){
 		switch(current_token.kind){
 			case TK_DOT:
 				ParseSelectorTypeAssertion();
@@ -342,11 +469,12 @@ AstExpression ParsePrimaryExpr(){
 				ParseIndexSlice();
 				break; 
 			default:
-				break;
+//				break;
+				return expr;
 		}		
 	}
 
-	return expr;
+//	return expr;
 }
 
 AstNode ParseBinaryOp(){
@@ -694,6 +822,23 @@ AstNode ParseKeyedElement(){
 
 //	AstNode node;
 //	CREATE_AST_NODE(node, Node);
+
+	return node;
+}
+
+
+/**
+ * MethodExpr    = ReceiverType "." MethodName .
+ReceiverType  = Type .
+MethodName         = identifier .
+ */
+AstExpression ParseMethodExpr(){
+
+	ParseType();
+	ParseIdentifier();
+
+	AstNode node;
+	CREATE_AST_NODE(node, Node);
 
 	return node;
 }

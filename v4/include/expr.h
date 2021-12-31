@@ -27,6 +27,7 @@ AstExpression ParseBasicLit();
 unsigned char IsCompositeLit();
 AstExpression ParseLiteral();
 AstExpression ParseOperand();
+AstExpression ParseMethodExpr();
 
 AstNode ParseConversion();
 int IsPostfix(TokenKind kind);
