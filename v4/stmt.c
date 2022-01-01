@@ -9,12 +9,12 @@ AstStatement ParseStatement(){
 	AstStatement stmt;
 
 	switch(current_token.kind){
-		case TK_ID:
-			// TODO
-			LOG("%s\n", "parse ID stmt");
-			// stmt = ParseSimpleStatement();
-			stmt = ParseLabelStatement();
-			break;
+//		case TK_ID:
+//			// TODO
+//			LOG("%s\n", "parse ID stmt");
+//			// stmt = ParseSimpleStatement();
+//			stmt = ParseLabelStatement();
+//			break;
 		case TK_IF:
 			// TODO
 			LOG("%s\n", "parse if stmt");
@@ -27,7 +27,7 @@ AstStatement ParseStatement(){
 		case TK_SELECT:
 			// TODO
 			LOG("%s\n", "parse select stmt");
-			stmt = (AstStatement)ParseAstSelectStmt();	
+			stmt = (AstStatement)ParseSelectStmt();	
 			break;
 		case TK_SWITCH:
 			LOG("%s\n", "parse switch stmt");
@@ -36,6 +36,30 @@ AstStatement ParseStatement(){
 		case TK_FOR:
 			LOG("%s\n", "parse for stmt");
 			stmt = (AstStatement)ParseForStmt();	
+			break;
+		case TK_GO:
+			LOG("%s\n", "parse go stmt");
+			stmt = (AstStatement)ParseGoStmt();	
+			break;
+		case TK_GOTO:
+			LOG("%s\n", "parse goto stmt");
+			stmt = (AstStatement)ParseGotoStatement();	
+			break;
+		case TK_CONTINUE:
+			LOG("%s\n", "parse continue stmt");
+			stmt = (AstStatement)ParseContinueStatement();	
+			break;
+		case TK_FALLTHROUGH:
+			LOG("%s\n", "parse Fallthrough stmt");
+			stmt = (AstStatement)ParseFallthroughStmt();	
+			break;
+		case TK_DEFER:
+			LOG("%s\n", "parse Defer stmt");
+			stmt = (AstStatement)ParseDeferStmt();
+			break;
+		case TK_LBRACE:
+			LOG("%s\n", "parse block");
+			stmt = (AstStatement)ParseFunctionBody();
 			break;
 		default:
 			LOG("%s\n", "parse default stmt");
@@ -46,33 +70,50 @@ AstStatement ParseStatement(){
 	return stmt;
 }
 
+/**
+ * LabeledStmt = Label ":" Statement .
+Label       = identifier .
+ */
 AstStatement ParseLabelStatement(){
-	// 判断是不是赋值语句。
-	char assign_flag = 0;
-	StartPeekToken();
-	while(1){
-		NO_TOKEN;
-		// if(current_token.kind == TK_EQUAL){
-		// IsAssignOp
-		// if(current_token.kind == TK_ASSIGN){
-		if(IsAssignOp(current_token.kind) == 1){
-			assign_flag = 1;
-			break;
-		}
-		NEXT_TOKEN;
-	}
-	EndPeekToken();
+	ParseIdentifier();
+	ParseStatement();
 
-	if(assign_flag == 1){
-		ParseAssignmentsStmt();
-	}else{
-		ParseSimpleStatement();
-	}
-
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-	return stmt;
+ 	AstStatement stmt;
+ 	CREATE_AST_NODE(stmt, Statement);
+ 	return stmt;
 }
+
+// /**
+//  * LabeledStmt = Label ":" Statement .
+// Label       = identifier .
+//  */
+// AstStatement ParseLabelStatement(){
+// 	// 判断是不是赋值语句。
+// 	char assign_flag = 0;
+// 	StartPeekToken();
+// 	while(1){
+// 		NO_TOKEN;
+// 		// if(current_token.kind == TK_EQUAL){
+// 		// IsAssignOp
+// 		// if(current_token.kind == TK_ASSIGN){
+// 		if(IsAssignOp(current_token.kind) == 1){
+// 			assign_flag = 1;
+// 			break;
+// 		}
+// 		NEXT_TOKEN;
+// 	}
+// 	EndPeekToken();
+// 
+// 	if(assign_flag == 1){
+// 		ParseAssignmentsStmt();
+// 	}else{
+// 		ParseSimpleStatement();
+// 	}
+// 
+// 	AstStatement stmt;
+// 	CREATE_AST_NODE(stmt, Statement);
+// 	return stmt;
+// }
 
 /**
  * SimpleStmt = EmptyStmt | ExpressionStmt | SendStmt | IncDecStmt | Assignment | ShortVarDecl .
@@ -81,33 +122,95 @@ AstStatement ParseLabelStatement(){
 AstStatement ParseSimpleStatement(){
 	AstStatement stmt;
 
+//	int type = -1;		// EmptyStmt
+//	StartPeekToken();
+//	// TODO 很低效的方法。想不到其他更好的方法。
+//	//while(1){
+//	//分析SimpleStmt出现的地方总结出这个结论。
+//	while(current_token.kind != TK_SEMICOLON && current_token.kind != TK_LBRACE){
+//		NO_TOKEN;
+//		if(current_token.kind == TK_INIT_ASSIGN){
+//			type = 1;	// ShortVarDecl
+//			break;
+//		}else if(current_token.kind == TK_RECEIVE){
+//			type = 2;	// SendStmt
+//			break;
+//		}else if(current_token.kind == TK_DEC || current_token.kind == TK_INC){
+//			type =3 ;	// IncDecStmt
+//			break;
+//		}else if(current_token.kind == TK_ASSIGN){
+//			type = 4;	// Assignment
+//			break;
+//		}else{
+//			type = 5;	// ExpressionStmt
+//		}
+//
+//		NEXT_TOKEN;
+//	}
+//	EndPeekToken();
+
+//	int type = -1;		// EmptyStmt
+//	StartPeekToken();
+//	if(current_token.kind == TK_ID){
+//		type = 1;		// ShortVarDecl
+//		NEXT_TOKEN;
+//		if(current_token.kind == TK_ASSIGN){
+//			type = 4; // Assignment
+//		}else if(IsAddOp() == 1 || IsMulOp() == 1){
+//			NEXT_TOKEN;
+//			if(current_token.kind == TK_ASSIGN){
+//				type = 4; // Assignment
+//			}
+//		} 
+//	}else{
+//		type = 5;	// ExpressionStmt
+//		ParseExpression();
+//		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
+//			type =3 ;	// IncDecStmt
+//		}else if(current_token.kind == TK_RECEIVE){
+//			type = 2;	// SendStmt
+//		}else if(current_token.kind == TK_ASSIGN){
+//			type = 4;	// Assignment	
+//		}else if(IsAddOp() == 1 || IsMulOp() == 1){
+//			NEXT_TOKEN;
+//			if(current_token.kind == TK_ASSIGN){
+//				type = 4; // Assignment
+//			}
+//		} 
+//	}	
+//	EndPeekToken();
+
 	int type = -1;		// EmptyStmt
-	StartPeekToken();
-	// TODO 很低效的方法。想不到其他更好的方法。
-	//while(1){
-	//分析SimpleStmt出现的地方总结出这个结论。
-	while(current_token.kind != TK_SEMICOLON && current_token.kind != TK_LBRACE){
-		NO_TOKEN;
+	// ShortVarDecl = IdentifierList ":=" ExpressionList .
+	if(current_token.kind == TK_ID){
+		StartPeekToken();
+		NEXT_TOKEN;
 		if(current_token.kind == TK_INIT_ASSIGN){
-			type = 1;	// ShortVarDecl
-			break;
+			type = 1;
+			EndPeekToken();
+			goto start;
+		}
+		EndPeekToken();	
+	}
+
+	StartPeekToken();
+	if(CurrentTokenIn(FIRST_Expression) == 1){
+		type = 5;	// ExpressionStmt
+		ParseExpression();
+		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
+			type =3 ;	// IncDecStmt
 		}else if(current_token.kind == TK_RECEIVE){
 			type = 2;	// SendStmt
-			break;
-		}else if(current_token.kind == TK_DEC || current_token.kind == TK_INC){
-			type =3 ;	// IncDecStmt
-			break;
 		}else if(current_token.kind == TK_ASSIGN){
-			type = 4;	// Assignment
-			break;
-		}else{
-			type = 5;	// ExpressionStmt
-		}
+			type = 4;	// Assignment	
+		// }else if(IsAddOp() == 1 || IsMulOp() == 1){
+		}else if(TK_ASSIGN <= current_token.kind && current_token.kind <= TK_BIT_CLEAR_ASSIGN){
+			type = 4; // Assignment
+		} 
+	}	
+	EndPeekToken();	
 
-		NEXT_TOKEN;
-	}
-	EndPeekToken();
-
+start:
 	if(type == 1){
 		stmt = (AstStatement)ParseShortVarDecl();
 	}else if(type == 2){
@@ -119,7 +222,7 @@ AstStatement ParseSimpleStatement(){
 	}else if(type == 5){
 		stmt = (AstStatement)ParseExpression();
 	}else{
-
+		CREATE_AST_NODE(stmt, Statement);
 	}
 
 	return stmt;
@@ -165,6 +268,7 @@ AstIfStatement ParseIfStatement(){
 
 	if(semicolon_flag == 1){
 		simpleStmt = ParseSimpleStatement();
+		NEXT_TOKEN;
 	}
 
 	stmt->simpleStmt = simpleStmt;	
@@ -172,9 +276,10 @@ AstIfStatement ParseIfStatement(){
 	AstExpression expr = ParseExpression();
 	stmt->expr = expr;
 
-	EXPECT(TK_LBRACE);	
-	AstCompoundStatement compoundStatement  = ParseCompoundStatement();
-	EXPECT(TK_RBRACE);	
+//	EXPECT(TK_LBRACE);	
+	// AstCompoundStatement compoundStatement  = ParseCompoundStatement();
+	AstCompoundStatement compoundStatement  = ParseFunctionBody();
+//	EXPECT(TK_RBRACE);	
 	stmt->thenStmt = (AstStatement)compoundStatement;
 
 	AstStatement  elseStmt = NULL;
@@ -184,9 +289,10 @@ AstIfStatement ParseIfStatement(){
 		if(current_token.kind == TK_IF){		
 			elseStmt = ParseIfStatement();
 		}else{
-			EXPECT(TK_LBRACE);	
-			elseStmt = ParseCompoundStatement();
-			EXPECT(TK_RBRACE);	
+//			EXPECT(TK_LBRACE);	
+			// elseStmt = ParseCompoundStatement();
+			elseStmt = ParseFunctionBody();
+//			EXPECT(TK_RBRACE);	
 		}
 	}
 
@@ -194,85 +300,117 @@ AstIfStatement ParseIfStatement(){
 
 	return stmt;
 }
-	
-AstCompoundStatement ParseCompoundStatement(){
-	// 找这个函数和{的代号，花了点时间。若经常用，花点时间记下来是不是能加快速度？
-	// EXPECT(TK_LBRACE);	
 
+/**
+ * Declaration | LabeledStmt | SimpleStmt
+ */
+AstCompoundStatement ParseCompoundStatement(){
 	AstCompoundStatement compoundStmt;	
 	CREATE_AST_NODE(compoundStmt, CompoundStatement); 
-	// 处理函数体中的声明。
-	// AstDeclarator decHead = NULL;	
-	AstDeclarator decHead;	
-	CREATE_AST_NODE(decHead, Declarator);
-	decHead->next = NULL;
-	AstDeclarator preDec = NULL;	
-	AstDeclarator curDec;	
-	// 当前token是声明字符集&&不是结束符&&不是}
-	while(CurrentTokenIn(FIRST_Declaration) && (current_token.kind != TK_RBRACE)){
-		NO_TOKEN;
-		curDec = declaration();
-		if(preDec == NULL){
-			preDec = curDec;
-		}else{
-			preDec->next = (AstNode)curDec;	
-			preDec = curDec;
-		}
 
-		if(decHead->next == NULL){
-			decHead->next = (AstNode)curDec;
+	if(CurrentTokenIn(FIRST_Declaration) == 1){
+		declaration();
+		return compoundStmt;
+	}
+
+	// type的值：0--LabeledStmt，1--SimpleStmt
+	unsigned char type = 1;	
+	StartPeekToken();
+	if(current_token.kind == TK_ID){
+		NEXT_TOKEN;
+		if(current_token.kind == TK_COLON){
+			type = 0;
 		}
 	}
-//	return compoundStmt;
-	compoundStmt->decls = decHead->next;
-//	return compoundStmt;
+	EndPeekToken();
 
-	// 处理函数体中的语句。
-	AstStatement headStmt;
-	CREATE_AST_NODE(headStmt, Statement);
-	headStmt->next = NULL;	
-	// 当前token属于语句字符集 && 不是结束符 && 不是}
-	AstStatement preStmt = NULL;
-	AstStatement curStmt;
-	// while(current_token.kind != TK_RBRACE){
-	while(current_token.kind != TK_RBRACE && current_token.kind != TK_CASE && current_token.kind !=TK_DEFAULT){
-		NO_TOKEN;
-		//if(current_token.kind == TK_RBRACE){
-		//	NEXT_TOKEN;
-		//	break;
-		//}
-		// todo 未实现。
-		curStmt = ParseStatement();
-//		if(current_token.kind == TK_RBRACE){
-//			// todo 这里很麻烦，复合语句的花括号要在ParseCompoundStatement外处理。
-//	//		NEXT_TOKEN;
-//			break;
-//		}
-		if(preStmt == NULL){
-			preStmt = curStmt;
-		}else{
-			preStmt->next = (AstNode)curStmt;
-			preStmt = curStmt;
-		}
-
-		if(headStmt->next == NULL){
-			headStmt->next = (AstNode)curStmt;
-		}
-
-		if(current_token.kind == TK_RBRACE){
-			// todo 这里很麻烦，复合语句的花括号要在ParseCompoundStatement外处理。
-	//		NEXT_TOKEN;
-			break;
-		}
+	if(type == 0){
+		ParseLabelStatement();
+	}else{
+		ParseSimpleStatement();
 	}
-	compoundStmt->stmts = headStmt->next;
-
-//	NEXT_TOKEN;
-
-//	EXPECT(TK_RBRACE);	
 
 	return compoundStmt;
 }
+
+// AstCompoundStatement ParseCompoundStatement(){
+// 	// 找这个函数和{的代号，花了点时间。若经常用，花点时间记下来是不是能加快速度？
+// 	// EXPECT(TK_LBRACE);	
+// 
+// 	AstCompoundStatement compoundStmt;	
+// 	CREATE_AST_NODE(compoundStmt, CompoundStatement); 
+// 	// 处理函数体中的声明。
+// 	// AstDeclarator decHead = NULL;	
+// 	AstDeclarator decHead;	
+// 	CREATE_AST_NODE(decHead, Declarator);
+// 	decHead->next = NULL;
+// 	AstDeclarator preDec = NULL;	
+// 	AstDeclarator curDec;	
+// 	// 当前token是声明字符集&&不是结束符&&不是}
+// 	while(CurrentTokenIn(FIRST_Declaration) && (current_token.kind != TK_RBRACE)){
+// 		NO_TOKEN;
+// 		curDec = declaration();
+// 		if(preDec == NULL){
+// 			preDec = curDec;
+// 		}else{
+// 			preDec->next = (AstNode)curDec;	
+// 			preDec = curDec;
+// 		}
+// 
+// 		if(decHead->next == NULL){
+// 			decHead->next = (AstNode)curDec;
+// 		}
+// 	}
+// //	return compoundStmt;
+// 	compoundStmt->decls = decHead->next;
+// //	return compoundStmt;
+// 
+// 	// 处理函数体中的语句。
+// 	AstStatement headStmt;
+// 	CREATE_AST_NODE(headStmt, Statement);
+// 	headStmt->next = NULL;	
+// 	// 当前token属于语句字符集 && 不是结束符 && 不是}
+// 	AstStatement preStmt = NULL;
+// 	AstStatement curStmt;
+// 	// while(current_token.kind != TK_RBRACE){
+// 	while(current_token.kind != TK_RBRACE && current_token.kind != TK_CASE && current_token.kind !=TK_DEFAULT){
+// 		NO_TOKEN;
+// 		//if(current_token.kind == TK_RBRACE){
+// 		//	NEXT_TOKEN;
+// 		//	break;
+// 		//}
+// 		// todo 未实现。
+// 		curStmt = ParseStatement();
+// //		if(current_token.kind == TK_RBRACE){
+// //			// todo 这里很麻烦，复合语句的花括号要在ParseCompoundStatement外处理。
+// //	//		NEXT_TOKEN;
+// //			break;
+// //		}
+// 		if(preStmt == NULL){
+// 			preStmt = curStmt;
+// 		}else{
+// 			preStmt->next = (AstNode)curStmt;
+// 			preStmt = curStmt;
+// 		}
+// 
+// 		if(headStmt->next == NULL){
+// 			headStmt->next = (AstNode)curStmt;
+// 		}
+// 
+// 		if(current_token.kind == TK_RBRACE){
+// 			// todo 这里很麻烦，复合语句的花括号要在ParseCompoundStatement外处理。
+// 	//		NEXT_TOKEN;
+// 			break;
+// 		}
+// 	}
+// 	compoundStmt->stmts = headStmt->next;
+// 
+// //	NEXT_TOKEN;
+// 
+// //	EXPECT(TK_RBRACE);	
+// 
+// 	return compoundStmt;
+// }
 
 /**
  * ReturnStmt = "return" [ ExpressionList ] .
@@ -600,7 +738,7 @@ CommCase   = "case" ( SendStmt | RecvStmt ) | "default" .
 RecvStmt   = [ ExpressionList "=" | IdentifierList ":=" ] RecvExpr .
 RecvExpr   = Expression .
  */ 
-AstSelectStmt ParseAstSelectStmt(){
+AstSelectStmt ParseSelectStmt(){
 	AstSelectStmt selectStmt;
 	CREATE_AST_NODE(selectStmt, SelectStmt);
 	
@@ -847,8 +985,10 @@ AstStatement ParseRangeClause(){
 
 	if(type == 1){
 		ParseExpressionList();
+		EXPECT(TK_ASSIGN);
 	}else if(type == 2){
 		ParseIdentifierList();
+		EXPECT(TK_INIT_ASSIGN);
 	}else{
 		// do nothing
 	}
@@ -884,7 +1024,8 @@ AstStatement ParseForStmt(){
 	int type = -1;
 	char flag_semicolon = 0;
 	// TODO 循环条件能改成 != TK_RBRACE  吗？
-	while(1){
+	// while(1){
+	while(current_token.kind != TK_LBRACE){
 		NO_TOKEN;
 		if(current_token.kind == TK_RANGE){
 			type = 1;

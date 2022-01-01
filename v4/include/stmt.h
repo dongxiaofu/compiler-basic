@@ -283,7 +283,7 @@ AstDeferStmt ParseDeferStmt();
 int getStmtType();
 AstStatement ParseStatementList();
 AstSelectCaseStatement ParseAstSelectCaseStmt();
-AstSelectStmt ParseAstSelectStmt();
+AstSelectStmt ParseSelectStmt();
 
 // TODO 寻机改把返回值改成更合适的数据类型。
 AstExpression ParseRangeExpr();

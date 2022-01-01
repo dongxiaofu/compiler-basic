@@ -677,7 +677,13 @@ AstParameterDeclaration ParseParameterList(){
  */
 AstParameterDeclaration ParseParameters(){
 	expect_token(TK_LPARENTHESES);
-	AstParameterDeclaration parameterList = ParseParameterList();
+	AstParameterDeclaration parameterList;
+	if(current_token.kind == TK_RPARENTHESES){
+		CREATE_AST_NODE(parameterList, ParameterDeclaration);	
+		EXPECT(TK_RPARENTHESES);
+		return parameterList;
+	}
+	parameterList = ParseParameterList();
 	expect_comma;
 //	while(current_token.kind != TK_RPARENTHESES){
 //
@@ -738,16 +744,37 @@ AstNode ParseSignature(){
 
 }
 
+/**
+ * Block = "{" StatementList "}" .
+StatementList = { Statement ";" } .
+ */
 AstStatement ParseFunctionBody(){
-	AstNode body = NULL;
-	// 因为函数体是可选的。
-	if(current_token.kind == TK_LBRACE){
-		EXPECT(TK_LBRACE);
-	 	body = (AstNode)ParseCompoundStatement(); 	
-		EXPECT(TK_RBRACE);
+	EXPECT(TK_LBRACE);
+	// while(current_token.kind == TK_SEMICOLON){
+//	while(1){
+	while(current_token.kind != TK_RBRACE){
+		NO_TOKEN;
+		ParseStatement();
+		expect_semicolon;
 	}
-	return body;
+	EXPECT(TK_RBRACE);
+
+	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
+	
+	return stmt;
 }
+
+// AstStatement ParseFunctionBody(){
+// 	AstNode body = NULL;
+// 	// 因为函数体是可选的。
+// 	if(current_token.kind == TK_LBRACE){
+// 		EXPECT(TK_LBRACE);
+// 	 	body = (AstNode)ParseCompoundStatement(); 	
+// 		EXPECT(TK_RBRACE);
+// 	}
+// 	return body;
+// }
 
 // todo 返回值的数据类型应该用AstStatement吗？
 // AstNode ParseFunctionBody(){
@@ -865,7 +892,7 @@ AstNode ParseFunctionDecl(){
 	fdec->sig = signature;
 	
 	// todo 测试，打印数据。
-	PrintFdec(fdec);
+//	PrintFdec(fdec);
 	
 		
 	AstFunction func;
@@ -884,7 +911,7 @@ AstNode ParseFunctionDecl(){
 int CurrentTokenIn(int toks[]){
 	int *p = toks;
 	
-	while(*p){
+	while(*p != TOKEN_SET_END_FLAG){
 		if(*p == current_token.kind){
 			return 1;
 		}

@@ -12,15 +12,18 @@
 
 
 //  to allow    struct{ ; },    empty struct declaration
-static int FIRST_StructDeclaration[]   = { FIRST_DECLARATION, TK_SEMICOLON,0};
-static int FF_StructDeclaration[]      = { FIRST_DECLARATION, TK_SEMICOLON,TK_RBRACE, 0};
-//
-static int FIRST_Function[]            = { FIRST_DECLARATION, TK_LBRACE, 0};
-// to allow ";"
-static int FIRST_ExternalDeclaration[] = { FIRST_DECLARATION, TK_MUL, TK_LPARENTHESES, TK_SEMICOLON,0};
 
-static int FIRST_Declaration[] = { FIRST_DECLARATION, 0};
-static int FIRST_Expression[] = { FIRST_EXPRESSION, 0};
+#define TOKEN_SET_END_FLAG -1
+
+static int FIRST_StructDeclaration[]   = { FIRST_DECLARATION, TK_SEMICOLON, TOKEN_SET_END_FLAG};
+static int FF_StructDeclaration[]      = { FIRST_DECLARATION, TK_SEMICOLON,TK_RBRACE, TOKEN_SET_END_FLAG};
+//
+static int FIRST_Function[]            = { FIRST_DECLARATION, TK_LBRACE, TOKEN_SET_END_FLAG};
+// to allow ";"
+static int FIRST_ExternalDeclaration[] = { FIRST_DECLARATION, TK_MUL, TK_LPARENTHESES, TK_SEMICOLON,TOKEN_SET_END_FLAG};
+
+static int FIRST_Declaration[] = { FIRST_DECLARATION, TOKEN_SET_END_FLAG};
+static int FIRST_Expression[] = { FIRST_EXPRESSION, TOKEN_SET_END_FLAG};
 
 
 int CurrentTokenIn(int *toks);

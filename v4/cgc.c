@@ -6,6 +6,7 @@
 #include "decl.h"
 #include "lex.h"
 #include "ast.h"
+#include "packages.h"
 
 int main(int argc, char *argv[])
 {
@@ -98,6 +99,10 @@ AstTranslationUnit ParseTranslationUnit(){
 	AstTranslationUnit *p;
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
+	ParseSourceFile();
+	LOG("parse unit over\n");
+
+	return *p;
 //	ParseExpression();
 
 //	return *p;

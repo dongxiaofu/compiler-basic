@@ -73,7 +73,11 @@ AstExpression ParseExpression(){
 //	expr = ParseBinaryExpr(2);
 	// expr = ParseBinaryExpr(7);
 	// OP_CONDITIONAL_OR 是优先级最低的二元运算符号。
-	expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+	if(CurrentTokenIn(FIRST_Expression) == 1){
+		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+	}else{
+		expr = ParseUnaryExpr();
+	}
 //	expr = ParseBinaryExpr(4);
 
 	return expr;
@@ -444,8 +448,19 @@ AstExpression ParsePrimaryExpr(){
 			if(current_token.kind != TK_LBRACE){
 				type = 1;
 			}
+		}else if(current_token.kind == TK_STRING){
+			// do nothing
+		
+		}else if(current_token.kind == TK_ELLIPSIS){
+			// do nothing
 		}else if(isTypeKeyWord(current_token.kind) == 1){
-			type = 1;
+			ParseType();
+			// TODO 其实可以不必这么写。这样写，逻辑更清晰。
+			if(current_token.kind == TK_LBRACE){
+				type = 0;	
+			}else{
+				type = 1;
+			}
 		}
 
 		EndPeekToken();
@@ -612,9 +627,24 @@ AstExpression ParseBasicLit(){
 
 // 不用写注释吧？
 unsigned char IsCompositeLit(){
+	if(current_token.kind == TK_STRING){
+		return 0;
+	}
+
+	if(current_token.kind == TK_FUNC){
+		return 0;
+	}
 
 	// 为啥不写出用||连接的语句？为了书写方便。
 	if(current_token.kind == TK_MAP){
+		return 1;
+	}
+
+	if(current_token.kind == TK_ID){
+		return 1;
+	}
+
+	if(current_token.kind == TK_SLICE){
 		return 1;
 	}
 
@@ -622,7 +652,7 @@ unsigned char IsCompositeLit(){
 		return 1;
 	}
 
-	if(current_token.kind == TK_LBRACE){
+	if(current_token.kind == TK_LBRACKET){
 		return 1;
 	}
 
