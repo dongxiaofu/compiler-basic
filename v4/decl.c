@@ -86,9 +86,11 @@ AstNode ParseConstDecl(){
 	}
 	curDeclaration->next = NULL;
 	expect_token(TK_RPARENTHESES);
+	expect_token(TK_SEMICOLON);
 	declaration = (AstDeclaration)head->next;
 }else{
 	declaration = ParseConstSpec();
+	expect_semicolon;
 }
 	return declaration;
 }
@@ -311,11 +313,14 @@ AstNode ParseVarDecl(){
 		}
 		curDeclaration->next = NULL;
 		expect_token(TK_RPARENTHESES);
+		expect_token(TK_SEMICOLON);
 		declaration = (AstDeclaration)headDeclaration->next;
 	}else{
 //		CREATE_AST_NODE(curDeclaration, Declaration);
 //		curDeclaration = ParseVarSpec();
 		declaration = ParseVarSpec();
+		// TODO 不能确定所有的声明后面都加上了分号。
+		expect_semicolon;	
 	}
 
 	return declaration;
@@ -549,11 +554,13 @@ AstNode ParseTypeDecl(){
 		}
 		curDeclaration->next = NULL;
 		expect_token(TK_RPARENTHESES);
+		expect_token(TK_SEMICOLON);
 		declaration = (AstDeclaration)headDeclaration->next;
 	}else{
 //		CREATE_AST_NODE(curDeclaration, Declaration);
 //		curDeclaration = ParseVarSpec();
 		declaration = ParseTypeSpec();
+		expect_semicolon;
 	}
 
 	return declaration;
@@ -758,6 +765,8 @@ AstStatement ParseFunctionBody(){
 		expect_semicolon;
 	}
 	EXPECT(TK_RBRACE);
+	expect_semicolon;
+	// expect_token(TK_SEMICOLON);
 
 	AstStatement stmt;
 	CREATE_AST_NODE(stmt, Statement);
@@ -928,6 +937,8 @@ AstNode ParseShortVarDecl(){
 	ParseIdentifierList();
 	EXPECT(TK_INIT_ASSIGN);
 	ParseExpressionList();	
+
+	expect_semicolon;
 	
 	AstNode node;
 	CREATE_AST_NODE(node, Node);

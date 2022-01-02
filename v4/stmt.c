@@ -19,6 +19,7 @@ AstStatement ParseStatement(){
 			// TODO
 			LOG("%s\n", "parse if stmt");
 			stmt = (AstStatement)ParseIfStatement();	
+			break;
 		case TK_RETURN:
 			// TODO
 			LOG("%s\n", "parse return stmt");
@@ -189,6 +190,14 @@ AstStatement ParseSimpleStatement(){
 			type = 1;
 			EndPeekToken();
 			goto start;
+		}else if(current_token.kind == TK_COMMA){
+			NEXT_TOKEN;
+			ParseIdentifierList();
+			if(current_token.kind == TK_INIT_ASSIGN){
+				type = 1;
+				EndPeekToken();
+				goto start;
+			}
 		}
 		EndPeekToken();	
 	}
@@ -229,6 +238,8 @@ start:
 		CREATE_AST_NODE(stmt, Statement);
 	}
 
+	expect_semicolon;
+
 	return stmt;
 }
 
@@ -244,6 +255,7 @@ AstIfStatement ParseIfStatement(){
 	// TODO 要给stmt的成员赋值，必定需要先分配一片内存，否则，会造成段错误。
 	CREATE_AST_NODE(stmt, IfStatement);
 
+	printf("【if start】\n");
 	EXPECT(TK_IF);
 	// todo 使用了StartPeekToken而没有使用EndPeekToken，会有问题吗？
 	// 处理[ SimpleStmt ";" ]
@@ -301,6 +313,10 @@ AstIfStatement ParseIfStatement(){
 	}
 
 	stmt->elseStmt = (AstStatement)elseStmt;
+
+	expect_semicolon;
+
+	printf("【if end】\n");
 
 	return stmt;
 }
@@ -424,10 +440,15 @@ AstReturnStatement ParseReturnStatement(){
 //	NEXT_TOKEN;
 //	NEXT_TOKEN;
 //	NEXT_TOKEN;
-	expect_token(TK_RETURN);
+	if(current_token.kind == TK_RETURN){
+		expect_token(TK_RETURN);
+	}	
+
 	if(current_token.kind != TK_RBRACE){
 		ParseExpressionList();
 	}	
+
+	expect_semicolon;
 
 	AstReturnStatement stmt;
 	CREATE_AST_NODE(stmt, ReturnStatement);
@@ -458,11 +479,13 @@ AstBreakStatement ParseBreakStatement(){
 // ContinueStmt = "continue" [ Label ] .
 AstContinueStatement ParseContinueStatement(){
 	NEXT_TOKEN;
+	expect_semicolon;
 	AstContinueStatement continueStmt;
 	CREATE_AST_NODE(continueStmt, ContinueStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
 	AstDeclarator decl = ParseIdentifier();	
+	expect_semicolon;
 	if(decl != NULL){
 		strcpy(label, decl->id);
 	}else{
@@ -482,6 +505,7 @@ AstGotoStatement ParseGotoStatement(){
 	// todo 内存泄露，但暂时没有找到好的处理方法。
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
 	AstDeclarator decl = ParseIdentifier();	
+	expect_semicolon;
 	if(decl != NULL){
 		strcpy(label, decl->id);
 	}else{
@@ -649,6 +673,9 @@ AstLabeledStmt ParseLabeledStmt(){
 // DeferStmt = "defer" Expression .
 AstDeferStmt ParseDeferStmt(){
 	NEXT_TOKEN;
+	ParseExpression();
+	// TODO 分号在表达式中解析还是在语句中解析？
+	expect_semicolon;
 	AstDeferStmt stmt;
 	CREATE_AST_NODE(stmt, DeferStmt);
 	stmt->stmt = stmt;
@@ -662,6 +689,7 @@ AstGoStmt ParseGoStmt(){
 	AstGoStmt stmt;
 	CREATE_AST_NODE(stmt, GoStmt);
 	stmt->expr = ParseExpression();
+	expect_semicolon;
 
 	return stmt;
 }
@@ -669,6 +697,7 @@ AstGoStmt ParseGoStmt(){
 // FallthroughStmt = "fallthrough" .
 AstFallthroughStmt ParseFallthroughStmt(){
 	NEXT_TOKEN;
+	expect_semicolon;
 	AstFallthroughStmt stmt;
 	CREATE_AST_NODE(stmt, FallthroughStmt);
 
@@ -875,6 +904,7 @@ AstSelectCaseStatement ParseAstSelectCaseStmt(){
 	}
 	// 跳过}
 	expect_token(TK_RBRACE);
+	expect_semicolon;
 }
 
 // TODO 建立单链表，重复了很多次的代码。
@@ -1243,6 +1273,7 @@ AstStatement ParseTypeSwitchStmt(){
 	expect_token(TK_LBRACE);
 	ParseTypeCaseClause();
 	expect_token(TK_RBRACE);
+	expect_semicolon;
 
 	AstStatement stmt;
 
@@ -1316,6 +1347,7 @@ AstStatement ParseExprSwitchStmt(){
 	expect_token(TK_LBRACE);
 	ParseExprCaseClause();
 	expect_token(TK_RBRACE);
+	expect_semicolon;
 	
 	AstStatement stmt;
 	CREATE_AST_NODE(stmt, Statement);

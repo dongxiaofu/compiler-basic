@@ -101,7 +101,7 @@ AstTranslationUnit ParseTranslationUnit(){
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
 	int i = 0;
-	while(1){
+	while(0){
 		NO_TOKEN;	
 		ParseAssignmentsStmt();
 		printf("【%d assign over】\n", i++);

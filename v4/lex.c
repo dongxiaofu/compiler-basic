@@ -85,12 +85,13 @@ Token get_token()
 	if(current_char == -1){
 		get_next_char();
 	}
+try_again:
 	// 跳过空白符
 	while(is_whitespace(current_char)){
 		get_next_char();
 	}
 
-try_again:
+// try_again:
 	// TK_EOF的值是82，R的值也是82，导致奇怪的问题。
 	// if(current_char == TK_EOF){
 	if(current_char == CH_EOF){
