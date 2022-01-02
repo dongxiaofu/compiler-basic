@@ -63,12 +63,13 @@ int main(int argc, char *argv[])
 
 
 	int loop_counter = 0;
-//	while(1){
-//		if(++loop_counter > 80){
-//			break;
-//		}
-//		get_token();
-//	}
+	while(0){
+		if(++loop_counter > 120){
+			break;
+		}
+		NO_TOKEN;
+		get_token();
+	}
 //	printf("scan token over\n");
 //	exit(3);
 	
@@ -99,6 +100,13 @@ AstTranslationUnit ParseTranslationUnit(){
 	AstTranslationUnit *p;
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
+	int i = 0;
+	while(1){
+		NO_TOKEN;	
+		ParseAssignmentsStmt();
+		printf("【%d assign over】\n", i++);
+	}
+
 	ParseSourceFile();
 	LOG("parse unit over\n");
 

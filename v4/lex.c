@@ -48,7 +48,11 @@ void dump_token(Token token)
 	}else{// if(token.token_kind == T_)
 		// 不打印结束符。
 		if(token.kind == TK_EOF) return;
-		printf("token = %s, type = %d\n", token.value.value_str, token.kind);
+		if(token.kind == TK_SEMICOLON){
+		 	printf("token = %s, type = %d\n", ";", token.kind);
+		}else{
+			printf("token = %s, type = %d\n", token.value.value_str, token.kind);
+		}
 	}
 }
 
@@ -91,7 +95,15 @@ try_again:
 	// if(current_char == TK_EOF){
 	if(current_char == CH_EOF){
 		token.kind = TK_EOF;
-	
+	}else if(current_char == '\n'){
+		// token.kind = TK_LINE_BREAK;
+		get_next_char();
+		if(IsInsertSemicolon() == 1){
+			token.kind = TK_SEMICOLON;
+		}else{
+			// get_next_char();
+			goto try_again;
+		}
 	}else if(isalpha(current_char)){ // 是字母
 		int len = 0;
 		do{
@@ -182,7 +194,7 @@ int is_whitespace(char ch)
 	if(ch == '\n'){
 	//	CURSOR++;
 		LINE++;
-		return 1;
+//		return 1;
 	}
 
 	return 0;
@@ -629,4 +641,35 @@ int ScanDot(){
 	}
 	
 	return TK_DOT;
+}
+
+// 是否加上分号
+// TODO 可以用数组来把代码写简洁一些。
+int IsInsertSemicolon(){
+	if(current_token.kind == TK_ID){
+		return 1;
+	}
+
+	if(current_token.kind == TK_STRING){
+		return 1;
+	}
+
+	if(current_token.kind == TK_NUM){
+		return 1;
+	}
+
+	if(current_token.kind == TK_INC || current_token.kind == TK_DEC
+		|| current_token.kind == TK_RPARENTHESES || current_token.kind == TK_RBRACE
+		|| current_token.kind == TK_RBRACKET
+	){
+		return 1;
+	}
+
+	if(current_token.kind == TK_BREAK || current_token.kind == TK_CONTINUE
+		|| current_token.kind == TK_FALLTHROUGH || current_token.kind == TK_RETURN
+	){
+		return 1;
+	}
+
+	return 0;
 }

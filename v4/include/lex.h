@@ -160,7 +160,7 @@ int get_keyword_kind(char *keyword);
 
 // 检查是不是运算符
 int is_operator(char ch);
-
+int IsInsertSemicolon();
 Token get_token();
 
 // 调试表达式使用。

@@ -196,6 +196,9 @@ AstStatement ParseSimpleStatement(){
 	StartPeekToken();
 	if(CurrentTokenIn(FIRST_Expression) == 1){
 		type = 5;	// ExpressionStmt
+		if(current_token.kind == TK_ADD || current_token.kind == TK_MINUS || current_token.kind == TK_MUL){
+//			goto start;
+		}
 		ParseExpression();
 		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
 			type =3 ;	// IncDecStmt
@@ -211,6 +214,7 @@ AstStatement ParseSimpleStatement(){
 	EndPeekToken();	
 
 start:
+	printf("【type = %d】\n", type);
 	if(type == 1){
 		stmt = (AstStatement)ParseShortVarDecl();
 	}else if(type == 2){

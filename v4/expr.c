@@ -73,11 +73,17 @@ AstExpression ParseExpression(){
 //	expr = ParseBinaryExpr(2);
 	// expr = ParseBinaryExpr(7);
 	// OP_CONDITIONAL_OR 是优先级最低的二元运算符号。
-	if(CurrentTokenIn(FIRST_Expression) == 1){
-		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
-	}else{
+	if(current_token.kind == TK_ADD || current_token.kind == TK_MINUS || current_token.kind == TK_MUL){
 		expr = ParseUnaryExpr();
+	}else{
+		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
 	}
+
+//	 if(CurrentTokenIn(FIRST_Expression) == 1){
+//		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+//	}else{
+//		expr = ParseUnaryExpr();
+//	}
 //	expr = ParseBinaryExpr(4);
 
 	return expr;
