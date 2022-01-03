@@ -218,6 +218,12 @@ AstStatement ParseSimpleStatement(){
 		// }else if(IsAddOp() == 1 || IsMulOp() == 1){
 		}else if(TK_ASSIGN <= current_token.kind && current_token.kind <= TK_BIT_CLEAR_ASSIGN){
 			type = 4; // Assignment
+		}else if(current_token.kind == TK_COMMA){
+			NEXT_TOKEN;
+			ParseExpressionList();
+			if(current_token.kind == TK_ASSIGN){
+				type = 4; // Assignment
+			}
 		} 
 	}	
 	EndPeekToken();	
@@ -962,9 +968,11 @@ AstStatement ParseForClause(){
 
 	// TODO [ InitStmt ] 等都是可选的。此处的代码把它们按照必选处理。寻机再完善。
 	ParseSimpleStatement();
-	expect_token(TK_SEMICOLON);
+	// expect_token(TK_SEMICOLON);
+	expect_semicolon;
 	ParseCondition();
-	expect_token(TK_SEMICOLON);
+	expect_semicolon;
+	// expect_token(TK_SEMICOLON);
 	ParseSimpleStatement();
 
 	AstStatement stmt;
@@ -1067,14 +1075,16 @@ AstStatement ParseForStmt(){
 			break;
 		}else if(current_token.kind == TK_SEMICOLON){
 			flag_semicolon++;
+			NEXT_TOKEN;
 			if(flag_semicolon == 2){
 				type = 2;
 				break;
 			}
-			NEXT_TOKEN;
+			// NEXT_TOKEN;
 		}else{
 			type = 3;
 			NEXT_TOKEN;
+//			break;
 		}
 	}
 

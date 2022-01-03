@@ -871,6 +871,7 @@ MethodName         = identifier .
 AstExpression ParseMethodExpr(){
 
 	ParseType();
+	EXPECT(TK_DOT);
 	ParseIdentifier();
 
 	AstNode node;
