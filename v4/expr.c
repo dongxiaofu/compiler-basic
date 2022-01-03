@@ -580,13 +580,31 @@ AstExpression ParseOperand(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 
+	/**
+ 	 *
+     * 怎么想出这种逻辑？
+     * 测试下面的代码，补充了这些逻辑。goto 挺有用的。
+     * dData := DivideError{
+                    dividee: varDividee,
+                    divider: varDivider,
+            }
+     */
 	if(current_token.kind == TK_ID){
+		StartPeekToken();
+		expr = ParseOperandName();
+		if(current_token.kind == TK_LBRACE){
+			EndPeekToken();
+			goto literal;
+		}
+		EndPeekToken();
+	
 		expr = ParseOperandName();
 	}else if(current_token.kind == TK_LPARENTHESES ){
 		EXPECT(TK_LPARENTHESES);
 		expr = ParseExpression();
 		EXPECT(TK_RPARENTHESES);
 	}else{
+literal:
 		expr = ParseLiteral();
 	}
 
