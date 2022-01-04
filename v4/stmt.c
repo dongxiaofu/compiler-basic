@@ -62,6 +62,10 @@ AstStatement ParseStatement(){
 			LOG("%s\n", "parse block");
 			stmt = (AstStatement)ParseFunctionBody();
 			break;
+		case TK_BREAK:
+			LOG("%s\n", "parse break");
+			stmt = (AstStatement)ParseBreakStmt();
+			break;
 		default:
 			LOG("%s\n", "parse default stmt");
 			stmt = (AstStatement)ParseCompoundStatement();	
@@ -77,6 +81,7 @@ Label       = identifier .
  */
 AstStatement ParseLabelStatement(){
 	ParseIdentifier();
+	NEXT_TOKEN;
 	ParseStatement();
 
  	AstStatement stmt;
@@ -182,6 +187,9 @@ AstStatement ParseSimpleStatement(){
 //	EndPeekToken();
 
 	int type = -1;		// EmptyStmt
+	if(current_token.kind == TK_BREAK){
+//		goto start;
+	}
 	// ShortVarDecl = IdentifierList ":=" ExpressionList .
 	if(current_token.kind == TK_ID){
 		StartPeekToken();
@@ -240,6 +248,8 @@ start:
 		stmt = (AstStatement)ParseAssignmentsStmt();
 	}else if(type == 5){
 		stmt = (AstStatement)ParseExpression();
+	}else if(type == 6){
+		stmt = (AstStatement)ParseStatement();
 	}else{
 		CREATE_AST_NODE(stmt, Statement);
 	}
@@ -1412,3 +1422,20 @@ AstStatement ParseSwitchStmt(){
 
 	return stmt;
 }
+
+/**
+ * BreakStmt = "break" [ Label ] .
+ * Label       = identifier .
+ */
+AstStatement ParseBreakStmt(){
+	EXPECT(TK_BREAK);
+	if(current_token.kind == TK_ID){
+		ParseIdentifier();
+	}
+
+	AstStatement stmt;
+	CREATE_AST_NODE(stmt, Statement);
+
+	return stmt;
+}
+

@@ -309,8 +309,7 @@ AstStatement ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();
 // AstStatement ParseSimpleStatement();
-// AstStatement ParseSimpleStatement();
-
+AstStatement ParseBreakStmt();
 AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();
 AstIfStatement ParseIfStatement();
