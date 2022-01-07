@@ -175,19 +175,19 @@ AstNode ParseQualifiedIdent(){
 ArrayLength = Expression .
 ElementType = Type .
  */
-// TODO 没有建立AST
-AstNode ParseArrayType(){
+AstExpression ParseArrayType(){
 	printf("parse array\n");
 	
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr->op = OP_INDEX;
 
 	expect_token(TK_LBRACKET);	
-	ParseExpression();
+	expr->kids[0] = (AstExpression)ParseExpression();
 	expect_token(TK_RBRACKET);	
-	ParseType();
+	expr->kids[1] = (AstExpression)ParseType();
 
-	return node;
+	return expr;
 }
 
 /**

@@ -47,5 +47,9 @@ OPINFO(OP_DEC,7, "--",      Assignment,     NOP)
 // TODO 不知道优先级
 OPINFO(OP_RECEIVE,8, "<-",      Assignment,     NOP)
 
+// 新加的运算符。不知道放到哪里合适，先放在这里。start
+OPINFO(OP_INDEX,          17,   "nop",    NOP,          NOP)
+
+// 新加的运算符。不知道放到哪里合适，先放在这里。end
 
 OPINFO(OP_NONE,          17,   "nop",    Error,          NOP)

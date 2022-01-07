@@ -27,7 +27,7 @@ AstNode ParseInterfaceType();
 AstTypedefName ParseTypeName();
 AstNode ParseTypeLit();
 AstNode ParseQualifiedIdent();
-AstNode ParseArrayType();
+AstExpression ParseArrayType();
 AstNode ParseStructType();
 AstNode ParsePointerType();
 AstNode ParseFunctionType();
