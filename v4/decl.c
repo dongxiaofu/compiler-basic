@@ -100,13 +100,7 @@ AstNode ParseConstDecl(){
  */
 AstDeclaration ParseConstSpec(){
 	LOG("%s\n", "parse const spec");
-//	ParseIdentifierList();
-//	AstExpression expr;
-//	CREATE_AST_NODE(expr, Expression); 
-//	expr = ParseExpressionList();
-	AstDeclarator decl;
-	CREATE_AST_NODE(decl, Declarator);
-	decl = ParseIdentifierList();
+	AstExpression expr = ParseIdentifierList();
 
 	AstExpression expr2;
 	CREATE_AST_NODE(expr2, Expression); 
@@ -147,7 +141,7 @@ AstDeclaration ParseConstSpec(){
 	AstInitDeclarator initDecsCur = initDecs;
 
 	// TODO 不应该这样命名，只是为了兼容之前的错误写法。
-	AstDeclarator exprCur = decl;
+	AstExpression exprCur = expr;
 	AstExpression expr2Cur = expr2;
 	while(exprCur != NULL){
 		// initDecsCur->dec->id = exprCur->val;	
@@ -155,15 +149,15 @@ AstDeclaration ParseConstSpec(){
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
 		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy(dec->id, exprCur->id);
+		strcpy(dec->id, exprCur->val.p);
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
 		CREATE_AST_NODE(init, Initializer);
-		AstExpression expr;
-		CREATE_AST_NODE(expr, Expression);
-		expr->val.i[0] = expr2Cur->val.i[0];
-		init->expr = expr;
+		AstExpression expr1;
+		CREATE_AST_NODE(expr1, Expression);
+		expr1->val.i[0] = expr2Cur->val.i[0];
+		init->expr = expr1;
 		initDecsCur->init = init;
 
 		preInitDecs = initDecsCur;
@@ -181,19 +175,20 @@ AstDeclaration ParseConstSpec(){
 }
 
 // IdentifierList = identifier { "," identifier }
-AstDeclarator ParseIdentifierList(){
+AstExpression ParseIdentifierList(){
 	LOG("%s\n", "parse IdentifierList");
 
 	int count = 0;
-	AstDeclarator decl = ParseIdentifier();
-	if(decl == NULL){
-		CREATE_AST_NODE(decl, NameDeclarator);
-		decl->variable_count = 0;
-		return decl;
+//	AstDeclarator decl = ParseIdentifier();
+	AstExpression expr = ParseIdentifier();
+	if(expr == NULL){
+		CREATE_AST_NODE(expr, Expression);
+		expr->variable_count = 0;
+		return expr;
 	}
 	count++;
-	AstDeclarator *tail;
-	tail = &(decl->next);
+	AstExpression *tail;
+	tail = &(expr->next);
 
 	// ParseIdentifier();
 	while(current_token.kind == TK_COMMA){
@@ -204,47 +199,54 @@ AstDeclarator ParseIdentifierList(){
 		}
 		count++;
 		tail = &((*tail)->next);
-		
-//		StartPeekToken();
-//		NEXT_TOKEN;
-//		if(current_token.kind != TK_COMMA){
-//			EndPeekToken();
-//			*tail = NULL;
-//			break;
-//		}else{
-//			EndPeekToken();
-//		}
 	}
 
-	decl->variable_count = count;
+	expr->variable_count = count;
 //	decl->next = NULL;		// 不能少了这一句。
 //	(*tail)->next = NULL;
 
-	return decl;
+	return expr;
 }
 
-AstDeclarator ParseIdentifier(){
+AstExpression ParseIdentifier(){
 	LOG("%s\n", "parse Identifier");
-	AstDeclarator decl = NULL;
-//	CREATE_AST_NODE(decl, NameDeclarator);
-	// todo 不知道有没有问题。
+	AstExpression expr = NULL;
+	CREATE_AST_NODE(expr, Expression);
+	// expr->val->p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	expr->val.p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 	// 我想用这种方式处理[Identifier]产生式。
 	if(current_token.kind == TK_ID){
-//		NEXT_TOKEN;
-		CREATE_AST_NODE(decl, NameDeclarator);
-		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy(decl->id, current_token.value.value_str);
-		NEXT_TOKEN;
+		strcpy(expr->val.p, current_token.value.value_str);
 	}if(current_token.kind == TK_UNDERSCORE){
-		// TODO 不一定正确。为了程序能正常运行，只能这样做。
-		CREATE_AST_NODE(decl, NameDeclarator);
-		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		strcpy(decl->id, "_");
-		NEXT_TOKEN;
+		strcpy(expr->val.p, "_");
 	}
+	NEXT_TOKEN;
 
-	return decl;
+	return expr;
 }
+
+// AstDeclarator ParseIdentifier(){
+// 	LOG("%s\n", "parse Identifier");
+// 	AstDeclarator decl = NULL;
+// //	CREATE_AST_NODE(decl, NameDeclarator);
+// 	// todo 不知道有没有问题。
+// 	// 我想用这种方式处理[Identifier]产生式。
+// 	if(current_token.kind == TK_ID){
+// //		NEXT_TOKEN;
+// 		CREATE_AST_NODE(decl, NameDeclarator);
+// 		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		strcpy(decl->id, current_token.value.value_str);
+// 		NEXT_TOKEN;
+// 	}if(current_token.kind == TK_UNDERSCORE){
+// 		// TODO 不一定正确。为了程序能正常运行，只能这样做。
+// 		CREATE_AST_NODE(decl, NameDeclarator);
+// 		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		strcpy(decl->id, "_");
+// 		NEXT_TOKEN;
+// 	}
+// 
+// 	return decl;
+// }
 
 void ExpectDataType(){
 	if(IsDataType(current_token.value.value_str) == 1){
@@ -423,7 +425,7 @@ AstDeclaration ParseTypeSpec(){
 //	// expr = ParseExpressionList();
 //	expr = ParseExpression();
 
-	AstDeclarator decl = ParseIdentifier();
+	AstExpression expr = ParseIdentifier();
 
 	AstNode type;
 	CREATE_AST_NODE(type, Node); 
@@ -446,7 +448,7 @@ AstDeclaration ParseTypeSpec(){
 	AstDeclarator dec;
 	CREATE_AST_NODE(dec, Declarator);
 	dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-	strcpy(dec->id, decl->id);
+	strcpy(dec->id, expr->val.p);
 //	strcpy(dec->id, expr->val.p);
 	initDecs->dec = dec;
 

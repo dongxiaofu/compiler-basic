@@ -731,14 +731,14 @@ AstExpression ParseOperandName(){
  	CREATE_AST_NODE(expr, Expression);
 
 	if(type == 1){
-		AstDeclarator decl = ParseIdentifier();
-		if(decl == NULL){
+		AstExpression expr1 = ParseIdentifier();
+		if(expr == NULL){
 			// TODO decl为空时，expr不是有意义的数据，直接返回可以吗？但我不知道应该怎么做。 			
 			return expr;
 		}
- 		expr->op = OP_NONE;
+ 		expr->op = OP_ID;
  		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
- 		strcpy((char *)(expr->val.p), decl->id);
+ 		strcpy((char *)(expr->val.p), expr->val.p);
 		return expr;
 	}else if(type == 2){
 		ParseQualifiedIdent();
@@ -811,11 +811,20 @@ AstNode ParseElementList(){
 	AstNode node;
 	CREATE_AST_NODE(node, Node);
 
-	ParseKeyedElement();
-	while(current_token.kind == TK_COMMA){
-		NEXT_TOKEN;
+	// TODO 不喜欢这样写。解析此段代码还用到了外部条件。
+	// while(current_token.kind != TK_COMMA || current_token.kind != TK_RBRACE){
+	while(current_token.kind != TK_RBRACE){
+		if(current_token.kind == TK_COMMA)	continue;
 		ParseKeyedElement();
+		// 处理逗号
+		NEXT_TOKEN;
 	}
+
+//	ParseKeyedElement();
+//	while(current_token.kind == TK_COMMA){
+//		NEXT_TOKEN;
+//		ParseKeyedElement();
+//	}
 
 	return node;
 }

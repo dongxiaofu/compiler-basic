@@ -479,9 +479,9 @@ AstBreakStatement ParseBreakStatement(){
 	CREATE_AST_NODE(breakStmt, BreakStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-	AstDeclarator decl = ParseIdentifier();	
-	if(decl != NULL){
-		strcpy(label, decl->id);
+	AstExpression expr = ParseIdentifier();	
+	if(expr != NULL){
+		strcpy(label, expr->val.p);
 	}else{
 		label = NULL;
 	}
@@ -500,10 +500,10 @@ AstContinueStatement ParseContinueStatement(){
 	CREATE_AST_NODE(continueStmt, ContinueStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-	AstDeclarator decl = ParseIdentifier();	
+	AstExpression expr = ParseIdentifier();	
 	expect_semicolon;
-	if(decl != NULL){
-		strcpy(label, decl->id);
+	if(expr != NULL){
+		strcpy(label, expr->val.p);
 	}else{
 		label = NULL;
 	}
@@ -667,9 +667,10 @@ AstIncDecStmt ParseIncDecStmt(){
 // TODO 有没有和 ParseLabelStatement 重复？
 AstLabeledStmt ParseLabeledStmt(){
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-	AstDeclarator decl = ParseIdentifier();	
-	if(decl != NULL){
-		strcpy(label, decl->id);
+	AstExpression expr = ParseIdentifier();	
+	expect_semicolon;
+	if(expr != NULL){
+		strcpy(label, expr->val.p);
 	}else{
 		label = NULL;
 	}
