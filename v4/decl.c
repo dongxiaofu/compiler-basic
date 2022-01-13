@@ -217,9 +217,12 @@ AstExpression ParseIdentifier(){
 	// 我想用这种方式处理[Identifier]产生式。
 	if(current_token.kind == TK_ID){
 		strcpy(expr->val.p, current_token.value.value_str);
-	}if(current_token.kind == TK_UNDERSCORE){
+	}else if(current_token.kind == TK_UNDERSCORE){
 		strcpy(expr->val.p, "_");
+	}else{
+		return expr;
 	}
+
 	NEXT_TOKEN;
 
 	return expr;
@@ -465,14 +468,53 @@ AstDeclaration ParseTypeSpec(){
 /**
  * FieldDecl     = (IdentifierList Type | EmbeddedField) [ Tag ] .
  */
-AstNode ParseFieldDecl(){
+FieldDecl ParseFieldDecl(){
+	// TODO 能把局部变量当作函数的返回值吗？
+	// FieldDecl decl = (FieldDecl)malloc(sizeof(*FieldDecl));
+	FieldDecl decl = (FieldDecl)malloc(sizeof(struct fieldDecl));
+
+	// TODO 怎么存储EmbeddedField？我特别烦这种不规则的语言结构。
 	if(current_token.kind == TK_MUL){
-		ParseEmbeddedField();
+		AstPointerDeclarator ptrDecl;
+		CREATE_AST_NODE(ptrDecl, PointerDeclarator);
+
+		expect_token(TK_MUL);
+		// ParseTypeName 的返回值有两种情况，例如：Sin；Math.Sin。
+		// TODO 非常厌恶这种返回值。我期望一个函数能返回结构相同的数据。
+		AstNode node = ParseTypeName();
+		ptrDecl->dec = (AstDeclarator)node;
+		decl->member = ptrDecl;
+		decl->tail = ptrDecl;
 	}else{
-		ParseIdentifierList();
-		ParseType();
+		AstStructDeclarator member = NULL;
+		AstStructDeclarator tail = NULL;
+		AstExpression expr = ParseIdentifierList();
+		AstNode dataType = ParseType();
+		AstStructDeclarator cur = NULL;
+		int variable_count = expr->variable_count;
+		for(int i = 0; i < variable_count; i++){
+			if(cur == NULL){
+				AstStructDeclarator cur;
+				CREATE_AST_NODE(cur, StructDeclarator);
+				member = cur;
+			}else{
+				AstStructDeclarator next;
+				CREATE_AST_NODE(next, StructDeclarator);
+				cur->next = next;
+				cur = next;
+			}
+			cur->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+			strcpy(cur->id, expr->val.p);
+			cur->type = dataType;
+		}	
+
+		tail = cur;
+		decl->member = member;
+		decl->tail = tail;
 	}
 //	ParseTag();
+
+	return decl;
 }
 
 /**
@@ -733,19 +775,25 @@ AstParameterDeclaration ParseResult(){
 	return parameterList;
 }
 
+/**
+ * FunctionName = identifier .
+ */
 AstNode ParseFunctionName(){
 
 	// todo 怎么确保这个位置的token是TK_ID？
 	// AstExpression identifier = ParseExpression();	
 	// AstExpression identifier = ParsePrimaryExpr();	
 	// todo 直接使用ParseOperandName能避免使用IsPostfix，但是，合适吗？
-	AstExpression identifier = ParseOperandName();
+	// AstExpression identifier = ParseOperandName();
+	// TODO 以后再重构。我不想在现在做这些复制粘贴的工作，拖慢进度。
+	// 语法解析和词法解析，这些工作，恶心。
+	AstExpression identifier = ParseIdentifier();
 	AstDeclarator functionName;
 	CREATE_AST_NODE(functionName, Declarator);
 	functionName->id = (char *)malloc(sizeof(char));
 	strcpy(functionName->id, (char *)identifier->val.p);
 
-	return functionName;
+	return (AstNode)functionName;
 }
 
 // todo 不要。

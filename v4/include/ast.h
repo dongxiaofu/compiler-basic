@@ -26,6 +26,8 @@ enum nodeKind
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
 	NK_Declarator,
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
+	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceDeclaration,
+	NK_SliceType, NK_MapType, NK_ChannelType, NK_VariableElementType,
 
 	NK_Expression,
 
@@ -40,6 +42,11 @@ enum nodeKind
 	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		
 	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		
 	NK_ReturnStatement,     NK_CompoundStatement
+};
+
+// 在AstChannelType中的成员中使用。
+enum ChannelType{
+	CT_Send, CT_Receive, CT_SendReceive
 };
 
 static char TypeNames[][16] = {
@@ -133,6 +140,31 @@ typedef struct astSpecifiers
 	AstNode tySpecs;
 } *AstSpecifiers;
 
+typedef struct astPointerDeclarator{
+	AST_DECLARATOR_COMMON
+} *AstPointerDeclarator;
+
+typedef struct astArrayTypeSpecifier{
+	AST_DECLARATOR_COMMON
+	AstExpression expr;
+	AstNode type;
+} *AstArrayTypeSpecifier;
+
+typedef struct astStructDeclarator{
+	AST_DECLARATOR_COMMON
+	AstNode type;
+} *AstStructDeclarator;
+
+typedef struct fieldDecl{
+	// TODO 暂时保留。目前，没有作用。
+  	int type;		// 0--IdentifierList Type；1--EmbeddedField
+  	// 存储IdentifierList Type链表
+  	AstStructDeclarator member;
+  	AstStructDeclarator tail;
+  	// 存储EmbeddedField
+  	// 也用AstStructDeclarator存储
+} *FieldDecl;
+
 // todo 暂时只支持初始化int类型变量。
 typedef  struct initData{
 	int offset;
@@ -183,6 +215,18 @@ typedef struct astDeclaration
 	AstNode initDecs;
 } *AstDeclaration;
 
+typedef struct astArrayDeclarator{
+	AST_DECLARATOR_COMMON
+	AstExpression expr;
+} *AstArrayDeclarator;
+
+typedef struct astStructDeclaration
+{
+	AST_NODE_COMMON
+	AstSpecifiers specs;
+	AstNode stDecs;
+} *AstStructDeclaration;
+
 typedef struct astTypedefName{
 	AST_NODE_COMMON
 	char *id;
@@ -210,6 +254,43 @@ typedef struct astFunctionDeclarator
         AstParameterTypeList paramTyList;
         AstParameterTypeList sig;
 } *AstFunctionDeclarator;
+
+typedef struct astMethodSpec{
+	AST_NODE_COMMON
+	AstDeclarator funcName;
+    AstParameterTypeList paramTyList;
+    AstParameterTypeList sig;
+} *AstMethodSpec;
+
+typedef struct astInterfaceDeclaration{
+	AST_NODE_COMMON
+	// TODO 这个成员没有作用。
+	AstSpecifiers specs;
+	AstNode interfaceDecs;
+} *AstInterfaceDeclaration;
+
+typedef struct astSliceType{
+	AST_NODE_COMMON
+	AstNode node;
+} *AstSliceType;
+
+typedef struct astMapType{
+	AST_NODE_COMMON
+	AstNode keyType;
+	AstNode elementType;
+} *AstMapType;
+
+typedef struct astChannelType{
+	AST_NODE_COMMON
+	// ChannelType type;
+	enum ChannelType type;
+	AstNode elementType;
+} *AstChannelType;
+
+typedef struct astVariableElementType{
+	AST_NODE_COMMON
+	AstNode node;
+} *AstVariableElementType;
 
 #define AST_STATEMENT_COMMON AST_NODE_COMMON
 

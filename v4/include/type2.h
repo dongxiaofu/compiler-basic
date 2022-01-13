@@ -19,24 +19,23 @@ int GetTypeKind();
 
 AstNode ParseMethodName();
 AstNode ParseInterfaceTypeName();
-AstNode ParseMethodSpec();
-AstNode ParseInterfaceType();
+AstMethodSpec ParseMethodSpec();
 
 
 // AstNode ParseType();
-AstTypedefName ParseTypeName();
+AstNode ParseTypeName();
 AstNode ParseTypeLit();
 AstNode ParseQualifiedIdent();
-AstExpression ParseArrayType();
-AstNode ParseStructType();
-AstNode ParsePointerType();
-AstNode ParseFunctionType();
-AstNode ParseInterfaceType();
-AstNode ParseSliceType();
-AstNode ParseMapType();
-AstNode ParseChannelType();
+AstArrayTypeSpecifier ParseArrayType();
+AstStructDeclarator ParseStructType();
+AstPointerDeclarator ParsePointerType();
+AstFunctionDeclarator ParseFunctionType();
+AstInterfaceDeclaration ParseInterfaceType();
+AstSliceType ParseSliceType();
+AstMapType ParseMapType();
+AstChannelType ParseChannelType();
 
-AstNode ParseElementType();
+AstVariableElementType ParseVariableElementType();
 AstNode ParseLiteralType();
 
 AstNode ParseType();
@@ -57,7 +56,4 @@ AstNode ParseType();
 // 	ParseMapType,
 // 	ParseChannelType
 // };
-
-
-
 #endif

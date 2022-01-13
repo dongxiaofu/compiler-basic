@@ -59,7 +59,9 @@ AstNode ParseType(){
 }
 
 // todo 不完善，只处理了TK_ID，没有处理TK_INT等。
-AstTypedefName ParseTypeName(){
+// TypeName  = identifier | QualifiedIdent .
+// AstTypedefName ParseTypeName(){
+AstNode ParseTypeName(){
 //	expect_token(TK_ID);
 //	type：0--identifier，1--QualifiedIdent。
 	unsigned char type = 0;
@@ -70,14 +72,25 @@ AstTypedefName ParseTypeName(){
 	}
 	EndPeekToken();
 	
-	AstTypedefName tname;
-	CREATE_AST_NODE(tname, TypedefName);
-	tname->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-	strcpy(tname->id, current_token.value.value_str);
-	// todo 是否应该放在这里？
-	NEXT_TOKEN;
-	
-	return tname;
+	if(type == 0){	
+		AstTypedefName tname;
+		CREATE_AST_NODE(tname, TypedefName);
+		tname->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		strcpy(tname->id, current_token.value.value_str);
+		NEXT_TOKEN;
+
+		return (AstNode)tname;
+	}else{
+		AstExpression expr;
+		CREATE_AST_NODE(expr, Expression);
+		
+		expr->op = OP_DOT;
+		expr->kids[0] = ParseIdentifier();
+		EXPECT(TK_DOT);
+		expr->kids[1] = ParseIdentifier();
+
+		return (AstNode)expr;
+	}
 }
 
 /**
@@ -175,51 +188,63 @@ AstNode ParseQualifiedIdent(){
 ArrayLength = Expression .
 ElementType = Type .
  */
-AstExpression ParseArrayType(){
+AstArrayTypeSpecifier ParseArrayType(){
 	printf("parse array\n");
 	
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression);
-	expr->op = OP_INDEX;
+	AstArrayTypeSpecifier spec;
+	CREATE_AST_NODE(spec, ArrayTypeSpecifier);
 
 	expect_token(TK_LBRACKET);	
-	expr->kids[0] = (AstExpression)ParseExpression();
+	spec->expr = (AstExpression)ParseExpression();
 	expect_token(TK_RBRACKET);	
-	expr->kids[1] = (AstExpression)ParseType();
+	spec->type = (AstNode)ParseType();
 
-	return expr;
+	return spec;
 }
 
 /**
  * StructType    = "struct" "{" { FieldDecl ";" } "}" .
 FieldDecl     = (IdentifierList Type | EmbeddedField) [ Tag ] .
 EmbeddedField = [ "*" ] TypeName .
+// Tag的作用是什么？
 Tag           = string_lit .
  */
-AstNode ParseStructType(){
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+AstStructDeclarator ParseStructType(){
+	AstStructDeclarator header;
+	CREATE_AST_NODE(header, StructDeclarator);
+	AstNode cur = NULL;
 
 	expect_token(TK_STRUCT);
 	expect_token(TK_LBRACE);	
 	while(current_token.kind != TK_RBRACE){
 		NO_TOKEN;
-		ParseFieldDecl();
+		FieldDecl fieldDecl = ParseFieldDecl();
+		if(header->next == NULL){
+			header->next = (AstNode)(fieldDecl->member);
+			cur = fieldDecl->tail;
+		}else{
+			cur->next = (AstNode)(fieldDecl->member);	
+		}
 		// 处理;
 		expect_semicolon;	
 	}
 	expect_token(TK_RBRACE);	
 
-	return node;
+	return (AstStructDeclarator)(header->next);
 }
 
 /**
  * PointerType = "*" BaseType .
 BaseType    = Type .
  */
-AstNode ParsePointerType(){
+AstPointerDeclarator ParsePointerType(){
+	AstPointerDeclarator ptrDecl;
+	CREATE_AST_NODE(ptrDecl, PointerDeclarator);
 	expect_token(TK_MUL);
-	ParseType();	
+	// TODO 真的很烦这种胡乱强制转换数据类型的做法。
+	ptrDecl->dec = (AstDeclarator)ParseType();	
+
+	return ptrDecl;
 }
 
 /**
@@ -270,9 +295,16 @@ MethodSpec         = MethodName Signature .
 MethodName         = identifier .
 InterfaceTypeName  = TypeName .
  */
-AstNode ParseInterfaceType(){
+AstInterfaceDeclaration ParseInterfaceType(){
 	expect_token(TK_INTERFACE);
 	expect_token(TK_LBRACE);
+	AstInterfaceDeclaration interfaceDeclaration;
+	CREATE_AST_NODE(interfaceDeclaration, InterfaceDeclaration);
+
+	AstNode header;
+	CREATE_AST_NODE(header, Node);
+	AstNode currentNode = NULL;
+
 	while(current_token.kind != TK_RBRACE){
 		NO_TOKEN;
 		// todo 如何区分MethodSpec和InterfaceTypeName？
@@ -287,70 +319,111 @@ AstNode ParseInterfaceType(){
 			NEXT_TOKEN;
 		}
 		EndPeekToken();
+		AstNode node;
 		if(type == 1){
-			ParseMethodSpec();
+			AstMethodSpec methodSpec = ParseMethodSpec();
+			node = (AstNode)methodSpec;
 		}else{
-			ParseInterfaceTypeName();
+			node = ParseTypeName();
+		}
+		if(header->next == NULL){
+			currentNode = node;
+			header->next = currentNode;
+		}else{
+			currentNode->next = node;
+			currentNode = node;
 		}
 		expect_semicolon;	
 	}
 	expect_token(TK_RBRACE);
+
+	interfaceDeclaration->interfaceDecs = header->next;
+
+	return interfaceDeclaration;	
 }
 
-AstNode ParseMethodSpec(){
-	ParseMethodName();
+/**
+ * MethodSpec         = MethodName Signature .
+   MethodName         = identifier .
+ */
+AstMethodSpec ParseMethodSpec(){
+	AstMethodSpec methodSpec;
+	CREATE_AST_NODE(methodSpec, MethodSpec);
+	methodSpec->funcName = ParseMethodName();	
 
 	AstParameterTypeList paramTypeList;
 	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
 	AstParameterDeclaration params = ParseParameters(); 
 	paramTypeList->paramDecls = params;
-//	fdec->paramTyList = paramTypeList;
+	methodSpec->paramTyList = paramTypeList; 
 	
 	AstParameterTypeList signature;
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
-//	fdec->sig = signature;
-//	ParseSignature();
+	methodSpec->sig = signature;
+
+	return methodSpec;
 }
 
 AstNode ParseInterfaceTypeName(){
-	ParseTypeName();
+	return ParseTypeName();
 }
 
 AstNode ParseMethodName(){
-	ParseIdentifier();
+	return ParseFunctionName();
 }
 
 /**
  * SliceType = "[" "]" ElementType .
  */
-AstNode ParseSliceType(){
+AstSliceType ParseSliceType(){
 	expect_token(TK_LBRACKET);	
 	expect_token(TK_RBRACKET);	
-	ParseType();
+
+	AstSliceType sliceType;
+	CREATE_AST_NODE(sliceType, SliceType);
+	sliceType->node = ParseType();
+
+	return sliceType;
 }
 
 /**
  * MapType     = "map" "[" KeyType "]" ElementType .
 KeyType     = Type .
  */
-AstNode ParseMapType(){
+AstMapType ParseMapType(){
+	AstMapType mapType;
+	CREATE_AST_NODE(mapType, MapType);
+
 	expect_token(TK_MAP);	
 	expect_token(TK_LBRACKET);	
-	ParseType();
+	AstNode KeyType = ParseType();
 	expect_token(TK_RBRACKET);	
-	ParseType();
+	AstNode elementType = ParseType();
+
+	mapType->keyType = KeyType;
+	mapType->elementType = elementType;
+
+	return mapType;
 }
 
 /**
  * ChannelType = ( "chan" | "chan" "<-" | "<-" "chan" ) ElementType .
+ * chan T          // can be used to send and receive values of type T
+ * chan<- float64  // can only be used to send float64s
+ * <-chan int      // can only be used to receive ints
  */
-AstNode ParseChannelType(){
+AstChannelType ParseChannelType(){
+	AstChannelType astChannelType;
+	CREATE_AST_NODE(astChannelType, ChannelType);
 	TokenKind kind = current_token.kind;
+	// ChannelType type;
+	enum ChannelType type;
 	if(kind == TK_CHAN){
 		expect_token(TK_CHAN);
-		unsigned char is_chan = 0;
+		type = CT_SendReceive;
+		int is_chan = 0;
 		StartPeekToken();
 		if(current_token.kind == TK_RECEIVE){
 			is_chan = 1;
@@ -358,14 +431,20 @@ AstNode ParseChannelType(){
 		EndPeekToken();
 		if(is_chan == 1){
 			expect_token(TK_RECEIVE);
+			type = CT_Send;
 		}
 	}else if(kind == TK_RECEIVE){
 		expect_token(TK_RECEIVE);
 		expect_token(TK_CHAN);
+		type = CT_Receive;
 	}else{
 		ERROR("expect a chan\n");
 	}
-	ParseType();
+
+	astChannelType->type = type;
+	astChannelType->elementType = ParseType();
+
+	return astChannelType;
 }
 
 // 获取数据类型的种类，例如数组、结构体等。
@@ -427,7 +506,7 @@ AstNode ParseLiteralType(){
 			node = ParseTypeName();
 			break;
 		case	ELEMENT:
-			node = ParseElementType();
+			node = ParseVariableElementType(); 
 			break;
 		default:
 			// TODO 暂时什么也不做。
@@ -446,7 +525,7 @@ Parameters     = "(" [ ParameterList [ "," ] ] ")" .
 ParameterList  = ParameterDecl { "," ParameterDecl } .
 ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
  */
-AstNode ParseFunctionType(){
+AstFunctionDeclarator ParseFunctionType(){
 
 	NEXT_TOKEN;
 
@@ -465,34 +544,19 @@ AstNode ParseFunctionType(){
 	signature->paramDecls = result;
 	fdec->sig = signature;
 	
-	// todo 测试，打印数据。
-//	PrintFdec(fdec);
-	
-		
-	AstFunction func;
-	CREATE_AST_NODE(func, Function);
-	func->fdec = fdec;
-	// return (AstNode)func;
-
-	// 处理FunctionBody
-	AstStatement stmt;// = ParseFunctionBody();
-	CREATE_AST_NODE(stmt, Statement);
-	func->stmt = stmt;
-
-	return (AstNode)func;
+	return fdec;
 }
 
 // "[" "..." "]" ElementType
-AstNode ParseElementType(){
+AstVariableElementType ParseVariableElementType(){
+	AstVariableElementType node;
+
+	CREATE_AST_NODE(node, VariableElementType);
 	EXPECT(TK_LBRACKET);
 	EXPECT(TK_ELLIPSIS);
 	EXPECT(TK_RBRACKET);
 
-	ParseType();
-
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	node->node = ParseType();
 
 	return node;
 }
-

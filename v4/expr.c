@@ -438,7 +438,8 @@ AstExpression ParsePrimaryExpr(){
 		StartPeekToken();
 		if(current_token.kind == TK_ID){
 //			ParseTypeName();
-			ParseOperandName();
+//			ParseOperandName();
+			ParseTypeName();
 			if(current_token.kind == TK_DOT){
 				type = 1;
 			}

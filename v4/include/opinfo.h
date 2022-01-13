@@ -50,6 +50,9 @@ OPINFO(OP_RECEIVE,8, "<-",      Assignment,     NOP)
 // 新加的运算符。不知道放到哪里合适，先放在这里。start
 OPINFO(OP_INDEX,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_ID,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_ARRAY,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_SLICE,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_DOT,          17,   "nop",    NOP,          NOP)
 
 // 新加的运算符。不知道放到哪里合适，先放在这里。end
 

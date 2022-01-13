@@ -57,8 +57,8 @@ AstNode ParseMethodDecl();
 AstNode ParseMethodDeclOrFunctionDecl();
 
 // todo 很奇怪，先后顺序可能会导致错误。
-AstNode ParseFieldDecl();
-AstNode ParseEmbeddedField();
+FieldDecl ParseFieldDecl();
+// AstNode ParseEmbeddedField();
 AstNode ParseTag();
 AstNode ParseStrintLit();
 
