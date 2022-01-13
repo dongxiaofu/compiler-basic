@@ -28,6 +28,7 @@ enum nodeKind
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
 	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceDeclaration,
 	NK_SliceType, NK_MapType, NK_ChannelType, NK_VariableElementType,
+	NK_ImportSpec, NK_ImportDeclaration,
 
 	NK_Expression,
 
@@ -320,6 +321,17 @@ struct astTranslationUnit
 };
 
 typedef struct astTranslationUnit AstTranslationUnit;
+
+typedef struct astImportSpec{
+	AST_NODE_COMMON
+	AstDeclarator packageName;
+	AstDeclarator importPath;
+} *AstImportSpec;
+
+typedef struct astImportDeclaration{
+	AST_NODE_COMMON
+	AstImportSpec importSpec;
+} *AstImportDeclaration;
 
 #define CREATE_AST_NODE(p, k) \
     p = (void *)malloc(sizeof(*p));              \

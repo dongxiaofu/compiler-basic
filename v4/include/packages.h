@@ -5,9 +5,9 @@
 
 
 AstNode ParsePackageClause();
-AstNode ParseImportPath();
-AstNode ParseImportSpec();
-AstNode ParseImportDecl();
+Token *ParseImportPath();
+AstImportSpec ParseImportSpec();
+AstImportDeclaration ParseImportDecl();
 AstNode ParseSourceFile();
 // AstNode Parse();
 // AstNode Parse();

@@ -19,49 +19,66 @@ AstNode ParsePackageClause(){
 /**
  * string_lit .
  */
-AstNode ParseImportPath(){
+Token *ParseImportPath(){
 	if(current_token.kind != TK_STRING){
 		perror("expect TK_STRING");
 		exit(-4);
 	}
 
-	NEXT_TOKEN;
+	Token *token = (Token *)malloc(sizeof(Token));
+	memcpy(token, &current_token, sizeof(Token));
 
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	return node;
+	NEXT_TOKEN;
+	
+	return token;
 }
 
 /**
  * [ "." | PackageName ] ImportPath .
+ * ImportPath       = string_lit .
+ * import   "lib/math"         math.Sin
+ * import m "lib/math"         m.Sin
+ * import . "lib/math"         Sin
  */
-AstNode ParseImportSpec(){
+AstImportSpec ParseImportSpec(){
+	AstImportSpec importSpec;
+	CREATE_AST_NODE(importSpec, ImportSpec);
+
+	AstDeclarator packageName;
+	CREATE_AST_NODE(packageName, Declarator);
+	packageName->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 	if(current_token.kind == TK_DOT){
 		EXPECT(TK_DOT);
+		strcpy(packageName->id, current_token.value.value_str);
 	}
 
 	if(current_token.kind == TK_ID){
 		EXPECT(TK_ID);
+		strcpy(packageName->id, current_token.value.value_str);
 	}
 
-	ParseImportPath();
-
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	return node;
+	Token *token = ParseImportPath();
+	AstDeclarator importPath;
+	CREATE_AST_NODE(importPath, Declarator);
+	importPath->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	strcpy(importPath->id, token->value.value_str);
+	
+	return importSpec;
 }
 
 /**
  * ImportDecl       = "import" ( ImportSpec | "(" { ImportSpec ";" } ")" ) .
  */
-AstNode ParseImportDecl(){
+AstImportDeclaration ParseImportDecl(){
 	EXPECT(TK_IMPORT);	
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	AstImportDeclaration decl;
+	CREATE_AST_NODE(decl, ImportDeclaration);
+	decl->importSpec = NULL;
 
 	if(current_token.kind != TK_LPARENTHESES){
-		ParseImportSpec();
-		return node;
+		AstImportSpec importSpec = ParseImportSpec();
+		decl->importSpec = importSpec;
+		return decl;
 	} 
 
 //	EXPECT(TK_LPARENTHESES);	
@@ -72,16 +89,25 @@ AstNode ParseImportDecl(){
 //	}
 //	EXPECT(TK_RPARENTHESES);	
 
+	AstImportSpec importSpec;
+
 	EXPECT(TK_LPARENTHESES);	
 	while(current_token.kind != TK_RPARENTHESES){
 		NO_TOKEN;
-		ParseImportSpec();
+		AstImportSpec currentImportSpec = ParseImportSpec();
+		if(decl->importSpec == NULL){
+			importSpec = currentImportSpec;
+			decl->importSpec = importSpec;
+		}else{
+			importSpec->next = currentImportSpec;
+			importSpec = currentImportSpec;
+		}
+
 		expect_semicolon;
-		// NEXT_TOKEN;
 	}
 	EXPECT(TK_RPARENTHESES);	
 
-	return node;
+	return decl;
 }
 
 /**
