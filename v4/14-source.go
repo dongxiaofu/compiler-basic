@@ -5,6 +5,7 @@ import (
 )
 
 func (de *DivideError) Error() string {
+	var a int
             dData := DivideError{
                     dividee: varDividee,
                     divider: varDivider,

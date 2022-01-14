@@ -31,19 +31,17 @@ int CurrentTokenIn(int *toks);
 int IsDataType(char *str);
 void ExpectDataType();
 
-// AstNode declaration();
-AstNode ParseConstDecl();
+AstConstDeclarator ParseConstSpec();
+AstConstDeclaration ParseConstDecl();
 
-AstDeclaration ParseConstSpec();
 AstExpression ParseIdentifierList();
 AstExpression ParseIdentifier();
-// TODO 找机会做得更完善。
-AstNode ParseShortVarDecl();
-AstNode ParseVarDecl();
-AstDeclaration ParseVarSpec();
 
-AstDeclaration ParseTypeSpec();
-AstNode ParseTypeDecl();
+AstVarDeclarator ParseVarSpec();
+AstVarDeclaration ParseVarDecl();
+
+AstTypeDeclarator ParseTypeSpec();
+AstTypeDeclaration ParseTypeDecl();
 
 AstParameterDeclaration ParseParameterDecl(int *count);
 AstParameterDeclaration ParseParameterList();
@@ -52,8 +50,8 @@ AstParameterDeclaration ParseResult();
 AstNode ParseFunctionName();
 AstNode ParseSignature();
 AstStatement ParseFunctionBody();
-AstNode ParseFunctionDecl();
-AstNode ParseMethodDecl();
+AstFunction ParseFunctionDecl();
+AstMethodDeclaration ParseMethodDecl();
 AstNode ParseMethodDeclOrFunctionDecl();
 
 // todo 很奇怪，先后顺序可能会导致错误。

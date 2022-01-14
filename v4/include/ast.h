@@ -30,6 +30,10 @@ enum nodeKind
 	NK_SliceType, NK_MapType, NK_ChannelType, NK_VariableElementType,
 	NK_ImportSpec, NK_ImportDeclaration,
 
+	NK_TypeDeclaration, NK_TypeDeclarator, NK_VarDeclarator, NK_VarDeclaration, 
+	NK_ConstDeclaration, NK_ConstDeclarator, NK_MethodDeclaration, 
+
+
 	NK_Expression,
 
 	NK_Statement,
@@ -252,6 +256,7 @@ typedef struct astParameterTypeList
 typedef struct astFunctionDeclarator
 {
         AST_DECLARATOR_COMMON
+        AstParameterTypeList receiver;
         AstParameterTypeList paramTyList;
         AstParameterTypeList sig;
 } *AstFunctionDeclarator;
@@ -293,6 +298,45 @@ typedef struct astVariableElementType{
 	AstNode node;
 } *AstVariableElementType;
 
+typedef struct astTypeDeclarator{
+	AST_DECLARATOR_COMMON
+	// declaration-specifiers:	(staic | int | const | ...) +
+	AstSpecifiers specs;
+	// init-declarator-list:		id, id=300,
+	AstNode initDecs;
+} *AstTypeDeclarator;
+
+typedef struct astTypeDeclaration{
+	AST_DECLARATOR_COMMON
+	AstTypeDeclarator decs;
+} *AstTypeDeclaration;
+
+typedef struct astVarDeclarator{
+	AST_DECLARATOR_COMMON
+	// declaration-specifiers:	(staic | int | const | ...) +
+	AstSpecifiers specs;
+	// init-declarator-list:		id, id=300,
+	AstNode initDecs;
+} *AstVarDeclarator;
+
+typedef struct astVarDeclaration{
+	AST_DECLARATOR_COMMON
+	AstVarDeclarator decs;
+} *AstVarDeclaration;
+
+typedef struct astConstDeclarator{
+	AST_DECLARATOR_COMMON
+	// declaration-specifiers:	(staic | int | const | ...) +
+	AstSpecifiers specs;
+	// init-declarator-list:		id, id=300,
+	AstNode initDecs;
+} *AstConstDeclarator;
+
+typedef struct astConstDeclaration{
+	AST_DECLARATOR_COMMON
+	AstVarDeclarator decs;
+} *AstConstDeclaration;
+
 #define AST_STATEMENT_COMMON AST_NODE_COMMON
 
 struct astStatement
@@ -310,6 +354,14 @@ typedef struct astFunction
         AstStatement stmt;
         int hasReturn;
 } *AstFunction;
+
+typedef struct astMethodDeclaration{
+        AST_NODE_COMMON
+        AstFunctionDeclarator fdec;
+        // compound-statement
+        AstStatement stmt;
+        int hasReturn;
+} *AstMethodDeclaration;
 
 struct astTranslationUnit
 {

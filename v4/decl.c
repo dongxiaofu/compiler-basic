@@ -46,59 +46,60 @@ AstNode declaration(){
  * 	ConstDecl      = "const" ( ConstSpec | "(" { ConstSpec ";" } ")" ) .
 	ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .
  */
-AstNode ParseConstDecl(){
+// AstNode ParseConstDecl(){
+AstConstDeclaration ParseConstDecl(){
 	LOG("%s\n", "parse const decl");
 
-	AstDeclaration head;
-	CREATE_AST_NODE(head, Declaration);
-	head->next = NULL;
-	AstDeclaration preDeclaration = NULL;
-	AstDeclaration curDeclaration;
-	AstDeclaration declaration;
-//	AstDeclaration;
+	AstConstDeclarator head;
+	CREATE_AST_NODE(head, ConstDeclarator);
+
+	AstConstDeclarator preDeclaration = NULL;
+	AstConstDeclarator  curDeclaration;
+
+	AstConstDeclaration declaration;
 
 	expect_token(TK_CONST);
 	if(current_token.kind == TK_LPARENTHESES){
-	NEXT_TOKEN;	
-//	ParseConstSpec();
-//	expect_semicolon;
-	// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
-	// todo 耗费了很多很多时间。
-	// while(current_token.kind == TK_SEMICOLON){
-	while(current_token.kind == TK_ID){
-		// todo 不需要这个NEXT_TOKEN，留给下面的函数解析。花了很多很多时间才找出这个问题。
-		//NEXT_TOKEN;	
-		curDeclaration = ParseConstSpec();
-		if(head->next == NULL){
-			head->next = curDeclaration;
-		}
-
-		if(preDeclaration == NULL){
-			preDeclaration = curDeclaration;
-		}else{
-			preDeclaration->next = curDeclaration;
-			preDeclaration = curDeclaration;
-		}
-		// curDeclaration = ParseConstSpec();
-		expect_semicolon;
+		NEXT_TOKEN;	
+	//	ParseConstSpec();
+	//	expect_semicolon;
 		// if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
-		//expect_token(TK_SEMICOLON);
+		// todo 耗费了很多很多时间。
+		// while(current_token.kind == TK_SEMICOLON){
+		while(current_token.kind == TK_ID){
+			// todo 不需要这个NEXT_TOKEN，留给下面的函数解析。花了很多很多时间才找出这个问题。
+			//NEXT_TOKEN;	
+			curDeclaration = ParseConstSpec();
+			if(head->next == NULL){
+				head->next = curDeclaration;
+			}
+	
+			if(preDeclaration == NULL){
+				preDeclaration = curDeclaration;
+			}else{
+				preDeclaration->next = curDeclaration;
+				preDeclaration = curDeclaration;
+			}
+	
+			expect_semicolon;
+		}
+		curDeclaration->next = NULL;
+		expect_token(TK_RPARENTHESES);
+		expect_token(TK_SEMICOLON);
+		declaration->decs = (AstConstDeclarator)head->next;
+	}else{
+		declaration->decs = ParseConstSpec();
+		expect_semicolon;
 	}
-	curDeclaration->next = NULL;
-	expect_token(TK_RPARENTHESES);
-	expect_token(TK_SEMICOLON);
-	declaration = (AstDeclaration)head->next;
-}else{
-	declaration = ParseConstSpec();
-	expect_semicolon;
-}
+
 	return declaration;
 }
 
 /**
  * ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .
  */
-AstDeclaration ParseConstSpec(){
+// AstDeclaration ParseConstSpec(){
+AstConstDeclarator ParseConstSpec(){
 	LOG("%s\n", "parse const spec");
 	AstExpression expr = ParseIdentifierList();
 
@@ -124,8 +125,8 @@ AstDeclaration ParseConstSpec(){
 
 
 	// 遍历expr和expr2开头的单链表，创建新的单链表。
-	AstDeclaration declaration;
-	CREATE_AST_NODE(declaration, Declaration);
+	AstConstDeclarator declaration;
+	CREATE_AST_NODE(declaration, ConstDeclarator);
 	
 	// 是一个单链表A的第一个结点。
 	AstInitDeclarator initDecs;
@@ -275,22 +276,24 @@ int IsDataType(char *str){
  * VarDecl     = "var" ( VarSpec | "(" { VarSpec ";" } ")" ) .
 VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
  */
-AstNode ParseVarDecl(){
+// TODO 最好找机会优化成变量专用声明。否则，怎么识别这个声明的种类。
+// AstNode ParseVarDecl(){
+// AstDeclaration ParseVarDecl(){
+AstVarDeclaration ParseVarDecl(){
 
-	AstDeclaration declaration;
-	CREATE_AST_NODE(declaration, Declaration);
+	AstVarDeclaration declaration;
+	CREATE_AST_NODE(declaration, VarDeclaration);
 
-	AstDeclaration curDeclaration;// = declaration;
-	CREATE_AST_NODE(curDeclaration, Declaration);
-	AstDeclaration preDeclaration;// = declaration;
-//	CREATE_AST_NODE(preDeclaration, Declaration);
-	preDeclaration = NULL;
+	// TODO 命名需要修改。
+	AstVarDeclarator curDeclaration;
+	CREATE_AST_NODE(curDeclaration, VarDeclarator);
+	AstVarDeclarator preDeclaration = NULL;
 
 	LOG("%s\n", "parse VarDec");
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
-		AstDeclaration headDeclaration;// = declaration;
-		CREATE_AST_NODE(headDeclaration, Declaration);
+		AstVarDeclarator headDeclaration;
+		CREATE_AST_NODE(headDeclaration, VarDeclarator);
 		headDeclaration->next = NULL;
 		NEXT_TOKEN;
 		while(current_token.kind != TK_RPARENTHESES){
@@ -307,23 +310,16 @@ AstNode ParseVarDecl(){
 				preDeclaration->next = (AstNode)curDeclaration;
 				preDeclaration = curDeclaration;
 			}
-// 			preDeclaration->next = (AstNode)curDeclaration;
-// 			preDeclaration = curDeclaration;
-			CREATE_AST_NODE(curDeclaration, Declaration);
-			// preDeclaration->next = (AstNode)curDeclaration;
-			// CREATE_AST_NODE(curDeclaration, Declaration);
-			// preDeclaration = curDeclaration;
-			// preDeclaration->next = curDeclaration;
 			expect_semicolon;	
 		}
 		curDeclaration->next = NULL;
 		expect_token(TK_RPARENTHESES);
 		expect_token(TK_SEMICOLON);
-		declaration = (AstDeclaration)headDeclaration->next;
+		declaration->decs = (AstVarDeclarator)headDeclaration->next;
 	}else{
 //		CREATE_AST_NODE(curDeclaration, Declaration);
 //		curDeclaration = ParseVarSpec();
-		declaration = ParseVarSpec();
+		declaration->decs = ParseVarSpec();
 		// TODO 不能确定所有的声明后面都加上了分号。
 		expect_semicolon;	
 	}
@@ -334,13 +330,14 @@ AstNode ParseVarDecl(){
 /**
  * VarSpec     = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
  */
-AstDeclaration ParseVarSpec(){
+// AstDeclaration ParseVarSpec(){
+AstVarDeclarator ParseVarSpec(){
 	LOG("%s\n", "parse VarDec");
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression); 
 	AstExpression expr2;
 	CREATE_AST_NODE(expr2, Expression); 
-	AstDeclarator decl = ParseIdentifierList();
+	AstExpression decl = ParseIdentifierList();
 	// expr2 = ParseExpressionList();
 
 	AstNode type;
@@ -361,8 +358,8 @@ AstDeclaration ParseVarSpec(){
 		}
 	}
 
-	AstDeclaration declaration;
-	CREATE_AST_NODE(declaration, Declaration);
+	AstVarDeclarator declaration;
+	CREATE_AST_NODE(declaration, VarDeclarator);
 	
 	// 是一个单链表A的第一个结点。
 	AstInitDeclarator initDecs;
@@ -377,9 +374,9 @@ AstDeclaration ParseVarSpec(){
 	AstInitDeclarator initDecsCur = initDecs;
 
 	AstExpression exprCur = expr;
-	// AstExpression expr2Cur = expr2;
+	AstExpression expr2Cur = decl;
 	// AstDeclaration expr2Cur = decl;
-	AstDeclarator expr2Cur = decl;
+	// AstDeclarator expr2Cur = decl;
 	while(exprCur != NULL){
 		NO_TOKEN;
 		// initDecsCur->dec->id = exprCur->val;	
@@ -387,8 +384,8 @@ AstDeclaration ParseVarSpec(){
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
 		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-		// strcpy(dec->id, expr2Cur->val.p);
-		strcpy(dec->id, expr2Cur->id);
+		strcpy(dec->id, expr2Cur->val.p);
+		// strcpy(dec->id, expr2Cur->id);
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
@@ -421,7 +418,8 @@ TypeSpec = AliasDecl | TypeDef .
 AliasDecl = identifier "=" Type .
 TypeDef = identifier Type .
  */
-AstDeclaration ParseTypeSpec(){
+// AstDeclaration ParseTypeSpec(){
+AstTypeDeclarator ParseTypeSpec(){
 	LOG("%s\n", "parse TypeSpec");
 //	AstExpression expr;
 //	CREATE_AST_NODE(expr, Expression); 
@@ -442,8 +440,8 @@ AstDeclaration ParseTypeSpec(){
 	}
 	type = ParseType();
 
-	AstDeclaration declaration;
-	CREATE_AST_NODE(declaration, Declaration);
+	AstTypeDeclarator decl;
+	CREATE_AST_NODE(decl, TypeDeclarator);
 	
 	AstInitDeclarator initDecs;
 	CREATE_AST_NODE(initDecs, InitDeclarator);
@@ -452,17 +450,16 @@ AstDeclaration ParseTypeSpec(){
 	CREATE_AST_NODE(dec, Declarator);
 	dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 	strcpy(dec->id, expr->val.p);
-//	strcpy(dec->id, expr->val.p);
 	initDecs->dec = dec;
 
 	AstSpecifiers specs;
 	CREATE_AST_NODE(specs, Specifiers);
 	specs->tySpecs = type;
 
-	declaration->specs = specs; 
-	declaration->initDecs = initDecs; 
+	decl->specs = specs; 
+	decl->initDecs = initDecs; 
 
-	return declaration;
+	return dec;
 }
 
 /**
@@ -552,25 +549,22 @@ AstNode ParseStrintLit(){
  * TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
 TypeSpec = AliasDecl | TypeDef .
  */
-AstNode ParseTypeDecl(){
-//	expect_token(TK_TYPE);
-//	expect_token(TK_ID);
-//	ParseType();
+// AstNode ParseTypeDecl(){
+AstTypeDeclaration ParseTypeDecl(){
 
-	AstDeclaration declaration;
-	CREATE_AST_NODE(declaration, Declaration);
+	AstTypeDeclaration declaration;
+	CREATE_AST_NODE(declaration, TypeDeclaration);
 
-	AstDeclaration curDeclaration;// = declaration;
-	CREATE_AST_NODE(curDeclaration, Declaration);
-	AstDeclaration preDeclaration;// = declaration;
-//	CREATE_AST_NODE(preDeclaration, Declaration);
-	preDeclaration = NULL;
+	// TODO curDeclaration改成curDeclarator会更好，但我不想现在做这些复制粘贴的工作。
+	AstTypeDeclarator curDeclaration;
+	CREATE_AST_NODE(curDeclaration, TypeDeclarator);
+	AstTypeDeclarator preDeclaration = NULL;
 
 	LOG("%s\n", "parse TypeDec");
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
-		AstDeclaration headDeclaration;// = declaration;
-		CREATE_AST_NODE(headDeclaration, Declaration);
+		AstTypeDeclarator headDeclaration;
+		CREATE_AST_NODE(headDeclaration, TypeDeclarator);
 		headDeclaration->next = NULL;
 		NEXT_TOKEN;
 		while(current_token.kind != TK_RPARENTHESES){
@@ -599,11 +593,9 @@ AstNode ParseTypeDecl(){
 		curDeclaration->next = NULL;
 		expect_token(TK_RPARENTHESES);
 		expect_token(TK_SEMICOLON);
-		declaration = (AstDeclaration)headDeclaration->next;
+		declaration->decs = (AstTypeDeclarator)headDeclaration->next;
 	}else{
-//		CREATE_AST_NODE(curDeclaration, Declaration);
-//		curDeclaration = ParseVarSpec();
-		declaration = ParseTypeSpec();
+		declaration->decs = ParseTypeSpec();
 		expect_semicolon;
 	}
 
@@ -928,7 +920,8 @@ void PrintFdec(AstFunctionDeclarator fdec){
 /**
  * FunctionDecl = "func" FunctionName Signature [ FunctionBody ] .
  */
-AstNode ParseFunctionDecl(){
+// AstNode ParseFunctionDecl(){
+AstFunction ParseFunctionDecl(){
 
 	NEXT_TOKEN;
 
@@ -964,7 +957,7 @@ AstNode ParseFunctionDecl(){
 	// CREATE_AST_NODE(stmt, Statement);
 	func->stmt = stmt;
 	
-	return (AstNode)func;
+	return func;
 }
 
 int CurrentTokenIn(int toks[]){
@@ -998,17 +991,29 @@ AstNode ParseShortVarDecl(){
 
 /**
  * MethodDecl = "func" Receiver MethodName Signature [ FunctionBody ] .
-Receiver   = Parameters .
+ * Receiver   = Parameters .
+ * FunctionDecl = "func" FunctionName Signature [ FunctionBody ] .
+ *
+ * Signature      = Parameters [ Result ] .
+Result         = Parameters | Type .
+Parameters     = "(" [ ParameterList [ "," ] ] ")" .
+ParameterList  = ParameterDecl { "," ParameterDecl } .
+ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
  */
-AstNode ParseMethodDecl(){
+// AstNode ParseMethodDecl(){
+AstMethodDeclaration ParseMethodDecl(){
 
 	NEXT_TOKEN;
+
+	AstFunctionDeclarator dec;
+	CREATE_AST_NODE(dec, FunctionDeclarator);
 
 	// Receiver
 	AstParameterTypeList paramTypeList2;
 	CREATE_AST_NODE(paramTypeList2, ParameterTypeList);
 	AstParameterDeclaration params2 = ParseParameters(); 
 	paramTypeList2->paramDecls = params2;
+	dec->receiver = paramTypeList2;
 
 	AstNode functionName = ParseFunctionName();
 
@@ -1016,22 +1021,29 @@ AstNode ParseMethodDecl(){
 	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
 	AstParameterDeclaration params = ParseParameters(); 
 	paramTypeList->paramDecls = params;
-//	fdec->paramTyList = paramTypeList;
+	dec->paramTyList = paramTypeList;
 	
 	AstParameterTypeList signature;
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
-//	fdec->sig = signature;
-	
+	dec->sig = signature;
 		
 //	AstFunction func;
 //	CREATE_AST_NODE(func, Function);
 //	func->fdec = fdec;
 	// return (AstNode)func;
+	AstMethodDeclaration methodDeclaration;
+	CREATE_AST_NODE(methodDeclaration, MethodDeclaration);
+	methodDeclaration->fdec = dec;
+	
 
 	// 处理FunctionBody
 	AstStatement stmt = ParseFunctionBody();
+
+	methodDeclaration->stmt = stmt;
+
+	return methodDeclaration;
 }
 
 AstNode ParseMethodDeclOrFunctionDecl(){
