@@ -276,14 +276,6 @@ AstIfStatement ParseIfStatement(){
 	// todo 使用了StartPeekToken而没有使用EndPeekToken，会有问题吗？
 	// 处理[ SimpleStmt ";" ]
 	AstStatement simpleStmt = NULL;
-//	StartPeekToken;
-//	simpleStmt = ParseSimpleStatement();
-//	if(current_token.kind == TK_SEMICOLON){
-//		EXPECT(TK_SEMICOLON);
-//	}else{
-//		EndPeekToken;
-//		simpleStmt = NULL;
-//	}
 
 	// 处理[ SimpleStmt ";" ]
 	char semicolon_flag = 0;
@@ -453,21 +445,23 @@ AstCompoundStatement ParseCompoundStatement(){
  */
 AstReturnStatement ParseReturnStatement(){
 	LOG("%s\n", "Parse return stmt");
-//	NEXT_TOKEN;
-//	NEXT_TOKEN;
-//	NEXT_TOKEN;
+
 	if(current_token.kind == TK_RETURN){
 		expect_token(TK_RETURN);
 	}	
 
+	AstExpression expr = NULL;
+
 	if(current_token.kind != TK_RBRACE){
-		ParseExpressionList();
+		expr = ParseExpressionList();
 	}	
 
 	expect_semicolon;
 
 	AstReturnStatement stmt;
 	CREATE_AST_NODE(stmt, ReturnStatement);
+	
+	stmt->expr = expr;
 
 	return stmt;
 }
@@ -593,11 +587,11 @@ AstRecvStmt ParseRecvStmt(){
 	
 	EndPeekToken();
 	
-	if(flag_chan == 0){
-		ERROR("%s\n", "Expect a <-");
-		// TODO 寻机优化成在ERROR中退出。
-		exit(2);
-	}
+//	if(flag_chan == 0){
+//		ERROR("%s\n", "Expect a <-");
+//		// TODO 寻机优化成在ERROR中退出。
+//		exit(2);
+//	}
 
 	if(type == 1){
 		ParseExpressionList();
@@ -609,10 +603,9 @@ AstRecvStmt ParseRecvStmt(){
 	}	
 
 	// 处理<-
-//	expect_token(TK_LESS);
-//	expect_token(TK_MINUS);
-	EXPECT(TK_RECEIVE);
-	// TODO 是sender还是receiver？
+	// 跳过=或:=
+	NEXT_TOKEN;
+
 	AstExpression expr = ParseExpression();
 	
 	// TODO 解析完了RecvStmt，但没有建立AST。返回值是不正确的。
@@ -797,60 +790,82 @@ AstSelectStmt ParseSelectStmt(){
 	return selectStmt;
 }
 
-// 获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
+/**
+ * SendStmt = Channel "<-" Expression .
+ * Channel  = Expression .
+ * RecvStmt   = [ ExpressionList "=" | IdentifierList ":=" ] RecvExpr .
+ * RecvExpr   = Expression .
+  获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
+ */
 int getStmtType(){
-	int tokens[200];
-	int i = -1;
-	int receive_operator_index = -1;
-	int assign_operator_index = -1;
-	int assign_init_operator_index = -1;
 	char stmt_type = -1;
-	
 	StartPeekToken();
-	while(current_token.kind != TK_COLON){
-		NO_TOKEN;
-		tokens[++i] = current_token.kind;
+	if(CurrentTokenIn(FIRST_Expression) == 1){
+		ParseExpression();
 		if(current_token.kind == TK_RECEIVE){
-			receive_operator_index = i;
-			break;
-		}else if(current_token.kind == TK_ASSIGN){
-			assign_operator_index = i;
-		}else if(current_token.kind == TK_INIT_ASSIGN){
-			assign_init_operator_index = i;
+			stmt_type = 1;
+		}else{
+			stmt_type = 2;
 		}
-		NEXT_TOKEN;
 	}
 	EndPeekToken();
-	
-	// TODO 下面的一系列代码写得太难看，寻机优化。
-	// 没有<-，报错。
-	if(receive_operator_index == -1){
-		EXPECT(TK_RECEIVE);
-	}	
 
-	// case后面紧邻<-，一定是接收语句。
-	if(receive_operator_index == 0){
-		stmt_type = 2;
-	}
-
-	// = <- ch 这种，是接收语句。
-	if(assign_operator_index != -1){
-		stmt_type = 2;
-	}
-
-	// := <- ch 这种，是接收语句。
-	if(assign_init_operator_index != -1){
-		stmt_type = 2;
-	}
-
-	// SendStmt = Channel "<-" Expression .
-	// Channel  = Expression .
-	if(assign_operator_index == -1 && assign_init_operator_index == -1 && receive_operator_index > 0){
-		stmt_type = 1;
-	}
-	
 	return stmt_type;
 }
+// 获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
+// int getStmtType(){
+// 	int tokens[200];
+// 	int i = -1;
+// 	int receive_operator_index = -1;
+// 	int assign_operator_index = -1;
+// 	int assign_init_operator_index = -1;
+// 	char stmt_type = -1;
+// 	
+// 	StartPeekToken();
+// 	while(current_token.kind != TK_COLON){
+// 		NO_TOKEN;
+// 		tokens[++i] = current_token.kind;
+// 		if(current_token.kind == TK_RECEIVE){
+// 			receive_operator_index = i;
+// 			break;
+// 		}else if(current_token.kind == TK_ASSIGN){
+// 			assign_operator_index = i;
+// 		}else if(current_token.kind == TK_INIT_ASSIGN){
+// 			assign_init_operator_index = i;
+// 		}
+// 		NEXT_TOKEN;
+// 	}
+// 	EndPeekToken();
+// 	
+// 	// TODO 下面的一系列代码写得太难看，寻机优化。
+// 	// 没有<-，报错。
+// 	if(receive_operator_index == -1){
+// 		EXPECT(TK_RECEIVE);
+// 	}	
+// 
+// 	// case后面紧邻<-，一定是接收语句。
+// 	if(receive_operator_index == 0){
+// 		stmt_type = 2;
+// 	}
+// 
+// 	// = <- ch 这种，是接收语句。
+// 	if(assign_operator_index != -1){
+// 		stmt_type = 2;
+// 	}
+// 
+// 	// := <- ch 这种，是接收语句。
+// 	if(assign_init_operator_index != -1){
+// 		stmt_type = 2;
+// 	}
+// 
+// 	// SendStmt = Channel "<-" Expression .
+// 	// Channel  = Expression .
+// 	if(assign_operator_index == -1 && assign_init_operator_index == -1 && receive_operator_index > 0){
+// 		stmt_type = 1;
+// 	}
+// 	
+// 	return stmt_type;
+// }
 
 // 获取语句的类型。1是SendStmt，2是RecvStmt，-1是其他。
 // int getStmtType(){
@@ -890,16 +905,28 @@ int getStmtType(){
 // 
 // 	return stmt_type;
 // }
-
+/**
+ *CommClause = CommCase ":" StatementList .
+ *CommCase   = "case" ( SendStmt | RecvStmt ) | "default" .
+ *RecvStmt   = [ ExpressionList "=" | IdentifierList ":=" ] RecvExpr .
+ *RecvExpr   = Expression .
+*/
 AstSelectCaseStatement ParseAstSelectCaseStmt(){
+
+	AstSelectCaseStatement stmtHeader;
+	CREATE_AST_NODE(stmtHeader, SelectCaseStatement);
+
+	AstSelectCaseStatement currentStmt;
+
 	// 跳过select
 	NEXT_TOKEN;
 	// 跳过{
 	expect_token(TK_LBRACE);
 	// 一个循环
 	while(current_token.kind == TK_CASE || current_token.kind == TK_DEFAULT){
-		// 跳过冒号
-		expect_token(TK_COLON);
+		// 跳过CASE或default
+		NEXT_TOKEN;
+		AstStatement stmtCase = NULL;
 		// 处理"case" ( SendStmt | RecvStmt ) | "default" .
 		if(current_token.kind == TK_DEFAULT){
 			// do nothing
@@ -907,21 +934,36 @@ AstSelectCaseStatement ParseAstSelectCaseStmt(){
 			// 分辨是SendStmt还是RecvStmt
 			char stmt_type = getStmtType();
 			if(stmt_type == 1){
-				ParseSendStmt();
+				stmtCase = ParseSendStmt();
 			}else if(stmt_type == 2){
-				ParseRecvStmt();
+				stmtCase = ParseRecvStmt();
 			}else{
 				ERROR("%s\n", "Require a SendStmt or RecvStmt");
 			}
 		}
 		
+		if(stmtHeader->next == NULL){
+			CREATE_AST_NODE(currentStmt, SelectCaseStatement);
+			stmtHeader->next = currentStmt;
+		}else{
+			AstSelectCaseStatement nextStmt;
+			CREATE_AST_NODE(nextStmt, SelectCaseStatement);
+			currentStmt->next = nextStmt;
+			currentStmt = nextStmt;
+		}	
+
+		currentStmt->caseStmt = stmtCase;
+		// 跳过冒号
+		expect_token(TK_COLON);
 		// 解析StatementList。又是一个循环。
 		// todo 分解问题，放到另外的函数处理吧。
-		ParseStatementList();
+		currentStmt->stmt = ParseStatementList();
 	}
 	// 跳过}
 	expect_token(TK_RBRACE);
 	expect_semicolon;
+
+	return stmtHeader->next;
 }
 
 // TODO 建立单链表，重复了很多次的代码。
@@ -1128,50 +1170,75 @@ AstStatement ParseForStmt(){
  * TypeList        = Type { "," Type } .
  */
 AstNode ParseTypeList(){
+	AstNode typeList;
+	CREATE_AST_NODE(typeList, Node);
+	
+	AstNode currentType = ParseType();
+	typeList->next = currentType;
 
-	ParseType();
 	while(current_token.kind == TK_COMMA){
 		NEXT_TOKEN;
-		ParseType();
+		AstNode next = ParseType();
+		currentType->next = next;
+		currentType = next;
 	}
 
-	AstStatement stmt;
-	return (AstNode)stmt;
+	return typeList->next;
 }
 
 /**
  * "case" TypeList | "default" .
  */
-AstStatement ParseTypeSwitchCase(){
-
+AstNode ParseTypeSwitchCase(){
+	AstNode node;
 	if(current_token.kind == TK_CASE){
 		NEXT_TOKEN;
-		ParseTypeList();
+		node = ParseTypeList();
 	}else if(current_token.kind == TK_DEFAULT){
 		NEXT_TOKEN;
+		node = NULL;
 	}else{
 		ERROR("%s\n", "TypeSwitchCase requires default or case");
 	}
 
-	AstStatement stmt;
-	return stmt;
+	return node;
 }
 
-AstStatement ParseTypeCaseClause(){
+/**
+ * TypeCaseClause  = TypeSwitchCase ":" StatementList .
+ * TypeSwitchCase  = "case" TypeList | "default" .
+ * TypeList        = Type { "," Type } .
+ */
+AstTypeCaseClause ParseTypeCaseClause(){
+	AstTypeCaseClause header;
+	CREATE_AST_NODE(header, TypeCaseClause);
+
+	AstTypeCaseClause currentTypeCaseClause = NULL;
+
 	while(current_token.kind == TK_CASE || current_token.kind == TK_DEFAULT){
-		ParseTypeSwitchCase();
+		AstTypeCaseClause next;
+		CREATE_AST_NODE(next, TypeCaseClause);
+
+		if(header->next == NULL){
+			currentTypeCaseClause = next;
+			header->next = currentTypeCaseClause; 
+		}else{
+			currentTypeCaseClause->next = next;
+			currentTypeCaseClause = next;
+		}
+
+		next->typeSwitchCase = ParseTypeSwitchCase();
 		expect_token(TK_COLON);
-		ParseStatementList();
+		next->statementList = ParseStatementList();
 	}
 	
-	AstStatement stmt;
-	return stmt;
+	return header->next;
 }
 
 /**
  * [ identifier ":=" ] PrimaryExpr "." "(" "type" ")" .
  */
-AstStatement ParseTypeSwitchGuard(){
+AstTypeSwitchGuard ParseTypeSwitchGuard(){
 
 //	StartPeekToken();
 //	char colon_flag = 0;
@@ -1214,12 +1281,15 @@ AstStatement ParseTypeSwitchGuard(){
 	}
 	EndPeekToken();
 
+	AstTypeSwitchGuard guard;
+	CREATE_AST_NODE(guard, TypeSwitchGuard);
+
 	if(colon_equal_flag == 1){
-		ParseIdentifier();
+		guard->identifier = ParseIdentifier();
 		EXPECT(TK_INIT_ASSIGN);
 	}
 
-	ParsePrimaryExpr();
+	guard->expr = ParsePrimaryExpr();
 
 	// 处理 "." "(" "type" ")"
 	expect_token(TK_DOT);
@@ -1227,42 +1297,55 @@ AstStatement ParseTypeSwitchGuard(){
 	expect_token(TK_TYPE);
 	expect_token(TK_RPARENTHESES);
 	
-
-	AstStatement stmt;
-	return stmt;
+	return guard;
 }
 
 AstStatement ParseExprSwitchCase(){
-
+	AstExpression expr = NULL;
 	if(current_token.kind == TK_DEFAULT){
 		// do nothing	
 		NEXT_TOKEN;
 	}else if(current_token.kind == TK_CASE){
 		NEXT_TOKEN;
-		ParseExpressionList();
+		expr = ParseExpressionList();
 	}else{
 		ERROR("%s\n", "ExprSwitchCase requires case or default");
 	}
 
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-	return stmt;
+	return expr;
 }
 
-AstStatement ParseExprCaseClause(){
-	
+// AstStatement ParseExprCaseClause(){
+AstExprCaseClause ParseExprCaseClause(){
+	AstExprCaseClause headExprCaseClause;	
+	CREATE_AST_NODE(headExprCaseClause, ExprCaseClause);
+	AstExprCaseClause currentExprCaseClause;	
+
 	while(current_token.kind == TK_DEFAULT || current_token.kind == TK_CASE){
-		ParseExprSwitchCase();
+		AstExprCaseClause exprCaseClause;	
+		CREATE_AST_NODE(exprCaseClause, ExprCaseClause);
+		if(headExprCaseClause->next == NULL){
+			headExprCaseClause->next = exprCaseClause;
+			currentExprCaseClause = exprCaseClause;
+		}else{
+			currentExprCaseClause->next = exprCaseClause;
+			currentExprCaseClause = exprCaseClause;
+		}
+		exprCaseClause->exprSwitchCase = ParseExprSwitchCase();
 		expect_token(TK_COLON);
-		ParseStatementList();
+		exprCaseClause->statementList = ParseStatementList();
 	}
 
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-
-	return stmt;
+	return headExprCaseClause->next;
 }
 
+/**
+ * TypeSwitchStmt  = "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" { TypeCaseClause } "}" .
+ * TypeSwitchGuard = [ identifier ":=" ] PrimaryExpr "." "(" "type" ")" .
+ * TypeCaseClause  = TypeSwitchCase ":" StatementList .
+ * TypeSwitchCase  = "case" TypeList | "default" .
+ * TypeList        = Type { "," Type } .
+ */
 AstStatement ParseTypeSwitchStmt(){
 
 	// 跳过switch
@@ -1283,27 +1366,33 @@ AstStatement ParseTypeSwitchStmt(){
 	}
 	EndPeekToken();
 
+	AstTypeSwitchStmt typeSwitchStmt;
+	CREATE_AST_NODE(typeSwitchStmt, TypeSwitchStmt);
+
 	if(semicolon_flag == 1){
-		ParseSimpleStatement();
+		typeSwitchStmt->simpleStmt = ParseSimpleStatement();
 	}
 
 	// 处理 TypeSwitchGuard
-	ParseTypeSwitchGuard();
+	typeSwitchStmt->guard = ParseTypeSwitchGuard();
 
 	// 处理 "{" { TypeCaseClause } "}"
 	expect_token(TK_LBRACE);
-	ParseTypeCaseClause();
+	typeSwitchStmt->typeCaseClause = ParseTypeCaseClause();
 	expect_token(TK_RBRACE);
 	expect_semicolon;
 
-	AstStatement stmt;
-
-	return stmt;
+	return typeSwitchStmt;
 }
 
-AstStatement ParseExprSwitchStmt(){
+/**
+ * ExprSwitchStmt = "switch" [ SimpleStmt ";" ] [ Expression ] "{" { ExprCaseClause } "}" .
+ * ExprCaseClause = ExprSwitchCase ":" StatementList .
+ * ExprSwitchCase = "case" ExpressionList | "default" .
+ */
+// AstStatement ParseExprSwitchStmt(){
+AstExprSwitchStmt ParseExprSwitchStmt(){
 	// 跳过switch
-//	NEXT_TOKEN;
 
 	// 处理[ SimpleStmt ";" ] [ Expression ]	
 	int tokens[200];
@@ -1352,30 +1441,33 @@ AstStatement ParseExprSwitchStmt(){
 
 	EndPeekToken();
 
+	AstExprSwitchStmt exprSwitchStmt;
+	CREATE_AST_NODE(exprSwitchStmt, ExprSwitchStmt);
+
 	// 处理 [ SimpleStmt ";" ] [ Expression ]
 	if(type == 1){
-		ParseSimpleStatement();	
+		exprSwitchStmt->simpleStmt = ParseSimpleStatement();	
 		expect_token(TK_SEMICOLON);
 	}else if(type == 2){
-		ParseExpression();
+		exprSwitchStmt->expr = ParseExpression();
 	}else if(type == 3){
-		ParseSimpleStatement();
+		exprSwitchStmt->simpleStmt = ParseSimpleStatement();
 		expect_token(TK_SEMICOLON);
-		ParseExpression();
+		exprSwitchStmt->expr = ParseExpression();
 	}
 
 	// 处理 "{" { ExprCaseClause } "}"
 	expect_token(TK_LBRACE);
-	ParseExprCaseClause();
+	exprSwitchStmt->exprCaseClause = ParseExprCaseClause();
 	expect_token(TK_RBRACE);
 	expect_semicolon;
 	
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-	
-	return stmt;
+	return exprSwitchStmt;
 }
 
+/**
+ * SwitchStmt = ExprSwitchStmt | TypeSwitchStmt .
+ */
 AstStatement ParseSwitchStmt(){
 	
 	expect_token(TK_SWITCH);
@@ -1410,16 +1502,16 @@ AstStatement ParseSwitchStmt(){
 	}
 	EndPeekToken();
 
+	AstNode stmt;
+	CREATE_AST_NODE(stmt, Node);
+
 	if(switch_type == 1){
-		ParseExprSwitchStmt();	
+		stmt = (AstNode)ParseExprSwitchStmt();	
 	}else if(switch_type == 2){
-		ParseTypeSwitchStmt();
+		stmt = (AstNode)ParseTypeSwitchStmt();
 	}else{
 		ERROR("%s\n", "Require a switch stmt");
 	}
-
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
 
 	return stmt;
 }

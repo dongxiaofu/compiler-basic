@@ -98,6 +98,26 @@ typedef struct astIfStatement
 	AstStatement  thenStmt;
 	AstStatement  elseStmt;
 } *AstIfStatement;
+
+typedef struct astTypeSwitchGuard{
+	AST_STATEMENT_COMMON
+	AstExpression identifier;	
+	AstExpression expr;
+} *AstTypeSwitchGuard;
+
+typedef struct astTypeCaseClause{
+	AST_STATEMENT_COMMON
+	AstNode typeSwitchCase;
+	AstStatement statementList;
+} *AstTypeCaseClause;
+
+typedef struct astTypeSwitchStmt{
+	AST_STATEMENT_COMMON
+	AstStatement simpleStmt;
+	AstTypeSwitchGuard guard;
+	AstTypeCaseClause typeCaseClause;
+} *AstTypeSwitchStmt;
+
 /**
 	@ncase		number of case
 	@minVal	minium value
@@ -297,14 +317,14 @@ AstStatement ParseForStmt();
 // AstStatement Parse();
 // TODO 这是一个很特殊的产生式。暂时先放在这里。
 AstNode ParseTypeList();
-AstStatement ParseTypeSwitchCase();
-AstStatement ParseTypeCaseClause();
-AstStatement ParseTypeSwitchGuard();
+AstNode ParseTypeSwitchCase();
+AstTypeCaseClause ParseTypeCaseClause();
+AstTypeSwitchGuard ParseTypeSwitchGuard();
 
 AstStatement ParseExprSwitchCase();
-AstStatement ParseExprCaseClause();
+AstExprCaseClause ParseExprCaseClause();
 AstStatement ParseTypeSwitchStmt();
-AstStatement ParseExprSwitchStmt();
+AstExprSwitchStmt ParseExprSwitchStmt();
 AstStatement ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();

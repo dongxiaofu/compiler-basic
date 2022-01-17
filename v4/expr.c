@@ -77,6 +77,7 @@ AstExpression ParseExpression(){
 		expr = ParseUnaryExpr();
 	}else{
 		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+//		expr = ParseBinaryExpr(5);
 	}
 
 //	 if(CurrentTokenIn(FIRST_Expression) == 1){
@@ -591,13 +592,15 @@ AstExpression ParseOperand(){
             }
      */
 	if(current_token.kind == TK_ID){
-		StartPeekToken();
-		expr = ParseOperandName();
-		if(current_token.kind == TK_LBRACE){
-			EndPeekToken();
-			goto literal;
-		}
-		EndPeekToken();
+
+		// TODO 这里，暂时不能要。需要进行语义分析才能解析上面的dData例程。暂时注释。
+//		StartPeekToken();
+//		expr = ParseOperandName();
+//		if(current_token.kind == TK_LBRACE){
+//			EndPeekToken();
+//			goto literal;
+//		}
+//		EndPeekToken();
 	
 		expr = ParseOperandName();
 	}else if(current_token.kind == TK_LPARENTHESES ){

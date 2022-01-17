@@ -33,6 +33,9 @@ enum nodeKind
 	NK_TypeDeclaration, NK_TypeDeclarator, NK_VarDeclarator, NK_VarDeclaration, 
 	NK_ConstDeclaration, NK_ConstDeclarator, NK_MethodDeclaration, 
 
+	NK_SelectCaseStatement, NK_ExprSwitchStmt,
+	NK_ExprCaseClause,
+	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
 
 	NK_Expression,
 
@@ -345,6 +348,19 @@ struct astStatement
 };
 
 typedef struct astStatement *AstStatement;
+
+typedef struct astExprCaseClause{
+	AST_NODE_COMMON
+	AstExpression exprSwitchCase;
+	AstStatement statementList;
+} *AstExprCaseClause;
+
+typedef struct astExprSwitchStmt{
+	AST_STATEMENT_COMMON
+	AstStatement simpleStmt;
+	AstExpression expr;
+	AstExprCaseClause exprCaseClause;
+} *AstExprSwitchStmt;
 
 typedef struct astFunction
 {

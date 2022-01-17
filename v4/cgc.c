@@ -106,7 +106,8 @@ AstTranslationUnit ParseTranslationUnit(){
 		ParseAssignmentsStmt();
 		printf("【%d assign over】\n", i++);
 	}
-
+	
+//	ParseExpression();
 	ParseSourceFile();
 	LOG("parse unit over\n");
 
