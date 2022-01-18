@@ -36,6 +36,8 @@ enum nodeKind
 	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
+	
+	NK_ForClause, NK_RangeClause, NK_ForStmt,
 
 	NK_Expression,
 

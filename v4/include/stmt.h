@@ -119,6 +119,36 @@ typedef struct astTypeSwitchStmt{
 } *AstTypeSwitchStmt;
 
 /**
+ * ForClause = [ InitStmt ] ";" [ Condition ] ";" [ PostStmt ] .
+ * InitStmt = SimpleStmt .
+ * PostStmt = SimpleStmt .
+ */
+typedef struct astForClause{
+	AST_NODE_COMMON
+	AstStatement initStmt;
+	AstExpression condition;
+	AstStatement postStmt;
+} *AstForClause;
+
+/**
+ * RangeClause = [ ExpressionList "=" | IdentifierList ":=" ] "range" Expression .
+ */
+typedef struct astRangeClause{
+	AST_NODE_COMMON
+	AstExpression expressionList;
+	AstExpression identifierList;
+	AstExpression expr;
+} *AstRangeClause;
+
+typedef struct astForStmt{
+	AST_STATEMENT_COMMON
+	AstExpression condition;
+	AstForClause forClause;
+	AstRangeClause rangeClause;
+	AstStatement body;
+} *AstForStmt;
+
+/**
 	@ncase		number of case
 	@minVal	minium value
 	@maxVal	maximum value
@@ -308,9 +338,9 @@ AstSelectStmt ParseSelectStmt();
 // TODO 寻机改把返回值改成更合适的数据类型。
 AstExpression ParseRangeExpr();
 AstExpression ParseCondition();
-AstStatement ParseForClause();
-AstStatement ParseRangeClause();
-AstStatement ParseForStmt();
+AstForClause ParseForClause();
+AstRangeClause ParseRangeClause();
+AstForStmt ParseForStmt();
 
 // switch
 // AstStatement Parse();
@@ -323,9 +353,9 @@ AstTypeSwitchGuard ParseTypeSwitchGuard();
 
 AstStatement ParseExprSwitchCase();
 AstExprCaseClause ParseExprCaseClause();
-AstStatement ParseTypeSwitchStmt();
+AstTypeSwitchStmt ParseTypeSwitchStmt();
 AstExprSwitchStmt ParseExprSwitchStmt();
-AstStatement ParseSwitchStmt();
+AstNode ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();
 // AstStatement ParseSimpleStatement();

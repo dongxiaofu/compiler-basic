@@ -1017,19 +1017,39 @@ AstExpression ParseCondition(){
 InitStmt = SimpleStmt .
 PostStmt = SimpleStmt .
  */
-AstStatement ParseForClause(){
+AstForClause ParseForClause(){
 
 	// TODO [ InitStmt ] 等都是可选的。此处的代码把它们按照必选处理。寻机再完善。
-	ParseSimpleStatement();
-	// expect_token(TK_SEMICOLON);
-	expect_semicolon;
-	ParseCondition();
-	expect_semicolon;
-	// expect_token(TK_SEMICOLON);
-	ParseSimpleStatement();
+//	ParseSimpleStatement();
+//	// expect_token(TK_SEMICOLON);
+//	expect_semicolon;
+//	ParseCondition();
+//	expect_semicolon;
+//	// expect_token(TK_SEMICOLON);
+//	ParseSimpleStatement();
+//
+//	AstStatement stmt;
+//	return stmt;
 
-	AstStatement stmt;
-	return stmt;
+	AstForClause forClause;
+	CREATE_AST_NODE(forClause, ForClause);
+	forClause->initStmt = NULL;
+	forClause->condition = NULL;
+	forClause->postStmt = NULL;
+
+	if(current_token.kind != TK_SEMICOLON){
+		forClause->initStmt = ParseSimpleStatement();
+	}	
+	expect_semicolon;
+
+	if(current_token.kind != TK_SEMICOLON){
+		forClause->condition = ParseCondition();
+	}	
+	expect_semicolon;
+
+	forClause->postStmt = ParseSimpleStatement();
+
+	return forClause;
 }
 
 AstExpression ParseRangeExpr(){
@@ -1042,7 +1062,7 @@ AstExpression ParseRangeExpr(){
 /**
  * RangeClause = [ ExpressionList "=" | IdentifierList ":=" ] "range" Expression .
  */
-AstStatement ParseRangeClause(){
+AstRangeClause ParseRangeClause(){
 	// 处理[ ExpressionList "=" | IdentifierList ":=" ]
 	// 识别是表达式列表还是标识符列表。
 //	char type = -1;
@@ -1078,11 +1098,16 @@ AstStatement ParseRangeClause(){
 	}
 	EndPeekToken();
 
+	AstRangeClause rangeClause;
+	CREATE_AST_NODE(rangeClause, RangeClause);
+	rangeClause->expressionList = NULL;
+	rangeClause->identifierList = NULL;
+
 	if(type == 1){
-		ParseExpressionList();
+		rangeClause->expressionList = ParseExpressionList();
 		EXPECT(TK_ASSIGN);
 	}else if(type == 2){
-		ParseIdentifierList();
+		rangeClause->identifierList = ParseIdentifierList();
 		EXPECT(TK_INIT_ASSIGN);
 	}else{
 		// do nothing
@@ -1092,11 +1117,9 @@ AstStatement ParseRangeClause(){
 	expect_token(TK_RANGE);
 
 	// TODO 暂时把range后面的表达式当普通表达式处理。
-	ParseRangeExpr();
+	rangeClause->expr = ParseRangeExpr();
 
-	AstStatement stmt = NULL;
-
-	return stmt;
+	return rangeClause;
 }
 
 /**
@@ -1109,7 +1132,7 @@ PostStmt = SimpleStmt .
 
 RangeClause = [ ExpressionList "=" | IdentifierList ":=" ] "range" Expression .
  */
-AstStatement ParseForStmt(){
+AstForStmt ParseForStmt(){
 	// 跳过 for
 	NEXT_TOKEN;
 
@@ -1147,23 +1170,24 @@ AstStatement ParseForStmt(){
 
 	EndPeekToken();	
 
+	AstForStmt forStmt;
+	CREATE_AST_NODE(forStmt, ForStmt);
+	forStmt->condition = NULL;
+	forStmt->forClause = NULL;
+	forStmt->rangeClause = NULL;
+
 	if(type == 1){
-		ParseRangeClause();
+		forStmt->rangeClause = ParseRangeClause();
 	}else if(type == 2){
-		ParseForClause();
+		forStmt->forClause = ParseForClause();
 	}else{
-		ParseCondition();
+		forStmt->condition = ParseCondition();
 	}
 
-
 	// 处理 Block
-	ParseFunctionBody();	
+	forStmt->body = ParseFunctionBody();	
 
-	// TODO 没有建立AST	
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-
-	return stmt;
+	return forStmt;
 }
 
 /**
@@ -1346,7 +1370,7 @@ AstExprCaseClause ParseExprCaseClause(){
  * TypeSwitchCase  = "case" TypeList | "default" .
  * TypeList        = Type { "," Type } .
  */
-AstStatement ParseTypeSwitchStmt(){
+AstTypeSwitchStmt ParseTypeSwitchStmt(){
 
 	// 跳过switch
 //	NEXT_TOKEN;
@@ -1468,7 +1492,7 @@ AstExprSwitchStmt ParseExprSwitchStmt(){
 /**
  * SwitchStmt = ExprSwitchStmt | TypeSwitchStmt .
  */
-AstStatement ParseSwitchStmt(){
+AstNode ParseSwitchStmt(){
 	
 	expect_token(TK_SWITCH);
 
@@ -1476,7 +1500,7 @@ AstStatement ParseSwitchStmt(){
 	char switch_type = -1;
 	StartPeekToken();
 	char dot_flag = 0;
-	while(current_token.kind != TK_LBRACE){
+	while(current_token.kind != TK_RBRACE){
 		NO_TOKEN;
 		if(current_token.kind == TK_DOT){ // .
 			StartPeekToken();
