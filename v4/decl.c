@@ -16,19 +16,19 @@ AstNode declaration(){
 	switch(kind){
 		case TK_VAR:
 			LOG("%s\n", "parse var");
-			ParseVarDecl();
+			decl = (AstNode)ParseVarDecl();
 			break;
 		case TK_TYPE:
 			LOG("%s\n", "parse type");
-			ParseTypeDecl();
+			decl = (AstNode)ParseTypeDecl();
 			break;
 		case TK_CONST:
 			LOG("%s\n", "parse const");
-			ParseConstDecl();
+			decl = (AstNode)ParseConstDecl();
 			break;
 		case TK_FUNC:
 			LOG("%s\n", "parse func");
-			ParseMethodDeclOrFunctionDecl();
+			decl = ParseMethodDeclOrFunctionDecl();
 			break;
 		default:
 			LOG("%s\n", "parse decl error");
@@ -983,17 +983,17 @@ int CurrentTokenIn(int toks[]){
 /**
  * ShortVarDecl = IdentifierList ":=" ExpressionList .
  */
-AstNode ParseShortVarDecl(){
-	ParseIdentifierList();
+AstShortVarDecl ParseShortVarDecl(){
+	AstShortVarDecl shortVarDecl;
+	CREATE_AST_NODE(shortVarDecl, ShortVarDecl);
+
+	shortVarDecl->identifierList = ParseIdentifierList();
 	EXPECT(TK_INIT_ASSIGN);
-	ParseExpressionList();	
+	shortVarDecl->expressionList = ParseExpressionList();	
 
 	expect_semicolon;
 	
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	
-	return node;
+	return shortVarDecl;
 }
 
 /**
@@ -1061,9 +1061,13 @@ AstNode ParseMethodDeclOrFunctionDecl(){
 	}
 	EndPeekToken();	
 	
+	AstNode node;
+
 	if(type == 0){
-		ParseFunctionDecl();
+		node = (AstNode)ParseFunctionDecl();
 	}else{
-		ParseMethodDecl();
+		node = (AstNode)ParseMethodDecl();
 	}
+
+	return node;
 }

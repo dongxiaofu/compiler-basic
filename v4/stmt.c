@@ -128,68 +128,11 @@ AstLabelStatement ParseLabelStatement(){
 AstStatement ParseSimpleStatement(){
 	AstStatement stmt;
 
-//	int type = -1;		// EmptyStmt
-//	StartPeekToken();
-//	// TODO 很低效的方法。想不到其他更好的方法。
-//	//while(1){
-//	//分析SimpleStmt出现的地方总结出这个结论。
-//	while(current_token.kind != TK_SEMICOLON && current_token.kind != TK_LBRACE){
-//		NO_TOKEN;
-//		if(current_token.kind == TK_INIT_ASSIGN){
-//			type = 1;	// ShortVarDecl
-//			break;
-//		}else if(current_token.kind == TK_RECEIVE){
-//			type = 2;	// SendStmt
-//			break;
-//		}else if(current_token.kind == TK_DEC || current_token.kind == TK_INC){
-//			type =3 ;	// IncDecStmt
-//			break;
-//		}else if(current_token.kind == TK_ASSIGN){
-//			type = 4;	// Assignment
-//			break;
-//		}else{
-//			type = 5;	// ExpressionStmt
-//		}
-//
-//		NEXT_TOKEN;
-//	}
-//	EndPeekToken();
-
-//	int type = -1;		// EmptyStmt
-//	StartPeekToken();
-//	if(current_token.kind == TK_ID){
-//		type = 1;		// ShortVarDecl
-//		NEXT_TOKEN;
-//		if(current_token.kind == TK_ASSIGN){
-//			type = 4; // Assignment
-//		}else if(IsAddOp() == 1 || IsMulOp() == 1){
-//			NEXT_TOKEN;
-//			if(current_token.kind == TK_ASSIGN){
-//				type = 4; // Assignment
-//			}
-//		} 
-//	}else{
-//		type = 5;	// ExpressionStmt
-//		ParseExpression();
-//		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
-//			type =3 ;	// IncDecStmt
-//		}else if(current_token.kind == TK_RECEIVE){
-//			type = 2;	// SendStmt
-//		}else if(current_token.kind == TK_ASSIGN){
-//			type = 4;	// Assignment	
-//		}else if(IsAddOp() == 1 || IsMulOp() == 1){
-//			NEXT_TOKEN;
-//			if(current_token.kind == TK_ASSIGN){
-//				type = 4; // Assignment
-//			}
-//		} 
-//	}	
-//	EndPeekToken();
-
 	int type = -1;		// EmptyStmt
 	if(current_token.kind == TK_BREAK){
 //		goto start;
 	}
+	// TODO 这种方式有没有问题？
 	// ShortVarDecl = IdentifierList ":=" ExpressionList .
 	if(current_token.kind == TK_ID){
 		StartPeekToken();
@@ -200,6 +143,7 @@ AstStatement ParseSimpleStatement(){
 			goto start;
 		}else if(current_token.kind == TK_COMMA){
 			NEXT_TOKEN;
+			// TODO 如果接下来的代码不是identifierList，岂不是会报错？
 			ParseIdentifierList();
 			if(current_token.kind == TK_INIT_ASSIGN){
 				type = 1;
@@ -251,7 +195,7 @@ start:
 	}else if(type == 6){
 		stmt = (AstStatement)ParseStatement();
 	}else{
-		CREATE_AST_NODE(stmt, Statement);
+		CREATE_AST_NODE(stmt, EmptyStmt);
 	}
 
 	expect_semicolon;
@@ -330,7 +274,7 @@ AstCompoundStatement ParseCompoundStatement(){
 	CREATE_AST_NODE(compoundStmt, CompoundStatement); 
 
 	if(CurrentTokenIn(FIRST_Declaration) == 1){
-		declaration();
+		compoundStmt->decls = (AstNode)declaration();
 		return compoundStmt;
 	}
 
@@ -346,9 +290,9 @@ AstCompoundStatement ParseCompoundStatement(){
 	EndPeekToken();
 
 	if(type == 0){
-		ParseLabelStatement();
+		compoundStmt->labeledStmt = ParseLabelStatement();
 	}else{
-		ParseSimpleStatement();
+		compoundStmt->stmts = (AstNode)ParseSimpleStatement();
 	}
 
 	return compoundStmt;

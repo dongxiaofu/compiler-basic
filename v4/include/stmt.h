@@ -213,19 +213,22 @@ typedef struct astReturnStatement
 	AST_STATEMENT_COMMON
 	AstExpression expr;
 } *AstReturnStatement;
+
+// 这是一个很重要的数据结构，差点漏掉。
+typedef struct astLabeledStmt{
+	AST_STATEMENT_COMMON
+	char *label;
+	AstStatement stmt;
+} *AstLabeledStmt;
+
 /**
-	@decls		list of declarations
-	@stmts		list of statements
-	@ilocals	id of local variables  ?
+ * Declaration | LabeledStmt | SimpleStmt
  */
-// { [declaration-list] 	[statement-list] }
-typedef struct astCompoundStatement
-{
+typedef struct astCompoundStatement{
 	AST_STATEMENT_COMMON
 	AstNode decls;
+	AstLabeledStmt labeledStmt;
 	AstNode stmts;
-	//	local variables that has initializer-list.
-//	Vector ilocals;
 } *AstCompoundStatement;
 
 typedef struct astSendStmt{
@@ -247,13 +250,6 @@ typedef struct astIncDecStmt{
 	int op;	
 } *AstIncDecStmt;
 
-// 这是一个很重要的数据结构，差点漏掉。
-typedef struct astLabeledStmt{
-	AST_STATEMENT_COMMON
-	char *label;
-	AstStatement stmt;
-} *AstLabeledStmt;
-
 typedef struct astDeferStmt{
 	AST_STATEMENT_COMMON
 	AstExpression expr;
@@ -273,6 +269,10 @@ typedef struct astBreakStmt{
 	AST_STATEMENT_COMMON
 	AstExpression label;
 } *AstBreakStmt;
+
+typedef struct astEmptyStmt{
+	AST_STATEMENT_COMMON
+} *AstEmptyStmt;
 
 typedef struct astLabelStatement{
 	AST_STATEMENT_COMMON

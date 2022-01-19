@@ -40,6 +40,10 @@ enum nodeKind
 	NK_FunctionLit, NK_Block, NK_LabeledStmt, NK_BreakStmt,
 	
 	NK_ForClause, NK_RangeClause, NK_ForStmt,
+	
+	NK_ShortVarDecl,
+
+	NK_EmptyStmt,
 
 	NK_Expression,
 
@@ -376,6 +380,12 @@ typedef struct astExprSwitchStmt{
 	AstExpression expr;
 	AstExprCaseClause exprCaseClause;
 } *AstExprSwitchStmt;
+
+typedef struct astShortVarDecl{
+	AST_NODE_COMMON
+	AstExpression identifierList;
+	AstExpression expressionList;
+} *AstShortVarDecl;
 
 typedef struct astFunction
 {
