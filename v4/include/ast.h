@@ -36,6 +36,8 @@ enum nodeKind
 	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
+
+	NK_FunctionLit, NK_Block, NK_LabeledStmt, NK_BreakStmt,
 	
 	NK_ForClause, NK_RangeClause, NK_ForStmt,
 
@@ -351,6 +353,17 @@ struct astStatement
 
 typedef struct astStatement *AstStatement;
 
+typedef struct astBlock{
+	AST_NODE_COMMON
+	AstStatement stmt;
+} *AstBlock;
+
+typedef struct astFunctionLit{
+	AST_NODE_COMMON
+	AstFunctionDeclarator fdecl;
+	AstBlock body;
+} *AstFunctionLit;
+
 typedef struct astExprCaseClause{
 	AST_NODE_COMMON
 	AstExpression exprSwitchCase;
@@ -369,7 +382,7 @@ typedef struct astFunction
         AST_NODE_COMMON
         AstFunctionDeclarator fdec;
         // compound-statement
-        AstStatement stmt;
+		AstBlock block;
         int hasReturn;
 } *AstFunction;
 
@@ -377,7 +390,7 @@ typedef struct astMethodDeclaration{
         AST_NODE_COMMON
         AstFunctionDeclarator fdec;
         // compound-statement
-        AstStatement stmt;
+		AstBlock	block;
         int hasReturn;
 } *AstMethodDeclaration;
 

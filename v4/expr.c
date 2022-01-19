@@ -754,24 +754,26 @@ AstExpression ParseOperandName(){
 /**
  * FunctionLit = "func" Signature FunctionBody .
  */
-AstExpression ParseFunctionLit(){
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression);
+AstFunctionLit ParseFunctionLit(){
 
 	EXPECT(TK_FUNC);
 
 	AstParameterDeclaration paramTyList = ParseParameters();
 	AstParameterDeclaration result = ParseResult();
-	AstStatement body = ParseFunctionBody();
+	AstBlock body = ParseFunctionBody();
 
 	AstFunctionDeclarator fdecl;
 	CREATE_AST_NODE(fdecl, FunctionDeclarator);
 	fdecl->paramTyList = paramTyList;
 	fdecl->sig = result;
 
-	// TODO FunctionLit是否应该放到声明中？
-	// 用函数AST存储表达式结构，合适吗？
-	return (AstExpression)fdecl;
+	AstFunctionLit functionLit;
+	CREATE_AST_NODE(functionLit, FunctionLit);
+
+	functionLit->fdecl = fdecl;
+	functionLit->body = body;
+
+	return functionLit;
 }
 
 /**

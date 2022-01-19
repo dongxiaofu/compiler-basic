@@ -38,26 +38,7 @@ typedef struct astExpressionStatement
 	AST_STATEMENT_COMMON
 	AstExpression expr;
 } *AstExpressionStatement;
-/**
-	label-statement:
-		identifier:	statement
-		case	constant-expression:	statement
-		default:		statement
-		
-	However,	in UCC,
-		case-statement and default-statement is specially treated.
-		see astCaseStatement and astDefaultStatement.
 
-	
- */
-// identifier:	statement	
-typedef struct astLabelStatement
-{
-	AST_STATEMENT_COMMON
-	char *id;
-	AstStatement stmt;
-//	Label label;
-} *AstLabelStatement;
 // case	constant-expression:	statement
 typedef struct astCaseStatement
 {
@@ -95,8 +76,8 @@ typedef struct astIfStatement
 	// 本想把simpleStmt放到expr中，但不怎么方便。
 	AstStatement simpleStmt;
 	AstExpression expr;
-	AstStatement  thenStmt;
-	AstStatement  elseStmt;
+	AstBlock	thenStmt;
+	AstStatement   elseStmt;
 } *AstIfStatement;
 
 typedef struct astTypeSwitchGuard{
@@ -275,7 +256,7 @@ typedef struct astLabeledStmt{
 
 typedef struct astDeferStmt{
 	AST_STATEMENT_COMMON
-	AstStatement stmt;
+	AstExpression expr;
 } *AstDeferStmt;
 
 typedef struct astGoStmt
@@ -287,6 +268,17 @@ typedef struct astGoStmt
 typedef struct astFallthroughStmt{
 	AST_STATEMENT_COMMON
 } *AstFallthroughStmt;
+
+typedef struct astBreakStmt{
+	AST_STATEMENT_COMMON
+	AstExpression label;
+} *AstBreakStmt;
+
+typedef struct astLabelStatement{
+	AST_STATEMENT_COMMON
+	AstExpression label;
+	AstStatement stmt;
+} *AstLabelStatement;
 
 typedef struct astAssignmentsStmt{
 	AST_STATEMENT_COMMON
@@ -359,12 +351,12 @@ AstNode ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();
 // AstStatement ParseSimpleStatement();
-AstStatement ParseBreakStmt();
+AstBreakStmt ParseBreakStmt();
 AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();
 AstIfStatement ParseIfStatement();
 AstCompoundStatement ParseCompoundStatement();
-AstStatement ParseLabelStatement();
+AstLabelStatement ParseLabelStatement();
 AstStatement ParseStatement();
 
 #endif

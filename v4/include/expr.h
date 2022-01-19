@@ -20,7 +20,7 @@ AstExpression ParseUnaryExpr();
 // AstExpression Parse
 // AstExpression Parse
 // AstExpression Parse
-AstExpression ParseFunctionLit();
+AstFunctionLit ParseFunctionLit();
 AstExpression ParseOperandName();
 AstExpression ParseIntLit();
 AstExpression ParseBasicLit();

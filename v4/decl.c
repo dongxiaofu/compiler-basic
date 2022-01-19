@@ -797,23 +797,30 @@ AstNode ParseSignature(){
  * Block = "{" StatementList "}" .
 StatementList = { Statement ";" } .
  */
-AstStatement ParseFunctionBody(){
+AstBlock ParseFunctionBody(){
+	AstBlock block;
+	CREATE_AST_NODE(block, Block);
+	block->stmt = NULL;
+
+	AstStatement currentStmt = NULL;
+
 	EXPECT(TK_LBRACE);
-	// while(current_token.kind == TK_SEMICOLON){
-//	while(1){
 	while(current_token.kind != TK_RBRACE){
 		NO_TOKEN;
-		ParseStatement();
+		AstStatement next = ParseStatement();
+		if(block->stmt == NULL){
+			currentStmt = next;
+			block->stmt = currentStmt;
+		}else{
+			currentStmt->next = next;
+			currentStmt = next;	
+		}
 		expect_semicolon;
 	}
 	EXPECT(TK_RBRACE);
 	expect_semicolon;
-	// expect_token(TK_SEMICOLON);
 
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-	
-	return stmt;
+	return block;
 }
 
 // AstStatement ParseFunctionBody(){
@@ -953,9 +960,9 @@ AstFunction ParseFunctionDecl(){
 	// return (AstNode)func;
 
 	// 处理FunctionBody
-	AstStatement stmt = ParseFunctionBody();
+	AstBlock block = ParseFunctionBody();
 	// CREATE_AST_NODE(stmt, Statement);
-	func->stmt = stmt;
+	func->block = block;
 	
 	return func;
 }
@@ -1036,12 +1043,11 @@ AstMethodDeclaration ParseMethodDecl(){
 	AstMethodDeclaration methodDeclaration;
 	CREATE_AST_NODE(methodDeclaration, MethodDeclaration);
 	methodDeclaration->fdec = dec;
-	
 
 	// 处理FunctionBody
-	AstStatement stmt = ParseFunctionBody();
+	AstBlock block = ParseFunctionBody();
 
-	methodDeclaration->stmt = stmt;
+	methodDeclaration->block = block;
 
 	return methodDeclaration;
 }

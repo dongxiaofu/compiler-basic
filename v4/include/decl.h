@@ -49,7 +49,7 @@ AstParameterDeclaration ParseParameters();
 AstParameterDeclaration ParseResult();
 AstNode ParseFunctionName();
 AstNode ParseSignature();
-AstStatement ParseFunctionBody();
+AstBlock ParseFunctionBody();
 AstFunction ParseFunctionDecl();
 AstMethodDeclaration ParseMethodDecl();
 AstNode ParseMethodDeclOrFunctionDecl();

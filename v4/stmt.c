@@ -79,14 +79,14 @@ AstStatement ParseStatement(){
  * LabeledStmt = Label ":" Statement .
 Label       = identifier .
  */
-AstStatement ParseLabelStatement(){
-	ParseIdentifier();
+AstLabelStatement ParseLabelStatement(){
+	AstLabelStatement labeledStmt;
+	CREATE_AST_NODE(labeledStmt, LabeledStmt);
+	labeledStmt->label = ParseIdentifier();
 	NEXT_TOKEN;
-	ParseStatement();
+	labeledStmt->stmt = ParseStatement();
 
- 	AstStatement stmt;
- 	CREATE_AST_NODE(stmt, Statement);
- 	return stmt;
+	return labeledStmt;
 }
 
 // /**
@@ -300,11 +300,7 @@ AstIfStatement ParseIfStatement(){
 	AstExpression expr = ParseExpression();
 	stmt->expr = expr;
 
-//	EXPECT(TK_LBRACE);	
-	// AstCompoundStatement compoundStatement  = ParseCompoundStatement();
-	AstCompoundStatement compoundStatement  = ParseFunctionBody();
-//	EXPECT(TK_RBRACE);	
-	stmt->thenStmt = (AstStatement)compoundStatement;
+	stmt->thenStmt = ParseFunctionBody();
 
 	AstStatement  elseStmt = NULL;
 	// 处理[ "else" ( IfStmt | Block ) ]
@@ -313,10 +309,7 @@ AstIfStatement ParseIfStatement(){
 		if(current_token.kind == TK_IF){		
 			elseStmt = ParseIfStatement();
 		}else{
-//			EXPECT(TK_LBRACE);	
-			// elseStmt = ParseCompoundStatement();
 			elseStmt = ParseFunctionBody();
-//			EXPECT(TK_RBRACE);	
 		}
 	}
 
@@ -507,6 +500,7 @@ AstContinueStatement ParseContinueStatement(){
 	return continueStmt;
 }
 
+// TODO 可能不正确。
 // GotoStmt = "goto" Label .
 AstGotoStatement ParseGotoStatement(){
 	NEXT_TOKEN;
@@ -514,10 +508,10 @@ AstGotoStatement ParseGotoStatement(){
 	CREATE_AST_NODE(gotoStmt, GotoStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-	AstDeclarator decl = ParseIdentifier();	
+	AstExpression expr = ParseIdentifier();
 	expect_semicolon;
-	if(decl != NULL){
-		strcpy(label, decl->id);
+	if(expr != NULL){
+		strcpy(label, expr->val.p);
 	}else{
 		label = NULL;
 	}
@@ -683,12 +677,12 @@ AstLabeledStmt ParseLabeledStmt(){
 // DeferStmt = "defer" Expression .
 AstDeferStmt ParseDeferStmt(){
 	NEXT_TOKEN;
-	ParseExpression();
+	AstExpression expr = ParseExpression();
 	// TODO 分号在表达式中解析还是在语句中解析？
 	expect_semicolon;
 	AstDeferStmt stmt;
 	CREATE_AST_NODE(stmt, DeferStmt);
-	stmt->stmt = stmt;
+	stmt->expr = expr;
 
 	return stmt;
 }
@@ -1544,15 +1538,14 @@ AstNode ParseSwitchStmt(){
  * BreakStmt = "break" [ Label ] .
  * Label       = identifier .
  */
-AstStatement ParseBreakStmt(){
+AstBreakStmt ParseBreakStmt(){
+	AstBreakStmt breakStmt;
+	CREATE_AST_NODE(breakStmt, BreakStmt);
+
 	EXPECT(TK_BREAK);
 	if(current_token.kind == TK_ID){
-		ParseIdentifier();
+		breakStmt->label = ParseIdentifier();
 	}
 
-	AstStatement stmt;
-	CREATE_AST_NODE(stmt, Statement);
-
-	return stmt;
+	return breakStmt;
 }
-
