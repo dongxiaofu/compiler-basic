@@ -40,8 +40,6 @@ AstNode declaration(){
 	return decl;
 }
 
-// todo 寻机把这个宏放到更合适的位置。
-// #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 /**
  * 	ConstDecl      = "const" ( ConstSpec | "(" { ConstSpec ";" } ")" ) .
 	ConstSpec      = IdentifierList [ [ Type ] "=" ExpressionList ] .

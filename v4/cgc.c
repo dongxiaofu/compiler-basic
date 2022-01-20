@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
 AstTranslationUnit ParseTranslationUnit(){
 	
-	AstTranslationUnit *p;
+	AstTranslationUnit p;
 	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
 	int i = 0;
@@ -108,10 +108,10 @@ AstTranslationUnit ParseTranslationUnit(){
 	}
 	
 //	ParseExpression();
-	ParseSourceFile();
+	AstSourceFile source = ParseSourceFile();
 	LOG("parse unit over\n");
 
-	return *p;
+	return p;
 //	ParseExpression();
 
 //	return *p;

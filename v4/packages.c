@@ -7,13 +7,15 @@
 /**
  * "package" PackageName .
  */
-AstNode ParsePackageClause(){
-	EXPECT(TK_PACKAGE);
-	ParseIdentifier();
+AstPackageClause ParsePackageClause(){
+	AstPackageClause packageClause;
+	CREATE_AST_NODE(packageClause, PackageClause);
 
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	return node;
+	EXPECT(TK_PACKAGE);
+	AstExpression identifier = ParseIdentifier();
+	packageClause->packageName = identifier;
+
+	return packageClause;
 }
 
 /**
@@ -81,14 +83,6 @@ AstImportDeclaration ParseImportDecl(){
 		return decl;
 	} 
 
-//	EXPECT(TK_LPARENTHESES);	
-//	ParseImportSpec();
-//	while(current_token.kind == TK_SEMICOLON){
-//		NEXT_TOKEN;
-//		ParseImportSpec();
-//	}
-//	EXPECT(TK_RPARENTHESES);	
-
 	AstImportSpec importSpec;
 
 	EXPECT(TK_LPARENTHESES);	
@@ -113,21 +107,40 @@ AstImportDeclaration ParseImportDecl(){
 /**
  * SourceFile       = PackageClause ";" { ImportDecl ";" } { TopLevelDecl ";" } .
  */
-AstNode ParseSourceFile(){
-	ParsePackageClause();
+AstSourceFile ParseSourceFile(){
+	AstSourceFile sourceFile;
+	CREATE_AST_NODE(sourceFile, SourceFile);
+	sourceFile->importDecls = NULL;
+	sourceFile->decls = NULL;
+
+	sourceFile->packageClause = ParsePackageClause();
 	expect_semicolon;
 	
+	AstImportDeclaration currentImportDecl = NULL;
 	while(current_token.kind == TK_IMPORT){
-		ParseImportDecl();
+		AstImportDeclaration next = ParseImportDecl();
+		if(sourceFile->importDecls == NULL){
+			currentImportDecl = next;
+			sourceFile->importDecls = currentImportDecl;
+		}else{
+			currentImportDecl->next = currentImportDecl;
+			currentImportDecl = next;
+		}
 		expect_semicolon;
 	}
 
+	AstNode currentDecl = NULL;
 	while(CurrentTokenIn(FIRST_Declaration) == 1){
-		declaration();
+		AstNode next = declaration();
+		if(sourceFile->decls == NULL){
+			currentDecl = next;
+			sourceFile->decls = currentDecl;
+		}else{
+			currentDecl->next = next;
+			currentDecl = next;
+		}
 		expect_semicolon;
 	}
 
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	return node;
+	return sourceFile;
 }

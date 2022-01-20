@@ -28,7 +28,7 @@ enum nodeKind
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
 	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceDeclaration,
 	NK_SliceType, NK_MapType, NK_ChannelType, NK_VariableElementType,
-	NK_ImportSpec, NK_ImportDeclaration,
+	NK_ImportSpec, NK_ImportDeclaration, NK_PackageClause, NK_SourceFile, 
 
 	NK_TypeDeclaration, NK_TypeDeclarator, NK_VarDeclarator, NK_VarDeclaration, 
 	NK_ConstDeclaration, NK_ConstDeclarator, NK_MethodDeclaration, 
@@ -40,7 +40,7 @@ enum nodeKind
 	NK_FunctionLit, NK_Block, NK_LabeledStmt, NK_BreakStmt,
 	
 	NK_ForClause, NK_RangeClause, NK_ForStmt,
-	
+
 	NK_ShortVarDecl,
 
 	NK_EmptyStmt,
@@ -413,7 +413,12 @@ struct astTranslationUnit
 	AstNode extDecls;
 };
 
-typedef struct astTranslationUnit AstTranslationUnit;
+typedef struct astTranslationUnit *AstTranslationUnit;
+
+typedef struct astPackageClause{
+	AST_NODE_COMMON
+	AstExpression packageName;
+} *AstPackageClause;
 
 typedef struct astImportSpec{
 	AST_NODE_COMMON
@@ -425,6 +430,13 @@ typedef struct astImportDeclaration{
 	AST_NODE_COMMON
 	AstImportSpec importSpec;
 } *AstImportDeclaration;
+
+typedef struct astSourceFile{
+	AST_NODE_COMMON
+	AstPackageClause packageClause;
+	AstImportDeclaration importDecls;
+	AstNode decls;
+} *AstSourceFile;
 
 #define CREATE_AST_NODE(p, k) \
     p = (void *)malloc(sizeof(*p));              \

@@ -3,15 +3,10 @@
 
 #include <assert.h>
 
-
-AstNode ParsePackageClause();
+AstPackageClause ParsePackageClause();
 Token *ParseImportPath();
 AstImportSpec ParseImportSpec();
 AstImportDeclaration ParseImportDecl();
-AstNode ParseSourceFile();
-// AstNode Parse();
-// AstNode Parse();
-// AstNode Parse();
-// AstNode Parse();
+AstSourceFile ParseSourceFile();
 
 #endif
