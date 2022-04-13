@@ -73,20 +73,12 @@ int main(int argc, char *argv[])
 //	printf("scan token over\n");
 //	exit(3);
 	
-//	while(1){
 		get_token();
-	//	StartPeekToken();
-	//	get_token();
-	//	get_token();
-	//	get_token();
-	//	get_token();
-	//	get_token();
-	//	get_token();
-	//	EndPeekToken();
 		if(current_token.kind == TK_EOF) return 0;
-		ParseTranslationUnit();
-//	}
-
+		// 语法分析
+		AstTranslationUnit transUnit = ParseTranslationUnit();
+		// 语义分析
+		CheckTranslationUnit(transUnit);
 	
 	free(cursor_tail);
 	free(char_tail);
