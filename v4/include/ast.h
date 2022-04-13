@@ -404,17 +404,6 @@ typedef struct astMethodDeclaration{
         int hasReturn;
 } *AstMethodDeclaration;
 
-struct astTranslationUnit
-{
-	AST_NODE_COMMON
-	/**
-		ExternalDeclarations
-	 */
-	AstNode extDecls;
-};
-
-typedef struct astTranslationUnit *AstTranslationUnit;
-
 typedef struct astPackageClause{
 	AST_NODE_COMMON
 	AstExpression packageName;
@@ -431,12 +420,13 @@ typedef struct astImportDeclaration{
 	AstImportSpec importSpec;
 } *AstImportDeclaration;
 
-typedef struct astSourceFile{
+// typedef struct astSourceFile{
+typedef struct astTranslationUnit{
 	AST_NODE_COMMON
 	AstPackageClause packageClause;
 	AstImportDeclaration importDecls;
 	AstNode decls;
-} *AstSourceFile;
+} *AstTranslationUnit;
 
 #define CREATE_AST_NODE(p, k) \
     p = (void *)malloc(sizeof(*p));              \

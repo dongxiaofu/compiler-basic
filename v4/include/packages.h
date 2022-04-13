@@ -7,6 +7,6 @@ AstPackageClause ParsePackageClause();
 Token *ParseImportPath();
 AstImportSpec ParseImportSpec();
 AstImportDeclaration ParseImportDecl();
-AstSourceFile ParseSourceFile();
+AstTranslationUnit ParseSourceFile();
 
 #endif

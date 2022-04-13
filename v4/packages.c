@@ -107,9 +107,11 @@ AstImportDeclaration ParseImportDecl(){
 /**
  * SourceFile       = PackageClause ";" { ImportDecl ";" } { TopLevelDecl ";" } .
  */
-AstSourceFile ParseSourceFile(){
-	AstSourceFile sourceFile;
-	CREATE_AST_NODE(sourceFile, SourceFile);
+// AstSourceFile ParseSourceFile(){
+AstTranslationUnit ParseSourceFile(){
+
+	AstTranslationUnit sourceFile;
+	CREATE_AST_NODE(sourceFile, TranslationUnit);
 	sourceFile->importDecls = NULL;
 	sourceFile->decls = NULL;
 

@@ -213,6 +213,8 @@ AstExpression ParseIdentifier(){
 	CREATE_AST_NODE(expr, Expression);
 	// expr->val->p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 	expr->val.p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	// TODO 初始化申请到的变量，清除脏数据。
+	memset(expr->val.p, 0, sizeof(char) * MAX_NAME_LEN);
 	// 我想用这种方式处理[Identifier]产生式。
 	if(current_token.kind == TK_ID){
 		strcpy(expr->val.p, current_token.value.value_str);
@@ -390,7 +392,10 @@ AstVarDeclarator ParseVarSpec(){
 		CREATE_AST_NODE(init, Initializer);
 		AstExpression expr;
 		CREATE_AST_NODE(expr, Expression);
-		expr->val.i[0] = exprCur->val.i[0];
+		memcpy(expr, exprCur, sizeof(*expr));
+//		if(expr->op == OP_STR){
+//			expr->val.i[0] = exprCur->val.i[0];
+//		}
 		init->expr = expr;
 		initDecsCur->init = init;
 
@@ -780,7 +785,14 @@ AstNode ParseFunctionName(){
 	AstExpression identifier = ParseIdentifier();
 	AstDeclarator functionName;
 	CREATE_AST_NODE(functionName, Declarator);
-	functionName->id = (char *)malloc(sizeof(char));
+	// TODO functionName->id的空间不够，可能会擦除其他数据。
+	// functionName->id = (char *)malloc(sizeof(char));
+	// strcpy(functionName->id, (char *)identifier->val.p);
+
+	// TODO len应该加1吗？把字符串末尾的\0的长度也统计进来。
+	int len = strlen(identifier->val.p);
+	functionName->id = (char *)malloc(sizeof(char) * len);
+	memset(functionName->id, 0, len);
 	strcpy(functionName->id, (char *)identifier->val.p);
 
 	return (AstNode)functionName;

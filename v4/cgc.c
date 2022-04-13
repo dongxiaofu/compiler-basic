@@ -107,33 +107,8 @@ AstTranslationUnit ParseTranslationUnit(){
 		printf("【%d assign over】\n", i++);
 	}
 	
-//	ParseExpression();
-	AstSourceFile source = ParseSourceFile();
+	p = ParseSourceFile();
 	LOG("parse unit over\n");
 
 	return p;
-//	ParseExpression();
-
-//	return *p;
-
-	while(current_token.kind != TK_EOF){
-		// 测试 start
-//		ParseCompositeLit();
-		ParseExpression();
-//		declaration();
-		// ParseType();
-		continue;
-		// 测试 end
-		if(current_token.kind == TK_FUNC){
-			LOG("parse func\n");
-			p->extDecls = declaration();
-	
-		}else{
-			LOG("parse decl\n");
-			p->extDecls = declaration();
-		}
-		LOG("parse loop\n");
-	}
-
-	LOG("parse unit over\n");
 }
