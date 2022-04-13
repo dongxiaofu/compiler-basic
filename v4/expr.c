@@ -117,7 +117,8 @@ AstExpression ParseBinaryExpr(int prec){
 	//	NEXT_TOKEN;
 	//	binExpr->kids[1] = ParseBinaryExpr(prec + 1);
 	//	expr = binExpr;
-		ParseBinaryExpr(prec + 1);
+		expr = ParseBinaryExpr(prec + 1);
+//		ParseBinaryExpr(prec + 1);
 	}
 
 	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){

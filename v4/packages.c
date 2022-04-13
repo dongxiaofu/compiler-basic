@@ -131,9 +131,9 @@ AstTranslationUnit ParseSourceFile(){
 		expect_semicolon;
 	}
 
-	AstNode currentDecl = NULL;
+	AstDeclaration currentDecl = NULL;
 	while(CurrentTokenIn(FIRST_Declaration) == 1){
-		AstNode next = declaration();
+		AstDeclaration next = declaration();
 		if(sourceFile->decls == NULL){
 			currentDecl = next;
 			sourceFile->decls = currentDecl;

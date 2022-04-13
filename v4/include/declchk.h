@@ -13,5 +13,6 @@
 
 
 void CheckTranslationUnit(AstTranslationUnit transUnit);
+void CheckGlobalDeclaration(AstDeclaration decl);
 
 #endif

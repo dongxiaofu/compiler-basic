@@ -433,6 +433,7 @@ typedef struct astTranslationUnit{
     p = (void *)malloc(sizeof(*p));              \
     p->kind = NK_##k;        \
     p->next = NULL; 
+#define PRINTF printf
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

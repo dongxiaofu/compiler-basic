@@ -60,8 +60,7 @@ FieldDecl ParseFieldDecl();
 AstNode ParseTag();
 AstNode ParseStrintLit();
 
-AstNode declaration();
-
+AstDeclaration declaration();
 
 
 #endif

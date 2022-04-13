@@ -4,31 +4,30 @@
 #include "expr.h"
 // #include "stmt.h"
 
-
-AstNode declaration(){
+AstDeclaration declaration(){
 	LOG("%s\n", "enter declaration");	
 	TokenKind kind = current_token.kind;
 	Value value = current_token.value;
 
-	AstNode decl;
-	CREATE_AST_NODE(decl, Node);
+	AstDeclaration decl;
+	CREATE_AST_NODE(decl, Declaration);
 
 	switch(kind){
 		case TK_VAR:
 			LOG("%s\n", "parse var");
-			decl = (AstNode)ParseVarDecl();
+			decl = (AstDeclaration)ParseVarDecl();
 			break;
 		case TK_TYPE:
 			LOG("%s\n", "parse type");
-			decl = (AstNode)ParseTypeDecl();
+			decl = (AstDeclaration)ParseTypeDecl();
 			break;
 		case TK_CONST:
 			LOG("%s\n", "parse const");
-			decl = (AstNode)ParseConstDecl();
+			decl = (AstDeclaration)ParseConstDecl();
 			break;
 		case TK_FUNC:
 			LOG("%s\n", "parse func");
-			decl = ParseMethodDeclOrFunctionDecl();
+			decl = (AstDeclaration)ParseMethodDeclOrFunctionDecl();
 			break;
 		default:
 			LOG("%s\n", "parse decl error");
@@ -378,7 +377,8 @@ AstVarDeclarator ParseVarSpec(){
 	AstExpression expr2Cur = decl;
 	// AstDeclaration expr2Cur = decl;
 	// AstDeclarator expr2Cur = decl;
-	while(exprCur != NULL){
+	// while(exprCur != NULL){
+	while(expr2Cur != NULL){
 		NO_TOKEN;
 		// initDecsCur->dec->id = exprCur->val;	
 		// initDecsCur->dec->id = exprCur->val;	
@@ -390,24 +390,33 @@ AstVarDeclarator ParseVarSpec(){
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
-		CREATE_AST_NODE(init, Initializer);
-		AstExpression expr;
-		CREATE_AST_NODE(expr, Expression);
-		memcpy(expr, exprCur, sizeof(*expr));
-//		if(expr->op == OP_STR){
-//			expr->val.i[0] = exprCur->val.i[0];
-//		}
-		init->expr = expr;
+		if(exprCur){
+		// AstInitializer init;
+			CREATE_AST_NODE(init, Initializer);
+			AstExpression expr;
+			CREATE_AST_NODE(expr, Expression);
+			memcpy(expr, exprCur, sizeof(*expr));
+//			if(expr->op == OP_STR){
+//				expr->val.i[0] = exprCur->val.i[0];
+//			}
+			init->expr = expr;
+		}else{
+			init = NULL;
+		}
 		initDecsCur->init = init;
 
 		preInitDecs = initDecsCur;
 		CREATE_AST_NODE(initDecsCur, InitDeclarator);
 		preInitDecs->next = initDecsCur;
 
-		exprCur = exprCur->next;
+		if(exprCur){
+			exprCur = exprCur->next;
+		}
 		expr2Cur = expr2Cur->next;
 	}
 
+	initDecsCur->next = NULL;
+	preInitDecs->next = NULL;
 	declaration->specs = specs; 
 	declaration->initDecs = initDecs; 
 
