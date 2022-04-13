@@ -40,7 +40,7 @@ void dump_token_number(){
 void dump_token(Token token)
 {
 	if(is_dump_token == 1){
-//		return;
+		return;
 	}
 
 	if(token.kind == TK_NUM){
@@ -277,7 +277,6 @@ void StartPeekToken(){
 //	start_cursor = CURSOR;
 //	start_char = current_char;
 
-	is_dump_token = 1;
 	if(cursor_tail->start_cursor == NULL){
 		cursor_tail->start_cursor = CURSOR;
 		char_tail->start_char = current_char;
@@ -338,7 +337,7 @@ void EndPeekToken(){
 	current_char = char_tail->start_char;
 
 	// 注意这行代码的位置，必须在此函数返回前。
-	is_dump_token = 0;
+//	is_dump_token = 0;
 
 	if(cursor_tail->pre == NULL){
 		return;

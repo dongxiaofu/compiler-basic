@@ -55,6 +55,7 @@ AstConstDeclaration ParseConstDecl(){
 	AstConstDeclarator  curDeclaration;
 
 	AstConstDeclaration declaration;
+	CREATE_AST_NODE(declaration, ConstDeclaration);
 
 	expect_token(TK_CONST);
 	if(current_token.kind == TK_LPARENTHESES){

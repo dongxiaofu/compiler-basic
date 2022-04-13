@@ -128,7 +128,8 @@ TOKEN_LINK current_token_tail;
 
 static char current_char = -1;
 FILE *fp;
-char is_dump_token;
+// static char is_dump_token = 1;
+#define is_dump_token 1
 
 //#define NEXT_TOKEN	get_token
 #define NEXT_TOKEN	get_token()

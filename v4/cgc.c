@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 AstTranslationUnit ParseTranslationUnit(){
 	
 	AstTranslationUnit p;
-	// CREATE_AST_NODE(p, "TranslationUnit");
+//	CREATE_AST_NODE(p, FunctionTest);
 	CREATE_AST_NODE(p, TranslationUnit);
 	int i = 0;
 	while(0){

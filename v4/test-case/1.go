@@ -1,11 +1,15 @@
 package main
 
 import "unsafe"
-const (
-    a = "abc";
-    b = len(a);
-    c = unsafe.Sizeof(a);
+
+var x, y int
+var (
+    a int
+    b bool
 )
+
+var c, d int = 1, 2
+var e, f = 123, "hello"
 
 func main(){
     println(a, b, c)

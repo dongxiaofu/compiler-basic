@@ -14,7 +14,8 @@
 */
 enum nodeKind 
 { 
-	NK_TranslationUnit,     NK_Function,           NK_Declaration,
+	NK_Function,
+	NK_TranslationUnit,     NK_FunctionTest,           NK_Declaration,
 	NK_TypeName,            NK_Specifiers,         NK_Token,				
 	NK_TypedefName,         NK_EnumSpecifier,      NK_Enumerator,			
 	NK_StructSpecifier,     NK_UnionSpecifier,     NK_StructDeclaration,	
