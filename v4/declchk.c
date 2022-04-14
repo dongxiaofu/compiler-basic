@@ -3,6 +3,7 @@
 #include "decl.h"
 #include "expr.h"
 #include "declchk.h"
+#include "symbol.h"
 
 void CheckTranslationUnit(AstTranslationUnit transUnit)
 {
@@ -34,11 +35,15 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 			while(declarator){
 				// 处理说明符
 
+				Symbol sym;
 				// TODO var a,b int = 2,4
 				AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
 				// CG 处理a,b
 				while(initDec){
 					AstDeclarator dec = initDec->dec;
+					if((sym = LookupID(dec->id)) == NULL){
+						sym = (Symbol)AddVariable(dec->id);
+					}	
 					// 变量的初始值
 					if(initDec->init){
 						AstInitializer init = initDec->init;

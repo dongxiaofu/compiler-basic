@@ -26,7 +26,8 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 	int h = (unsigned long)sym->name & SYM_HASH_MASK;
 	if(tbl->buckets == NULL){
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
-		int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
+		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
+		int size = sizeof(Symbol) * (SYM_HASH_MASK + 1);
 		tbl->buckets = (Symbol *)malloc(sizeof(size));
 		memset(tbl->buckets, 0, size);
 	}
@@ -75,6 +76,11 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 // 	return sym;
 // }
 
+Symbol LookupID(char *name)
+{
+	return LookupSymbol(Identifiers, name);
+}
+
 Symbol LookupSymbol(Table tbl, char *name)
 {
 	return DoLookupSymbol(tbl, name, SEARCH_OUTER_TABLE); 
@@ -104,6 +110,7 @@ VariableSymbol AddVariable(char *name)
 {
 	int size = sizeof(VariableSymbol);
 	VariableSymbol p = (VariableSymbol)malloc(size);	
+	memset(p, 0, sizeof(struct variableSymbol));
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
 	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
 	memset(p->name, 0, MAX_NAME_LEN);
