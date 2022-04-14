@@ -46,6 +46,6 @@ Symbol AddSymbol(Table tbl, Symbol sym);
 Symbol LookupSymbol(Table tbl, char *name);
 char * GetSymbolKind(int kind);
 Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter);
-
+VariableSymbol AddVariable(char *name);
 
 #endif

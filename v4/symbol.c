@@ -5,9 +5,20 @@
 #include "declchk.h"
 #include "symbol.h"
 
+
+static struct table GlobalIDs;
+static struct table Constants;
+static Table Identifiers;
+
 void InitSymbol()
 {
+	GlobalIDs.buckets = NULL;
+	GlobalIDs.outer = NULL;
+	GlobalIDs.level = 0;
 
+	// 常量表比较复杂，没弄懂，搁置。
+
+	Identifiers = &GlobalIDs;
 }
 
 Symbol AddSymbol(Table tbl, Symbol sym)
@@ -87,5 +98,19 @@ Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 	}while(((tbl = tbl->outer) != NULL) && searchOuter);
 
 	return NULL;
+}
+
+VariableSymbol AddVariable(char *name)
+{
+	int size = sizeof(VariableSymbol);
+	VariableSymbol p = (VariableSymbol)malloc(size);	
+	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
+	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
+	memset(p->name, 0, MAX_NAME_LEN);
+	strcpy(p->name, name, MAX_NAME_LEN);
+
+	p = AddSymbol(Identifiers, (Symbol)p);
+
+	return p;
 }
 
