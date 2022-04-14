@@ -1,0 +1,91 @@
+#include "ast.h"
+#include "stmt.h"
+#include "decl.h"
+#include "expr.h"
+#include "declchk.h"
+#include "symbol.h"
+
+void InitSymbol()
+{
+
+}
+
+Symbol AddSymbol(Table tbl, Symbol sym)
+{
+	int h = (unsigned long)sym->name & SYM_HASH_MASK;
+	if(tbl->buckets == NULL){
+		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
+		int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
+		tbl->buckets = (Symbol *)malloc(sizeof(size));
+		memset(tbl->buckets, 0, size);
+	}
+	
+	int linkerSize = sizeof(BucketLinker);
+	BucketLinker linker = (BucketLinker)malloc(linkerSize);
+	memset(linker, 0, linkerSize);
+	linker->sym = sym;
+
+	linker->link = (BucketLinker)tbl->buckets[h];
+	tbl->buckets[h] = (Symbol)linker;
+
+	sym->level = tbl->level;
+
+	return sym;
+}
+// TODO AddSymbol2中包含困扰我很长时间的错误写法。AddSymbol是修复了所有所谓。
+// Symbol AddSymbol2(Table tbl, Symbol sym)
+// {
+// 	int h = sym->name & SYM_HASH_MASK;
+// 	if(tbl->buckets == NULL){
+// 		// int size = SYM_HASH_MASK + 1;
+// 		int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
+// 		// tbl->buckets = (Symbol *)malloc(sizeof(Symbol) * size);
+// 		// tbl->buckets = (Symbol)malloc(sizeof(Symbol) * size);
+// 		// tbl->buckets = (Symbol)malloc(sizeof(struct symbol) * size);
+// 		tbl->buckets = (Symbol *)malloc(sizeof(struct symbol) * size);
+// 		memset(tbl->buckets, 0, size);
+// 	}
+// 	
+// 	// int linkerSize = sizeof(BucketLinker);
+// 	int linkerSize = sizeof(struct bucketLinker);
+// 	// BucketLinker linker = (BucketLinker)malloc(sizeof(BucketLinker));
+// 	// BucketLinker linker = (BucketLinker)malloc(sizeof(struct bucketLinker));
+// 	BucketLinker linker = (BucketLinker)malloc(linkerSize);
+// 	memset(linker, 0, linkerSize);
+// 	linker->symbol = sym;
+// 	if(tbl->buckets[h] == NULL){
+// 		tbl->buckets[h] = (Symbol)linker;
+// 	}
+// 	linker->linker = tbl->buckets[h];
+// 	tbl->buckets[h] = linker;
+// 
+// 	sym->level = tbl->level;
+// 
+// 	return sym;
+// }
+
+Symbol LookupSymbol(Table tbl, char *name)
+{
+	return DoLookupSymbol(tbl, name, SEARCH_OUTER_TABLE); 
+}
+
+char * GetSymbolKind(int kind)
+{
+
+}
+
+Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
+{
+	do{
+		int h = (unsigned long)name & SYM_HASH_MASK;
+		BucketLinker linker;
+		for(linker = (BucketLinker)tbl->buckets; linker; linker = linker->link){
+			if(name == linker->sym->name){
+				return (Symbol)linker->sym;
+			}
+		}	
+	}while(((tbl = tbl->outer) != NULL) && searchOuter);
+
+	return NULL;
+}
+
