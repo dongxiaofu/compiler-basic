@@ -6,8 +6,6 @@
 #include "decl.h"
 #include "lex.h"
 #include "ast.h"
-#include "packages.h"
-#include "symbol.h"
 
 int main(int argc, char *argv[])
 {
@@ -64,25 +62,29 @@ int main(int argc, char *argv[])
 
 
 	int loop_counter = 0;
-	while(0){
-		if(++loop_counter > 120){
-			break;
-		}
-		NO_TOKEN;
-		get_token();
-	}
+//	while(1){
+//		if(++loop_counter > 80){
+//			break;
+//		}
+//		get_token();
+//	}
 //	printf("scan token over\n");
 //	exit(3);
 	
+//	while(1){
 		get_token();
+	//	StartPeekToken();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	get_token();
+	//	EndPeekToken();
 		if(current_token.kind == TK_EOF) return 0;
-		// 语法分析
-		AstTranslationUnit transUnit = ParseTranslationUnit();
+		ParseTranslationUnit();
+//	}
 
-		InitSymbolTable();
-
-		// 语义分析
-		CheckTranslationUnit(transUnit);
 	
 	free(cursor_tail);
 	free(char_tail);
@@ -93,18 +95,27 @@ int main(int argc, char *argv[])
 
 AstTranslationUnit ParseTranslationUnit(){
 	
-	AstTranslationUnit p;
-//	CREATE_AST_NODE(p, FunctionTest);
+	AstTranslationUnit *p;
+	// CREATE_AST_NODE(p, "TranslationUnit");
 	CREATE_AST_NODE(p, TranslationUnit);
-	int i = 0;
-	while(0){
-		NO_TOKEN;	
-		ParseAssignmentsStmt();
-		printf("【%d assign over】\n", i++);
-	}
-	
-	p = ParseSourceFile();
-	LOG("parse unit over\n");
+//	ParseExpression();
 
-	return p;
+//	return *p;
+
+	while(current_token.kind != TK_EOF){
+		ParseType();
+		continue;
+
+		if(current_token.kind == TK_FUNC){
+			LOG("parse func\n");
+			p->extDecls = declaration();
+	
+		}else{
+			LOG("parse decl\n");
+			p->extDecls = declaration();
+		}
+		LOG("parse loop\n");
+	}
+
+	LOG("parse unit over\n");
 }

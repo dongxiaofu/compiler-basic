@@ -41,7 +41,7 @@ typedef struct table{
 	struct table *outer;
 } *Table;
 
-void InitSymbol();
+void InitSymbolTable();
 Symbol AddSymbol(Table tbl, Symbol sym);
 Symbol LookupSymbol(Table tbl, char *name);
 char * GetSymbolKind(int kind);

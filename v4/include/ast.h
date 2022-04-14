@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "grammer.h"
+// #include "symbol.h"
 
 // 打印日志
 // #define LOG	printf

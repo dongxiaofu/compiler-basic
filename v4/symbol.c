@@ -10,7 +10,7 @@ static struct table GlobalIDs;
 static struct table Constants;
 static Table Identifiers;
 
-void InitSymbol()
+void InitSymbolTable()
 {
 	GlobalIDs.buckets = NULL;
 	GlobalIDs.outer = NULL;
@@ -107,9 +107,10 @@ VariableSymbol AddVariable(char *name)
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
 	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
 	memset(p->name, 0, MAX_NAME_LEN);
-	strcpy(p->name, name, MAX_NAME_LEN);
+	// strcpy(p->name, name, MAX_NAME_LEN);
+	strcpy(p->name, name);
 
-	p = AddSymbol(Identifiers, (Symbol)p);
+	p = (VariableSymbol)AddSymbol(Identifiers, (Symbol)p);
 
 	return p;
 }
