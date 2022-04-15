@@ -11,6 +11,7 @@
 // #include "grammer.h"
 
 
+void CheckDeclarationSpecifiers(AstSpecifiers specs);
 
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void CheckGlobalDeclaration(AstDeclaration decl);

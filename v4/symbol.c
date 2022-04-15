@@ -95,12 +95,14 @@ Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 {
 	do{
 		int h = (unsigned long)name & SYM_HASH_MASK;
-		BucketLinker linker;
-		for(linker = (BucketLinker)tbl->buckets; linker; linker = linker->link){
-			if(name == linker->sym->name){
-				return (Symbol)linker->sym;
-			}
-		}	
+		if(tbl->buckets != NULL){
+			BucketLinker linker;
+			for(linker = (BucketLinker)tbl->buckets[h]; linker; linker = linker->link){
+				if(name == linker->sym->name){
+					return (Symbol)linker->sym;
+				}
+			}	
+		}
 	}while(((tbl = tbl->outer) != NULL) && searchOuter);
 
 	return NULL;
@@ -108,9 +110,11 @@ Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 
 VariableSymbol AddVariable(char *name)
 {
-	int size = sizeof(VariableSymbol);
+	// int size = sizeof(VariableSymbol);
+	int size = sizeof(struct variableSymbol);
 	VariableSymbol p = (VariableSymbol)malloc(size);	
-	memset(p, 0, sizeof(struct variableSymbol));
+	// memset(p, 0, sizeof(struct variableSymbol));
+	memset(p, 0, size);
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
 	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
 	memset(p->name, 0, MAX_NAME_LEN);

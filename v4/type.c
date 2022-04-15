@@ -221,10 +221,11 @@ AstStructDeclarator ParseStructType(){
 		FieldDecl fieldDecl = ParseFieldDecl();
 		if(header->next == NULL){
 			header->next = (AstNode)(fieldDecl->member);
-			cur = fieldDecl->tail;
+			// cur = fieldDecl->tail;
 		}else{
 			cur->next = (AstNode)(fieldDecl->member);	
 		}
+		cur = fieldDecl->tail;
 		// 处理;
 		expect_semicolon;	
 	}
@@ -559,4 +560,11 @@ AstVariableElementType ParseVariableElementType(){
 	node->node = ParseType();
 
 	return node;
+}
+
+void SetupTypeSystem(){
+//	(Types + INT)->size = INT_SIZE;
+//	T(INT)->size = 5;
+ 	T(BYTE)->size = BYTE_SIZE;	
+ 	T(INT)->size = INT_SIZE;
 }

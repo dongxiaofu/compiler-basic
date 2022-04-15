@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 		// 语法分析
 		AstTranslationUnit transUnit = ParseTranslationUnit();
 
+		SetupTypeSystem();
 		InitSymbolTable();
 
 		// 语义分析

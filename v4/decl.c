@@ -504,7 +504,6 @@ FieldDecl ParseFieldDecl(){
 		int variable_count = expr->variable_count;
 		for(int i = 0; i < variable_count; i++){
 			if(cur == NULL){
-				AstStructDeclarator cur;
 				CREATE_AST_NODE(cur, StructDeclarator);
 				member = cur;
 			}else{

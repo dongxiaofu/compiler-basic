@@ -73,10 +73,11 @@ int is_operator(char ch)
 
 Token get_token()
 {
-//	todo 暂时不打印token
-	if(is_dump_token == 0){
 		dump_token(current_token);
-	}
+//	todo 暂时不打印token
+//	if(is_dump_token == 1){
+//		dump_token(current_token);
+//	}
 //	printf("get token\n");
 //	Token token;
 //	token.kind = TK_NAN;

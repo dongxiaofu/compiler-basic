@@ -30,11 +30,12 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 {
 	if(decls->kind == NK_VarDeclaration){
 		AstVarDeclaration decl = (AstVarDeclaration)decls;
+		int i = 0;
 		while(decl){
 			AstVarDeclarator declarator = (AstVarDeclarator)decl->decs;	
 			while(declarator){
 				// 处理说明符
-
+				CheckDeclarationSpecifiers(declarator->specs);
 				Symbol sym;
 				// TODO var a,b int = 2,4
 				AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
@@ -54,10 +55,16 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 				declarator = declarator->next;
 			}
 			decl = decl->next;
+			PRINTF("loop %d\n", i++);
 		}	
 	}else if(decls->kind == NK_ConstDeclaration){
 
 	}else{
 		printf("%s\n", "todo");
 	}
+}
+
+void CheckDeclarationSpecifiers(AstSpecifiers specs)
+{
+
 }
