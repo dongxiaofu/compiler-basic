@@ -11,6 +11,7 @@
 // #include "grammer.h"
 
 
+void EndRecord(RecordType rty);
 Field AddField(RecordType rty, char *id, Type ty);
 RecordType StartRecord();
 RecordType CheckStructSpecifier(AstStructSpecifier specs);

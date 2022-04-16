@@ -21,7 +21,8 @@ enum{
 #define INT_SIZE 4
 
 // Type Types[INT - VOID + 1];
-static struct type Types[INT - VOID + 1];
+// static struct type Types[INT - VOID + 1];
+struct type Types[INT - VOID + 1];
 
 // #define T(categ)	Types[VOID + categ]
 // #define T(categ)	Types + categ

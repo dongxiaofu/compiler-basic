@@ -35,6 +35,8 @@ enum nodeKind
 	NK_TypeDeclaration, NK_TypeDeclarator, NK_VarDeclarator, NK_VarDeclaration, 
 	NK_ConstDeclaration, NK_ConstDeclarator, NK_MethodDeclaration, 
 
+	NK_RecordType,
+
 	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
@@ -109,6 +111,7 @@ typedef struct astDeclarator
 } *AstDeclarator;
 
 #define TYPE_COMMON \
+	AST_NODE_COMMON \
     int categ : 8;  \
     int qual  : 8;  \
     int align : 16; \

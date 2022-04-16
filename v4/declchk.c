@@ -93,6 +93,8 @@ RecordType CheckStructSpecifier(AstStructSpecifier specs)
 	}
 
 	// specs->ty = rty;
+	
+	EndRecord(rty);
 
 	return rty;
 }
@@ -100,6 +102,7 @@ RecordType CheckStructSpecifier(AstStructSpecifier specs)
 RecordType StartRecord()
 {
 	RecordType rty = (RecordType)malloc(sizeof(struct recordType));
+	rty->kind = NK_RecordType;
 	rty->id = NULL;
 	rty->flds = NULL;
 	rty->tail = &(rty->flds);
@@ -124,4 +127,26 @@ Field AddField(RecordType rty, char *id, Type ty)
 	rty->tail = &(fld->next);
 	
 	return fld;
+}
+
+void EndRecord(RecordType rty)
+{
+	Field fld = rty->flds;
+	Field pre = NULL;
+	int offset = 0;
+	int size = 0;
+	while(fld != NULL){
+//		if(fld->kind == NK_RecordType){
+//			EndRecord(fld);
+//		}
+		if(pre != NULL){
+			offset = pre->offset + pre->ty->size;
+		}
+		size += fld->ty->size;
+		fld->offset = offset;
+		pre = fld;
+		fld = fld->next;
+	}
+
+	rty->size = size;
 }
