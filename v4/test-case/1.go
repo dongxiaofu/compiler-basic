@@ -3,9 +3,9 @@ package main
 import "unsafe"
 
 var Books struct {
-   title struct {
-		name byte
+	seller struct {
 		age int
+		height int
 	}
    author int
    subject int

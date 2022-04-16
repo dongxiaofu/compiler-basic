@@ -367,7 +367,7 @@ AstVarDeclarator ParseVarSpec(){
 
 	AstSpecifiers specs;
 	CREATE_AST_NODE(specs, Specifiers);
-	specs->tySpecs = type;
+	specs = (AstSpecifiers)type;
 
 	// 遍历单链表B和C，创建A。
 	AstInitDeclarator preInitDecs = initDecs;
@@ -491,7 +491,7 @@ FieldDecl ParseFieldDecl(){
 		expect_token(TK_MUL);
 		// ParseTypeName 的返回值有两种情况，例如：Sin；Math.Sin。
 		// TODO 非常厌恶这种返回值。我期望一个函数能返回结构相同的数据。
-		AstNode node = ParseTypeName();
+		AstNode node = ParseBasicType();
 		ptrDecl->dec = (AstDeclarator)node;
 		decl->member = ptrDecl;
 		decl->tail = ptrDecl;
@@ -514,7 +514,7 @@ FieldDecl ParseFieldDecl(){
 			}
 			cur->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 			strcpy(cur->id, expr->val.p);
-			cur->type = dataType;
+			cur->tySpecs = dataType;
 		}	
 
 		tail = cur;
@@ -531,7 +531,7 @@ FieldDecl ParseFieldDecl(){
  */
 AstNode ParseEmbeddedField(){
 	expect_token(TK_MUL);
-	ParseTypeName();
+	ParseBasicType();
 }
 
 /**

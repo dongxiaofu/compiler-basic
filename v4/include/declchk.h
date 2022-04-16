@@ -11,6 +11,9 @@
 // #include "grammer.h"
 
 
+Field AddField(RecordType rty, char *id, Type ty);
+RecordType StartRecord();
+RecordType CheckStructSpecifier(AstStructSpecifier specs);
 void CheckDeclarationSpecifiers(AstSpecifiers specs);
 
 void CheckTranslationUnit(AstTranslationUnit transUnit);

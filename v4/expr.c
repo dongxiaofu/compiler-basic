@@ -441,7 +441,7 @@ AstExpression ParsePrimaryExpr(){
 		if(current_token.kind == TK_ID){
 //			ParseTypeName();
 //			ParseOperandName();
-			ParseTypeName();
+			ParseBasicType();
 			if(current_token.kind == TK_DOT){
 				type = 1;
 			}

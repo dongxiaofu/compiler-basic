@@ -48,20 +48,23 @@ AstNode ParseType(){
 		ParseType();
 		expect_token(TK_RPARENTHESES);
 	}else if(kind == TK_ID){	// todo 不仅TK_ID应该在这里解析，TK_INT等golang内置数据类型也应该在这里解析。 
-		node = (AstNode)ParseTypeName();
+		node = (AstNode)ParseBasicType();
 		return node;
 	}else if(isTypeKeyWord(kind) == 1){
-		ParseTypeLit();
+		return ParseTypeLit();
 	}else{
 		// todo 处理QualifiedIdent，暂时不实现
 		printf("hi");
 	}
+
+	return node;
 }
 
 // todo 不完善，只处理了TK_ID，没有处理TK_INT等。
 // TypeName  = identifier | QualifiedIdent .
 // AstTypedefName ParseTypeName(){
-AstNode ParseTypeName(){
+// AstNode ParseTypeName(){
+AstNode ParseBasicType(){
 //	expect_token(TK_ID);
 //	type：0--identifier，1--QualifiedIdent。
 	unsigned char type = 0;
@@ -71,6 +74,9 @@ AstNode ParseTypeName(){
 		type = 1;
 	}
 	EndPeekToken();
+
+	AstSpecifiers spec;
+	CREATE_AST_NODE(spec, Specifiers);
 	
 	if(type == 0){	
 		AstTypedefName tname;
@@ -78,8 +84,7 @@ AstNode ParseTypeName(){
 		tname->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
 		strcpy(tname->id, current_token.value.value_str);
 		NEXT_TOKEN;
-
-		return (AstNode)tname;
+		spec->tySpecs = tname;	
 	}else{
 		AstExpression expr;
 		CREATE_AST_NODE(expr, Expression);
@@ -88,9 +93,10 @@ AstNode ParseTypeName(){
 		expr->kids[0] = ParseIdentifier();
 		EXPECT(TK_DOT);
 		expr->kids[1] = ParseIdentifier();
-
-		return (AstNode)expr;
+		spec->tySpecs = expr;
 	}
+
+	return spec;
 }
 
 /**
@@ -133,6 +139,8 @@ AstNode ParseTypeLit(){
 		}
 		// EndPeekToken();
 		// todo 退回处理了的token，交给解析函数去处理。
+	}else{
+	//	kind = TK_ID;
 	}
 	// return (TypeListParsers[kind]());
 	return (TypeListParsers[kind - TK_FUNC]());
@@ -209,7 +217,7 @@ EmbeddedField = [ "*" ] TypeName .
 // Tag的作用是什么？
 Tag           = string_lit .
  */
-AstStructDeclarator ParseStructType(){
+AstStructSpecifier ParseStructType(){
 	AstStructDeclarator header;
 	CREATE_AST_NODE(header, StructDeclarator);
 	AstNode cur = NULL;
@@ -231,7 +239,11 @@ AstStructDeclarator ParseStructType(){
 	}
 	expect_token(TK_RBRACE);	
 
-	return (AstStructDeclarator)(header->next);
+	AstStructSpecifier stSpec;
+	CREATE_AST_NODE(stSpec, StructSpecifier);
+	stSpec->stDecls = header->next;	
+
+	return stSpec;
 }
 
 /**
@@ -325,7 +337,7 @@ AstInterfaceDeclaration ParseInterfaceType(){
 			AstMethodSpec methodSpec = ParseMethodSpec();
 			node = (AstNode)methodSpec;
 		}else{
-			node = ParseTypeName();
+			node = ParseBasicType();
 		}
 		if(header->next == NULL){
 			currentNode = node;
@@ -368,7 +380,7 @@ AstMethodSpec ParseMethodSpec(){
 }
 
 AstNode ParseInterfaceTypeName(){
-	return ParseTypeName();
+	return ParseBasicType(); 
 }
 
 AstNode ParseMethodName(){
@@ -504,7 +516,7 @@ AstNode ParseLiteralType(){
 			node = ParseMapType();
 			break;
 		case	NAME:
-			node = ParseTypeName();
+			node = ParseBasicType();
 			break;
 		case	ELEMENT:
 			node = ParseVariableElementType(); 
@@ -512,6 +524,7 @@ AstNode ParseLiteralType(){
 		default:
 			// TODO 暂时什么也不做。
 			// 神奇！default的break也不能缺少。
+			node = ParseBasicType();
 			break;
 	}
  

@@ -18,3 +18,4 @@ TYPEINFO(TK_CHAN,Channel)
 // todo 这两个token需要特别注意。
 TYPEINFO(TK_POINTER,Pointer)
 TYPEINFO(TK_ARRAY,Array)
+TYPEINFO(TK_ID,Basic)

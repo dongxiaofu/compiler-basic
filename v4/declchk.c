@@ -66,5 +66,62 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 
 void CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
+	Type ty;
 
+	if(specs->kind == NK_StructSpecifier){
+		// ty = CheckStructSpecifier((AstStructSpecifier)specs->tySpecs);
+		ty = CheckStructSpecifier((AstStructSpecifier)specs);
+	}else{
+		ty = T(INT);
+	}
+
+	specs->ty = ty;
+}
+
+RecordType CheckStructSpecifier(AstStructSpecifier specs)
+{
+	RecordType rty = StartRecord();	
+	AstStructDeclarator decl = specs->stDecls;
+
+	while(decl){
+		// CheckDeclarationSpecifiers(specs->tySpecs);
+		// CheckDeclarationSpecifiers((AstSpecifiers)decl);
+		CheckDeclarationSpecifiers((AstSpecifiers)decl->tySpecs);
+		// AddField(rty, decl->id, decl->ty);	
+		AddField(rty, decl->id, ((AstSpecifiers)(decl->tySpecs))->ty);	
+		decl = (AstStructDeclarator)decl->next;
+	}
+
+	// specs->ty = rty;
+
+	return rty;
+}
+
+RecordType StartRecord()
+{
+	RecordType rty = (RecordType)malloc(sizeof(struct recordType));
+	rty->id = NULL;
+	rty->flds = NULL;
+	rty->tail = &(rty->flds);
+
+	return rty;
+}
+
+Field AddField(RecordType rty, char *id, Type ty)
+{
+	int fldSize = sizeof(struct field);
+	Field fld = (Field)malloc(fldSize);
+	memset(fld, 0, fldSize);
+
+	int idSize = sizeof(char) * MAX_NAME_LEN;
+	fld->id = (char *)malloc(idSize);
+	memset(fld->id, 0, idSize);
+	strcpy(fld->id, id);
+
+	fld->ty = ty;
+	
+	*rty->tail = fld;
+	rty->tail = &(fld->next);
+	
+	return fld;
 }

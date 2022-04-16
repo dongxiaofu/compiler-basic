@@ -120,6 +120,21 @@ typedef struct type
 	TYPE_COMMON
 } *Type;
 
+typedef struct field
+{
+	char *id;
+	int offset;
+	Type ty;
+	struct field *next;	
+} *Field;
+
+typedef struct recordType
+{
+	TYPE_COMMON
+	char *id;
+	Field flds;
+	Field *tail;	
+} *RecordType;
 
 struct astExpression
 {
@@ -150,12 +165,16 @@ typedef struct astToken
 	int token;
 } *AstToken;
 
+#define SPECIFIERS_COMMON \
+	AST_NODE_COMMON		\
+	AstNode stgClasses;	\
+	AstNode tyQuals;	\
+	AstNode tySpecs;	\
+	Type ty;
+	
 typedef struct astSpecifiers
 {
-	AST_NODE_COMMON
-	AstNode stgClasses;
-	AstNode tyQuals;
-	AstNode tySpecs;
+	SPECIFIERS_COMMON
 } *AstSpecifiers;
 
 typedef struct astPointerDeclarator{
@@ -169,9 +188,15 @@ typedef struct astArrayTypeSpecifier{
 } *AstArrayTypeSpecifier;
 
 typedef struct astStructDeclarator{
-	AST_DECLARATOR_COMMON
-	AstNode type;
+	SPECIFIERS_COMMON
+	char *id;
 } *AstStructDeclarator;
+
+typedef struct astStructSpecifier{
+	SPECIFIERS_COMMON
+	AstStructDeclarator stDecls;
+	char *id;
+} *AstStructSpecifier;
 
 typedef struct fieldDecl{
 	// TODO 暂时保留。目前，没有作用。
