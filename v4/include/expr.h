@@ -3,10 +3,9 @@
 
 #include <assert.h>
 
-AstNode ParseKeyedElement();
-AstNode ParseElementList();
-AstNode ParseLiteralValue();
-AstNode ParseCompositeLit();
+AstKeyedElement ParseKeyedElement();
+AstLiteralValue ParseLiteralValue();
+AstCompositeLit ParseCompositeLit();
 
 AstExpression ParseExpressionList();
 AstExpression ParseExpression();

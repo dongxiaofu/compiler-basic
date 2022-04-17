@@ -17,6 +17,12 @@ RecordType StartRecord();
 RecordType CheckStructSpecifier(AstStructSpecifier specs);
 void CheckDeclarationSpecifiers(AstSpecifiers specs);
 
+AstKeyedElement LookupElement(AstKeyedElement element, char *name);
+CanAssign(Type ty, AstNode val);
+
+InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit);
+void CheckInitializer(AstInitializer init);
+
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void CheckGlobalDeclaration(AstDeclaration decl);
 

@@ -37,6 +37,9 @@ enum nodeKind
 
 	NK_RecordType,
 
+	// CompositeLit 相关
+	NK_KeyedElement, NK_Key, NK_Element, NK_CompositeLit, NK_LiteralValue, 
+
 	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
@@ -224,13 +227,49 @@ union Data {
 	AstExpression expr;		// when lbrace is 0, assignment-expression
 };
 
+typedef struct astKey{
+	AST_NODE_COMMON
+	int lbrace;
+	union{
+		AstNode literalValue;
+		AstNode expr;
+	};
+} *AstKey;
+
+typedef struct astElement{
+	AST_NODE_COMMON
+	int lbrace;
+	union{
+		AstNode literalValue;
+		AstNode expr;
+	};
+} *AstElement;
+
+typedef struct AstKeyedElement{
+	AST_NODE_COMMON
+	AstKey key;
+	AstElement element;
+} *AstKeyedElement;
+
+typedef struct astLiteralValue{
+	AST_NODE_COMMON
+	int hasKey;
+	AstKeyedElement keyedElement;
+} *AstLiteralValue;
+
+typedef struct astCompositeLit{
+	AST_NODE_COMMON
+	AstNode literalType;
+	AstLiteralValue literalValue;
+} *AstCompositeLit;
+
 typedef struct astInitializer{
 	AST_NODE_COMMON
-	//  left brace  {			1/0		has or not
-	int lbrace;
-//	union Data data;
-//	todo 在struct中使用union受阻，There is no member named data，先简化成不使用union。
-	AstExpression expr;		// when lbrace is 0, assignment-expression
+	int isCompositeLit;
+	union{
+		AstExpression expr;		// when isCompositeLit is 0, assignment-expression
+		AstCompositeLit compositeLit;
+	};
 	// todo 语法解析时创建语法树并未使用到此成员。
 	InitData idata;
 } *AstInitializer;
@@ -240,7 +279,8 @@ typedef struct astInitDeclarator{
 	// declarator
 	AstDeclarator dec;
 	// initializer
-	AstInitializer init;
+	// AstInitializer init;
+	AstNode init;
 } *AstInitDeclarator;
 
 /**

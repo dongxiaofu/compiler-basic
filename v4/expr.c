@@ -780,13 +780,12 @@ AstFunctionLit ParseFunctionLit(){
 /**
  * CompositeLit  = LiteralType LiteralValue .
  */
-// TODO 没有建立AST。
-AstNode ParseCompositeLit(){
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+AstCompositeLit ParseCompositeLit(){
+	AstCompositeLit node;
+	CREATE_AST_NODE(node, CompositeLit);
 	
-	ParseLiteralType();
-	ParseLiteralValue();	
+	node->literalType = (AstNode)ParseLiteralType();
+	node->literalValue = ParseLiteralValue();	
  
 	return node;
 }
@@ -799,41 +798,40 @@ Key           = FieldName | Expression | LiteralValue .
 FieldName     = identifier .
 Element       = Expression | LiteralValue .
  */
-// TODO 没有组建AST
 // 创建层层分解的函数，代码变得简洁，复杂度降低，可是建立AST时可能会有许多不方便。怎么办？
-AstNode ParseLiteralValue(){
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	
+AstLiteralValue ParseLiteralValue(){
 	EXPECT(TK_LBRACE);
-	ParseElementList();
-	expect_comma;
-	EXPECT(TK_RBRACE);
 
-	return node;
-}
+	AstLiteralValue value;
+	CREATE_AST_NODE(value, LiteralValue);
+	int hasKey = 1;
 
-// TODO 没有组建AST
-AstNode ParseElementList(){
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	AstKeyedElement header;
+	CREATE_AST_NODE(header, KeyedElement);
+	// header->next = element;
+	AstKeyedElement *element = &(header->next);
 
 	// TODO 不喜欢这样写。解析此段代码还用到了外部条件。
 	// while(current_token.kind != TK_COMMA || current_token.kind != TK_RBRACE){
 	while(current_token.kind != TK_RBRACE){
 		if(current_token.kind == TK_COMMA)	continue;
-		ParseKeyedElement();
+		*element = ParseKeyedElement();
+		if((*element)->key == NULL)	hasKey = 0;
+		// element = &(element->next);
+		element = &((*element)->next);
 		// 处理逗号
 		NEXT_TOKEN;
 	}
 
-//	ParseKeyedElement();
-//	while(current_token.kind == TK_COMMA){
-//		NEXT_TOKEN;
-//		ParseKeyedElement();
-//	}
+	expect_comma;
+	EXPECT(TK_RBRACE);
 
-	return node;
+	// TODO LiteralValue 不允许同时存在key:val和val两种模式。我目前没有对此进行检查。
+
+	value->hasKey = hasKey;
+	value->keyedElement = header->next;
+
+	return value;
 }
 
 /**
@@ -842,58 +840,58 @@ Key           = FieldName | Expression | LiteralValue .
 FieldName     = identifier .
 Element       = Expression | LiteralValue .
  */
-// TODO 没有建立AST。
-AstNode ParseKeyedElement(){
+AstKeyedElement ParseKeyedElement(){
+
+	AstKeyedElement elementNode;
+	CREATE_AST_NODE(elementNode, KeyedElement);
+
+	AstKey key;
+	CREATE_AST_NODE(key, Key);
+
+	AstElement element;
+	CREATE_AST_NODE(element, Element);
+
+	// element->key = key;
 
 	// 这是唯一的难点。
 	unsigned char flag = 0;
-//	StartPeekToken();
-//	// while(current_token.kind == TK_RBRACE){
-//	while(current_token.kind != TK_COMMA){
-//		if(current_token.kind == TK_COLON){
-//	//		flag = 1;
-//			break;
-//		}
-//
-//		NEXT_TOKEN;
-//	}
-//	EndPeekToken();
-
-	// Key           = FieldName | Expression | LiteralValue .
-//	if(flag == 1){
 		if(current_token.kind == TK_LBRACE){
-			ParseLiteralValue();
+			key->lbrace = 1;
+			key->literalValue = (AstNode)ParseLiteralValue();
 		}else{
+			key->lbrace = 0;
 			if(CurrentTokenIn(FIRST_Expression) == 1){
-				ParseExpression();
+				key->literalValue = (AstNode)ParseExpression();
 			}else{	// FieldName
-				ParseIdentifier();
+				key->expr = (AstNode)ParseIdentifier();
 			}	
 		}
 
 		// 处理:
-//		EXPECT(TK_COLON);
 		if(current_token.kind == TK_COLON){
 			flag = 1;
 			EXPECT(TK_COLON);
 		}
-//	}
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+
+	// 只有值没有键，
 	if(flag == 0){
-		return node;
+		elementNode->key = NULL;
+		elementNode->element = element;
+		return elementNode;
 	}
 
 	if(current_token.kind == TK_LBRACE){
-		ParseLiteralValue();
+		element->lbrace = 1;
+		element->literalValue = (AstNode)ParseLiteralValue();
 	}else{
-		ParseExpression();
+		element->lbrace = 0;
+		element->expr = (AstNode)ParseExpression();
 	}
 
-//	AstNode node;
-//	CREATE_AST_NODE(node, Node);
+	elementNode->key = key;
+	elementNode->element = element;
 
-	return node;
+	return elementNode;
 }
 
 

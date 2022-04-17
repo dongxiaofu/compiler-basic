@@ -2,20 +2,9 @@ package main
 
 import "unsafe"
 
-var Books struct {
-	seller struct {
-		age int
-		height int
-	}
-   author int
-   subject int
-   book int
-}
-
-var x, y int = 4,5
-
-var c, d int = 1, 2
+var a int = struct{age int; x   int}{age:3,x:4}
 
 func main(){
+	var f int = struct{age int; x   int}{3,4}
     println(a, b, c)
 }

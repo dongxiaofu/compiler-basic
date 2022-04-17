@@ -400,6 +400,10 @@ AstVarDeclarator ParseVarSpec(){
 //				expr->val.i[0] = exprCur->val.i[0];
 //			}
 			init->expr = expr;
+			// TODO exprCur一直存储着在ParseCompositeLit中设置的kind吗？
+			if(exprCur->kind == NK_CompositeLit){
+				init->isCompositeLit = 1;
+			}
 		}else{
 			init = NULL;
 		}

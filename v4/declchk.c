@@ -47,7 +47,7 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 					}	
 					// 变量的初始值
 					if(initDec->init){
-						AstInitializer init = initDec->init;
+						CheckInitializer((AstInitializer)initDec->init);
 					}
 
 					initDec = (AstInitDeclarator)initDec->next;
@@ -149,4 +149,99 @@ void EndRecord(RecordType rty)
 	}
 
 	rty->size = size;
+}
+
+InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
+{
+	AstNode literalType = compositeLit->literalType;
+	AstLiteralValue literalValue = compositeLit->literalValue;
+	AstKeyedElement element = literalValue->keyedElement;	
+
+	InitData head = (InitData)malloc(sizeof(struct initData));
+	memset(head, 0, sizeof(struct initData));
+	InitData *init = &(head->next);
+	int offset = 0;
+	
+
+//	if(literalType->kind == NK_StructDeclaration){
+	if(literalType->kind == NK_StructSpecifier){
+		RecordType rty = CheckStructSpecifier((AstStructSpecifier)literalType);
+		Field fld = rty->flds;
+		if(literalValue->hasKey){
+			// {age:3,height:4}这种初始化值比较难处理。
+			while(fld){
+				AstKeyedElement targetElement = LookupElement(element, fld->id);
+				*init = (InitData)malloc(sizeof(struct initData));
+				memset(*init, 0, sizeof(struct initData));
+				(*init)->expr = targetElement->element->expr;	
+				(*init)->offset = offset;
+				offset += fld->ty->size;
+
+				init = &((*init)->next);
+
+				fld = fld->next;
+			}
+		}else{
+			while(fld){
+				// 语义检查，值和数据类型是否匹配。
+				// TODO 暂时不支持嵌套结构体。
+				AstNode val = element->element->expr;
+				if(!CanAssign(fld->ty, val)){
+					// TODO 打印报错信息，搁置。
+				}
+				
+				*init = (InitData)malloc(sizeof(struct initData));
+				memset(*init, 0, sizeof(struct initData));
+				(*init)->expr = val;
+				(*init)->offset = offset;
+				offset += fld->ty->size;
+
+				init = &((*init)->next);
+
+				fld = fld->next;
+			}	
+		}
+	}
+
+	return head->next;
+}
+
+void CheckInitializer(AstInitializer init)
+{
+	InitData idata;
+	
+	if(init->isCompositeLit == 1){
+		// 处理struct{age int;height int}{3,4}这种初始化值。
+		AstCompositeLit compositeLit = init->compositeLit;
+		idata = CheckCompositeLitInitializer(compositeLit);
+	}else{
+		idata = (InitData)malloc(sizeof(struct initData));
+		memset(idata, 0, sizeof(struct initData));
+		idata->offset = 0;
+		idata->expr = init->expr;
+	}
+
+	init->idata = (AstNode)idata;
+}
+
+int CanAssign(Type ty, AstNode val)
+{
+
+	return 1;
+}
+
+AstKeyedElement LookupElement(AstKeyedElement element, char *name)
+{
+	while(element){
+		AstKey key = element->key;
+		if(key->lbrace == 0){
+			char *keyName = (char *)(((AstExpression)(key->expr))->val.p);
+			if(strcmp(keyName, name) == 0){
+				return element;
+			}
+		}
+		element = element->next;
+	}
+
+	return NULL;
 }
