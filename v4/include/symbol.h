@@ -37,6 +37,7 @@ typedef struct bucketLinker{
 
 typedef struct table{
 	Symbol *buckets;
+//	Symbol buckets[128];
 	int level;
 	struct table *outer;
 } *Table;

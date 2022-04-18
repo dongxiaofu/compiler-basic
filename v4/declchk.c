@@ -283,6 +283,12 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	AstKeyedElement element = literalValue->keyedElement;	
 
 	InitData head = (InitData)malloc(sizeof(struct initData));
+//	(char *)malloc(sizeof(char));
+////	InitData head = (InitData)malloc(2);
+//	return NULL;
+	if(head == -1){
+		exit(-2);
+	}
 	memset(head, 0, sizeof(struct initData));
 	InitData *init = &(head->next);
 	int offset = 0;

@@ -28,7 +28,9 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		int size = sizeof(Symbol) * (SYM_HASH_MASK + 1);
-		tbl->buckets = (Symbol *)malloc(sizeof(size));
+	// TODO 一个十分可笑的错误。
+	//	tbl->buckets = (Symbol *)malloc(sizeof(size));
+		tbl->buckets = (Symbol *)malloc(size);
 		memset(tbl->buckets, 0, size);
 	}
 	

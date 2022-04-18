@@ -820,7 +820,8 @@ AstLiteralValue ParseLiteralValue(){
 		// element = &(element->next);
 		element = &((*element)->next);
 		// 处理逗号
-		NEXT_TOKEN;
+//		NEXT_TOKEN;
+		expect_comma;
 	}
 
 	expect_comma;
