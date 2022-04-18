@@ -827,6 +827,7 @@ AstLiteralValue ParseLiteralValue(){
 	EXPECT(TK_RBRACE);
 
 	// TODO LiteralValue 不允许同时存在key:val和val两种模式。我目前没有对此进行检查。
+	// TODO 补充上面的注释，数组的LiteralValue。
 
 	value->hasKey = hasKey;
 	value->keyedElement = header->next;
@@ -876,7 +877,8 @@ AstKeyedElement ParseKeyedElement(){
 	// 只有值没有键，
 	if(flag == 0){
 		elementNode->key = NULL;
-		elementNode->element = element;
+		key->kind = NK_Element;
+		elementNode->element = (AstElement)key;
 		return elementNode;
 	}
 

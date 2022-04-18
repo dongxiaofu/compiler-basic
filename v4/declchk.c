@@ -71,6 +71,8 @@ void CheckDeclarationSpecifiers(AstSpecifiers specs)
 	if(specs->kind == NK_StructSpecifier){
 		// ty = CheckStructSpecifier((AstStructSpecifier)specs->tySpecs);
 		ty = CheckStructSpecifier((AstStructSpecifier)specs);
+	}else if(specs->kind == NK_ArrayTypeSpecifier){
+		ty = CheckArraySpecifier((AstArrayTypeSpecifier)specs);
 	}else{
 		ty = T(INT);
 	}
@@ -154,17 +156,25 @@ void EndRecord(RecordType rty)
 InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
 {
 	AstNode literalType = compositeLit->literalType;
-	AstLiteralValue literalValue = compositeLit->literalValue;
-	AstKeyedElement element = literalValue->keyedElement;	
-
-	InitData head = (InitData)malloc(sizeof(struct initData));
-	memset(head, 0, sizeof(struct initData));
-	InitData *init = &(head->next);
-	int offset = 0;
+//	AstLiteralValue literalValue = compositeLit->literalValue;
+//	AstKeyedElement element = literalValue->keyedElement;	
+//
+//	InitData head = (InitData)malloc(sizeof(struct initData));
+//	memset(head, 0, sizeof(struct initData));
+//	InitData *init = &(head->next);
+//	int offset = 0;
 	
-
+	InitData idata;
 //	if(literalType->kind == NK_StructDeclaration){
 	if(literalType->kind == NK_StructSpecifier){
+		AstNode literalType = compositeLit->literalType;
+		AstLiteralValue literalValue = compositeLit->literalValue;
+		AstKeyedElement element = literalValue->keyedElement;	
+	
+		InitData head = (InitData)malloc(sizeof(struct initData));
+		memset(head, 0, sizeof(struct initData));
+		InitData *init = &(head->next);
+		int offset = 0;
 		RecordType rty = CheckStructSpecifier((AstStructSpecifier)literalType);
 		Field fld = rty->flds;
 		if(literalValue->hasKey){
@@ -173,7 +183,11 @@ InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
 				AstKeyedElement targetElement = LookupElement(element, fld->id);
 				*init = (InitData)malloc(sizeof(struct initData));
 				memset(*init, 0, sizeof(struct initData));
-				(*init)->expr = targetElement->element->expr;	
+				if(targetElement == NULL){
+					(*init)->expr = NULL;
+				}else{
+					(*init)->expr = targetElement->element->expr;	
+				}
 				(*init)->offset = offset;
 				offset += fld->ty->size;
 
@@ -201,9 +215,13 @@ InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
 				fld = fld->next;
 			}	
 		}
+		idata = head->next;
+
+	}else if(literalType->kind == NK_ArrayTypeSpecifier){
+		idata = CheckArrayInitializer(compositeLit);
 	}
 
-	return head->next;
+	return idata;
 }
 
 void CheckInitializer(AstInitializer init)
@@ -244,4 +262,55 @@ AstKeyedElement LookupElement(AstKeyedElement element, char *name)
 	}
 
 	return NULL;
+}
+
+ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
+{
+	ArrayType aty = (ArrayType)malloc(sizeof(struct arrayType));
+	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
+	aty->length = specs->expr->val.i[0];
+	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
+	aty->bty = ((AstSpecifiers)specs->type)->ty;	
+
+	return aty;
+}
+
+InitData CheckArrayInitializer(AstCompositeLit compositeLit)
+{
+	AstArrayTypeSpecifier node  = (AstArrayTypeSpecifier)compositeLit->literalType;
+	ArrayType aty = CheckArraySpecifier(node);
+	AstLiteralValue literalValue = compositeLit->literalValue;
+	AstKeyedElement element = literalValue->keyedElement;	
+
+	InitData head = (InitData)malloc(sizeof(struct initData));
+	memset(head, 0, sizeof(struct initData));
+	InitData *init = &(head->next);
+	int offset = 0;
+
+	AstExpression arrayLength = node->expr;
+	int length = -1;
+	if(arrayLength){
+		length = arrayLength->val.i[0];
+	}
+
+	int index = 0;
+	// TODO RecordType转化成普通Type后，数据似乎全部丢失。此处的写法，有问题吗？
+	int elementSize = aty->bty->size;
+	while(element != NULL && length >= 0){
+		offset = index * elementSize;
+		*init = (InitData)malloc(sizeof(struct initData));
+		memset(*init, 0, sizeof(struct initData));
+		(*init)->offset = offset;
+		// TODO 这样做行吗？exlement->expr中的数据是否会被销毁？
+		// TODO element->element->expr 没有考虑嵌套。
+		(*init)->expr = element->element->expr;	
+		init = &((*init)->next);
+		// *init = &((*init)->next);
+	
+		element = element->next;
+		length--;
+		index++;
+	}
+
+	return head->next;	
 }

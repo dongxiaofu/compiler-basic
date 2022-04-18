@@ -142,6 +142,12 @@ typedef struct recordType
 	Field *tail;	
 } *RecordType;
 
+typedef struct arrayType
+{
+	TYPE_COMMON
+	int length;	
+} *ArrayType;
+
 struct astExpression
 {
 	AST_NODE_COMMON
@@ -172,7 +178,7 @@ typedef struct astToken
 } *AstToken;
 
 #define SPECIFIERS_COMMON \
-	AST_NODE_COMMON		\
+	AST_DECLARATOR_COMMON \
 	AstNode stgClasses;	\
 	AstNode tyQuals;	\
 	AstNode tySpecs;	\
@@ -188,20 +194,18 @@ typedef struct astPointerDeclarator{
 } *AstPointerDeclarator;
 
 typedef struct astArrayTypeSpecifier{
-	AST_DECLARATOR_COMMON
+	SPECIFIERS_COMMON
 	AstExpression expr;
 	AstNode type;
 } *AstArrayTypeSpecifier;
 
 typedef struct astStructDeclarator{
 	SPECIFIERS_COMMON
-	char *id;
 } *AstStructDeclarator;
 
 typedef struct astStructSpecifier{
 	SPECIFIERS_COMMON
 	AstStructDeclarator stDecls;
-	char *id;
 } *AstStructSpecifier;
 
 typedef struct fieldDecl{

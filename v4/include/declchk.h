@@ -20,6 +20,8 @@ void CheckDeclarationSpecifiers(AstSpecifiers specs);
 AstKeyedElement LookupElement(AstKeyedElement element, char *name);
 CanAssign(Type ty, AstNode val);
 
+ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
+InitData CheckArrayInitializer(AstCompositeLit compositeLit);
 InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit);
 void CheckInitializer(AstInitializer init);
 
