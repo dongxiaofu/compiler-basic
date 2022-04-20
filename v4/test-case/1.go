@@ -2,7 +2,7 @@ package main
 
 import "unsafe"
 
-var f int = map[Point]string{{90, 40}: "orig"}
+var f int = map[int]string{80: "orig", 90:"red", 100:"hi"}
 var balance [5]int  =  [5]int{8,9,1:2,5, 3:7}
 var a int = struct{age int; x   int}{age:3,x:4}
 

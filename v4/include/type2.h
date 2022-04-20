@@ -52,7 +52,7 @@ AstPointerDeclarator ParsePointerType();
 AstFunctionDeclarator ParseFunctionType();
 AstInterfaceDeclaration ParseInterfaceType();
 AstSliceType ParseSliceType();
-AstMapType ParseMapType();
+AstMapSpecifier ParseMapType();
 AstChannelType ParseChannelType();
 
 AstVariableElementType ParseVariableElementType();

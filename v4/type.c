@@ -405,9 +405,9 @@ AstSliceType ParseSliceType(){
  * MapType     = "map" "[" KeyType "]" ElementType .
 KeyType     = Type .
  */
-AstMapType ParseMapType(){
-	AstMapType mapType;
-	CREATE_AST_NODE(mapType, MapType);
+AstMapSpecifier ParseMapType(){
+	AstMapSpecifier mapType;
+	CREATE_AST_NODE(mapType, MapSpecifier);
 
 	expect_token(TK_MAP);	
 	expect_token(TK_LBRACKET);	

@@ -10,17 +10,20 @@
 #include "expr.h"
 // #include "grammer.h"
 
-
 void EndRecord(RecordType rty);
 Field AddField(RecordType rty, char *id, Type ty);
 RecordType StartRecord();
+
 RecordType CheckStructSpecifier(AstStructSpecifier specs);
+MapType CheckMapSpecifier(AstMapSpecifier specs);
+ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
 void CheckDeclarationSpecifiers(AstSpecifiers specs);
 
 AstKeyedElement LookupElement(AstKeyedElement element, char *name);
-CanAssign(Type ty, AstNode val);
+CanAssign(Type ty, AstExpression val);
 
-ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
+InitData CheckMapInitializer(AstCompositeLit compositeLit);
+InitData CheckStructInitializer(AstCompositeLit compositeLit);
 InitData CheckArrayInitializer(AstCompositeLit compositeLit);
 InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit);
 void CheckInitializer(AstInitializer init);

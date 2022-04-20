@@ -29,7 +29,7 @@ enum nodeKind
 	NK_Declarator,
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
 	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceDeclaration,
-	NK_SliceType, NK_MapType, NK_ChannelType, NK_VariableElementType,
+	NK_SliceType, NK_MapSpecifier, NK_ChannelType, NK_VariableElementType,
 	NK_ImportSpec, NK_ImportDeclaration, NK_PackageClause, NK_SourceFile, 
 
 	NK_TypeDeclaration, NK_TypeDeclarator, NK_VarDeclarator, NK_VarDeclaration, 
@@ -148,6 +148,16 @@ typedef struct arrayType
 	int length;	
 } *ArrayType;
 
+typedef struct mapType
+{
+	TYPE_COMMON
+	char *id;
+	// 集合的key
+	Type key;
+	// 集合的value
+	Type value;
+} *MapType;
+
 struct astExpression
 {
 	AST_NODE_COMMON
@@ -218,10 +228,19 @@ typedef struct fieldDecl{
   	// 也用AstStructDeclarator存储
 } *FieldDecl;
 
+typedef struct keyValue{
+	AstExpression key;
+	AstExpression value;
+} *KeyValue;
+
 // todo 暂时只支持初始化int类型变量。
 typedef  struct initData{
 	int offset;
-	AstExpression expr;
+	int kind;	// 0---expr;1--keyValue
+	union{
+		AstExpression expr;
+		KeyValue kv;
+	};
 	struct initData *next;
 } *InitData;
 
@@ -365,11 +384,11 @@ typedef struct astSliceType{
 	AstNode node;
 } *AstSliceType;
 
-typedef struct astMapType{
-	AST_NODE_COMMON
+typedef struct astMapSpecifier{
+	SPECIFIERS_COMMON
 	AstNode keyType;
 	AstNode elementType;
-} *AstMapType;
+} *AstMapSpecifier;
 
 typedef struct astChannelType{
 	AST_NODE_COMMON

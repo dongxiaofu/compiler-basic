@@ -138,9 +138,6 @@ void EndRecord(RecordType rty)
 	int offset = 0;
 	int size = 0;
 	while(fld != NULL){
-//		if(fld->kind == NK_RecordType){
-//			EndRecord(fld);
-//		}
 		if(pre != NULL){
 			offset = pre->offset + pre->ty->size;
 		}
@@ -153,20 +150,8 @@ void EndRecord(RecordType rty)
 	rty->size = size;
 }
 
-InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
+InitData CheckStructInitializer(AstCompositeLit compositeLit)
 {
-	AstNode literalType = compositeLit->literalType;
-//	AstLiteralValue literalValue = compositeLit->literalValue;
-//	AstKeyedElement element = literalValue->keyedElement;	
-//
-//	InitData head = (InitData)malloc(sizeof(struct initData));
-//	memset(head, 0, sizeof(struct initData));
-//	InitData *init = &(head->next);
-//	int offset = 0;
-	
-	InitData idata;
-//	if(literalType->kind == NK_StructDeclaration){
-	if(literalType->kind == NK_StructSpecifier){
 		AstNode literalType = compositeLit->literalType;
 		AstLiteralValue literalValue = compositeLit->literalValue;
 		AstKeyedElement element = literalValue->keyedElement;	
@@ -215,10 +200,22 @@ InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
 				fld = fld->next;
 			}	
 		}
-		idata = head->next;
 
+	InitData idata = head->next;
+
+	return idata;
+}
+
+InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
+{
+	InitData idata;
+	AstNode literalType = compositeLit->literalType;
+	if(literalType->kind == NK_StructSpecifier){
+		idata = CheckStructInitializer(compositeLit);
 	}else if(literalType->kind == NK_ArrayTypeSpecifier){
 		idata = CheckArrayInitializer(compositeLit);
+	}else if(literalType->kind == NK_MapSpecifier){
+		idata = CheckMapInitializer(compositeLit);
 	}
 
 	return idata;
@@ -242,7 +239,7 @@ void CheckInitializer(AstInitializer init)
 	init->idata = (AstNode)idata;
 }
 
-int CanAssign(Type ty, AstNode val)
+int CanAssign(Type ty, AstExpression val)
 {
 
 	return 1;
@@ -283,12 +280,10 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	AstKeyedElement element = literalValue->keyedElement;	
 
 	InitData head = (InitData)malloc(sizeof(struct initData));
-//	(char *)malloc(sizeof(char));
-////	InitData head = (InitData)malloc(2);
-//	return NULL;
 	if(head == -1){
 		exit(-2);
 	}
+
 	memset(head, 0, sizeof(struct initData));
 	InitData *init = &(head->next);
 	int offset = 0;
@@ -319,4 +314,59 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	}
 
 	return head->next;	
+}
+
+MapType CheckMapSpecifier(AstMapSpecifier specs)
+{
+	// TODO 缺少一个数据类型枚举值。
+	MapType mty = (MapType)malloc(sizeof(struct mapType));
+	CheckDeclarationSpecifiers((AstSpecifiers)specs->keyType);
+	CheckDeclarationSpecifiers((AstSpecifiers)specs->elementType);
+	mty->key = (Type)(((AstSpecifiers)(specs->keyType))->ty);
+	mty->value = (Type)(((AstSpecifiers)(specs->elementType))->ty);
+	
+	return mty;
+}
+
+InitData CheckMapInitializer(AstCompositeLit compositeLit) 
+{
+	AstMapSpecifier node  = (AstMapSpecifier)compositeLit->literalType;
+
+	MapType mty = CheckMapSpecifier(node);
+	int keySize = mty->size;
+	int valSize = mty->size;
+	int kvSize = keySize + valSize;
+	AstLiteralValue literalValue = compositeLit->literalValue;
+
+	AstKeyedElement element = literalValue->keyedElement;	
+	InitData head = (InitData)malloc(sizeof(struct initData));
+	if(head == -1){
+		exit(-2);
+	}
+
+	memset(head, 0, sizeof(struct initData));
+	InitData *init = &(head->next);
+	int offset = 0;
+	int index = 0;
+
+	// TODO 不支持嵌套
+	while(element){
+		int size = sizeof(struct keyValue);
+		KeyValue kv = (KeyValue)malloc(size);
+		memset(kv, 0, size);
+		kv->key = (AstExpression)(((AstKey)element->key)->expr); 
+		kv->value = (AstExpression)(((AstElement)element->element)->expr);
+
+		*init = (InitData)malloc(sizeof(struct initData));
+		memset(*init, 0, sizeof(struct initData));
+		(*init)->kv = kv;
+		offset = index * kvSize;
+		(*init)->offset = offset;
+		init = &((*init)->next);
+
+		index++;
+		element = element->next;
+	}	
+	
+	return head->next;
 }

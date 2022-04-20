@@ -639,6 +639,8 @@ AstExpression ParseBasicLit(){
 	if(current_token.kind == TK_NUM){
 		// expr->op = OP_CONST;
 		// TODO 这是不正确的。临时这样做。
+		// TODO 临时这样做。
+		expr->ty = T(INT);
 		expr->op = OP_NONE;
 		union value v = {current_token.value.value_num,0};
 		expr->val = v;
