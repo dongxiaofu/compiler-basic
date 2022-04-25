@@ -632,7 +632,8 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 
 	int expr_count = 0;
 	// todo 等会再修改expr
-	AstDeclarator expr;
+//	AstDeclarator expr;
+	AstExpression expr;
 	// TK_ELLIPSIS 是省略号，即...。
 	// 当前token不是省略号，也不是数据类型，把当前token当表达式解析。
 	// todo 能解析出一个表达式也不存在吗？
@@ -650,29 +651,10 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 	if(expr_count == 1){
 		decl->specs = specs;
 		decl->dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-		strcpy(decl->dec->id, (char *)(expr->id));
+		strcpy(decl->dec->id, (char *)(expr->val.p));
 	}else if(expr_count > 1){
 		AstParameterDeclaration *tail = &decl;
-//		AstExpression cur = expr;
-		AstDeclarator cur = expr;
-//		AstDeclarator decl;
-//		CREATE_AST_NODE(decl, NameDeclarator);
-//		AstDeclarator dec;
-//		CREATE_AST_NODE(dec, NameDeclarator);
-		// while(cur != NULL){
-//		while(cur != 345){
-////			(*tail)->specs = type;
-//			AstDeclarator dec;
-//			CREATE_AST_NODE(dec, NameDeclarator);
-//			dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-//			strcpy(dec->id, (char *)(cur->id));
-//			(*tail)->dec = cur;
-//		//	(*tail)->dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-//			// strcpy((*tail)->dec->id, (char *)(cur->val.p));
-//			// strcpy(dec->id, (char *)(cur->val.p));
-//			tail = &((*tail)->next);
-//			cur = cur->next;
-//		}
+		AstExpression cur = expr;
 
 		AstParameterDeclaration pre;
 		AstParameterDeclaration curDecl;
@@ -694,7 +676,10 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 				pre->next = curDecl;
 				pre = curDecl;
 			}
-			curDecl->dec = cur;
+			CREATE_AST_NODE(dec, Declarator);
+			dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+			strcpy(dec->id, (char *)(cur->val.p));
+			curDecl->dec = dec;
 			curDecl->specs = specs;
 			cur = cur->next;
 		}
@@ -727,7 +712,7 @@ AstParameterDeclaration ParseParameterList(){
 		*tail = ParseParameterDecl(count_useless);		
 		tail = &((*tail)->next);
 	}
-	*tail = NULL;
+	// *tail = NULL;
 	return decl;
 }
 
@@ -740,7 +725,8 @@ AstParameterDeclaration ParseParameters(){
 	if(current_token.kind == TK_RPARENTHESES){
 		CREATE_AST_NODE(parameterList, ParameterDeclaration);	
 		EXPECT(TK_RPARENTHESES);
-		return parameterList;
+		return NULL;
+//		return parameterList;
 	}
 	parameterList = ParseParameterList();
 	expect_comma;
@@ -929,7 +915,7 @@ void PrintFdec(AstFunctionDeclarator fdec){
 		count++;
 	}
 
-	AstParameterTypeList sig = fdec->sig;
+	AstParameterTypeList sig = fdec->result;
 	AstParameterDeclaration rdec = (AstParameterDeclaration)sig->paramDecls;	
 	int rcount = 0;
 	while(rdec != NULL){
@@ -971,7 +957,7 @@ AstFunction ParseFunctionDecl(){
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
-	fdec->sig = signature;
+	fdec->result = signature;
 	
 	// todo 测试，打印数据。
 //	PrintFdec(fdec);
@@ -1057,7 +1043,7 @@ AstMethodDeclaration ParseMethodDecl(){
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
-	dec->sig = signature;
+	dec->result = signature;
 		
 //	AstFunction func;
 //	CREATE_AST_NODE(func, Function);

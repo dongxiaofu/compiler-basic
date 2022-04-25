@@ -2,9 +2,16 @@ package main
 
 import "unsafe"
 
-var f int = map[int]string{80: "orig", 90:"red", 100:"hi"}
-var balance [5]int  =  [5]int{8,9,1:2,5, 3:7}
-var a int = struct{age int; x   int}{age:3,x:4}
+func max(num1, num2 int) (int, int) {
+   var result int
+
+   if (num1 > num2) {
+      result = num1
+   } else {
+      result = num2
+   }
+   return result
+}
 
 func main(){
 	var f int = struct{age int; x   int}{3,4}

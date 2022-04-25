@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "grammer.h"
+// TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
 
 // 打印日志
@@ -158,6 +159,27 @@ typedef struct mapType
 	Type value;
 } *MapType;
 
+#define PARAM_LENGTH 5
+
+typedef struct signatureElement{
+	char *id;
+	Type ty;
+} *SignatureElement;
+
+typedef struct signature
+{
+	SignatureElement params[PARAM_LENGTH];
+	int paramIndex;
+	SignatureElement results[PARAM_LENGTH];
+	int resultIndex;
+} *Signature;
+
+typedef struct functionType
+{
+	TYPE_COMMON
+	Signature sig;
+} *FunctionType;
+
 struct astExpression
 {
 	AST_NODE_COMMON
@@ -243,6 +265,48 @@ typedef  struct initData{
 	};
 	struct initData *next;
 } *InitData;
+
+#define SYM_HASH_MASK	127
+#define SEARCH_OUTER_TABLE 1
+
+#define SYMBOL_COMMON	\
+	int kind;	\
+	char *name;	\
+	Type ty;	\
+	int level;	\
+	union value val;	\
+	struct symbol *link;	\
+	struct symbol *next;
+
+typedef struct symbol{
+	SYMBOL_COMMON
+} *Symbol;
+
+typedef struct variableSymbol{
+	SYMBOL_COMMON
+	InitData initData;	
+} *VariableSymbol;
+
+typedef struct functionSymbol{
+	SYMBOL_COMMON
+	Symbol params;
+	Symbol results;
+	Symbol locals;
+} *FunctionSymbol;
+
+typedef struct bucketLinker{
+	Symbol sym;
+	struct bucketLinker *link;
+} *BucketLinker;
+
+typedef struct table{
+	Symbol *buckets;
+//	Symbol buckets[128];
+	int level;
+	struct table *outer;
+} *Table;
+
+void InitSymbolTable();
 
 // todo 想不到更好的命名。
 union Data {
@@ -357,12 +421,13 @@ typedef struct astParameterTypeList
         int ellipsis;
 } *AstParameterTypeList;
 
+// TODO 不理解我当初为什么设计这个结构？
 typedef struct astFunctionDeclarator
 {
         AST_DECLARATOR_COMMON
         AstParameterTypeList receiver;
         AstParameterTypeList paramTyList;
-        AstParameterTypeList sig;
+        AstParameterTypeList result;
 } *AstFunctionDeclarator;
 
 typedef struct astMethodSpec{
@@ -487,6 +552,7 @@ typedef struct astFunction
         // compound-statement
 		AstBlock block;
         int hasReturn;
+		FunctionSymbol fsym;
 } *AstFunction;
 
 typedef struct astMethodDeclaration{

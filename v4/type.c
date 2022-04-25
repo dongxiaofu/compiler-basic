@@ -556,7 +556,7 @@ AstFunctionDeclarator ParseFunctionType(){
 	CREATE_AST_NODE(signature, ParameterTypeList);
 	AstParameterDeclaration result = ParseResult(); 
 	signature->paramDecls = result;
-	fdec->sig = signature;
+	fdec->result = signature;
 	
 	return fdec;
 }

@@ -28,6 +28,8 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit);
 InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit);
 void CheckInitializer(AstInitializer init);
 
+void CheckBlock(AstBlock block);
+void CheckFunction(AstFunction p);
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void CheckGlobalDeclaration(AstDeclaration decl);
 

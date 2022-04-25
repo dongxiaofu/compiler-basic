@@ -1,27 +1,94 @@
+#include "symbol.h"
 #include "ast.h"
 #include "stmt.h"
 #include "decl.h"
 #include "expr.h"
 #include "declchk.h"
-#include "symbol.h"
+// #include "symbol.h"
 
 void CheckTranslationUnit(AstTranslationUnit transUnit)
 {
 	printf("%s\n", "Start Check");
 
 	AstDeclaration p = transUnit->decls;
+	VariableSymbol sym;
 
 	while(p){
 		if(p->kind == NK_Function){
 			printf("%s\n", "Check function");
+			CheckFunction((AstFunction)p);
 		}else{
 			printf("%s\n", "Check global declaration");
 			CheckGlobalDeclaration(p);
+			
+			// TODO 这样是查不到f对应的符号的。因为查询符号使用的是变量的内存地址而不是变量名。
+			// sym = LookupID("f");
 		}
 		p = p->next;
 	}
 
 	printf("%s\n", "End Check");
+}
+
+void CheckBlock(AstBlock block)
+{
+
+}
+
+void CheckFunction(AstFunction p)
+{
+	FunctionSymbol fsym;
+
+	AstFunctionDeclarator fdec = p->fdec;
+	Signature sig = (Signature)malloc(sizeof(struct signature));
+	memset(sig, 0, sizeof(struct signature));
+	int paramIndex = sig->paramIndex;
+	int resultIndex = sig->resultIndex;
+
+	AstParameterTypeList paramTyList = fdec->paramTyList;
+	AstParameterDeclaration paramDecls = paramTyList->paramDecls;
+	AstParameterDeclaration paramDecl = paramDecls;
+	while(paramDecl){
+		CheckDeclarationSpecifiers(paramDecl->specs);
+		AstDeclarator dec = paramDecl->dec;
+		SignatureElement sigElement = (SignatureElement)malloc(sizeof(struct signatureElement));
+		memset(sigElement, 0, sizeof(struct signatureElement));
+		sigElement->id = dec->id;
+		sigElement->ty = paramDecl->specs->ty;
+		sig->params[paramIndex++] = sigElement;
+
+		paramDecl = paramDecl->next;
+	}
+
+	sig->paramIndex = paramIndex;
+
+	AstParameterTypeList resultList = fdec->result;
+	AstParameterDeclaration resultParamDecls = resultList->paramDecls;
+	AstParameterDeclaration resultParamDecl = resultParamDecls;
+	while(resultParamDecl){
+		CheckDeclarationSpecifiers(resultParamDecl->specs);
+		AstDeclarator dec = resultParamDecl->dec;
+		SignatureElement sigElement = (SignatureElement)malloc(sizeof(struct signatureElement));
+		memset(sigElement, 0, sizeof(struct signatureElement));
+		if(dec != NULL){
+			sigElement->id = dec->id;
+		}
+		sigElement->ty = resultParamDecl->specs->ty;
+		sig->results[resultIndex++] = sigElement;
+
+		resultParamDecl = resultParamDecl->next;
+	}
+
+	sig->resultIndex = resultIndex;
+
+	AstDeclarator fname = (AstDeclarator)fdec->dec;
+	if((fsym == LookupID(fname->id)) == NULL){
+		fsym = AddFunction(fname->id, sig);
+	}	
+
+	// 检查函数体
+	AstBlock block = p->block;
+	CheckBlock(block);	
 }
 
 // TODO 必须加static吗？
@@ -36,19 +103,24 @@ void CheckGlobalDeclaration(AstDeclaration decls)
 			while(declarator){
 				// 处理说明符
 				CheckDeclarationSpecifiers(declarator->specs);
-				Symbol sym;
+				VariableSymbol sym;
+				VariableSymbol sym2;
 				// TODO var a,b int = 2,4
 				AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
 				// CG 处理a,b
 				while(initDec){
 					AstDeclarator dec = initDec->dec;
-					if((sym = LookupID(dec->id)) == NULL){
-						sym = (Symbol)AddVariable(dec->id);
+					if((sym = (VariableSymbol)LookupID(dec->id)) == NULL){
+						sym = AddVariable(dec->id);
 					}	
 					// 变量的初始值
 					if(initDec->init){
 						CheckInitializer((AstInitializer)initDec->init);
+						sym->initData = ((AstInitializer)initDec->init)->idata;
 					}
+
+					// TODO 测试查询功能，没有作用。
+					sym2 = (VariableSymbol)LookupID(dec->id);
 
 					initDec = (AstInitDeclarator)initDec->next;
 				}

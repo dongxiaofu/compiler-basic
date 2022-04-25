@@ -768,7 +768,7 @@ AstFunctionLit ParseFunctionLit(){
 	AstFunctionDeclarator fdecl;
 	CREATE_AST_NODE(fdecl, FunctionDeclarator);
 	fdecl->paramTyList = paramTyList;
-	fdecl->sig = result;
+	fdecl->result = result;
 
 	AstFunctionLit functionLit;
 	CREATE_AST_NODE(functionLit, FunctionLit);

@@ -23,7 +23,8 @@ void InitSymbolTable()
 
 Symbol AddSymbol(Table tbl, Symbol sym)
 {
-	int h = (unsigned long)sym->name & SYM_HASH_MASK;
+	// int h = (unsigned long)sym->name & SYM_HASH_MASK;
+	unsigned int h = (unsigned long)sym->name & SYM_HASH_MASK;
 	if(tbl->buckets == NULL){
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
@@ -96,7 +97,8 @@ char * GetSymbolKind(int kind)
 Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 {
 	do{
-		int h = (unsigned long)name & SYM_HASH_MASK;
+		// int h = (unsigned long)name & SYM_HASH_MASK;
+		unsigned int h = (unsigned long)name & SYM_HASH_MASK;
 		if(tbl->buckets != NULL){
 			BucketLinker linker;
 			for(linker = (BucketLinker)tbl->buckets[h]; linker; linker = linker->link){
@@ -118,13 +120,27 @@ VariableSymbol AddVariable(char *name)
 	// memset(p, 0, sizeof(struct variableSymbol));
 	memset(p, 0, size);
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
-	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
-	memset(p->name, 0, MAX_NAME_LEN);
+//	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
+//	memset(p->name, 0, MAX_NAME_LEN);
 	// strcpy(p->name, name, MAX_NAME_LEN);
-	strcpy(p->name, name);
+//	strcpy(p->name, name);
+	p->name = name;
 
 	p = (VariableSymbol)AddSymbol(Identifiers, (Symbol)p);
 
 	return p;
 }
 
+FunctionSymbol AddFunction(char *funcName, Signature sig)
+{
+	FunctionType fty = (FunctionType)malloc(sizeof(struct functionType));
+	memset(fty, 0, sizeof(struct functionType));
+	fty->sig = sig;
+	FunctionSymbol fsym = (FunctionSymbol)malloc(sizeof(struct functionSymbol));
+	memset(fsym, 0, sizeof(struct functionSymbol));
+	fsym->name = funcName;
+	fsym->ty = fty;
+	fsym = (FunctionSymbol)AddSymbol(Identifiers, (Symbol)fsym);
+
+	return fsym;
+}
