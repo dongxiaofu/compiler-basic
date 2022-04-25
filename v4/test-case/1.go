@@ -10,6 +10,7 @@ func max(num1, num2 int) (int, int) {
    } else {
       result = num2
    }
+   var result2 int
    return result
 }
 

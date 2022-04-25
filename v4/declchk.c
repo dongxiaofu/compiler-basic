@@ -30,9 +30,33 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 	printf("%s\n", "End Check");
 }
 
+void CheckLocalDeclaration(AstDeclaration decls)
+{
+	CheckDeclaration(decls);
+}
+
 void CheckBlock(AstBlock block)
 {
+	AstStatement stmt = block->stmt;
+	while(stmt != NULL){
+		if(stmt->kind == NK_CompoundStatement){
+			PRINTF("check local variable\n");
+			AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
+			// 处理局部变量
+			AstDeclaration decls = (AstDeclaration)compoundStmt->decls;
+			if(decls){
+				CheckLocalDeclaration(decls);
+			}
+			// 处理其他
+			// TODO 待完善
+			AstLabeledStmt labeledStmt = compoundStmt->labeledStmt;
+			AstStatement simpleStmt = compoundStmt->stmts;	
+		}else{
 
+		}
+
+		stmt = stmt->next;
+	}
 }
 
 void CheckFunction(AstFunction p)
@@ -91,9 +115,14 @@ void CheckFunction(AstFunction p)
 	CheckBlock(block);	
 }
 
+void CheckGlobalDeclaration(AstDeclaration decls){
+	CheckDeclaration(decls);
+}
+
 // TODO 必须加static吗？
 // static void CheckGlobalDeclaration(AstDeclaration decl)
-void CheckGlobalDeclaration(AstDeclaration decls)
+// void CheckGlobalDeclaration(AstDeclaration decls)
+void CheckDeclaration(AstDeclaration decls)
 {
 	if(decls->kind == NK_VarDeclaration){
 		AstVarDeclaration decl = (AstVarDeclaration)decls;

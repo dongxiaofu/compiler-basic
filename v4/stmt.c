@@ -9,12 +9,6 @@ AstStatement ParseStatement(){
 	AstStatement stmt;
 
 	switch(current_token.kind){
-//		case TK_ID:
-//			// TODO
-//			LOG("%s\n", "parse ID stmt");
-//			// stmt = ParseSimpleStatement();
-//			stmt = ParseLabelStatement();
-//			break;
 		case TK_IF:
 			// TODO
 			LOG("%s\n", "parse if stmt");
