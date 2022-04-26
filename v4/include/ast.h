@@ -41,7 +41,7 @@ enum nodeKind
 	// CompositeLit 相关
 	NK_KeyedElement, NK_Key, NK_Element, NK_CompositeLit, NK_LiteralValue, 
 
-	NK_SelectCaseStatement, NK_ExprSwitchStmt,
+//	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
 
@@ -57,7 +57,7 @@ enum nodeKind
 
 
 	NK_ExpressionStatement,	// 没用到 
-	NK_CaseStatement,		
+	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_IfStatement,        NK_SwitchStatement,		
     NK_ForStmt,		
 	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		

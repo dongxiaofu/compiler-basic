@@ -7,7 +7,14 @@
 #include "type2.h"
 #include "expr.h"
 
-AstStatement CheckCaseStatement(AstStatement stmt);
+// TODO 暂时放在这里。
+AstExpression CheckExpression(AstExpression expr);
+AstExpression CheckExpressionList(AstExpression expr);
+AstExpression CheckIdentifierList(AstExpression expr);
+
+AstStatement CheckSimpleStmt(AstStatement stmt);
+AstStatement CheckExprSwitchStmt(AstStatement stmt);
+AstStatement CheckSelectCaseStatement(AstStatement stmt);
 AstStatement CheckIfStatement(AstStatement stmt);
 AstStatement CheckSwitchStatement(AstStatement stmt);
 AstStatement CheckForStmt(AstStatement stmt);

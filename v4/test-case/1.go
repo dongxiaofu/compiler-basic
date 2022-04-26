@@ -11,6 +11,14 @@ func max(num1, num2 int) (int, int) {
       result = num2
    }
    var result2 int
+
+
+	sum := 0
+        for i := 0; i <= 10; i++ {
+                sum += i
+        }
+        fmt.Println(sum)
+
    return result
 }
 

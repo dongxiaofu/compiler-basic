@@ -77,7 +77,8 @@ typedef struct astIfStatement
 	AstStatement simpleStmt;
 	AstExpression expr;
 	AstBlock	thenStmt;
-	AstStatement   elseStmt;
+	AstStatement elseIfStmt;
+	AstBlock   elseStmt;
 } *AstIfStatement;
 
 typedef struct astTypeSwitchGuard{
@@ -169,21 +170,7 @@ typedef struct astSwitchStatement
 //	BBlock nextBB;
 //	BBlock defBB;
 } *AstSwitchStatement;
-/**
-	@expr	in AST_LOOP_STATEMENT_COMMON
-			expression2
-	@initExpr	expression1
-	@incrExpr	expression3
-	@testBB
- */
-// for([expression1];[expression2];[expression3]) statement
-typedef struct astForStatement
-{
-	AST_LOOP_STATEMENT_COMMON
-	AstExpression initExpr;
-	AstExpression incrExpr;
-//	BBlock testBB;
-} *AstForStatement;
+
 // goto identifier
 typedef struct astGotoStatement
 {
@@ -298,7 +285,7 @@ typedef struct astSelectStmt{
 #define AsIf(stmt)     ((AstIfStatement)stmt)
 #define AsSwitch(stmt) ((AstSwitchStatement)stmt)
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
-#define AsFor(stmt)    ((AstForStatement)stmt)
+#define AsFor(stmt)    ((AstForStmt)stmt)
 #define AsGoto(stmt)   ((AstGotoStatement)stmt)
 #define AsCont(stmt)   ((AstContinueStatement)stmt)
 #define AsBreak(stmt)  ((AstBreakStatement)stmt)

@@ -6,7 +6,8 @@
 #include "stmtchk.h"
 
 AstStatement (*StmtCheckers[])(AstStatement) = {
-	CheckCaseStatement,
+	CheckExprSwitchStmt,
+	CheckSelectCaseStatement,
 	CheckIfStatement,
 	CheckSwitchStatement,
 	CheckForStmt,
@@ -26,10 +27,16 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 
 AstStatement CheckStatement(AstStatement stmt)
 {
-	return (*StmtCheckers[stmt->kind - NK_CaseStatement])(stmt);
+	return (*StmtCheckers[stmt->kind - NK_SelectCaseStatement])(stmt);
 }
 
-AstStatement CheckCaseStatement(AstStatement stmt)
+AstStatement CheckExprSwitchStmt(AstStatement stmt)
+{
+
+	return stmt;
+}
+
+AstStatement CheckSelectCaseStatement(AstStatement stmt)
 {
 
 return stmt;
@@ -37,8 +44,23 @@ return stmt;
 
 AstStatement CheckIfStatement(AstStatement stmt)
 {
+	AstIfStatement ifStmt = AsIf(stmt);
+	if(ifStmt->simpleStmt){
+		ifStmt->simpleStmt = CheckSimpleStmt(ifStmt->simpleStmt);
+	}
 
-return stmt;
+	ifStmt->expr = CheckExpression(ifStmt->expr);
+	ifStmt->thenStmt = CheckBlock(ifStmt->thenStmt);
+
+	if(ifStmt->elseIfStmt){
+		ifStmt->elseIfStmt = CheckIfStatement(ifStmt->elseIfStmt);
+	}
+
+	if(ifStmt->elseStmt){
+		ifStmt->elseStmt = CheckBlock(ifStmt->elseStmt);
+	}
+
+	return (AstIfStatement)ifStmt;
 }
 
 AstStatement CheckSwitchStatement(AstStatement stmt)
@@ -47,10 +69,48 @@ AstStatement CheckSwitchStatement(AstStatement stmt)
 return stmt;
 }
 
+AstForClause CheckForClause(AstForClause forClause)
+{
+	forClause->initStmt = CheckSimpleStmt(forClause->initStmt);
+	forClause->condition = CheckExpression(forClause->condition);
+	forClause->postStmt = CheckSimpleStmt(forClause->postStmt);
+
+	return forClause;
+}
+
+AstRangeClause CheckRangeClause(AstRangeClause rangeClause)
+{
+	if(rangeClause->expressionList){
+		rangeClause->expressionList = CheckExpressionList(rangeClause->expressionList);
+	}
+
+	if(rangeClause->identifierList){
+		rangeClause->identifierList = CheckIdentifierList(rangeClause->identifierList);
+	}
+
+	rangeClause->expr = CheckExpression(rangeClause->expr);
+	
+	return rangeClause;
+}
+
 AstStatement CheckForStmt(AstStatement stmt)
 {
+	AstForStmt forStmt = AsFor(stmt);
+	if(forStmt->condition){
+		forStmt->condition = CheckExpression(forStmt->condition);
+	}
 
-return stmt;
+	if(forStmt->forClause){
+		forStmt->forClause = CheckForClause(forStmt->forClause);
+	}
+
+	if(forStmt->rangeClause){
+		forStmt->rangeClause = CheckRangeClause(forStmt->rangeClause);
+	}
+
+	forStmt->body = CheckBlock(forStmt->body);
+
+	return stmt;
 }
 
 AstStatement CheckGotoStatement(AstStatement stmt)
@@ -123,4 +183,28 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 {
 
 return stmt;
+}
+
+AstExpression CheckExpression(AstExpression expr)
+{
+
+	return expr;
+}
+
+AstStatement CheckSimpleStmt(AstStatement stmt)
+{
+
+	return stmt;
+}
+
+AstExpression CheckExpressionList(AstExpression expr)
+{
+
+	return expr;
+}
+
+AstExpression CheckIdentifierList(AstExpression expr)
+{
+
+	return expr;
 }
