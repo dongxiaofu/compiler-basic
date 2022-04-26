@@ -274,11 +274,11 @@ typedef struct astEmptyStmt{
 	AST_STATEMENT_COMMON
 } *AstEmptyStmt;
 
-typedef struct astLabelStatement{
+typedef struct astLabelStmt{
 	AST_STATEMENT_COMMON
 	AstExpression label;
 	AstStatement stmt;
-} *AstLabelStatement;
+} *AstLabelStmt;
 
 typedef struct astAssignmentsStmt{
 	AST_STATEMENT_COMMON
@@ -304,8 +304,6 @@ typedef struct astSelectStmt{
 #define AsBreak(stmt)  ((AstBreakStatement)stmt)
 #define AsRet(stmt)    ((AstReturnStatement)stmt)
 #define AsComp(stmt)   ((AstCompoundStatement)stmt)
-
-AstStatement CheckCompoundStatement(AstStatement stmt);
 
 int IsAssignOp(int token_kind);
 // 解析AstAssignmentsStmt中的运算符。
@@ -356,7 +354,7 @@ AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();
 AstIfStatement ParseIfStatement();
 AstCompoundStatement ParseCompoundStatement();
-AstLabelStatement ParseLabelStatement();
+AstLabelStmt ParseLabelStatement();
 AstStatement ParseStatement();
 
 #endif

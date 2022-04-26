@@ -73,8 +73,8 @@ AstStatement ParseStatement(){
  * LabeledStmt = Label ":" Statement .
 Label       = identifier .
  */
-AstLabelStatement ParseLabelStatement(){
-	AstLabelStatement labeledStmt;
+AstLabelStmt ParseLabelStatement(){
+	AstLabelStmt labeledStmt;
 	CREATE_AST_NODE(labeledStmt, LabeledStmt);
 	labeledStmt->label = ParseIdentifier();
 	NEXT_TOKEN;

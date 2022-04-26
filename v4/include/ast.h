@@ -47,7 +47,7 @@ enum nodeKind
 
 	NK_FunctionLit, NK_Block, NK_LabeledStmt, NK_BreakStmt,
 	
-	NK_ForClause, NK_RangeClause, NK_ForStmt,
+	NK_ForClause, NK_RangeClause,
 
 	NK_ShortVarDecl,
 
@@ -55,17 +55,18 @@ enum nodeKind
 
 	NK_Expression,
 
-	NK_Statement,
-	NK_SendStmt, NK_IncDecStmt, NK_LabelStmt, NK_DeferStmt, NK_FallthroughStmt, NK_SelectStmt, 
-	NK_GoStmt,
 
-	NK_AssignmentsStmt,
-
-	NK_ExpressionStatement, NK_LabelStatement,     NK_CaseStatement,		
-	NK_DefaultStatement,    NK_IfStatement,        NK_SwitchStatement,		
-	NK_WhileStatement,      NK_DoStatement,        NK_ForStatement,		
+	NK_ExpressionStatement,	// 没用到 
+	NK_CaseStatement,		
+	NK_IfStatement,        NK_SwitchStatement,		
+    NK_ForStmt,		
 	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		
-	NK_ReturnStatement,     NK_CompoundStatement
+	NK_ReturnStatement,     NK_CompoundStatement,
+
+	NK_IncDecStmt, NK_LabelStmt, NK_DeferStmt, NK_FallthroughStmt, NK_SelectStmt, 
+	NK_GoStmt,NK_SendStmt,
+	NK_AssignmentsStmt,
+	NK_Statement
 };
 
 // 在AstChannelType中的成员中使用。
