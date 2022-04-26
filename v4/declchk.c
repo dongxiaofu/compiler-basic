@@ -3,6 +3,7 @@
 #include "stmt.h"
 #include "decl.h"
 #include "expr.h"
+#include "stmtchk.h"
 #include "declchk.h"
 // #include "symbol.h"
 
@@ -52,10 +53,12 @@ void CheckBlock(AstBlock block)
 			AstLabeledStmt labeledStmt = compoundStmt->labeledStmt;
 			AstStatement simpleStmt = compoundStmt->stmts;	
 		}else{
-
+			stmt = CheckStatement(stmt);
 		}
 
-		stmt = stmt->next;
+		if(stmt){
+			stmt = stmt->next;
+		}
 	}
 }
 
