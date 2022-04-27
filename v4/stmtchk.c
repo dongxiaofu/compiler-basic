@@ -22,6 +22,8 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 	CheckFallthroughStmt,
 	CheckSelectStmt,
 	CheckGoStmt,
+	CheckSendStmt,
+	CheckRecvStmt,
 	CheckAssignmentsStmt
 };
 
@@ -204,8 +206,21 @@ return stmt;
 
 AstStatement CheckSelectStmt(AstStatement stmt)
 {
+	AstSelectStmt selectStmt = AsSelect(stmt);
+	AstSelectCaseStatement selectCaseStmt = selectStmt->stmt;	
+	while(selectCaseStmt){
+		if(selectCaseStmt->caseStmt){
+			selectCaseStmt->caseStmt = CheckStatement(selectCaseStmt->caseStmt);	
+		}
+		selectCaseStmt->stmt = CheckStatement(selectCaseStmt->stmt); 
 
-return stmt;
+		selectCaseStmt = selectCaseStmt->next;
+	}
+	// TODO 我认为，这里的赋值不是必须的。因为CheckStatement并不会修改参数的值，只会修改
+	// 参数指向的内存空间中的数据。但为了形式上统一或未来某种未知的需要，还是写上赋值。
+	selectStmt->stmt = selectCaseStmt;
+
+	return stmt;
 }
 
 AstStatement CheckGoStmt(AstStatement stmt)
@@ -260,4 +275,16 @@ AstStatement PopStatement(StmtVector v)
 	}
 
 	return NULL;
+}
+
+AstStatement CheckSendStmt(AstStatement stmt)
+{
+
+	return stmt;
+}
+
+AstStatement CheckRecvStmt(AstStatement stmt)
+{
+
+	return stmt;
 }

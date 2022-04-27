@@ -220,7 +220,10 @@ typedef struct astSendStmt{
 
 typedef struct astRecvStmt{
 	AST_STATEMENT_COMMON
-	AstExpression channel;
+// TODO 这个命名，含义更好，但不适合存储对应的产生式。
+//	AstExpression channel;
+	AstExpression expressionList;
+	AstExpression identifierList;
 	AstExpression receiver;
 } *AstRecvStmt;
 
@@ -278,7 +281,8 @@ typedef struct astSelectStmt{
 #define AsCase(stmt)   ((AstCaseStatement)stmt)
 #define AsDef(stmt)    ((AstDefaultStatement)stmt)
 #define AsIf(stmt)     ((AstIfStatement)stmt)
-#define AsSwitch(stmt) ((AstSwitchStatement)stmt)
+#define AsSwitch(stmt) ((AstSelectCaseStatement)stmt)
+#define AsSelect(stmt) ((AstSelectStmt)stmt)
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
 #define AsFor(stmt)    ((AstForStmt)stmt)
 #define AsGoto(stmt)   ((AstGotoStatement)stmt)

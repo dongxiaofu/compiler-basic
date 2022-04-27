@@ -527,10 +527,13 @@ AstRecvStmt ParseRecvStmt(){
 //		exit(2);
 //	}
 
+	AstRecvStmt recvStmt;
+	CREATE_AST_NODE(recvStmt, RecvStmt);
+
 	if(type == 1){
-		ParseExpressionList();
+		recvStmt->expressionList = ParseExpressionList();
 	}else if(type == 2){
-		ParseIdentifierList();
+		recvStmt->identifierList = ParseIdentifierList();
 	}else{
 		// TODO 什么都不需要做吗？
 		// ERROR("%s\n", "Expect a RecvStmt");
@@ -540,10 +543,9 @@ AstRecvStmt ParseRecvStmt(){
 	// 跳过=或:=
 	NEXT_TOKEN;
 
-	AstExpression expr = ParseExpression();
+	recvStmt->receiver = ParseExpression();
 	
-	// TODO 解析完了RecvStmt，但没有建立AST。返回值是不正确的。
-	return expr;
+	return recvStmt;
 }
 
 // todo 很好解析SendStmt，但是非常不容易识别这种表达式。
@@ -849,6 +851,7 @@ AstSelectCaseStatement ParseAstSelectCaseStmt(){
 
 	AstSelectCaseStatement stmtHeader;
 	CREATE_AST_NODE(stmtHeader, SelectCaseStatement);
+	
 
 	AstSelectCaseStatement currentStmt;
 

@@ -64,7 +64,7 @@ enum nodeKind
 	NK_ReturnStatement,     NK_CompoundStatement,
 
 	NK_IncDecStmt, NK_LabelStmt, NK_DeferStmt, NK_FallthroughStmt, NK_SelectStmt, 
-	NK_GoStmt,NK_SendStmt,
+	NK_GoStmt,NK_SendStmt,NK_RecvStmt,
 	NK_AssignmentsStmt,
 	NK_Statement
 };
@@ -601,6 +601,7 @@ typedef struct astTranslationUnit{
 
 #define CREATE_AST_NODE(p, k) \
     p = (void *)malloc(sizeof(*p));              \
+	memset(p, 0, sizeof(*p));	\
     p->kind = NK_##k;        \
     p->next = NULL; 
 

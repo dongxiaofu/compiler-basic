@@ -12,11 +12,18 @@ AstExpression CheckExpression(AstExpression expr);
 AstExpression CheckExpressionList(AstExpression expr);
 AstExpression CheckIdentifierList(AstExpression expr);
 
+
+
 // TODO 语句容器。
 void PushStatement(AstStatement stmt, StmtVector v);
 AstStatement PopStatement(StmtVector v);
+
+AstStatement CheckSendStmt(AstStatement stmt);
+AstStatement CheckRecvStmt(AstStatement stmt);
+
 AstStatement CheckSimpleStmt(AstStatement stmt);
 AstStatement CheckExprSwitchStmt(AstStatement stmt);
+// TODO 这个函数可能并不需要了。因为，把它的功能在CheckSelectStmt中实现了。
 AstStatement CheckSelectCaseStatement(AstStatement stmt);
 AstStatement CheckIfStatement(AstStatement stmt);
 AstStatement CheckSwitchStatement(AstStatement stmt);
