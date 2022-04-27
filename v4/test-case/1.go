@@ -16,6 +16,10 @@ func max(num1, num2 int) (int, int) {
 	sum := 0
         for i := 0; i <= 10; i++ {
                 sum += i
+				break;
+				if(i == 4){
+					continue;
+				}
         }
         fmt.Println(sum)
 

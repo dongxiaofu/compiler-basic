@@ -60,7 +60,7 @@ AstStatement CheckIfStatement(AstStatement stmt)
 		ifStmt->elseStmt = CheckBlock(ifStmt->elseStmt);
 	}
 
-	return (AstIfStatement)ifStmt;
+	return stmt;
 }
 
 AstStatement CheckSwitchStatement(AstStatement stmt)
@@ -95,6 +95,9 @@ AstRangeClause CheckRangeClause(AstRangeClause rangeClause)
 
 AstStatement CheckForStmt(AstStatement stmt)
 {
+	PushStatement(stmt, CURRENT->loops);
+	PushStatement(stmt, CURRENT->breakable);
+	
 	AstForStmt forStmt = AsFor(stmt);
 	if(forStmt->condition){
 		forStmt->condition = CheckExpression(forStmt->condition);
@@ -110,6 +113,9 @@ AstStatement CheckForStmt(AstStatement stmt)
 
 	forStmt->body = CheckBlock(forStmt->body);
 
+	PopStatement(CURRENT->loops);
+	PopStatement(CURRENT->breakable);
+
 	return stmt;
 }
 
@@ -121,14 +127,43 @@ return stmt;
 
 AstStatement CheckBreakStatement(AstStatement stmt)
 {
+	AstBreakStmt breakStmt = AsBreak(stmt);
+	if(breakStmt->label){
+		// TODO 不知道怎么实现标签？	
 
-return stmt;
+		return stmt;
+	}
+
+	AstStatement target = PopStatement(CURRENT->breakable);
+	if(target == NULL){
+		// TODO 打印错误信息，还没有实现。
+		PRINTF("break必须出现在for、switch、select语句中\n");
+		exit(-1);
+	}
+
+	breakStmt->target = target;
+	
+	return stmt;
 }
 
 AstStatement CheckContinueStatement(AstStatement stmt)
 {
+	AstContinueStatement continueStmt = AsCont(stmt);
+	if(continueStmt->label){
+		// TODO 实现continue label
+		return stmt;
+	}
 
-return stmt;
+	AstStatement target = PopStatement(CURRENT->loops);
+	if(target){
+		continueStmt->target = target;
+	}else{
+		// TODO 打印错误信息，还没有实现。
+		PRINTF("continue必须出现在for语句中\n");
+		exit(-1);
+	}
+
+	return stmt;
 }
 
 AstStatement CheckReturnStatement(AstStatement stmt)
@@ -207,4 +242,22 @@ AstExpression CheckIdentifierList(AstExpression expr)
 {
 
 	return expr;
+}
+
+void PushStatement(AstStatement stmt, StmtVector v)
+{
+	if(v->index >= VECTOR_SIZE){
+		return;
+	}
+
+	v->params[++v->index] = stmt;
+}
+
+AstStatement PopStatement(StmtVector v)
+{
+	if(v->index >= 0){
+		return v->params[v->index--];
+	}
+
+	return NULL;
 }

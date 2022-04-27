@@ -7,6 +7,8 @@
 #include "declchk.h"
 // #include "symbol.h"
 
+// static AstFunction CURRENT;
+
 void CheckTranslationUnit(AstTranslationUnit transUnit)
 {
 	printf("%s\n", "Start Check");
@@ -17,6 +19,16 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 	while(p){
 		if(p->kind == NK_Function){
 			printf("%s\n", "Check function");
+			CURRENT = (AstFunction)p;
+
+			CURRENT->loops = (StmtVector)malloc(sizeof(struct stmtVector));
+			memset(CURRENT->loops, 0, sizeof(struct stmtVector));
+			CURRENT->loops->index = -1;
+
+			CURRENT->breakable = (StmtVector)malloc(sizeof(struct stmtVector));
+			memset(CURRENT->breakable, 0, sizeof(struct stmtVector));
+			CURRENT->breakable->index = -1;
+
 			CheckFunction((AstFunction)p);
 		}else{
 			printf("%s\n", "Check global declaration");

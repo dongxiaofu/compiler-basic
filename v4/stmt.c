@@ -397,24 +397,26 @@ AstReturnStatement ParseReturnStatement(){
 	return stmt;
 }
 
+// TODO 没有用到。还有一个功能类似的函数ParseBreakStmt。
+// 我不知道哪个实现得更好。代码多了后，删除了头文件中的函数声明却忘记还有对应实现没有删除。
 // BreakStmt = "break" [ Label ] .
-AstBreakStatement ParseBreakStatement(){
-	NEXT_TOKEN;
-	AstBreakStatement breakStmt;
-	CREATE_AST_NODE(breakStmt, BreakStatement);
-	// todo 内存泄露，但暂时没有找到好的处理方法。
-	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
-	AstExpression expr = ParseIdentifier();	
-	if(expr != NULL){
-		strcpy(label, expr->val.p);
-	}else{
-		label = NULL;
-	}
-	
-	breakStmt->label = label;
-
-	return breakStmt;
-}
+// AstBreakStmt ParseBreakStatement(){
+// 	NEXT_TOKEN;
+// 	AstBreakStmt breakStmt;
+// 	CREATE_AST_NODE(breakStmt, BreakStmt);
+// 	// todo 内存泄露，但暂时没有找到好的处理方法。
+// 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+// 	AstExpression expr = ParseIdentifier();	
+// 	if(expr != NULL){
+// 		strcpy(label, expr->val.p);
+// 	}else{
+// 		label = NULL;
+// 	}
+// 	
+// 	breakStmt->label = label;
+// 
+// 	return breakStmt;
+// }
 
 // 和ParseBreakStatement代码完全相同，寻机优化。
 // ContinueStmt = "continue" [ Label ] .

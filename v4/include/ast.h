@@ -45,7 +45,7 @@ enum nodeKind
 	NK_ExprCaseClause,
 	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
 
-	NK_FunctionLit, NK_Block, NK_LabeledStmt, NK_BreakStmt,
+	NK_FunctionLit, NK_Block, NK_LabeledStmt,
 	
 	NK_ForClause, NK_RangeClause,
 
@@ -60,7 +60,7 @@ enum nodeKind
 	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_IfStatement,        NK_SwitchStatement,		
     NK_ForStmt,		
-	NK_GotoStatement,       NK_BreakStatement,     NK_ContinueStatement,		
+	NK_GotoStatement,       NK_BreakStmt,     NK_ContinueStatement,		
 	NK_ReturnStatement,     NK_CompoundStatement,
 
 	NK_IncDecStmt, NK_LabelStmt, NK_DeferStmt, NK_FallthroughStmt, NK_SelectStmt, 
@@ -546,6 +546,14 @@ typedef struct astShortVarDecl{
 	AstExpression expressionList;
 } *AstShortVarDecl;
 
+
+#define VECTOR_SIZE	100
+// TODO 语句容器
+typedef struct stmtVector{
+	AstStatement params[VECTOR_SIZE];
+	int index;
+} *StmtVector;
+
 typedef struct astFunction
 {
         AST_NODE_COMMON
@@ -554,6 +562,9 @@ typedef struct astFunction
 		AstBlock block;
         int hasReturn;
 		FunctionSymbol fsym;
+
+		StmtVector breakable;
+		StmtVector loops;		
 } *AstFunction;
 
 typedef struct astMethodDeclaration{
@@ -594,6 +605,9 @@ typedef struct astTranslationUnit{
     p->next = NULL; 
 
 #define PRINTF printf
+
+// static AstFunction CURRENT;
+AstFunction CURRENT;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

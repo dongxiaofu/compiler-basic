@@ -221,7 +221,8 @@ AstExpression ParseIdentifier(){
 	}else if(current_token.kind == TK_UNDERSCORE){
 		strcpy(expr->val.p, "_");
 	}else{
-		return expr;
+		// return expr;
+		return NULL;
 	}
 
 	NEXT_TOKEN;

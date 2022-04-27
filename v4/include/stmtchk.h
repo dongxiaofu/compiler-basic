@@ -12,11 +12,18 @@ AstExpression CheckExpression(AstExpression expr);
 AstExpression CheckExpressionList(AstExpression expr);
 AstExpression CheckIdentifierList(AstExpression expr);
 
+// TODO 语句容器。
+void PushStatement(AstStatement stmt, StmtVector v);
+AstStatement PopStatement(StmtVector v);
 AstStatement CheckSimpleStmt(AstStatement stmt);
 AstStatement CheckExprSwitchStmt(AstStatement stmt);
 AstStatement CheckSelectCaseStatement(AstStatement stmt);
 AstStatement CheckIfStatement(AstStatement stmt);
 AstStatement CheckSwitchStatement(AstStatement stmt);
+
+
+AstForClause CheckForClause(AstForClause forClause);
+AstRangeClause CheckRangeClause(AstRangeClause rangeClause);
 AstStatement CheckForStmt(AstStatement stmt);
 AstStatement CheckGotoStatement(AstStatement stmt);
 AstStatement CheckBreakStatement(AstStatement stmt);

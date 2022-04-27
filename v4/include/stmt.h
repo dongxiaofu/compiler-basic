@@ -180,13 +180,7 @@ typedef struct astGotoStatement
 	char *label;
 	AstStatement target;
 } *AstGotoStatement;
-//	break;
-typedef struct astBreakStatement
-{
-	AST_STATEMENT_COMMON
-	AstStatement target;
-	char *label;
-} *AstBreakStatement;
+
 // continue;
 typedef struct astContinueStatement
 {   
@@ -254,6 +248,7 @@ typedef struct astFallthroughStmt{
 
 typedef struct astBreakStmt{
 	AST_STATEMENT_COMMON
+	AstStatement target;
 	AstExpression label;
 } *AstBreakStmt;
 
@@ -288,7 +283,7 @@ typedef struct astSelectStmt{
 #define AsFor(stmt)    ((AstForStmt)stmt)
 #define AsGoto(stmt)   ((AstGotoStatement)stmt)
 #define AsCont(stmt)   ((AstContinueStatement)stmt)
-#define AsBreak(stmt)  ((AstBreakStatement)stmt)
+#define AsBreak(stmt)  ((AstBreakStmt)stmt)
 #define AsRet(stmt)    ((AstReturnStatement)stmt)
 #define AsComp(stmt)   ((AstCompoundStatement)stmt)
 
@@ -298,7 +293,7 @@ int ParseAssignmentsOp();
 AstAssignmentsStmt ParseAssignmentsStmt(); 
 AstFallthroughStmt ParseFallthroughStmt();
 AstGoStmt ParseGoStmt();
-AstBreakStatement ParseBreakStatement();
+AstBreakStmt ParseBreakStmt();
 AstContinueStatement ParseContinueStatement();
 AstGotoStatement ParseGotoStatement();
 AstRecvStmt ParseRecvStmt();
@@ -336,7 +331,6 @@ AstNode ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();
 // AstStatement ParseSimpleStatement();
-AstBreakStmt ParseBreakStmt();
 AstReturnStatement ParseReturnStatement();
 AstStatement ParseSimpleStatement();
 AstIfStatement ParseIfStatement();
