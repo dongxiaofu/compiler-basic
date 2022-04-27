@@ -34,15 +34,28 @@ func main2() {
          fmt.Printf("received ", i1, " from c1\n")
       case c2 <- i2:
          fmt.Printf("sent ", i2, " to c2\n")
+	case a[f()] = <-c4:
       case i3, ok := (<-c3): 
          if ok {
             fmt.Printf("received ", i3, " from c3\n")
          } else {
             fmt.Printf("c3 is closed\n")
+			i1++
+			c2--
          }
       default:
          fmt.Printf("no communication\n")
    }    
+
+	defer  max(3,4);
+	ch <- 3 
+
+	a[i] <<= 2
+i &^= 1<<n
+
+	x = 1
+*p = f()
+a[i] = 23
 }
 
 func main(){

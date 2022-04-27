@@ -29,6 +29,9 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 
 AstStatement CheckStatement(AstStatement stmt)
 {
+	if(stmt == NULL){
+		return NULL;
+	}
 	return (*StmtCheckers[stmt->kind - NK_SelectCaseStatement])(stmt);
 }
 
@@ -182,8 +185,10 @@ return stmt;
 
 AstStatement CheckIncDecStmt(AstStatement stmt)
 {
-
-return stmt;
+	AstIncDecStmt incDecStmt = AsIncDec(stmt);
+	incDecStmt->expr = CheckExpression(incDecStmt->expr);
+	// TODO 不知道怎么检测是不是加号或减号，暂时不处理。
+	return stmt;
 }
 
 AstStatement CheckLabelStmt(AstStatement stmt)
@@ -192,10 +197,21 @@ AstStatement CheckLabelStmt(AstStatement stmt)
 return stmt;
 }
 
+// TODO 这个函数远远没有完成。
+// 请阅读https://go.dev/ref/spec#DeferStmt实现其他检查。
+AstExpression CheckDeferExpr(AstExpression expr)
+{
+	AstExpression deferExpr = CheckExpression(expr);
+
+	return deferExpr;
+}
+
 AstStatement CheckDeferStmt(AstStatement stmt)
 {
+	AstDeferStmt deferStmt = AsDefer(stmt);
+	deferStmt->expr = CheckDeferExpr(deferStmt->expr);
 
-return stmt;
+	return stmt;
 }
 
 AstStatement CheckFallthroughStmt(AstStatement stmt)
@@ -229,10 +245,21 @@ AstStatement CheckGoStmt(AstStatement stmt)
 return stmt;
 }
 
+int CheckAssignOp(int op)
+{
+	
+	return op;
+}
+
 AstStatement CheckAssignmentsStmt(AstStatement stmt)
 {
+	AstAssignmentsStmt assignStmt = AsAssign(stmt);
 
-return stmt;
+	assignStmt->expr->kids[0] = CheckExpressionList(assignStmt->expr->kids[0]);
+	assignStmt->expr->op = CheckAssignOp(assignStmt->expr->op);
+	assignStmt->expr->kids[1] = CheckExpressionList(assignStmt->expr->kids[1]);
+
+	return stmt;
 }
 
 AstExpression CheckExpression(AstExpression expr)
@@ -279,12 +306,26 @@ AstStatement PopStatement(StmtVector v)
 
 AstStatement CheckSendStmt(AstStatement stmt)
 {
+	AstSendStmt sendStmt = AsSend(stmt);
+	sendStmt->channel = CheckExpression(sendStmt->channel);
+	sendStmt->expr = CheckExpression(sendStmt->expr);
 
 	return stmt;
 }
 
 AstStatement CheckRecvStmt(AstStatement stmt)
 {
+	AstRecvStmt recvStmt = AsRecv(stmt);
+
+	if(recvStmt->expressionList){
+		recvStmt->expressionList = CheckExpressionList(recvStmt->expressionList);
+	}
+
+	if(recvStmt->identifierList){
+		recvStmt->identifierList = CheckIdentifierList(recvStmt->identifierList);	
+	}
+
+	recvStmt->receiver = CheckExpression(recvStmt->receiver);
 
 	return stmt;
 }

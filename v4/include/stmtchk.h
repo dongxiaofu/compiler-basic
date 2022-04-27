@@ -11,7 +11,8 @@
 AstExpression CheckExpression(AstExpression expr);
 AstExpression CheckExpressionList(AstExpression expr);
 AstExpression CheckIdentifierList(AstExpression expr);
-
+AstExpression CheckDeferExpr(AstExpression expr);
+int CheckAssignOp(int op);
 
 
 // TODO 语句容器。
