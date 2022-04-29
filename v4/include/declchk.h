@@ -30,7 +30,7 @@ void CheckInitializer(AstInitializer init);
 
 void CheckDeclaration(AstDeclaration decls);
 void CheckLocalDeclaration(AstDeclaration decls);
-void CheckBlock(AstBlock block);
+int CheckBlock(AstBlock block);
 void CheckFunction(AstFunction p);
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void CheckGlobalDeclaration(AstDeclaration decl);

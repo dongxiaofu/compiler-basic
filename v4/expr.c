@@ -25,7 +25,7 @@ AstExpression ParseExpressionList(){
 	preExpr = expr;
 	while(current_token.kind==TK_COMMA){
 		NEXT_TOKEN;
-//		memset(curExpr, 0, sizeof(*curExpr));
+//		//memset(curExpr, 0, sizeof(*curExpr));
 		curExpr = ParseExpression();
 		curExpr->next = NULL;
 		count++;
@@ -135,8 +135,8 @@ AstExpression ParseBinaryExpr(int prec){
 			binExpr->op = BINARY_OP;
 			binExpr->kids[0] = expr;
 //			NEXT_TOKEN;
-			// binExpr->kids[1] = ParseBinaryExpr(prec + 1);
-			ParseBinaryExpr(prec + 1);
+			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
+		//	ParseBinaryExpr(prec + 1);
 			expr = binExpr;
 		}
 	}
@@ -252,6 +252,10 @@ AstNode ParseArguments(){
 	if(CurrentTokenIn(FIRST_Expression) == 1){
 		ParseExpressionList();
 	}else{
+		if(TK_RPARENTHESES){
+			NEXT_TOKEN;
+			return node;
+		}
 		ParseType();
 		if(current_token.kind == TK_COMMA){
 			NEXT_TOKEN;
@@ -618,7 +622,7 @@ literal:
 
 AstExpression ParseIntLit(){
 	// todo 不完善。
-//	// todo 应该使用malloc分配内存空间才更妥当吗？
+//	// todo 应该使用MALLOC分配内存空间才更妥当吗？
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_NUM){
@@ -633,7 +637,7 @@ AstExpression ParseIntLit(){
  */
 // TODO 这个函数很复杂，工作量非常大，后期再处理。
 AstExpression ParseBasicLit(){
-//	// todo 应该使用malloc分配内存空间才更妥当吗？
+//	// todo 应该使用MALLOC分配内存空间才更妥当吗？
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_NUM){
@@ -648,7 +652,7 @@ AstExpression ParseBasicLit(){
 	}else if(current_token.kind == TK_STRING){
 		// TODO 可能不正确。临时这样做。
 		expr->op = OP_STR;
-		expr->val.p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);;
+		expr->val.p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);;
 		strcpy(expr->val.p, current_token.value.value_str);
 		NEXT_TOKEN;
 	}
@@ -731,6 +735,7 @@ AstExpression ParseOperandName(){
 			break;
 		}
 		type = 1;
+		NEXT_TOKEN;
 	}
 	EndPeekToken();
 
@@ -744,14 +749,17 @@ AstExpression ParseOperandName(){
 			return expr;
 		}
  		expr->op = OP_ID;
- 		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
- 		strcpy((char *)(expr->val.p), expr->val.p);
+ 		expr->val.p = (void *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+ //		strcpy((char *)(expr->val.p), expr->val.p);
+		strcpy((char *)(expr->val.p), expr1->val.p);
 		return expr;
 	}else if(type == 2){
 		ParseQualifiedIdent();
 	}else{
 		expect_token(TK_ID);
 	}
+
+	return expr;
 }
 
 /**
@@ -926,7 +934,7 @@ AstExpression ParseMethodExpr(){
 // 	if(current_token.kind == TK_ID){
 // 		// TODO 这是不正确的。临时这样做。
 // 		expr->op = OP_NONE;
-// 		expr->val.p = (void *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		expr->val.p = (void *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 // 		strcpy((char *)(expr->val.p), current_token.value.value_str);
 // 		NEXT_TOKEN;
 // 	}
@@ -945,3 +953,14 @@ AstExpression ParseMethodExpr(){
 // AstExpression ParseDecimalLit(){
 // 
 // }
+//
+//
+AstExpression ParseCall()
+{
+	ParseOperandName();
+	EXPECT(TK_LPARENTHESES);
+	ParseExpressionList();
+	EXPECT(TK_RPARENTHESES);
+
+	return NULL;
+}

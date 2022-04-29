@@ -7,11 +7,16 @@
 //#include <ctype.h>
 //#include <stdlib.h>
 
-#define MAX_NAME_LEN	200
+#define MAX_NAME_LEN	128
+//#define MAX_NAME_LEN	12
 // 打印日志
 // #define LOG	printf
 #define LOG	
-#define ERROR	printf
+#define ERROR(fmt, msg)	printf(fmt, msg);\
+					exit(-2);
+
+//#define ERROR(fmt, msg)
+
 #define NO_TOKEN	if(current_token.kind == TK_EOF){break;}
 // #define NO_TOKEN 
 

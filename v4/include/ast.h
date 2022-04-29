@@ -6,11 +6,37 @@
 // TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
 
+struct mblock
+{
+	struct mblock *next;
+	char *begin;
+	char *avail;
+	char *end;
+};
+
+typedef struct heap
+{
+	struct mblock *last;
+	struct mblock head;
+} *Heap;
+
+union align
+{
+	double d;
+	int (*f)(void);
+};
+
+#define ALIGN(size, align)  ((align == 0) ? size: ((size + align - 1) & (~(align - 1))))
+
+#define HEAP(hp)    struct heap  hp = { &hp.head }
+
+int HeapAllocate(Heap heap, int size);
+
 // 打印日志
 // #define LOG	printf
 // #define LOG	
 // #define ERROR	printf
-
+void *MALLOC(int size);
 /**
 	NK:		Node Kind
 */
@@ -170,9 +196,9 @@ typedef struct signatureElement{
 typedef struct signature
 {
 	SignatureElement params[PARAM_LENGTH];
-	int paramIndex;
+	int paramSize;
 	SignatureElement results[PARAM_LENGTH];
-	int resultIndex;
+	int resultSize;
 } *Signature;
 
 typedef struct functionType
@@ -600,8 +626,7 @@ typedef struct astTranslationUnit{
 } *AstTranslationUnit;
 
 #define CREATE_AST_NODE(p, k) \
-    p = (void *)malloc(sizeof(*p));              \
-	memset(p, 0, sizeof(*p));	\
+    p = (void *)MALLOC(sizeof(*p));              \
     p->kind = NK_##k;        \
     p->next = NULL; 
 
@@ -609,6 +634,7 @@ typedef struct astTranslationUnit{
 
 // static AstFunction CURRENT;
 AstFunction CURRENT;
+FunctionSymbol FSYM;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

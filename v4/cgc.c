@@ -9,8 +9,71 @@
 #include "packages.h"
 #include "symbol.h"
 
+#include <signal.h>
+#include <unistd.h>
+#include <execinfo.h>
+
+
+#define BACKTRACE_SIZE 1024
+
+void seg()
+{
+	int *p = NULL;
+	*p = 4;
+}
+
+void segv_handler(int sig)
+{
+	void *func[BACKTRACE_SIZE];
+	int j=0, nptrs=0;
+	 char **symb = NULL;
+	
+	//char **symb = NULL;
+	
+	int size;
+	
+	printf("<----------BACKTRACE START---------->\n");
+	printf("signo: %d\n", sig);
+
+	printf("1\n");
+	size = backtrace(func, BACKTRACE_SIZE);
+	printf("2\n");
+	printf("backtrace() returned %d addresses\n", size);
+	
+//	backtrace_symbols_fd(func, size, STDERR_FILENO);
+
+//方法2
+	symb = backtrace_symbols(func, size);
+	if (symb == NULL) {
+		perror("backtrace_symbols");
+		exit(EXIT_FAILURE);
+	}
+	
+	printf("3\n");
+	printf("nptrs = %d\n", nptrs);
+	for (j = 0; j < size; j++)
+		printf("%s\n", symb[j]);
+	
+	free(symb);
+	symb = NULL;
+	
+	printf("<----------BACKTRACE END---------->\n");
+	
+	exit(1);
+}
+
+Heap CurrentHeap;
+struct heap ProgramHeap;
+HEAP(ProgramHeap);
+
 int main(int argc, char *argv[])
 {
+
+//	CURRENT_HEAP = {&CURRENT_HEAP.head};
+
+//		signal(SIGSEGV, segv_handler);
+//		signal(SIGINT, segv_handler);
+//		signal(SIGQUIT, segv_handler);
 	printf("I am a scanner\n");
 
 //	printf("argc = %d\n", argc);
@@ -19,9 +82,11 @@ int main(int argc, char *argv[])
 //	}
 
 	if(argc < 2){
-		ERROR("need filename");
+		ERROR("need filename", "");
 		exit(-1);
 	}	
+
+	CurrentHeap = &ProgramHeap;
 
 	ReadSourceFile(argv[1]);	
 
@@ -74,10 +139,15 @@ int main(int argc, char *argv[])
 //	printf("scan token over\n");
 //	exit(3);
 	
+	//	signal(SIGSEGV, segv_handler);
+	//	signal(SIGINT, segv_handler);
+	//	signal(SIGQUIT, segv_handler);
 		get_token();
 		if(current_token.kind == TK_EOF) return 0;
 		// 语法分析
 		AstTranslationUnit transUnit = ParseTranslationUnit();
+
+		//signal(SIGSEGV, segv_handler);
 
 		SetupTypeSystem();
 		InitSymbolTable();
@@ -85,9 +155,9 @@ int main(int argc, char *argv[])
 		// 语义分析
 		CheckTranslationUnit(transUnit);
 	
-	free(cursor_tail);
-	free(char_tail);
-	free(current_token_tail);
+//	free(cursor_tail);
+//	free(char_tail);
+//	free(current_token_tail);
 
 	return 0;
 }
@@ -108,4 +178,44 @@ AstTranslationUnit ParseTranslationUnit(){
 	LOG("parse unit over\n");
 
 	return p;
+}
+
+void *MALLOC(int size)
+{
+//	void *p = (void *)malloc(size);
+//	if(p == NULL){
+//		exit(-4);
+//	}
+
+//	memset(p, 0, size);
+	void *p = HeapAllocate(CurrentHeap, size);
+	memset(p, 0, size);
+	return p;
+}
+
+int HeapAllocate(Heap heap, int size)
+{
+	struct mblock *blk = heap->last;
+
+	// size = ALIGN(size, sizeof(union align));
+
+	while(size > blk->end - blk->avail){
+		int m = 4096 + sizeof(struct mblock) + size; 
+		blk->next = (struct mblock *)malloc(m);
+		blk = blk->next;
+		if(blk == NULL){
+			printf("分配内存失败\n");
+			exit(-4);
+		}
+		blk->begin = blk->avail = (char *)(blk + 1);
+//		blk->begin = blk->avail = (char *)(blk);
+		blk->next = NULL;
+		heap->last = blk;	
+		// blk->end = (char *)(blk + m);
+		blk->end = (char *)blk + m;
+	}
+
+	blk->avail += size;
+
+	return blk->avail - size;
 }

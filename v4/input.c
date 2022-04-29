@@ -21,7 +21,7 @@ void ReadSourceFile(char *file){
 	Input.size = ftell(Input.file);
 	// 开辟一段size大小的内存空间存储源码,这段内存空间的初始地址是base
 	// todo 为何要加1？
-	Input.base = (char *)malloc(Input.size + 1);
+	Input.base = (char *)MALLOC(Input.size + 1);
 	if(Input.base == -1){
 		
 		fclose(Input.file);

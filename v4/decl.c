@@ -147,7 +147,7 @@ AstConstDeclarator ParseConstSpec(){
 		// initDecsCur->dec->id = exprCur->val;	
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
-		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		dec->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 		strcpy(dec->id, exprCur->val.p);
 		initDecsCur->dec = dec;
 
@@ -211,10 +211,10 @@ AstExpression ParseIdentifier(){
 	LOG("%s\n", "parse Identifier");
 	AstExpression expr = NULL;
 	CREATE_AST_NODE(expr, Expression);
-	// expr->val->p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
-	expr->val.p = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	// expr->val->p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+	expr->val.p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	// TODO 初始化申请到的变量，清除脏数据。
-	memset(expr->val.p, 0, sizeof(char) * MAX_NAME_LEN);
+	//memset(expr->val.p, 0, sizeof(char) * MAX_NAME_LEN);
 	// 我想用这种方式处理[Identifier]产生式。
 	if(current_token.kind == TK_ID){
 		strcpy(expr->val.p, current_token.value.value_str);
@@ -239,13 +239,13 @@ AstExpression ParseIdentifier(){
 // 	if(current_token.kind == TK_ID){
 // //		NEXT_TOKEN;
 // 		CREATE_AST_NODE(decl, NameDeclarator);
-// 		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		decl->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 // 		strcpy(decl->id, current_token.value.value_str);
 // 		NEXT_TOKEN;
 // 	}if(current_token.kind == TK_UNDERSCORE){
 // 		// TODO 不一定正确。为了程序能正常运行，只能这样做。
 // 		CREATE_AST_NODE(decl, NameDeclarator);
-// 		decl->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+// 		decl->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 // 		strcpy(decl->id, "_");
 // 		NEXT_TOKEN;
 // 	}
@@ -385,7 +385,7 @@ AstVarDeclarator ParseVarSpec(){
 		// initDecsCur->dec->id = exprCur->val;	
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
-		dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		dec->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 		strcpy(dec->id, expr2Cur->val.p);
 		// strcpy(dec->id, expr2Cur->id);
 		initDecsCur->dec = dec;
@@ -466,7 +466,7 @@ AstTypeDeclarator ParseTypeSpec(){
 
 	AstDeclarator dec;
 	CREATE_AST_NODE(dec, Declarator);
-	dec->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	dec->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	strcpy(dec->id, expr->val.p);
 	initDecs->dec = dec;
 
@@ -485,8 +485,8 @@ AstTypeDeclarator ParseTypeSpec(){
  */
 FieldDecl ParseFieldDecl(){
 	// TODO 能把局部变量当作函数的返回值吗？
-	// FieldDecl decl = (FieldDecl)malloc(sizeof(*FieldDecl));
-	FieldDecl decl = (FieldDecl)malloc(sizeof(struct fieldDecl));
+	// FieldDecl decl = (FieldDecl)MALLOC(sizeof(*FieldDecl));
+	FieldDecl decl = (FieldDecl)MALLOC(sizeof(struct fieldDecl));
 
 	// TODO 怎么存储EmbeddedField？我特别烦这种不规则的语言结构。
 	if(current_token.kind == TK_MUL){
@@ -517,7 +517,7 @@ FieldDecl ParseFieldDecl(){
 				cur->next = next;
 				cur = next;
 			}
-			cur->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+			cur->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 			strcpy(cur->id, expr->val.p);
 			cur->tySpecs = dataType;
 		}	
@@ -651,7 +651,7 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 
 	if(expr_count == 1){
 		decl->specs = specs;
-		decl->dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+		decl->dec->id = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 		strcpy(decl->dec->id, (char *)(expr->val.p));
 	}else if(expr_count > 1){
 		AstParameterDeclaration *tail = &decl;
@@ -678,7 +678,7 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 				pre = curDecl;
 			}
 			CREATE_AST_NODE(dec, Declarator);
-			dec->id = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+			dec->id = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 			strcpy(dec->id, (char *)(cur->val.p));
 			curDecl->dec = dec;
 			curDecl->specs = specs;
@@ -702,11 +702,11 @@ AstParameterDeclaration ParseParameterDecl(int *count){
 AstParameterDeclaration ParseParameterList(){
 	
 	AstParameterDeclaration decl;
-	int *count = (int *)malloc(sizeof(int));;
+	int *count = (int *)MALLOC(sizeof(int));;
 	*count = 0;
 	decl = ParseParameterDecl(count);
 	AstParameterDeclaration *tail = &(decl->next);
-	int *count_useless = (int *)malloc(sizeof(int));
+	int *count_useless = (int *)MALLOC(sizeof(int));
 	*count_useless = 0;
 	while(current_token.kind == TK_COMMA){
 		NEXT_TOKEN;
@@ -786,13 +786,13 @@ AstNode ParseFunctionName(){
 	AstDeclarator functionName;
 	CREATE_AST_NODE(functionName, Declarator);
 	// TODO functionName->id的空间不够，可能会擦除其他数据。
-	// functionName->id = (char *)malloc(sizeof(char));
+	// functionName->id = (char *)MALLOC(sizeof(char));
 	// strcpy(functionName->id, (char *)identifier->val.p);
 
 	// TODO len应该加1吗？把字符串末尾的\0的长度也统计进来。
 	int len = strlen(identifier->val.p);
-	functionName->id = (char *)malloc(sizeof(char) * len);
-	memset(functionName->id, 0, len);
+	functionName->id = (char *)MALLOC(sizeof(char) * len);
+	//memset(functionName->id, 0, len);
 	strcpy(functionName->id, (char *)identifier->val.p);
 
 	return (AstNode)functionName;

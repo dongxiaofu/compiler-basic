@@ -383,11 +383,12 @@ AstReturnStatement ParseReturnStatement(){
 
 	AstExpression expr = NULL;
 
+	// TODO 函数体的}
 	if(current_token.kind != TK_RBRACE){
 		expr = ParseExpressionList();
 	}	
 
-	expect_semicolon;
+//	expect_semicolon;
 
 	AstReturnStatement stmt;
 	CREATE_AST_NODE(stmt, ReturnStatement);
@@ -405,7 +406,7 @@ AstReturnStatement ParseReturnStatement(){
 // 	AstBreakStmt breakStmt;
 // 	CREATE_AST_NODE(breakStmt, BreakStmt);
 // 	// todo 内存泄露，但暂时没有找到好的处理方法。
-// 	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+// 	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 // 	AstExpression expr = ParseIdentifier();	
 // 	if(expr != NULL){
 // 		strcpy(label, expr->val.p);
@@ -426,7 +427,7 @@ AstContinueStatement ParseContinueStatement(){
 	AstContinueStatement continueStmt;
 	CREATE_AST_NODE(continueStmt, ContinueStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
-	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 	AstExpression expr = ParseIdentifier();	
 	expect_semicolon;
 	if(expr != NULL){
@@ -447,7 +448,7 @@ AstGotoStatement ParseGotoStatement(){
 	AstGotoStatement gotoStmt;
 	CREATE_AST_NODE(gotoStmt, GotoStatement);
 	// todo 内存泄露，但暂时没有找到好的处理方法。
-	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 	AstExpression expr = ParseIdentifier();
 	expect_semicolon;
 	if(expr != NULL){
@@ -536,12 +537,13 @@ AstRecvStmt ParseRecvStmt(){
 		recvStmt->identifierList = ParseIdentifierList();
 	}else{
 		// TODO 什么都不需要做吗？
-		// ERROR("%s\n", "Expect a RecvStmt");
+		ERROR("%s\n", "Expect a RecvStmt");
 	}	
 
 	// 处理<-
 	// 跳过=或:=
 	NEXT_TOKEN;
+	// TODO 判断是不是=或:=，更合适。
 
 	recvStmt->receiver = ParseExpression();
 	
@@ -595,7 +597,7 @@ AstIncDecStmt ParseIncDecStmt(){
  */
 // TODO 有没有和 ParseLabelStatement 重复？
 AstLabeledStmt ParseLabeledStmt(){
-	char *label = (char *)malloc(sizeof(char)*MAX_NAME_LEN);
+	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 	AstExpression expr = ParseIdentifier();	
 	expect_semicolon;
 	if(expr != NULL){
@@ -736,8 +738,11 @@ AstSelectStmt ParseSelectStmt(){
 int getStmtType(){
 	char stmt_type = -1;
 	StartPeekToken();
+	// 跳过CASE
+	NEXT_TOKEN;
 	if(CurrentTokenIn(FIRST_Expression) == 1){
 		ParseExpression();
+//		ParseExpressionList();
 		if(current_token.kind == TK_RECEIVE){
 			stmt_type = 1;
 		}else{
@@ -861,15 +866,17 @@ AstSelectCaseStatement ParseAstSelectCaseStmt(){
 	expect_token(TK_LBRACE);
 	// 一个循环
 	while(current_token.kind == TK_CASE || current_token.kind == TK_DEFAULT){
-		// 跳过CASE或default
-		NEXT_TOKEN;
 		AstStatement stmtCase = NULL;
 		// 处理"case" ( SendStmt | RecvStmt ) | "default" .
 		if(current_token.kind == TK_DEFAULT){
 			// do nothing
+			// 跳过CASE或default
+			NEXT_TOKEN;
 		}else{
 			// 分辨是SendStmt还是RecvStmt
 			char stmt_type = getStmtType();
+			// 跳过CASE或default
+			NEXT_TOKEN;
 			if(stmt_type == 1){
 				stmtCase = ParseSendStmt();
 			}else if(stmt_type == 2){
@@ -878,6 +885,8 @@ AstSelectCaseStatement ParseAstSelectCaseStmt(){
 				ERROR("%s\n", "Require a SendStmt or RecvStmt");
 			}
 		}
+		// 跳过CASE或default
+//		NEXT_TOKEN;
 		
 		if(stmtHeader->next == NULL){
 			CREATE_AST_NODE(currentStmt, SelectCaseStatement);

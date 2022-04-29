@@ -21,12 +21,12 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 			printf("%s\n", "Check function");
 			CURRENT = (AstFunction)p;
 
-			CURRENT->loops = (StmtVector)malloc(sizeof(struct stmtVector));
-			memset(CURRENT->loops, 0, sizeof(struct stmtVector));
+			CURRENT->loops = (StmtVector)MALLOC(sizeof(struct stmtVector));
+			//memset(CURRENT->loops, 0, sizeof(struct stmtVector));
 			CURRENT->loops->index = -1;
 
-			CURRENT->breakable = (StmtVector)malloc(sizeof(struct stmtVector));
-			memset(CURRENT->breakable, 0, sizeof(struct stmtVector));
+			CURRENT->breakable = (StmtVector)MALLOC(sizeof(struct stmtVector));
+			//memset(CURRENT->breakable, 0, sizeof(struct stmtVector));
 			CURRENT->breakable->index = -1;
 
 			CheckFunction((AstFunction)p);
@@ -48,9 +48,10 @@ void CheckLocalDeclaration(AstDeclaration decls)
 	CheckDeclaration(decls);
 }
 
-void CheckBlock(AstBlock block)
+int CheckBlock(AstBlock block)
 {
 	AstStatement stmt = block->stmt;
+	AstStatement lastStmt = NULL;
 	while(stmt != NULL){
 		if(stmt->kind == NK_CompoundStatement){
 			PRINTF("check local variable\n");
@@ -69,9 +70,16 @@ void CheckBlock(AstBlock block)
 		}
 
 		if(stmt){
+			lastStmt = stmt;
 			stmt = stmt->next;
 		}
 	}
+
+	if(lastStmt->kind == NK_ReturnStatement){
+		return 1;
+	}
+
+	return 0;
 }
 
 void CheckFunction(AstFunction p)
@@ -79,10 +87,10 @@ void CheckFunction(AstFunction p)
 	FunctionSymbol fsym;
 
 	AstFunctionDeclarator fdec = p->fdec;
-	Signature sig = (Signature)malloc(sizeof(struct signature));
-	memset(sig, 0, sizeof(struct signature));
-	int paramIndex = sig->paramIndex;
-	int resultIndex = sig->resultIndex;
+	Signature sig = (Signature)MALLOC(sizeof(struct signature));
+	//memset(sig, 0, sizeof(struct signature));
+	int paramIndex = sig->paramSize - 1;
+	int resultIndex = sig->resultSize - 1;
 
 	AstParameterTypeList paramTyList = fdec->paramTyList;
 	AstParameterDeclaration paramDecls = paramTyList->paramDecls;
@@ -90,16 +98,16 @@ void CheckFunction(AstFunction p)
 	while(paramDecl){
 		CheckDeclarationSpecifiers(paramDecl->specs);
 		AstDeclarator dec = paramDecl->dec;
-		SignatureElement sigElement = (SignatureElement)malloc(sizeof(struct signatureElement));
-		memset(sigElement, 0, sizeof(struct signatureElement));
+		SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
+		//memset(sigElement, 0, sizeof(struct signatureElement));
 		sigElement->id = dec->id;
 		sigElement->ty = paramDecl->specs->ty;
-		sig->params[paramIndex++] = sigElement;
+		sig->params[++paramIndex] = sigElement;
 
 		paramDecl = paramDecl->next;
 	}
 
-	sig->paramIndex = paramIndex;
+	sig->paramSize = paramIndex + 1;
 
 	AstParameterTypeList resultList = fdec->result;
 	AstParameterDeclaration resultParamDecls = resultList->paramDecls;
@@ -107,27 +115,33 @@ void CheckFunction(AstFunction p)
 	while(resultParamDecl){
 		CheckDeclarationSpecifiers(resultParamDecl->specs);
 		AstDeclarator dec = resultParamDecl->dec;
-		SignatureElement sigElement = (SignatureElement)malloc(sizeof(struct signatureElement));
-		memset(sigElement, 0, sizeof(struct signatureElement));
+		SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
+		//memset(sigElement, 0, sizeof(struct signatureElement));
 		if(dec != NULL){
 			sigElement->id = dec->id;
 		}
 		sigElement->ty = resultParamDecl->specs->ty;
-		sig->results[resultIndex++] = sigElement;
+		sig->results[++resultIndex] = sigElement;
 
 		resultParamDecl = resultParamDecl->next;
 	}
 
-	sig->resultIndex = resultIndex;
+	sig->resultSize = resultIndex + 1;
 
 	AstDeclarator fname = (AstDeclarator)fdec->dec;
 	if((fsym == LookupID(fname->id)) == NULL){
 		fsym = AddFunction(fname->id, sig);
+		FSYM = fsym;
 	}	
 
 	// 检查函数体
 	AstBlock block = p->block;
-	CheckBlock(block);	
+	int hasReturn = CheckBlock(block);	
+	CURRENT->hasReturn = hasReturn;
+	if(sig->resultSize > 0 && hasReturn == 0){
+		// TODO
+		ERROR("函数必须有返回值\n", "");
+	}
 }
 
 void CheckGlobalDeclaration(AstDeclaration decls){
@@ -219,7 +233,7 @@ RecordType CheckStructSpecifier(AstStructSpecifier specs)
 
 RecordType StartRecord()
 {
-	RecordType rty = (RecordType)malloc(sizeof(struct recordType));
+	RecordType rty = (RecordType)MALLOC(sizeof(struct recordType));
 	rty->kind = NK_RecordType;
 	rty->id = NULL;
 	rty->flds = NULL;
@@ -231,12 +245,12 @@ RecordType StartRecord()
 Field AddField(RecordType rty, char *id, Type ty)
 {
 	int fldSize = sizeof(struct field);
-	Field fld = (Field)malloc(fldSize);
-	memset(fld, 0, fldSize);
+	Field fld = (Field)MALLOC(fldSize);
+	//memset(fld, 0, fldSize);
 
 	int idSize = sizeof(char) * MAX_NAME_LEN;
-	fld->id = (char *)malloc(idSize);
-	memset(fld->id, 0, idSize);
+	fld->id = (char *)MALLOC(idSize);
+	//memset(fld->id, 0, idSize);
 	strcpy(fld->id, id);
 
 	fld->ty = ty;
@@ -272,8 +286,8 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 		AstLiteralValue literalValue = compositeLit->literalValue;
 		AstKeyedElement element = literalValue->keyedElement;	
 	
-		InitData head = (InitData)malloc(sizeof(struct initData));
-		memset(head, 0, sizeof(struct initData));
+		InitData head = (InitData)MALLOC(sizeof(struct initData));
+		//memset(head, 0, sizeof(struct initData));
 		InitData *init = &(head->next);
 		int offset = 0;
 		RecordType rty = CheckStructSpecifier((AstStructSpecifier)literalType);
@@ -282,8 +296,8 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 			// {age:3,height:4}这种初始化值比较难处理。
 			while(fld){
 				AstKeyedElement targetElement = LookupElement(element, fld->id);
-				*init = (InitData)malloc(sizeof(struct initData));
-				memset(*init, 0, sizeof(struct initData));
+				*init = (InitData)MALLOC(sizeof(struct initData));
+				//memset(*init, 0, sizeof(struct initData));
 				if(targetElement == NULL){
 					(*init)->expr = NULL;
 				}else{
@@ -305,8 +319,8 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 					// TODO 打印报错信息，搁置。
 				}
 				
-				*init = (InitData)malloc(sizeof(struct initData));
-				memset(*init, 0, sizeof(struct initData));
+				*init = (InitData)MALLOC(sizeof(struct initData));
+				//memset(*init, 0, sizeof(struct initData));
 				(*init)->expr = val;
 				(*init)->offset = offset;
 				offset += fld->ty->size;
@@ -346,8 +360,8 @@ void CheckInitializer(AstInitializer init)
 		AstCompositeLit compositeLit = init->compositeLit;
 		idata = CheckCompositeLitInitializer(compositeLit);
 	}else{
-		idata = (InitData)malloc(sizeof(struct initData));
-		memset(idata, 0, sizeof(struct initData));
+		idata = (InitData)MALLOC(sizeof(struct initData));
+		//memset(idata, 0, sizeof(struct initData));
 		idata->offset = 0;
 		idata->expr = init->expr;
 	}
@@ -379,7 +393,7 @@ AstKeyedElement LookupElement(AstKeyedElement element, char *name)
 
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
 {
-	ArrayType aty = (ArrayType)malloc(sizeof(struct arrayType));
+	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
 	aty->length = specs->expr->val.i[0];
 	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
@@ -395,12 +409,12 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	AstLiteralValue literalValue = compositeLit->literalValue;
 	AstKeyedElement element = literalValue->keyedElement;	
 
-	InitData head = (InitData)malloc(sizeof(struct initData));
+	InitData head = (InitData)MALLOC(sizeof(struct initData));
 	if(head == -1){
 		exit(-2);
 	}
 
-	memset(head, 0, sizeof(struct initData));
+	//memset(head, 0, sizeof(struct initData));
 	InitData *init = &(head->next);
 	int offset = 0;
 
@@ -415,8 +429,8 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	int elementSize = aty->bty->size;
 	while(element != NULL && length >= 0){
 		offset = index * elementSize;
-		*init = (InitData)malloc(sizeof(struct initData));
-		memset(*init, 0, sizeof(struct initData));
+		*init = (InitData)MALLOC(sizeof(struct initData));
+		//memset(*init, 0, sizeof(struct initData));
 		(*init)->offset = offset;
 		// TODO 这样做行吗？exlement->expr中的数据是否会被销毁？
 		// TODO element->element->expr 没有考虑嵌套。
@@ -435,7 +449,7 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 MapType CheckMapSpecifier(AstMapSpecifier specs)
 {
 	// TODO 缺少一个数据类型枚举值。
-	MapType mty = (MapType)malloc(sizeof(struct mapType));
+	MapType mty = (MapType)MALLOC(sizeof(struct mapType));
 	CheckDeclarationSpecifiers((AstSpecifiers)specs->keyType);
 	CheckDeclarationSpecifiers((AstSpecifiers)specs->elementType);
 	mty->key = (Type)(((AstSpecifiers)(specs->keyType))->ty);
@@ -455,12 +469,12 @@ InitData CheckMapInitializer(AstCompositeLit compositeLit)
 	AstLiteralValue literalValue = compositeLit->literalValue;
 
 	AstKeyedElement element = literalValue->keyedElement;	
-	InitData head = (InitData)malloc(sizeof(struct initData));
+	InitData head = (InitData)MALLOC(sizeof(struct initData));
 	if(head == -1){
 		exit(-2);
 	}
 
-	memset(head, 0, sizeof(struct initData));
+	//memset(head, 0, sizeof(struct initData));
 	InitData *init = &(head->next);
 	int offset = 0;
 	int index = 0;
@@ -468,13 +482,13 @@ InitData CheckMapInitializer(AstCompositeLit compositeLit)
 	// TODO 不支持嵌套
 	while(element){
 		int size = sizeof(struct keyValue);
-		KeyValue kv = (KeyValue)malloc(size);
-		memset(kv, 0, size);
+		KeyValue kv = (KeyValue)MALLOC(size);
+		//memset(kv, 0, size);
 		kv->key = (AstExpression)(((AstKey)element->key)->expr); 
 		kv->value = (AstExpression)(((AstElement)element->element)->expr);
 
-		*init = (InitData)malloc(sizeof(struct initData));
-		memset(*init, 0, sizeof(struct initData));
+		*init = (InitData)MALLOC(sizeof(struct initData));
+		//memset(*init, 0, sizeof(struct initData));
 		(*init)->kv = kv;
 		offset = index * kvSize;
 		(*init)->offset = offset;

@@ -82,7 +82,7 @@ Token get_token()
 //	Token token;
 //	token.kind = TK_NAN;
 	Token token;
-	memset(&token, 0, sizeof(token));
+	//memset(&token, 0, sizeof(token));
 	if(current_char == -1){
 		get_next_char();
 	}
@@ -487,8 +487,7 @@ int ScanGreat(){
 // TODO 全局变量有点可怕。需进入函数才知道是怎么回事。
 // void ScanToken(){
 Token *ScanToken(){
-	Token *token = (Token *)malloc(sizeof(Token));
-	memset(token, 0, sizeof(Token));
+	Token *token = (Token *)MALLOC(sizeof(Token));
 
 	char flag = 0;
 	for(int i = 0; i < 256; i++){
@@ -530,7 +529,7 @@ Token *ScanToken(){
 int ScanStrintLiterals(){
 	get_next_char();
 	char temp[512];
-	memset(temp, 0, 512);
+	//memset(temp, 0, 512);
 	int len = -1;
 
 //	while(current_char != TK_DOUBLE_QUOTATION_MARK){

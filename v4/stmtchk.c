@@ -173,8 +173,29 @@ AstStatement CheckContinueStatement(AstStatement stmt)
 
 AstStatement CheckReturnStatement(AstStatement stmt)
 {
+	FunctionType fty = FSYM->ty;	
+	Signature sig = fty->sig;
+	SignatureElement results = sig->results;
+	int resultSize = sig->resultSize;
+	int index = resultSize - 1;
 
-return stmt;
+	AstReturnStatement returnStmt = AsRet(stmt); 	
+	AstExpression expr = returnStmt->expr;
+
+	while(index >= 0 && expr){
+		// 
+		Type ty = results[index--].ty;	
+		CheckExpression(expr);
+		// TODO 检查返回值的数据类型和函数要求的返回值类型是否一致。
+		expr = expr->next;
+		resultSize--;
+	}
+
+	if(resultSize > 0 || expr){
+		ERROR("函数的返回值和函数定义不匹配\n", "");
+	}
+
+	return stmt;
 }
 
 AstStatement CheckCompoundStatement(AstStatement stmt)
@@ -276,12 +297,17 @@ AstStatement CheckSimpleStmt(AstStatement stmt)
 
 AstExpression CheckExpressionList(AstExpression expr)
 {
-
+	AstExpression current = expr;
+	while(current){
+		CheckExpression(current);
+		current = current->next;
+	}
 	return expr;
 }
 
 AstExpression CheckIdentifierList(AstExpression expr)
 {
+	CheckExpressionList(expr);
 
 	return expr;
 }

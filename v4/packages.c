@@ -27,7 +27,7 @@ Token *ParseImportPath(){
 		exit(-4);
 	}
 
-	Token *token = (Token *)malloc(sizeof(Token));
+	Token *token = (Token *)MALLOC(sizeof(Token));
 	memcpy(token, &current_token, sizeof(Token));
 
 	NEXT_TOKEN;
@@ -48,7 +48,7 @@ AstImportSpec ParseImportSpec(){
 
 	AstDeclarator packageName;
 	CREATE_AST_NODE(packageName, Declarator);
-	packageName->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	packageName->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	if(current_token.kind == TK_DOT){
 		EXPECT(TK_DOT);
 		strcpy(packageName->id, current_token.value.value_str);
@@ -62,7 +62,7 @@ AstImportSpec ParseImportSpec(){
 	Token *token = ParseImportPath();
 	AstDeclarator importPath;
 	CREATE_AST_NODE(importPath, Declarator);
-	importPath->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+	importPath->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	strcpy(importPath->id, token->value.value_str);
 	
 	return importSpec;

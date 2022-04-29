@@ -55,6 +55,9 @@ AstNode ParseType(){
 	}else{
 		// todo 处理QualifiedIdent，暂时不实现
 		printf("hi");
+		NEXT_TOKEN;
+		NEXT_TOKEN;
+		NEXT_TOKEN;
 	}
 
 	return node;
@@ -81,7 +84,7 @@ AstNode ParseBasicType(){
 	if(type == 0){	
 		AstTypedefName tname;
 		CREATE_AST_NODE(tname, TypedefName);
-		tname->id = (char *)malloc(sizeof(char) * MAX_NAME_LEN);
+		tname->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 		strcpy(tname->id, current_token.value.value_str);
 		NEXT_TOKEN;
 		spec->tySpecs = tname;	
@@ -188,7 +191,9 @@ AstNode ParseTypeLit(){
  */
 // todo 暂时不实现这个函数。它属于其他元素的组成部分。
 AstNode ParseQualifiedIdent(){
-
+	NEXT_TOKEN;
+	NEXT_TOKEN;
+	NEXT_TOKEN;
 }
 
 /**
@@ -451,7 +456,7 @@ AstChannelType ParseChannelType(){
 		expect_token(TK_CHAN);
 		type = CT_Receive;
 	}else{
-		ERROR("expect a chan\n");
+		ERROR("expect a chan\n", "");
 	}
 
 	astChannelType->type = type;

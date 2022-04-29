@@ -5,7 +5,7 @@ PYTHON:all
 #C_SRC	=	lex.c stmt.c expr.c
 H_SRC			= lex.h stmt.h
 T_SRC			= tokens.txt
-CFLAGS	= -I ./include -g -m32
+CFLAGS	= -I ./include -g -m32 -O0
 #OBJS        = $(C_SRC:.c=.o)
 # CC          = ucc
 CC          = gcc

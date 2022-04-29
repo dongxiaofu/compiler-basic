@@ -30,14 +30,14 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		int size = sizeof(Symbol) * (SYM_HASH_MASK + 1);
 	// TODO 一个十分可笑的错误。
-	//	tbl->buckets = (Symbol *)malloc(sizeof(size));
-		tbl->buckets = (Symbol *)malloc(size);
-		memset(tbl->buckets, 0, size);
+	//	tbl->buckets = (Symbol *)MALLOC(sizeof(size));
+		tbl->buckets = (Symbol *)MALLOC(size);
+		//memset(tbl->buckets, 0, size);
 	}
 	
 	int linkerSize = sizeof(BucketLinker);
-	BucketLinker linker = (BucketLinker)malloc(linkerSize);
-	memset(linker, 0, linkerSize);
+	BucketLinker linker = (BucketLinker)MALLOC(linkerSize);
+	//memset(linker, 0, linkerSize);
 	linker->sym = sym;
 
 	linker->link = (BucketLinker)tbl->buckets[h];
@@ -54,19 +54,19 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 // 	if(tbl->buckets == NULL){
 // 		// int size = SYM_HASH_MASK + 1;
 // 		int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
-// 		// tbl->buckets = (Symbol *)malloc(sizeof(Symbol) * size);
-// 		// tbl->buckets = (Symbol)malloc(sizeof(Symbol) * size);
-// 		// tbl->buckets = (Symbol)malloc(sizeof(struct symbol) * size);
-// 		tbl->buckets = (Symbol *)malloc(sizeof(struct symbol) * size);
-// 		memset(tbl->buckets, 0, size);
+// 		// tbl->buckets = (Symbol *)MALLOC(sizeof(Symbol) * size);
+// 		// tbl->buckets = (Symbol)MALLOC(sizeof(Symbol) * size);
+// 		// tbl->buckets = (Symbol)MALLOC(sizeof(struct symbol) * size);
+// 		tbl->buckets = (Symbol *)MALLOC(sizeof(struct symbol) * size);
+// 		//memset(tbl->buckets, 0, size);
 // 	}
 // 	
 // 	// int linkerSize = sizeof(BucketLinker);
 // 	int linkerSize = sizeof(struct bucketLinker);
-// 	// BucketLinker linker = (BucketLinker)malloc(sizeof(BucketLinker));
-// 	// BucketLinker linker = (BucketLinker)malloc(sizeof(struct bucketLinker));
-// 	BucketLinker linker = (BucketLinker)malloc(linkerSize);
-// 	memset(linker, 0, linkerSize);
+// 	// BucketLinker linker = (BucketLinker)MALLOC(sizeof(BucketLinker));
+// 	// BucketLinker linker = (BucketLinker)MALLOC(sizeof(struct bucketLinker));
+// 	BucketLinker linker = (BucketLinker)MALLOC(linkerSize);
+// 	//memset(linker, 0, linkerSize);
 // 	linker->symbol = sym;
 // 	if(tbl->buckets[h] == NULL){
 // 		tbl->buckets[h] = (Symbol)linker;
@@ -116,12 +116,12 @@ VariableSymbol AddVariable(char *name)
 {
 	// int size = sizeof(VariableSymbol);
 	int size = sizeof(struct variableSymbol);
-	VariableSymbol p = (VariableSymbol)malloc(size);	
-	// memset(p, 0, sizeof(struct variableSymbol));
-	memset(p, 0, size);
+	VariableSymbol p = (VariableSymbol)MALLOC(size);	
+	// //memset(p, 0, sizeof(struct variableSymbol));
+	//memset(p, 0, size);
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
-//	p->name = (char *)malloc(sizeof(char) * MAX_NAME_LEN);	
-//	memset(p->name, 0, MAX_NAME_LEN);
+//	p->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);	
+//	//memset(p->name, 0, MAX_NAME_LEN);
 	// strcpy(p->name, name, MAX_NAME_LEN);
 //	strcpy(p->name, name);
 	p->name = name;
@@ -133,11 +133,11 @@ VariableSymbol AddVariable(char *name)
 
 FunctionSymbol AddFunction(char *funcName, Signature sig)
 {
-	FunctionType fty = (FunctionType)malloc(sizeof(struct functionType));
-	memset(fty, 0, sizeof(struct functionType));
+	FunctionType fty = (FunctionType)MALLOC(sizeof(struct functionType));
+	//memset(fty, 0, sizeof(struct functionType));
 	fty->sig = sig;
-	FunctionSymbol fsym = (FunctionSymbol)malloc(sizeof(struct functionSymbol));
-	memset(fsym, 0, sizeof(struct functionSymbol));
+	FunctionSymbol fsym = (FunctionSymbol)MALLOC(sizeof(struct functionSymbol));
+	//memset(fsym, 0, sizeof(struct functionSymbol));
 	fsym->name = funcName;
 	fsym->ty = fty;
 	fsym = (FunctionSymbol)AddSymbol(Identifiers, (Symbol)fsym);
