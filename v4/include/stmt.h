@@ -177,7 +177,6 @@ typedef struct astGotoStatement
 	AST_STATEMENT_COMMON
 	char *id;
 //	Label label;
-	char *label;
 	AstStatement target;
 } *AstGotoStatement;
 
@@ -186,7 +185,7 @@ typedef struct astContinueStatement
 {   
 	AST_STATEMENT_COMMON
 	AstLoopStatement target;
-	char *label;
+	char *id;
 } *AstContinueStatement;
 // return [expression];
 typedef struct astReturnStatement
@@ -195,12 +194,11 @@ typedef struct astReturnStatement
 	AstExpression expr;
 } *AstReturnStatement;
 
-// 这是一个很重要的数据结构，差点漏掉。
-typedef struct astLabeledStmt{
+typedef struct astLabelStmt{
 	AST_STATEMENT_COMMON
-	char *label;
+	char *id;
 	AstStatement stmt;
-} *AstLabeledStmt;
+} *AstLabelStmt;
 
 /**
  * Declaration | LabeledStmt | SimpleStmt
@@ -208,7 +206,7 @@ typedef struct astLabeledStmt{
 typedef struct astCompoundStatement{
 	AST_STATEMENT_COMMON
 	AstNode decls;
-	AstLabeledStmt labeledStmt;
+	AstLabelStmt labeledStmt;
 	AstNode stmts;
 } *AstCompoundStatement;
 
@@ -252,18 +250,12 @@ typedef struct astFallthroughStmt{
 typedef struct astBreakStmt{
 	AST_STATEMENT_COMMON
 	AstStatement target;
-	AstExpression label;
+	char *id;
 } *AstBreakStmt;
 
 typedef struct astEmptyStmt{
 	AST_STATEMENT_COMMON
 } *AstEmptyStmt;
-
-typedef struct astLabelStmt{
-	AST_STATEMENT_COMMON
-	AstExpression label;
-	AstStatement stmt;
-} *AstLabelStmt;
 
 typedef struct astAssignmentsStmt{
 	AST_STATEMENT_COMMON
@@ -277,7 +269,7 @@ typedef struct astSelectStmt{
 
 // 简化代码，应学习。
 #define AsExpr(stmt)   ((AstExpressionStatement)stmt)
-#define AsLabel(stmt)  ((AstLabelStatement)stmt)
+#define AsLabel(stmt)  ((AstLabelStmt)stmt)
 #define AsCase(stmt)   ((AstCaseStatement)stmt)
 #define AsDef(stmt)    ((AstDefaultStatement)stmt)
 #define AsIf(stmt)     ((AstIfStatement)stmt)
@@ -291,6 +283,7 @@ typedef struct astSelectStmt{
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
 #define AsFor(stmt)    ((AstForStmt)stmt)
 #define AsGoto(stmt)   ((AstGotoStatement)stmt)
+#define AsGo(stmt)     ((AstGoStmt)stmt)
 #define AsCont(stmt)   ((AstContinueStatement)stmt)
 #define AsBreak(stmt)  ((AstBreakStmt)stmt)
 #define AsRet(stmt)    ((AstReturnStatement)stmt)
@@ -308,7 +301,6 @@ AstGotoStatement ParseGotoStatement();
 AstRecvStmt ParseRecvStmt();
 AstSendStmt ParseSendStmt();
 AstIncDecStmt ParseIncDecStmt();
-AstLabeledStmt ParseLabeledStmt();
 AstDeferStmt ParseDeferStmt();
 
 int getStmtType();

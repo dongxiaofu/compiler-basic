@@ -76,7 +76,11 @@ Label       = identifier .
 AstLabelStmt ParseLabelStatement(){
 	AstLabelStmt labeledStmt;
 	CREATE_AST_NODE(labeledStmt, LabeledStmt);
-	labeledStmt->label = ParseIdentifier();
+	AstExpression id = ParseIdentifier();
+	if(id == NULL){
+		ERROR("LabeledStmt的Label不能为空\n", "");
+	}
+	labeledStmt->id = (char *)(id->val.p);
 	NEXT_TOKEN;
 	labeledStmt->stmt = ParseStatement();
 
@@ -436,7 +440,7 @@ AstContinueStatement ParseContinueStatement(){
 		label = NULL;
 	}
 	
-	continueStmt->label = label;
+	continueStmt->id = label;
 
 	return continueStmt;
 }
@@ -447,17 +451,18 @@ AstGotoStatement ParseGotoStatement(){
 	NEXT_TOKEN;
 	AstGotoStatement gotoStmt;
 	CREATE_AST_NODE(gotoStmt, GotoStatement);
-	// todo 内存泄露，但暂时没有找到好的处理方法。
-	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
+	char *id = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
 	AstExpression expr = ParseIdentifier();
 	expect_semicolon;
 	if(expr != NULL){
-		strcpy(label, expr->val.p);
+		strcpy(id, expr->val.p);
 	}else{
-		label = NULL;
+		id = NULL;
+		// TODO 不满足语法，应该报错。
+		ERROR("goto的label不能是NULL\n", "");
 	}
 	
-	gotoStmt->label = label;
+	gotoStmt->id = id;
 
 	return gotoStmt;
 }
@@ -589,33 +594,6 @@ AstIncDecStmt ParseIncDecStmt(){
 	stmt->expr = expr;
 	stmt->op = current_token.kind;	
 	return stmt;
-}
-
-/**
- * LabeledStmt = Label ":" Statement .
-   Label       = identifier .
- */
-// TODO 有没有和 ParseLabelStatement 重复？
-AstLabeledStmt ParseLabeledStmt(){
-	char *label = (char *)MALLOC(sizeof(char)*MAX_NAME_LEN);
-	AstExpression expr = ParseIdentifier();	
-	expect_semicolon;
-	if(expr != NULL){
-		strcpy(label, expr->val.p);
-	}else{
-		label = NULL;
-	}
-	// todo label是不能为空的。若为空，此处如何处理？
-	// TK_COLON 是冒号。
-	expect_token(TK_COLON);
-	AstStatement stmt = ParseStatement();
-	
-	AstLabeledStmt labelStmt;
-	CREATE_AST_NODE(labelStmt, LabelStmt);
-	labelStmt->label = label;
-	labelStmt->stmt = stmt;
-
-	return labelStmt;
 }
 
 // DeferStmt = "defer" Expression .
@@ -1496,7 +1474,8 @@ AstBreakStmt ParseBreakStmt(){
 
 	EXPECT(TK_BREAK);
 	if(current_token.kind == TK_ID){
-		breakStmt->label = ParseIdentifier();
+		AstExpression expr = ParseIdentifier();
+		breakStmt->id = (char *)(expr->val.p);
 	}
 
 	return breakStmt;

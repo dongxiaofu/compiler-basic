@@ -3,6 +3,7 @@
 #include "stmt.h"
 #include "decl.h"
 #include "expr.h"
+#include "declchk.h"
 #include "stmtchk.h"
 
 AstStatement (*StmtCheckers[])(AstStatement) = {
@@ -126,14 +127,17 @@ AstStatement CheckForStmt(AstStatement stmt)
 
 AstStatement CheckGotoStatement(AstStatement stmt)
 {
+	AstGotoStatement gotoStmt = AsGoto(stmt);
+	// TODO 检查label，待实现。
+	gotoStmt->target = CheckStatement(gotoStmt->target);
 
-return stmt;
+	return stmt;
 }
 
 AstStatement CheckBreakStatement(AstStatement stmt)
 {
 	AstBreakStmt breakStmt = AsBreak(stmt);
-	if(breakStmt->label){
+	if(breakStmt->id){
 		// TODO 不知道怎么实现标签？	
 
 		return stmt;
@@ -154,7 +158,7 @@ AstStatement CheckBreakStatement(AstStatement stmt)
 AstStatement CheckContinueStatement(AstStatement stmt)
 {
 	AstContinueStatement continueStmt = AsCont(stmt);
-	if(continueStmt->label){
+	if(continueStmt->id){
 		// TODO 实现continue label
 		return stmt;
 	}
@@ -200,8 +204,26 @@ AstStatement CheckReturnStatement(AstStatement stmt)
 
 AstStatement CheckCompoundStatement(AstStatement stmt)
 {
+	AstCompoundStatement compoundStmt = AsComp(stmt);
 
-return stmt;
+	if(compoundStmt->decls){
+		AstDeclaration decl = (AstDeclaration)compoundStmt->decls;
+		while(decl){
+			CheckDeclaration(decl);
+			decl = (AstDeclaration)decl->next;
+		}
+	}
+
+	if(compoundStmt->labeledStmt){
+		compoundStmt->labeledStmt = CheckStatement(compoundStmt->labeledStmt);
+	}
+
+	if(compoundStmt->stmts){
+		AstStatement stmt = (AstStatement)compoundStmt->stmts;	
+		compoundStmt->stmts = CheckSimpleStmt(stmt);
+	}
+
+	return stmt;
 }
 
 AstStatement CheckIncDecStmt(AstStatement stmt)
@@ -214,8 +236,11 @@ AstStatement CheckIncDecStmt(AstStatement stmt)
 
 AstStatement CheckLabelStmt(AstStatement stmt)
 {
+	AstLabelStmt labelStmt = AsLabel(stmt);;
+	// TODO 还没有处理label
+	labelStmt->stmt = CheckStatement(labelStmt->stmt);
 
-return stmt;
+	return stmt;
 }
 
 // TODO 这个函数远远没有完成。
@@ -262,8 +287,15 @@ AstStatement CheckSelectStmt(AstStatement stmt)
 
 AstStatement CheckGoStmt(AstStatement stmt)
 {
-
-return stmt;
+	AstGoStmt goStmt = AsGo(stmt);
+	if(goStmt->expr == NULL){
+		ERROR("GoStmt的expr不能是空", "");
+	}
+	// TODO 只完成了最基本的检查。
+	// 还有许多其他检查，例如，expr是不是函数调用等。
+	goStmt->expr = CheckExpression(goStmt->expr);
+	
+	return stmt;
 }
 
 int CheckAssignOp(int op)

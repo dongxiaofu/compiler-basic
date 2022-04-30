@@ -63,7 +63,7 @@ int CheckBlock(AstBlock block)
 			}
 			// 处理其他
 			// TODO 待完善
-			AstLabeledStmt labeledStmt = compoundStmt->labeledStmt;
+			AstLabelStmt labeledStmt = compoundStmt->labeledStmt;
 			AstStatement simpleStmt = compoundStmt->stmts;	
 		}else{
 			stmt = CheckStatement(stmt);
