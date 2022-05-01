@@ -1187,38 +1187,6 @@ AstTypeCaseClause ParseTypeCaseClause(){
  * [ identifier ":=" ] PrimaryExpr "." "(" "type" ")" .
  */
 AstTypeSwitchGuard ParseTypeSwitchGuard(){
-
-//	StartPeekToken();
-//	char colon_flag = 0;
-//	char colon_equal_flag = 0;
-//	while(current_token.kind != TK_DOT){
-//		NO_TOKEN;
-//	//	if(current_token.kind == TK_COLON){
-//	//		colon_flag = 1;
-//	//	}
-//		if(colon_flag == 1){
-//			if(current_token.kind == TK_EQUAL){
-//				colon_equal_flag = 1;
-//				break;
-//			}else{
-//				colon_flag = 0;
-//			}
-//		}	
-//		if(current_token.kind == TK_COLON){
-//			colon_flag = 1;
-//		}
-//		
-//		NEXT_TOKEN;
-//	}
-//	EndPeekToken();
-//
-//	if(colon_flag == 1){
-//		ParseIdentifier();
-//		expect_token(TK_COLON);
-//		expect_token(TK_EQUAL);
-//	}
-
-
 	StartPeekToken();
 	char colon_equal_flag = 0;
 	while(current_token.kind != TK_DOT){
@@ -1248,7 +1216,7 @@ AstTypeSwitchGuard ParseTypeSwitchGuard(){
 	return guard;
 }
 
-AstStatement ParseExprSwitchCase(){
+AstExpression ParseExprSwitchCase(){
 	AstExpression expr = NULL;
 	if(current_token.kind == TK_DEFAULT){
 		// do nothing	
@@ -1416,7 +1384,7 @@ AstExprSwitchStmt ParseExprSwitchStmt(){
 /**
  * SwitchStmt = ExprSwitchStmt | TypeSwitchStmt .
  */
-AstNode ParseSwitchStmt(){
+AstSwitchStatement ParseSwitchStmt(){
 	
 	expect_token(TK_SWITCH);
 
@@ -1450,13 +1418,13 @@ AstNode ParseSwitchStmt(){
 	}
 	EndPeekToken();
 
-	AstNode stmt;
-	CREATE_AST_NODE(stmt, Node);
+	AstSwitchStatement stmt;
+	CREATE_AST_NODE(stmt, SwitchStatement);
 
 	if(switch_type == 1){
-		stmt = (AstNode)ParseExprSwitchStmt();	
+		stmt->expr = ParseExprSwitchStmt();	
 	}else if(switch_type == 2){
-		stmt = (AstNode)ParseTypeSwitchStmt();
+		stmt->type = ParseTypeSwitchStmt();
 	}else{
 		ERROR("%s\n", "Require a switch stmt");
 	}

@@ -53,11 +53,7 @@ AstNode ParseType(){
 	}else if(isTypeKeyWord(kind) == 1){
 		return ParseTypeLit();
 	}else{
-		// todo 处理QualifiedIdent，暂时不实现
-		printf("hi");
-		NEXT_TOKEN;
-		NEXT_TOKEN;
-		NEXT_TOKEN;
+		ERROR("ParseType 错误\n", "");
 	}
 
 	return node;
@@ -189,11 +185,22 @@ AstNode ParseTypeLit(){
 /**
  * QualifiedIdent = PackageName "." identifier .
  */
-// todo 暂时不实现这个函数。它属于其他元素的组成部分。
-AstNode ParseQualifiedIdent(){
-	NEXT_TOKEN;
-	NEXT_TOKEN;
-	NEXT_TOKEN;
+AstQualifiedIdent ParseQualifiedIdent(){
+	AstQualifiedIdent ident;
+	CREATE_AST_NODE(ident, QualifiedIdent);
+	AstExpression expr1 = ParseIdentifier();	
+	if(expr1 == NULL){
+		ERROR("QualifiedIdent的PackageName不能是NULL\n", "");
+	}
+	ident->packageName = (char *)(expr1->val.p);
+	EXPECT(TK_DOT);
+	AstExpression expr2 = ParseIdentifier();	
+	if(expr2 == NULL){
+		ERROR("QualifiedIdent的identifier不能是NULL\n", "");
+	}
+	ident->identifier = (char *)(expr2->val.p);
+
+	return ident;
 }
 
 /**

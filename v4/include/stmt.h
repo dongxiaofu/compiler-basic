@@ -147,28 +147,12 @@ typedef struct switchBucket
 	AstCaseStatement *tail;
 	struct switchBucket *prev;
 } *SwitchBucket;
-/**
-	@expr		expression
-	@stmt		statement
-	@cases		list of case-statements
-	@defStmt	default-statement
-	@buckets	list of switchBucket
-	@nbucket	number of nodes in the list of switchBucket
-	@nextBB
-	@defBB
- */
-// switch(expression) statement
+
 typedef struct astSwitchStatement
 {
 	AST_STATEMENT_COMMON
-	AstExpression expr;
-	AstStatement  stmt;
-	AstCaseStatement cases;
-	AstDefaultStatement defStmt;
-	SwitchBucket buckets;
-	int nbucket;
-//	BBlock nextBB;
-//	BBlock defBB;
+	AstStatement expr;
+	AstStatement type;
 } *AstSwitchStatement;
 
 // goto identifier
@@ -274,6 +258,9 @@ typedef struct astSelectStmt{
 #define AsDef(stmt)    ((AstDefaultStatement)stmt)
 #define AsIf(stmt)     ((AstIfStatement)stmt)
 #define AsSwitch(stmt) ((AstSelectCaseStatement)stmt)
+#define AsSwitchStmt(stmt) ((AstSwitchStatement)stmt)
+#define AsTypeSwitchStmt(stmt) ((AstTypeSwitchStmt)stmt)
+#define AsExprSwitchStmt(stmt) ((AstExprSwitchStmt)stmt)
 #define AsSelect(stmt) ((AstSelectStmt)stmt)
 #define AsDefer(stmt)  ((AstDeferStmt)stmt)
 #define AsSend(stmt)   ((AstSendStmt)stmt)
@@ -324,11 +311,11 @@ AstNode ParseTypeSwitchCase();
 AstTypeCaseClause ParseTypeCaseClause();
 AstTypeSwitchGuard ParseTypeSwitchGuard();
 
-AstStatement ParseExprSwitchCase();
+AstExpression ParseExprSwitchCase();
 AstExprCaseClause ParseExprCaseClause();
 AstTypeSwitchStmt ParseTypeSwitchStmt();
 AstExprSwitchStmt ParseExprSwitchStmt();
-AstNode ParseSwitchStmt();
+AstSwitchStatement ParseSwitchStmt();
 
 // AstStatement ParseSimpleStatement();
 // AstStatement ParseSimpleStatement();

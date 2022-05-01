@@ -45,7 +45,7 @@ AstMethodSpec ParseMethodSpec();
 // AstNode ParseType();
 AstNode ParseBasicType();
 AstNode ParseTypeLit();
-AstNode ParseQualifiedIdent();
+AstQualifiedIdent ParseQualifiedIdent();
 AstArrayTypeSpecifier ParseArrayType();
 AstStructSpecifier ParseStructType();
 AstPointerDeclarator ParsePointerType();

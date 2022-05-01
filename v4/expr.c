@@ -93,11 +93,6 @@ AstExpression ParseExpression(){
 // todo 这个函数难理解。
 AstExpression ParseBinaryExpr(int prec){
 	LOG("%s\n", "parse BinaryExpr");
-//	ParseExpression();
-//	// todo 如何处理binary_op？
-//	ParseBinaryOp();
-//	ParseExpression();
-	// #define HIGHEST_BIN_PREC Prec[TK_MUL - TK_CONDITIONAL_OR]	
 	// OP_MUL是优先级最高的二元运算符号。
 	#define HIGHEST_BIN_PREC Prec[OP_MUL]	
 
@@ -107,36 +102,20 @@ AstExpression ParseBinaryExpr(int prec){
 	CREATE_AST_NODE(binExpr, Expression);
 	CREATE_AST_NODE(expr, Expression);
 
-	//dump_token_number();	
-
 	if(prec == HIGHEST_BIN_PREC){
 		expr = ParseUnaryExpr();
 	}else{
-	//	binExpr->op = BINARY_OP;
-	//	binExpr->kids[0] = expr;
-	//	NEXT_TOKEN;
-	//	binExpr->kids[1] = ParseBinaryExpr(prec + 1);
-	//	expr = binExpr;
 		expr = ParseBinaryExpr(prec + 1);
-//		ParseBinaryExpr(prec + 1);
 	}
 
 	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){
-//		AstExpression binExpr;
-//		AstExpression expr;
-
-//		CREATE_AST_NODE(binExpr, Expression);
-//		CREATE_AST_NODE(expr, Expression);
-
 		NEXT_TOKEN;
 		if(prec == HIGHEST_BIN_PREC){
 			expr = ParseUnaryExpr();
 		}else{
 			binExpr->op = BINARY_OP;
 			binExpr->kids[0] = expr;
-//			NEXT_TOKEN;
 			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
-		//	ParseBinaryExpr(prec + 1);
 			expr = binExpr;
 		}
 	}
@@ -148,23 +127,6 @@ AstExpression ParseBinaryExpr(int prec){
  * unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
  */
 AstExpression ParseUnaryExpr(){
-	//dump_token_number();	
-
-//	LOG("%s\n", "parse UnaryExpr");
-//	AstExpression expr;	
-//	CREATE_AST_NODE(expr, Expression);
-//	// if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
-//	// TODO IsUnaryOp 需要重构。有可能根本就不正确。
-//	// if(IsUnaryOp() == 1){
-//	char flag = 0;
-//	if(flag == 1){
-//		expr->op = UNARY_OP;
-//		NEXT_TOKEN;
-//		expr->kids[0] = ParseUnaryExpr();
-//	}else{
-//		expr = ParsePrimaryExpr();
-//	}
-
 	LOG("%s\n", "parse UnaryExpr");
 	AstExpression expr;	
 	CREATE_AST_NODE(expr, Expression);
@@ -756,7 +718,8 @@ AstExpression ParseOperandName(){
 	}else if(type == 2){
 		ParseQualifiedIdent();
 	}else{
-		expect_token(TK_ID);
+//		expect_token(TK_ID);
+		ERROR("ParseOperandName错误\n", "");
 	}
 
 	return expr;

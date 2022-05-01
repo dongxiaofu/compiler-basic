@@ -50,6 +50,8 @@ enum nodeKind
 	NK_StructDeclarator,    NK_PointerDeclarator,  NK_ArrayDeclarator,		
 	NK_FunctionDeclarator,  NK_ParameterTypeList,  NK_ParameterDeclaration,
 	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,
+
+	NK_QualifiedIdent,
 	
 	NK_Node,	
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
@@ -69,7 +71,7 @@ enum nodeKind
 
 //	NK_SelectCaseStatement, NK_ExprSwitchStmt,
 	NK_ExprCaseClause,
-	NK_TypeSwitchGuard, NK_TypeCaseClause, NK_TypeSwitchStmt,
+	NK_TypeSwitchGuard, NK_TypeCaseClause,
 
 	NK_FunctionLit, NK_Block, NK_LabeledStmt,
 	
@@ -83,7 +85,7 @@ enum nodeKind
 
 
 	NK_ExpressionStatement,	// 没用到 
-	NK_SelectCaseStatement, NK_ExprSwitchStmt,
+	NK_SelectCaseStatement, NK_ExprSwitchStmt, NK_TypeSwitchStmt,
 	NK_IfStatement,        NK_SwitchStatement,		
     NK_ForStmt,		
 	NK_GotoStatement,       NK_BreakStmt,     NK_ContinueStatement,		
@@ -229,6 +231,13 @@ typedef struct astNode
 {
 	AST_NODE_COMMON
 } *AstNode;
+
+typedef struct astQualifiedIdent
+{
+	AST_NODE_COMMON
+	char *packageName;
+	char *identifier;
+} *AstQualifiedIdent;
 
 typedef struct astToken
 {

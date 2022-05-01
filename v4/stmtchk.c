@@ -8,6 +8,7 @@
 
 AstStatement (*StmtCheckers[])(AstStatement) = {
 	CheckExprSwitchStmt,
+	CheckTypeSwitchStmt,
 	CheckSelectCaseStatement,
 	CheckIfStatement,
 	CheckSwitchStatement,
@@ -38,6 +39,53 @@ AstStatement CheckStatement(AstStatement stmt)
 
 AstStatement CheckExprSwitchStmt(AstStatement stmt)
 {
+	AstExprSwitchStmt switchStmt = AsExprSwitchStmt(stmt);
+	if(switchStmt->simpleStmt){
+		switchStmt->simpleStmt = CheckSimpleStmt(switchStmt->simpleStmt);
+	}
+
+	if(switchStmt->expr){
+		switchStmt->expr = CheckExpression(switchStmt->expr);
+	}
+
+	AstExprCaseClause caseClause = switchStmt->exprCaseClause;
+	while(caseClause){
+		AstExpression expr = caseClause->exprSwitchCase;	
+		caseClause->exprSwitchCase = CheckExpressionList(expr);
+		
+		AstStatement statement = caseClause->statementList;	
+		while(statement){
+			CheckStatement(statement);
+			statement = statement->next;
+		}
+		caseClause = caseClause->next;
+	}
+
+	return stmt;
+}
+
+AstStatement CheckTypeSwitchStmt(AstStatement stmt)
+{
+	AstTypeSwitchStmt switchStmt = AsTypeSwitchStmt(stmt);
+	if(switchStmt->simpleStmt){
+		switchStmt->simpleStmt = CheckSimpleStmt(switchStmt->simpleStmt);
+	}
+
+	// TODO 检查guard，待实现。
+	switchStmt->guard = switchStmt->guard;	
+
+	// 检查AstTypeCaseClause typeCaseClause
+	AstTypeCaseClause typeCaseClause = switchStmt->typeCaseClause;
+	while(typeCaseClause){
+		// TODO typeSwitchCase，不检查。我不知道是否要对数据类型做语义分析。
+		// AstStatement statementList
+		AstStatement statement = typeCaseClause->statementList;
+		while(statement){
+			CheckStatement(statement);	
+			statement = statement->next;
+		}
+		typeCaseClause = typeCaseClause->next;
+	}
 
 	return stmt;
 }
@@ -71,8 +119,16 @@ AstStatement CheckIfStatement(AstStatement stmt)
 
 AstStatement CheckSwitchStatement(AstStatement stmt)
 {
+	AstSwitchStatement switchStmt = AsSwitchStmt(stmt);
+	if(switchStmt->expr){
+		switchStmt->expr = CheckStatement((AstStatement)switchStmt->expr);
+	}
 
-return stmt;
+	if(switchStmt->type){
+		switchStmt->type = CheckStatement((AstStatement)switchStmt->type);
+	}
+
+	return stmt;
 }
 
 AstForClause CheckForClause(AstForClause forClause)
