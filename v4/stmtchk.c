@@ -92,8 +92,20 @@ AstStatement CheckTypeSwitchStmt(AstStatement stmt)
 
 AstStatement CheckSelectCaseStatement(AstStatement stmt)
 {
+	AstSelectCaseStatement selectCaseStmt = AsSwitch(stmt);
+	if(selectCaseStmt->caseStmt){
+		selectCaseStmt->caseStmt = CheckStatement(selectCaseStmt->caseStmt);	
+	}
+	AstStatement stmts = selectCaseStmt->stmt;
+	AstStatement oneStmt = stmts;
+	while(oneStmt){
+		CheckStatement(oneStmt);
+		oneStmt = oneStmt->next;
+	}
+	// TODO 这个赋值并不是必须的。
+	selectCaseStmt->stmt = stmts;
 
-return stmt;
+	return stmt;
 }
 
 AstStatement CheckIfStatement(AstStatement stmt)
@@ -327,13 +339,9 @@ AstStatement CheckSelectStmt(AstStatement stmt)
 	AstSelectStmt selectStmt = AsSelect(stmt);
 	AstSelectCaseStatement selectCaseStmt = selectStmt->stmt;	
 	while(selectCaseStmt){
-		if(selectCaseStmt->caseStmt){
-			selectCaseStmt->caseStmt = CheckStatement(selectCaseStmt->caseStmt);	
-		}
-		selectCaseStmt->stmt = CheckStatement(selectCaseStmt->stmt); 
-
+		CheckSelectCaseStatement(selectCaseStmt);
 		selectCaseStmt = selectCaseStmt->next;
-	}
+	}	
 	// TODO 我认为，这里的赋值不是必须的。因为CheckStatement并不会修改参数的值，只会修改
 	// 参数指向的内存空间中的数据。但为了形式上统一或未来某种未知的需要，还是写上赋值。
 	selectStmt->stmt = selectCaseStmt;
