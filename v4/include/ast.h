@@ -6,6 +6,14 @@
 // TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
 
+
+// TODO 表达式的op
+enum EXPR_OP
+{
+	// TODO 不能使用OP_DOT，和其他同名OP_DOT冲突。
+	EOP_DOT, EOP_MEMBER, EOP_CALL, EOP_METHOD, EOP_TYPE_ASSERT, EOP_SLICE, EOP_INDEX
+};
+
 struct mblock
 {
 	struct mblock *next;
@@ -52,6 +60,8 @@ enum nodeKind
 	NK_NameDeclarator,      NK_InitDeclarator,     NK_Initializer,
 
 	NK_QualifiedIdent,
+
+	NK_SliceMeta,
 	
 	NK_Node,	
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
@@ -213,7 +223,7 @@ struct astExpression
 {
 	AST_NODE_COMMON
 	Type ty;
-	int op : 16;
+	enum EXPR_OP op : 16;
 	int isarray : 1;
 	int isfunc  : 1;
 	int lvalue  : 1;
@@ -226,6 +236,14 @@ struct astExpression
 };
 
 typedef struct astExpression      *AstExpression;
+
+typedef struct astSliceMeta
+{
+	AST_NODE_COMMON
+	AstExpression start;
+	AstExpression len;
+	AstExpression cap;
+} *AstSliceMeta;
 
 typedef struct astNode
 {

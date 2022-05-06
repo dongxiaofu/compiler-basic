@@ -30,9 +30,10 @@ AstExpression ParseMethodExpr();
 
 AstNode ParseConversion();
 int IsPostfix(TokenKind kind);
-AstNode ParseSelectorTypeAssertion();
+void ParseSelectorTypeAssertion(AstExpression expr);
 AstNode ParseArguments();
 AstNode ParseIndexSlice();
+AstExpression ParseDotExpr();
 AstExpression ParsePrimaryExpr();
 
 // todo 这些运算符的解析函数是否应该存在？

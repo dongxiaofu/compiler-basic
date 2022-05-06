@@ -7,9 +7,11 @@
 //    TK_STRUCT,   TK_ID,	TK_VAR,	TK_TYPE, TK_FUNC
 // fisrt token of an expression
 // 第二行是一元运算符，unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
+// 第三行是(T).Mv(t, 7)。测试中偶然发现的。
 #define FIRST_EXPRESSION                                                          \
     TK_ID,	TK_STRING, TK_NUM,	\
-	TK_ADD,	TK_MINUS,	TK_NOT,	TK_BINARY_BITWISE_XOR,	TK_MUL,	TK_BITWISE_AND,	TK_RECEIVE		
+	TK_ADD,	TK_MINUS,	TK_NOT,	TK_BINARY_BITWISE_XOR,	TK_MUL,	TK_BITWISE_AND,	TK_RECEIVE,	\
+	TK_LPARENTHESES	
 	
 // first token of statement
 #define FIRST_STATEMENT                                                                   \

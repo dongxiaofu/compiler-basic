@@ -529,7 +529,7 @@ Token *ScanToken(){
 int ScanStrintLiterals(){
 	get_next_char();
 	char temp[512];
-	//memset(temp, 0, 512);
+	memset(temp, 0, 512);
 	int len = -1;
 
 //	while(current_char != TK_DOUBLE_QUOTATION_MARK){

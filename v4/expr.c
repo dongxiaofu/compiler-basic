@@ -55,17 +55,6 @@ unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
  */
 AstExpression ParseExpression(){
 	LOG("%s\n", "parse Expression");
-//	ParseUnaryExpr() || ParseBinaryExpr();
-//	if(TK_POSITIVE <= current_token.kind && current_token.kind <= TK_RECEIVE){
-//	if(IsUnaryOp() == 1){
-//		ParseUnaryExpr();
-//	}else{
-//		Token pre_token = current_token;
-//		
-//
-//		ParseBinaryExpr();
-//
-//	}
 	AstExpression expr;
 //	CREATE_AST_NODE(expr, Expression);
 	// expr = ParseBinaryExpr(4);
@@ -79,13 +68,6 @@ AstExpression ParseExpression(){
 		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
 //		expr = ParseBinaryExpr(5);
 	}
-
-//	 if(CurrentTokenIn(FIRST_Expression) == 1){
-//		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
-//	}else{
-//		expr = ParseUnaryExpr();
-//	}
-//	expr = ParseBinaryExpr(4);
 
 	return expr;
 }
@@ -170,22 +152,17 @@ int IsPostfix(TokenKind kind){
  * Selector       = "." identifier .
  * TypeAssertion  = "." "(" Type ")" .
  */
-AstNode ParseSelectorTypeAssertion(){
+void ParseSelectorTypeAssertion(AstExpression expr){
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
 		NEXT_TOKEN;
-		ParseType();
-	//	ExpectDataType();
+		expr->op = EOP_TYPE_ASSERT;
+		expr->kids[1] = ParseType();
 		expect_token(TK_RPARENTHESES);
 	}else{
-	//	expect_token(TK_ID);
-		ParseIdentifier();
+		expr->op = EOP_DOT;
+		expr->kids[1] = ParseIdentifier();
 	}
-
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-
-	return node;
 }
 
 /**
@@ -287,34 +264,36 @@ Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
  */
 AstNode ParseIndexSlice(){
 	NEXT_TOKEN;
-
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	AstNode node = NULL;
 
 	if(current_token.kind != TK_COLON){
-		ParseExpression();
+		node = (AstNode)ParseExpression();
 	}
 
 	if(current_token.kind == TK_RBRACKET){
 		NEXT_TOKEN;
 		return node;
 	}
+
+	AstSliceMeta meta;
+	CREATE_AST_NODE(meta, SliceMeta);
+	meta->start = (AstExpression)node;
 
 	EXPECT(TK_COLON);
 
 	if(current_token.kind == TK_RBRACKET){
 		NEXT_TOKEN;
-		return node;
+		return (AstNode)meta;
 	}
 	
-	ParseExpression();
+	meta->len = ParseExpression();
 	if(current_token.kind == TK_COLON){
 		EXPECT(TK_COLON);
-		ParseExpression();
+		meta->cap = ParseExpression();
 	}
 	EXPECT(TK_RBRACKET);
 
-	return node;
+	return (AstNode)meta;
 }
 
 // /**
@@ -370,6 +349,21 @@ AstNode ParseIndexSlice(){
 // 	}
 // }
 
+
+AstExpression ParseDotExpr()
+{
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	
+	expr->op = EOP_DOT;
+	expr->kids[0] = ParseIdentifier();
+	EXPECT(TK_DOT);
+	expr->kids[1] = ParseIdentifier();
+
+	return expr;
+}
+
+
 /**
  * PrimaryExpr =
 	Operand |
@@ -391,25 +385,20 @@ Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." 
 AstExpression ParsePrimaryExpr(){
 	LOG("%s\n", "parse PrimaryExpr");
 
-//	//dump_token_number();	
-
 	AstExpression expr;	
 	CREATE_AST_NODE(expr, Expression);
 	if(IsDataType(current_token.value.value_str) == 1){
 		ParseConversion();
 	}else{
-//		NEXT_TOKEN;
 		// todo 解析 Operand、MethodExpr。目前，只解析Operand。
 		// 区分Operand和MethodExpr。
-		// 1：MethodExpr；0：Oprand。
+		// 2:点号连接起来的表达式；1：MethodExpr；0：Oprand。
 		unsigned char type = 0;
 		StartPeekToken();
 		if(current_token.kind == TK_ID){
-//			ParseTypeName();
-//			ParseOperandName();
-			ParseBasicType();
+			NEXT_TOKEN;
 			if(current_token.kind == TK_DOT){
-				type = 1;
+				type = 2;
 			}
 		}else if(current_token.kind == TK_LPARENTHESES){
 			NEXT_TOKEN;
@@ -441,30 +430,45 @@ AstExpression ParsePrimaryExpr(){
 		EndPeekToken();
 		if(type == 1){
 			expr = ParseMethodExpr();
-		}else{
+		}else if(type == 0){
 			expr = ParseOperand();
+		}else if(type == 2){
+			expr = ParseDotExpr();
 		}
 	}
 
 	// TODO 不理解这里的逻辑，参考ucc的ParsePostfixExpression函数写的。
 	while(1){
+		AstExpression p;
+		CREATE_AST_NODE(p, Expression);
+		p->kids[0] = expr;
+
 		switch(current_token.kind){
 			case TK_DOT:
-				ParseSelectorTypeAssertion();
+				ParseSelectorTypeAssertion(p);
+				expr = p;
 				break; 
 			case TK_LPARENTHESES:
-				ParseArguments();
+				p->op = EOP_CALL;
+				p->kids[1] = ParseArguments();
+				expr = p;
 				break; 
 			case TK_LBRACKET:
-				ParseIndexSlice();
-				break; 
+				{
+					AstNode node = ParseIndexSlice();
+					if(node->kind == NK_SliceMeta){
+						p->op = EOP_SLICE;
+					}else{
+						p->op = EOP_INDEX;
+					}
+					p->kids[1] = (AstExpression)node;
+					expr = p;
+				}
+				break;
 			default:
-//				break;
 				return expr;
 		}		
 	}
-
-//	return expr;
 }
 
 AstNode ParseBinaryOp(){
