@@ -6,14 +6,6 @@
 // TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
 
-
-// TODO 表达式的op
-enum EXPR_OP
-{
-	// TODO 不能使用OP_DOT，和其他同名OP_DOT冲突。
-	EOP_DOT, EOP_MEMBER, EOP_CALL, EOP_METHOD, EOP_TYPE_ASSERT, EOP_SLICE, EOP_INDEX
-};
-
 struct mblock
 {
 	struct mblock *next;
@@ -223,7 +215,7 @@ struct astExpression
 {
 	AST_NODE_COMMON
 	Type ty;
-	enum EXPR_OP op : 16;
+	int op : 16;
 	int isarray : 1;
 	int isfunc  : 1;
 	int lvalue  : 1;

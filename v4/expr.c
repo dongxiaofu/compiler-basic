@@ -156,11 +156,11 @@ void ParseSelectorTypeAssertion(AstExpression expr){
 	NEXT_TOKEN;
 	if(current_token.kind == TK_LPARENTHESES){
 		NEXT_TOKEN;
-		expr->op = EOP_TYPE_ASSERT;
+		expr->op = OP_TYPE_ASSERT;
 		expr->kids[1] = ParseType();
 		expect_token(TK_RPARENTHESES);
 	}else{
-		expr->op = EOP_DOT;
+		expr->op = OP_DOT;
 		expr->kids[1] = ParseIdentifier();
 	}
 }
@@ -355,7 +355,7 @@ AstExpression ParseDotExpr()
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	
-	expr->op = EOP_DOT;
+	expr->op = OP_DOT;
 	expr->kids[0] = ParseIdentifier();
 	EXPECT(TK_DOT);
 	expr->kids[1] = ParseIdentifier();
@@ -449,7 +449,7 @@ AstExpression ParsePrimaryExpr(){
 				expr = p;
 				break; 
 			case TK_LPARENTHESES:
-				p->op = EOP_CALL;
+				p->op = OP_CALL;
 				p->kids[1] = ParseArguments();
 				expr = p;
 				break; 
@@ -457,9 +457,9 @@ AstExpression ParsePrimaryExpr(){
 				{
 					AstNode node = ParseIndexSlice();
 					if(node->kind == NK_SliceMeta){
-						p->op = EOP_SLICE;
+						p->op = OP_SLICE;
 					}else{
-						p->op = EOP_INDEX;
+						p->op = OP_INDEX;
 					}
 					p->kids[1] = (AstExpression)node;
 					expr = p;
@@ -575,6 +575,8 @@ AstExpression ParseOperand(){
 	
 		expr = ParseOperandName();
 	}else if(current_token.kind == TK_LPARENTHESES ){
+		// TODO 需要给这种expr设置独立的op吗？
+		// 不知道。搁置吧。
 		EXPECT(TK_LPARENTHESES);
 		expr = ParseExpression();
 		EXPECT(TK_RPARENTHESES);
@@ -611,7 +613,7 @@ AstExpression ParseBasicLit(){
 		// TODO 这是不正确的。临时这样做。
 		// TODO 临时这样做。
 		expr->ty = T(INT);
-		expr->op = OP_NONE;
+		expr->op = OP_NOT;
 		union value v = {current_token.value.value_num,0};
 		expr->val = v;
 		NEXT_TOKEN;
@@ -676,9 +678,11 @@ AstExpression ParseLiteral(){
 	// 当然，这是在本函数中，是有具体上下文的。
 
 	if(current_token.kind == TK_FUNC){
-		expr = ParseFunctionLit();
+		expr->kids[0] = ParseFunctionLit();
+		expr->op = OP_FUNC_LIT;
 	}else if(IsCompositeLit() == 1){
-		expr = ParseCompositeLit(); 
+		expr->kids[0] = ParseCompositeLit(); 
+		expr->op = OP_COMPOSITELIT;
 	}else{
 		expr = ParseBasicLit();
 	}
@@ -716,13 +720,12 @@ AstExpression ParseOperandName(){
 		}
  		expr->op = OP_ID;
  		expr->val.p = (void *)MALLOC(sizeof(char) * MAX_NAME_LEN);
- //		strcpy((char *)(expr->val.p), expr->val.p);
 		strcpy((char *)(expr->val.p), expr1->val.p);
 		return expr;
 	}else if(type == 2){
-		ParseQualifiedIdent();
+		expr->kids[0] = ParseQualifiedIdent();
+		expr->op = OP_PACKAGE;
 	}else{
-//		expect_token(TK_ID);
 		ERROR("ParseOperandName错误\n", "");
 	}
 

@@ -56,6 +56,21 @@ OPINFO(OP_DOT,          17,   "nop",    NOP,          NOP)
 
 OPINFO(OP_CONST,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_STR,          17,   "nop",    NOP,          NOP)
+
+OPINFO(OP_COMPOSITELIT,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_FUNC_LIT,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+
+
+OPINFO(OP_MEMBER,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_CALL,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_METHOD,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_TYPE_ASSERT,          17,   "nop",    NOP,          NOP)
+// OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+// OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+// OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+// OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+
 // 新加的运算符。不知道放到哪里合适，先放在这里。end
 
 OPINFO(OP_NONE,          17,   "nop",    Error,          NOP)
