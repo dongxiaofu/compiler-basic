@@ -15,7 +15,7 @@ const (
 	Thursday
 	Friday
 	Partyday
-	numberOfDays  // this constant is not exported
+	numberOfDays
 )
 
 func main(){

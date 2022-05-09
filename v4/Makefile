@@ -17,7 +17,7 @@ SCANNER = cgc
 #OBJS	= cgc.o decl.o lex.o expr.o
 #OBJS	= cgc.o decl.o lex.o expr.o input.o
 OBJS	= cgc.o decl.o lex.o expr.o input.o type2.o stmt.o packages.o declchk.o \
-			symbol.o stmtchk.o
+			symbol.o stmtchk.o exprchk.o
 #OBJS	= stmt.o lex.o expr.o decl.o
 #OBJS	= lex.o
 
@@ -48,6 +48,8 @@ lex.o:lex.c
 #	#${CC} ${CFLAGS} -c -o $@ $<
 #	${CC} ${CFLAGS} -c stmt.c
 #
+exprchk.o:exprchk.c
+	${CC} ${CFLAGS} -c -o $@ $<
 symbol.o:symbol.c
 	${CC} ${CFLAGS} -c -o $@ $<
 declchk.o:declchk.c
