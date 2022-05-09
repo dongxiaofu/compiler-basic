@@ -22,7 +22,8 @@ TOKEN(TK_CHAN,"chan")
 // todo 这个符号应该存在吗？
 // TOKEN(TK_SEND_RECEIVE, "<-")
 // todo 这两个token需要特别注意。
-TOKEN(TK_POINTER,"pointer")
+// TOKEN(TK_POINTER,"pointer")
+TOKEN(TK_POINTER,"")
 TOKEN(TK_ARRAY,"Array")
 
 TOKEN(TK_BREAK,"break")

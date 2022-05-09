@@ -126,7 +126,7 @@ AstLabelStmt ParseLabelStatement(){
 AstStatement ParseSimpleStatement(){
 	AstStatement stmt;
 
-	int type = -1;		// EmptyStmt
+	int type = -2;		// EmptyStmt
 	if(current_token.kind == TK_BREAK){
 //		goto start;
 	}
@@ -193,7 +193,7 @@ start:
 	}else if(type == 6){
 		stmt = (AstStatement)ParseStatement();
 	}else{
-		CREATE_AST_NODE(stmt, EmptyStmt);
+		NEXT_TOKEN;
 	}
 
 	expect_semicolon;

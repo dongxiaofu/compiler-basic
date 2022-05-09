@@ -4,6 +4,40 @@
 #include "decl.h"
 #include "expr.h"
 
+int IsTypeName(char *id)
+{
+	char **table = tnames.table;
+	int index = tnames.index;
+	int len = tnames.index;
+	for(int i = 0; i < len; i++){
+		if(strcmp(id, table[i]) == 0){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void AddTypeName(char *id)
+{
+	int index = tnames.index;
+	tnames.table[index++] = id;
+	tnames.index = index;
+}
+
+void PreCheckTypeName(AstDeclaration decl)
+{
+	if(decl->kind != NK_TypeDeclaration)	return;
+	AstTypeDeclarator next = (AstTypeDeclarator)((AstTypeDeclaration)decl)->decs;
+	while(next){
+		if(next->kind != NK_TypeDeclarator) continue;
+		char *id = ((AstInitDeclarator)((AstTypeDeclarator)next)->initDecs)->dec->id;
+		AddTypeName(id);
+		next = (AstTypeDeclarator)next->next;
+	}
+}
+
+// TODO 要把FunctionLit从Type中排除。目前，可能还没有做这项工作。
 int isTypeKeyWord(TokenKind kind){
 	StartPeekToken();
 	if(kind == TK_LBRACKET){
@@ -127,6 +161,7 @@ AstNode ParseTypeLit(){
 		NEXT_TOKEN;
 		kind = current_token.kind;
 		EndPeekToken();
+		// TODO 有问题吗？slice是这样判断吗？
 		if(kind == TK_RBRACKET){
 			// todo 耗时两三个小时才找出这个低级错误。
 			// kind == TK_SLICE;

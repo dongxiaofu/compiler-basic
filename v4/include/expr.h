@@ -23,15 +23,16 @@ AstFunctionLit ParseFunctionLit();
 AstExpression ParseOperandName();
 AstExpression ParseIntLit();
 AstExpression ParseBasicLit();
+int IsSwitch();
 unsigned char IsCompositeLit();
 AstExpression ParseLiteral();
 AstExpression ParseOperand();
 AstExpression ParseMethodExpr();
 
-AstNode ParseConversion();
+AstExpression ParseConversion();
 int IsPostfix(TokenKind kind);
 void ParseSelectorTypeAssertion(AstExpression expr);
-AstNode ParseArguments();
+AstArguments ParseArguments();
 AstNode ParseIndexSlice();
 AstExpression ParseDotExpr();
 AstExpression ParsePrimaryExpr();

@@ -32,8 +32,16 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 AstStatement CheckStatement(AstStatement stmt)
 {
 	if(stmt == NULL){
+		printf("empty stmt\n");
 		return NULL;
 	}
+
+	if(stmt->kind - NK_SelectCaseStatement < 0 || stmt->kind - NK_SelectCaseStatement >= 20){
+		printf("1stmt->kind = %d\n", stmt->kind);
+		return NULL;
+	}
+	
+	printf("stmt index = %d\n", stmt->kind - NK_SelectCaseStatement);
 	return (*StmtCheckers[stmt->kind - NK_SelectCaseStatement])(stmt);
 }
 

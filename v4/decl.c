@@ -270,6 +270,8 @@ int IsDataType(char *str){
 		}
 	}
 
+	if(IsTypeName(str) == 1) return 1;
+
 	return 0;
 }
 
@@ -298,13 +300,11 @@ AstVarDeclaration ParseVarDecl(){
 		headDeclaration->next = NULL;
 		NEXT_TOKEN;
 		while(current_token.kind != TK_RPARENTHESES){
-			// CREATE_AST_NODE(curDeclaration, Declaration);
 			// todo 耗费了很多很多时间才处理好。
 			curDeclaration = ParseVarSpec();
 			if(headDeclaration->next == NULL){
 				headDeclaration->next = (AstNode)curDeclaration;
 			}
-//			CREATE_AST_NODE(preDeclaration, Declaration);
 			if(preDeclaration == NULL){
 				preDeclaration = curDeclaration;
 			}else{
@@ -318,8 +318,6 @@ AstVarDeclaration ParseVarDecl(){
 		expect_token(TK_SEMICOLON);
 		declaration->decs = (AstVarDeclarator)headDeclaration->next;
 	}else{
-//		CREATE_AST_NODE(curDeclaration, Declaration);
-//		curDeclaration = ParseVarSpec();
 		declaration->decs = ParseVarSpec();
 		// TODO 不能确定所有的声明后面都加上了分号。
 		expect_semicolon;	
@@ -339,7 +337,6 @@ AstVarDeclarator ParseVarSpec(){
 	AstExpression expr2;
 	CREATE_AST_NODE(expr2, Expression); 
 	AstExpression decl = ParseIdentifierList();
-	// expr2 = ParseExpressionList();
 
 	AstNode type;
 	CREATE_AST_NODE(type, Node); 
@@ -349,9 +346,6 @@ AstVarDeclarator ParseVarSpec(){
 		expr = ParseExpressionList();
 	}else{
 		// 跳过Type
-		// NEXT_TOKEN;
-	//	AstNode type;
-	//	CREATE_AST_NODE(type, Node); 
 		type = ParseType();
 		if(current_token.kind == TK_ASSIGN){
 			NEXT_TOKEN;
@@ -376,30 +370,20 @@ AstVarDeclarator ParseVarSpec(){
 
 	AstExpression exprCur = expr;
 	AstExpression expr2Cur = decl;
-	// AstDeclaration expr2Cur = decl;
-	// AstDeclarator expr2Cur = decl;
-	// while(exprCur != NULL){
 	while(expr2Cur != NULL){
 		NO_TOKEN;
-		// initDecsCur->dec->id = exprCur->val;	
-		// initDecsCur->dec->id = exprCur->val;	
 		AstDeclarator dec;
 		CREATE_AST_NODE(dec, Declarator);
 		dec->id = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 		strcpy(dec->id, expr2Cur->val.p);
-		// strcpy(dec->id, expr2Cur->id);
 		initDecsCur->dec = dec;
 
 		AstInitializer init;
 		if(exprCur){
-		// AstInitializer init;
 			CREATE_AST_NODE(init, Initializer);
 			AstExpression expr;
 			CREATE_AST_NODE(expr, Expression);
 			memcpy(expr, exprCur, sizeof(*expr));
-//			if(expr->op == OP_STR){
-//				expr->val.i[0] = exprCur->val.i[0];
-//			}
 			init->expr = expr;
 			// TODO exprCur一直存储着在ParseCompositeLit中设置的kind吗？
 			if(exprCur->kind == NK_CompositeLit){
@@ -436,13 +420,8 @@ TypeSpec = AliasDecl | TypeDef .
 AliasDecl = identifier "=" Type .
 TypeDef = identifier Type .
  */
-// AstDeclaration ParseTypeSpec(){
 AstTypeDeclarator ParseTypeSpec(){
 	LOG("%s\n", "parse TypeSpec");
-//	AstExpression expr;
-//	CREATE_AST_NODE(expr, Expression); 
-//	// expr = ParseExpressionList();
-//	expr = ParseExpression();
 
 	AstExpression expr = ParseIdentifier();
 
@@ -456,6 +435,7 @@ AstTypeDeclarator ParseTypeSpec(){
 	}else{
 //		type = ParseType();
 	}
+
 	type = ParseType();
 
 	AstTypeDeclarator decl;
@@ -472,12 +452,15 @@ AstTypeDeclarator ParseTypeSpec(){
 
 	AstSpecifiers specs;
 	CREATE_AST_NODE(specs, Specifiers);
+	AstToken token = (AstToken)MALLOC(sizeof(struct astToken)); 
+	token->token = TK_TYPE;
+	specs->stgClasses = (AstNode)token;
 	specs->tySpecs = type;
 
 	decl->specs = specs; 
 	decl->initDecs = initDecs; 
 
-	return dec;
+	return decl;
 }
 
 /**

@@ -81,7 +81,8 @@ Token get_token()
 //	printf("get token\n");
 //	Token token;
 //	token.kind = TK_NAN;
-	Token token;
+	Token *tokenPtr = (Token *)MALLOC(sizeof(Token));
+	Token token = *tokenPtr;
 	//memset(&token, 0, sizeof(token));
 	if(current_char == -1){
 		get_next_char();
@@ -179,9 +180,6 @@ try_again:
 	}	
 
 	current_token = token;
-
-	//dump_token(token);
-
 	return token;
 }
 

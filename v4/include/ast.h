@@ -54,6 +54,7 @@ enum nodeKind
 	NK_QualifiedIdent,
 
 	NK_SliceMeta,
+	NK_Arguments,
 	
 	NK_Node,	
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
@@ -266,6 +267,14 @@ typedef struct astSpecifiers
 {
 	SPECIFIERS_COMMON
 } *AstSpecifiers;
+
+typedef struct astArguments
+{
+	AST_NODE_COMMON
+	AstSpecifiers type;
+	AstExpression args;
+	int hasEllipsis;
+} *AstArguments;
 
 typedef struct astPointerDeclarator{
 	AST_DECLARATOR_COMMON

@@ -11,7 +11,8 @@
 #define FIRST_EXPRESSION                                                          \
     TK_ID,	TK_STRING, TK_NUM,	\
 	TK_ADD,	TK_MINUS,	TK_NOT,	TK_BINARY_BITWISE_XOR,	TK_MUL,	TK_BITWISE_AND,	TK_RECEIVE,	\
-	TK_LPARENTHESES	
+	TK_LPARENTHESES,	\
+	TK_STRING
 	
 // first token of statement
 #define FIRST_STATEMENT                                                                   \

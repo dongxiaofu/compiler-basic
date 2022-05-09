@@ -32,6 +32,20 @@ enum LITERAL_TYPE{
 	ARRAY, SLICE, STRUCT, MAP, ELEMENT, NAME 
 };
 
+#define TYPE_NAME_TABLE_SIZE 100
+
+typedef struct typeNameTable{
+	char *table[TYPE_NAME_TABLE_SIZE];
+	int index;
+} TypeNameTable;
+
+TypeNameTable tnames;
+
+int IsTypeName(char *id);
+void AddTypeName(char *id);
+void PreCheckTypeName(AstDeclaration decl);
+
+
 void SetupTypeSystem();
 
 // 获取数据类型的种类，例如数组、结构体等。

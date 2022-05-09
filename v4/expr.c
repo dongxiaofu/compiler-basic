@@ -132,13 +132,19 @@ AstExpression ParseUnaryExpr(){
 }
 
 // Conversion = Type "(" Expression [ "," ] ")" .
-AstNode ParseConversion(){
-	// NEXT_TOKEN;
-	ParseType();
+AstExpression ParseConversion(){
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr->op = OP_CONVERSION;
+
+	expr->kids[0] = (AstExpression)ParseType();
+
 	expect_token(TK_LPARENTHESES);
-	ParseExpression();
+	expr->kids[1] = ParseExpression();
 	expect_comma;
 	expect_token(TK_RPARENTHESES);
+
+	return expr;
 }
 
 // todo 暂时不处理后缀表达式。
@@ -171,39 +177,50 @@ void ParseSelectorTypeAssertion(AstExpression expr){
  * (abc, def)
  * (uint abc, def,name)
  * (uint abc, def,name) ...
+ *
+ *
+ * func Greeting(prefix string, who ...string)
+Greeting("nobody")
+Greeting("hello:", "Joe", "Anna", "Eileen")
+
+s := []string{"James", "Jasmine"}
+Greeting("goodbye:", s...)
  */
-AstNode ParseArguments(){
+AstArguments ParseArguments(){
 	expect_token(TK_LPARENTHESES);
 
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
+	AstArguments args;
+	CREATE_AST_NODE(args, Arguments);
 
 	if(current_token.kind == TK_ELLIPSIS){
+		args->hasEllipsis = 1;
 		NEXT_TOKEN;
 	}
 
 	if(current_token.kind == TK_COMMA){
 		NEXT_TOKEN;
-		return node;
+		return args;
 	}
 
 	// TODO 这段代码可以简化。 
 	if(CurrentTokenIn(FIRST_Expression) == 1){
-		ParseExpressionList();
+		args->args = ParseExpressionList();
 	}else{
-		if(TK_RPARENTHESES){
+		// TK_RPARENTHESES 是 )
+		if(current_token.kind == TK_RPARENTHESES){
 			NEXT_TOKEN;
-			return node;
+			return args;
 		}
-		ParseType();
+		args->type = (AstSpecifiers)ParseType();
 		if(current_token.kind == TK_COMMA){
 			NEXT_TOKEN;
-			ParseExpressionList();
+			args->args = ParseExpressionList();
 		}
 	}
 
 	if(current_token.kind == TK_ELLIPSIS){
 		NEXT_TOKEN;
+		args->hasEllipsis = 1;
 	}
 
 	if(current_token.kind == TK_COMMA){
@@ -212,7 +229,7 @@ AstNode ParseArguments(){
 
 	expect_token(TK_RPARENTHESES);
 	
-	return node;
+	return args;
 }
 
 // /**
@@ -352,14 +369,7 @@ AstNode ParseIndexSlice(){
 
 AstExpression ParseDotExpr()
 {
-	AstExpression expr;
-	CREATE_AST_NODE(expr, Expression);
-	
-	expr->op = OP_DOT;
-	expr->kids[0] = ParseIdentifier();
-	EXPECT(TK_DOT);
-	expr->kids[1] = ParseIdentifier();
-
+	AstExpression expr = ParseIdentifier();
 	return expr;
 }
 
@@ -387,54 +397,76 @@ AstExpression ParsePrimaryExpr(){
 
 	AstExpression expr;	
 	CREATE_AST_NODE(expr, Expression);
-	if(IsDataType(current_token.value.value_str) == 1){
-		ParseConversion();
+	// todo 解析 Operand、MethodExpr。目前，只解析Operand。
+	// 区分Operand和MethodExpr。
+	// 2:点号连接起来的表达式；1：MethodExpr；0：Oprand。
+	unsigned char type = 0;
+	StartPeekToken();
+	if(isTypeKeyWord(current_token.kind) == 1 || IsDataType(current_token.value.value_str) == 1){
+		ParseType();
+		// TODO 其实可以不必这么写。这样写，逻辑更清晰。
+		if(current_token.kind == TK_LBRACE){
+			type = 0;	
+		}else if(current_token.kind == TK_LPARENTHESES){
+			type = 3;
+		}else if(current_token.kind == TK_DOT){
+			type = 1;
+		}
 	}else{
-		// todo 解析 Operand、MethodExpr。目前，只解析Operand。
-		// 区分Operand和MethodExpr。
-		// 2:点号连接起来的表达式；1：MethodExpr；0：Oprand。
-		unsigned char type = 0;
-		StartPeekToken();
 		if(current_token.kind == TK_ID){
 			NEXT_TOKEN;
-			if(current_token.kind == TK_DOT){
+			if(current_token.kind == TK_LPARENTHESES){
+				NEXT_TOKEN;
+				if(CurrentTokenIn(FIRST_Expression) == 1){
+					ParseExpression();
+					expect_comma;
+					if(current_token.kind == TK_LPARENTHESES){
+						type = 3;
+					}else if(CurrentTokenIn(FIRST_Expression) == 1){
+						type = 0;
+					}
+				}else{
+					type = 0;
+				}
+			}else if(current_token.kind == TK_LBRACE){
+				type = 0;
+			}else if(current_token.kind == TK_DOT){
 				type = 2;
 			}
 		}else if(current_token.kind == TK_LPARENTHESES){
 			NEXT_TOKEN;
 			if(CurrentTokenIn(FIRST_Expression) == 0){
-				type = 1;
+//				"(" Expression ")"
+				type = 0;
 			}
 		}else if(current_token.kind == TK_FUNC){
 			NEXT_TOKEN;
 			ParseParameters();
 			ParseResult();		
-			if(current_token.kind != TK_LBRACE){
+			if(current_token.kind == TK_LBRACE){
+				type = 0;
+			}else{
 				type = 1;
 			}
 		}else if(current_token.kind == TK_STRING){
 			// do nothing
-		
 		}else if(current_token.kind == TK_ELLIPSIS){
 			// do nothing
-		}else if(isTypeKeyWord(current_token.kind) == 1){
-			ParseType();
-			// TODO 其实可以不必这么写。这样写，逻辑更清晰。
-			if(current_token.kind == TK_LBRACE){
-				type = 0;	
-			}else{
-				type = 1;
-			}
+		}else if(current_token.kind == TK_NUM){
+			type = 0;
 		}
+	}
 
-		EndPeekToken();
-		if(type == 1){
-			expr = ParseMethodExpr();
-		}else if(type == 0){
-			expr = ParseOperand();
-		}else if(type == 2){
-			expr = ParseDotExpr();
-		}
+	EndPeekToken();
+
+	if(type == 1){
+		expr = ParseMethodExpr();
+	}else if(type == 0){
+		expr = ParseOperand();
+	}else if(type == 2){
+		expr = ParseDotExpr();
+	}else if(type == 3){
+		expr = ParseConversion();
 	}
 
 	// TODO 不理解这里的逻辑，参考ucc的ParsePostfixExpression函数写的。
@@ -549,7 +581,6 @@ BasicLit    = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
 OperandName = identifier | QualifiedIdent .
  */
 AstExpression ParseOperand(){
-	// dump_token_number();	
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 
@@ -563,17 +594,21 @@ AstExpression ParseOperand(){
             }
      */
 	if(current_token.kind == TK_ID){
-
-		// TODO 这里，暂时不能要。需要进行语义分析才能解析上面的dData例程。暂时注释。
-//		StartPeekToken();
-//		expr = ParseOperandName();
-//		if(current_token.kind == TK_LBRACE){
-//			EndPeekToken();
-//			goto literal;
-//		}
-//		EndPeekToken();
-	
+		char *str = (char *)current_token.value.value_str;	
+		if(IsTypeName(str) == 1) goto literal;
 		expr = ParseOperandName();
+//		if(IsSwitch() == 1){
+//			expr = ParseOperandName();
+//		}else{
+//			StartPeekToken();
+//			NEXT_TOKEN;
+//			if(current_token.kind == TK_LBRACE){
+//				EndPeekToken();
+//				goto literal;
+//			}
+//			EndPeekToken();
+//			expr = ParseOperandName();
+//		}
 	}else if(current_token.kind == TK_LPARENTHESES ){
 		// TODO 需要给这种expr设置独立的op吗？
 		// 不知道。搁置吧。
@@ -628,6 +663,22 @@ AstExpression ParseBasicLit(){
 	return expr;
 }
 
+int IsSwitch(){
+	int result = 0;
+	StartPeekToken();
+	EXPECT(TK_ID);
+	if(current_token.kind == TK_LBRACE){
+		NEXT_TOKEN;
+		if(current_token.kind == TK_CASE){
+			result = 1;
+		}
+	}
+
+	EndPeekToken();
+
+	return result;
+}
+
 // 不用写注释吧？
 unsigned char IsCompositeLit(){
 	if(current_token.kind == TK_STRING){
@@ -644,6 +695,16 @@ unsigned char IsCompositeLit(){
 	}
 
 	if(current_token.kind == TK_ID){
+		StartPeekToken();
+		EXPECT(TK_ID);
+		if(current_token.kind == TK_LBRACE){
+			EXPECT(TK_LBRACE);
+			if(current_token.kind == TK_CASE){
+				EndPeekToken();
+				return 0;
+			}
+		}
+		EndPeekToken();
 		return 1;
 	}
 
@@ -884,15 +945,14 @@ ReceiverType  = Type .
 MethodName         = identifier .
  */
 AstExpression ParseMethodExpr(){
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	// TODO 想不到更好的op名称。
+	expr->op = OP_METHOD;
+	expr->kids[0] = (AstExpression)ParseType();
+	expr->kids[1] = ParseIdentifier();
 
-	ParseType();
-	EXPECT(TK_DOT);
-	ParseIdentifier();
-
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-
-	return node;
+	return expr;
 }
 
 // TODO 这个函数很复杂，工作量非常大，后期再处理。
