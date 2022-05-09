@@ -387,33 +387,10 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 	return stmt;
 }
 
-AstExpression CheckExpression(AstExpression expr)
-{
-
-	return expr;
-}
-
 AstStatement CheckSimpleStmt(AstStatement stmt)
 {
 
 	return stmt;
-}
-
-AstExpression CheckExpressionList(AstExpression expr)
-{
-	AstExpression current = expr;
-	while(current){
-		CheckExpression(current);
-		current = current->next;
-	}
-	return expr;
-}
-
-AstExpression CheckIdentifierList(AstExpression expr)
-{
-	CheckExpressionList(expr);
-
-	return expr;
 }
 
 void PushStatement(AstStatement stmt, StmtVector v)

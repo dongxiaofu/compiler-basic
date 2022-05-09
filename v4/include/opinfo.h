@@ -42,17 +42,17 @@ OPINFO(OP_NEG,6,"-",      Assignment,     NOP)
 OPINFO(OP_BITWISE_XOR,6,"^",      Assignment,     NOP)
 OPINFO(OP_DEREF,6,"*",      Assignment,     NOP)
 OPINFO(OP_NOT,6, "!",      Assignment,     NOP)
-OPINFO(OP_INC,7, "++",      Assignment,     NOP)
-OPINFO(OP_DEC,7, "--",      Assignment,     NOP)
+OPINFO(OP_INC,7, "++",      Postfix,     NOP)
+OPINFO(OP_DEC,7, "--",      Postfix,     NOP)
 // TODO 不知道优先级
 OPINFO(OP_RECEIVE,8, "<-",      Assignment,     NOP)
 
 // 新加的运算符。不知道放到哪里合适，先放在这里。start
-OPINFO(OP_INDEX,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_INDEX,          17,   "nop",    Postfix,          NOP)
 OPINFO(OP_ID,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_ARRAY,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_SLICE,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_DOT,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_DOT,          17,   "nop",    Postfix,          NOP)
 
 OPINFO(OP_CONST,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_STR,          17,   "nop",    NOP,          NOP)
@@ -62,9 +62,9 @@ OPINFO(OP_FUNC_LIT,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
 
 
-OPINFO(OP_MEMBER,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_CALL,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_METHOD,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_MEMBER,          17,   "nop",    Postfix,          NOP)
+OPINFO(OP_CALL,          17,   "nop",    Postfix,          NOP)
+OPINFO(OP_METHOD,          17,   "nop",    Postfix,          NOP)
 OPINFO(OP_TYPE_ASSERT,          17,   "nop",    NOP,          NOP)
 OPINFO(OP_CONVERSION,          17,   "nop",    NOP,          NOP)
 // OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
@@ -73,4 +73,4 @@ OPINFO(OP_CONVERSION,          17,   "nop",    NOP,          NOP)
 
 // 新加的运算符。不知道放到哪里合适，先放在这里。end
 
-OPINFO(OP_NONE,          17,   "nop",    Error,          NOP)
+OPINFO(OP_NONE,          17,   "nop",    Assignment,          NOP)

@@ -8,7 +8,6 @@
 #include "expr.h"
 
 // TODO 暂时放在这里。
-AstExpression CheckExpression(AstExpression expr);
 AstExpression CheckExpressionList(AstExpression expr);
 AstExpression CheckIdentifierList(AstExpression expr);
 AstExpression CheckDeferExpr(AstExpression expr);
