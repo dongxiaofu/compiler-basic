@@ -391,12 +391,34 @@ AstKeyedElement LookupElement(AstKeyedElement element, char *name)
 	return NULL;
 }
 
+// ArrayType ArrayOf(Type ty, int length)
+// {
+// 	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
+// 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
+// 	aty->length = specs->expr->val.i[0];
+// 	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
+// 	aty->bty = ((AstSpecifiers)specs->type)->ty;	
+// 
+// 	return aty;
+// }
+
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
 {
+//	AstSpecifiers ty = (AstSpecifiers)specs;
+//	while(ty && ty->kind == NK_ArrayTypeSpecifier){
+//		ty = (AstArrayTypeSpecifier)ty;
+//		AstExpression length = ty->expr;	
+//		
+//		ty = ty->type;
+//	}
+
 	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
-	aty->length = specs->expr->val.i[0];
+	int length = specs->expr->val.i[0];
+	aty->length = length;
 	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
+	int size = ((AstSpecifiers)(specs->type))->ty->size;
+	aty->size = size * length;
 	aty->bty = ((AstSpecifiers)specs->type)->ty;	
 
 	return aty;

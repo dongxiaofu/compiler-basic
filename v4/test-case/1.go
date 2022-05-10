@@ -1,6 +1,12 @@
 package main
 
 import "unsafe"
+
+func test(){
+	var  arr[5][7]int
+	arr[3][4] = 4
+}
+
 type Point3D struct{
 	y int
 	z int

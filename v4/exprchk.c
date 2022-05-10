@@ -21,9 +21,17 @@ AstExpression CheckAssignmentExpression(AstExpression expr)
 }
 static AstExpression CheckPostfixExpression(AstExpression expr)
 {
-	AstExpression expr2;
-	return expr2;
+	switch(expr->op){
+		case OP_INDEX:
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			expr->kids[1] = CheckExpression(expr->kids[1]);
+			break;
+		default:
+			break;
+	}
 
+
+	return expr;
 }
 
 // TODO 占位符，暂时无作用。
