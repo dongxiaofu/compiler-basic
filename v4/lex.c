@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "input.h"
+#include "ast.h"
 #include "lex.h"
 
 int main2(int argc, char *argv[])

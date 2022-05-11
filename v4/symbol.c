@@ -23,8 +23,7 @@ void InitSymbolTable()
 
 Symbol AddSymbol(Table tbl, Symbol sym)
 {
-	// int h = (unsigned long)sym->name & SYM_HASH_MASK;
-	unsigned int h = (unsigned long)sym->name & SYM_HASH_MASK;
+	unsigned int h = SymbolHash(sym->name);
 	if(tbl->buckets == NULL){
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
@@ -94,15 +93,30 @@ char * GetSymbolKind(int kind)
 
 }
 
+unsigned int SymbolHash(char *name)
+{
+	// int h = (unsigned long)name & SYM_HASH_MASK;
+//	unsigned int h = (unsigned long)name & SYM_HASH_MASK;
+	unsigned int h = 0;
+	char *p = name;
+	while(*p){
+		h += *p;
+		p++;
+	}
+	h = h  & SYM_HASH_MASK;
+
+	return h;
+}
+
 Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 {
 	do{
-		// int h = (unsigned long)name & SYM_HASH_MASK;
-		unsigned int h = (unsigned long)name & SYM_HASH_MASK;
+		unsigned int h = SymbolHash(name);
 		if(tbl->buckets != NULL){
 			BucketLinker linker;
 			for(linker = (BucketLinker)tbl->buckets[h]; linker; linker = linker->link){
-				if(name == linker->sym->name){
+				// if(name == linker->sym->name){
+				if(strcmp(name,linker->sym->name) == 0){
 					return (Symbol)linker->sym;
 				}
 			}	
@@ -112,13 +126,11 @@ Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
 	return NULL;
 }
 
-VariableSymbol AddVariable(char *name)
+VariableSymbol AddVariable(char *name, Type *ty)
 {
-	// int size = sizeof(VariableSymbol);
 	int size = sizeof(struct variableSymbol);
 	VariableSymbol p = (VariableSymbol)MALLOC(size);	
-	// //memset(p, 0, sizeof(struct variableSymbol));
-	//memset(p, 0, size);
+	p->ty = ty;
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
 //	p->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);	
 //	//memset(p->name, 0, MAX_NAME_LEN);

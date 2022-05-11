@@ -11,6 +11,7 @@
 // #include "grammer.h"
 
 void EndRecord(RecordType rty);
+Field LookupField(char *fieldName, char *structName);
 Field AddField(RecordType rty, char *id, Type ty);
 RecordType StartRecord();
 

@@ -25,6 +25,8 @@ TOKEN(TK_CHAN,"chan")
 // TOKEN(TK_POINTER,"pointer")
 TOKEN(TK_POINTER,"")
 TOKEN(TK_ARRAY,"Array")
+TOKEN(TK_TYPE_NAME, "")
+TOKEN(TK_BASIC, "Basic")
 
 TOKEN(TK_BREAK,"break")
 TOKEN(TK_DEFAULT,"default")

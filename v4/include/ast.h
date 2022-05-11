@@ -5,6 +5,12 @@
 #include "grammer.h"
 // TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
+//
+// 打印日志
+// #define LOG	printf
+#define LOG	
+#define ERROR(fmt, msg)	printf(fmt, msg);\
+					exit(-2);
 
 struct mblock
 {
@@ -151,6 +157,7 @@ typedef struct astDeclarator
     int categ : 8;  \
     int qual  : 8;  \
     int align : 16; \
+	int isarray;	\
     int size;       \
     struct type *bty;
 	

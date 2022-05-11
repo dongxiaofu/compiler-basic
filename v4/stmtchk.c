@@ -296,7 +296,7 @@ AstStatement CheckCompoundStatement(AstStatement stmt)
 
 	if(compoundStmt->stmts){
 		AstStatement stmt = (AstStatement)compoundStmt->stmts;	
-		compoundStmt->stmts = CheckSimpleStmt(stmt);
+		compoundStmt->stmts = CheckStatement(stmt);
 	}
 
 	return stmt;

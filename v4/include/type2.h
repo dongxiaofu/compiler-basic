@@ -13,8 +13,12 @@
 
 // TODO 暂时这样。
 enum{
-	VOID, BYTE, INT
+	BYTE, INT, POINTER, VOID, ARRAY, STRUCT,
+	FUNCTION
 };
+
+#define IsObjectPtr(ty)		(ty->categ == POINTER && ty->bty->categ != FUNCTION)
+#define IsIntegType(ty)		(BYTE <= ty->categ <= INT)
 
 // TODO 定义数据类型的长度，单位是字节还是位？
 #define BYTE_SIZE 1
@@ -22,29 +26,37 @@ enum{
 
 // Type Types[INT - VOID + 1];
 // static struct type Types[INT - VOID + 1];
-struct type Types[INT - VOID + 1];
+struct type Types[FUNCTION - BYTE + 1];
 
 // #define T(categ)	Types[VOID + categ]
 // #define T(categ)	Types + categ
 #define T(categ)	(Types + categ)
 
 enum LITERAL_TYPE{
-	ARRAY, SLICE, STRUCT, MAP, ELEMENT, NAME 
+	EARRAY, ESLICE, ESTRUCT, EMAP, EELEMENT, ENAME 
 };
 
 #define TYPE_NAME_TABLE_SIZE 100
 
+typedef struct typeName{
+	char *id;
+	AstSpecifiers type; 
+} TypeName;
+
 typedef struct typeNameTable{
-	char *table[TYPE_NAME_TABLE_SIZE];
+	TypeName *table[TYPE_NAME_TABLE_SIZE];
 	int index;
 } TypeNameTable;
 
 TypeNameTable tnames;
 
-int IsTypeName(char *id);
-void AddTypeName(char *id);
-void PreCheckTypeName(AstDeclaration decl);
+Type PointerTo(Type ty);
+ArrayType ArrayOf(Type ty, int len);
 
+TypeName *LookupTypeName(char *id);
+int IsTypeName(char *id);
+void AddTypeName(char *id, AstSpecifiers type);
+void PreCheckTypeName(AstDeclaration decl);
 
 void SetupTypeSystem();
 
@@ -60,6 +72,7 @@ AstMethodSpec ParseMethodSpec();
 AstNode ParseBasicType();
 AstNode ParseTypeLit();
 AstQualifiedIdent ParseQualifiedIdent();
+// AstSpecifiers ParseTypeNameType(char *typeName);
 AstArrayTypeSpecifier ParseArrayType();
 AstStructSpecifier ParseStructType();
 AstPointerDeclarator ParsePointerType();
@@ -68,6 +81,7 @@ AstInterfaceDeclaration ParseInterfaceType();
 AstSliceType ParseSliceType();
 AstMapSpecifier ParseMapType();
 AstChannelType ParseChannelType();
+AstSpecifiers ParseTypeNameType(char *typeName);
 
 AstVariableElementType ParseVariableElementType();
 AstNode ParseLiteralType();

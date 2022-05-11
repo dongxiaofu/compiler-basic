@@ -4,13 +4,50 @@
 #include "decl.h"
 #include "expr.h"
 
-int IsTypeName(char *id)
+Type PointerTo(Type ty)
 {
-	char **table = tnames.table;
-	int index = tnames.index;
+	Type pty = (Type *)MALLOC(sizeof(Type));
+	pty->categ = POINTER;
+	pty->size = T(POINTER)->size;
+	pty->bty = ty;
+
+	return pty;
+}
+
+ArrayType ArrayOf(Type ty, int len)
+{
+	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
+	aty->categ = ARRAY;
+	aty->length = len;
+	int size = ty->size; 
+	aty->size = size * len;
+	aty->bty = ty;
+
+	return aty;
+}
+
+TypeName *LookupTypeName(char *id)
+{
+	TypeName *target = NULL;
+	TypeName **table = tnames.table;
 	int len = tnames.index;
 	for(int i = 0; i < len; i++){
-		if(strcmp(id, table[i]) == 0){
+		TypeName *tname = table[i];
+		if(strcmp(id, tname->id) == 0){
+			return tname;
+		}
+	}
+
+	return target;	
+}
+
+int IsTypeName(char *id)
+{
+	TypeName **table = tnames.table;
+	int len = tnames.index;
+	for(int i = 0; i < len; i++){
+		TypeName *tname = table[i];
+		if(strcmp(id, tname->id) == 0){
 			return 1;
 		}
 	}
@@ -18,10 +55,13 @@ int IsTypeName(char *id)
 	return 0;
 }
 
-void AddTypeName(char *id)
+void AddTypeName(char *id, AstSpecifiers type)
 {
 	int index = tnames.index;
-	tnames.table[index++] = id;
+	TypeName *tname = (TypeName *)MALLOC(sizeof(TypeName));
+	tname->id = id;
+	tname->type = type;
+	tnames.table[index++] = tname;
 	tnames.index = index;
 }
 
@@ -32,7 +72,8 @@ void PreCheckTypeName(AstDeclaration decl)
 	while(next){
 		if(next->kind != NK_TypeDeclarator) continue;
 		char *id = ((AstInitDeclarator)((AstTypeDeclarator)next)->initDecs)->dec->id;
-		AddTypeName(id);
+		AstSpecifiers type = (AstSpecifiers)(next->specs->tySpecs);
+		AddTypeName(id, type);
 		next = (AstTypeDeclarator)next->next;
 	}
 }
@@ -81,11 +122,11 @@ AstNode ParseType(){
 		expect_token(TK_LPARENTHESES);
 		ParseType();
 		expect_token(TK_RPARENTHESES);
+	}else if(isTypeKeyWord(kind) == 1 || IsDataType(current_token.value.value_str)){
+		return ParseTypeLit();
 	}else if(kind == TK_ID){	// todo 不仅TK_ID应该在这里解析，TK_INT等golang内置数据类型也应该在这里解析。 
 		node = (AstNode)ParseBasicType();
 		return node;
-	}else if(isTypeKeyWord(kind) == 1){
-		return ParseTypeLit();
 	}else{
 		ERROR("ParseType 错误\n", "");
 	}
@@ -98,6 +139,13 @@ AstNode ParseType(){
 // AstTypedefName ParseTypeName(){
 // AstNode ParseTypeName(){
 AstNode ParseBasicType(){
+
+	// TODO 暂时这样做。
+	char *name = current_token.value.value_str;
+	if(IsTypeName(name) == 1){
+		return ParseTypeNameType(name);
+	}	
+
 //	expect_token(TK_ID);
 //	type：0--identifier，1--QualifiedIdent。
 	unsigned char type = 0;
@@ -173,10 +221,12 @@ AstNode ParseTypeLit(){
 		}
 		// EndPeekToken();
 		// todo 退回处理了的token，交给解析函数去处理。
+	}else if(kind == TK_ID){
+		kind = TK_BASIC;
 	}else{
-	//	kind = TK_ID;
+		kind = TK_TYPE_NAME;
 	}
-	// return (TypeListParsers[kind]());
+
 	return (TypeListParsers[kind - TK_FUNC]());
 }
 
@@ -514,20 +564,20 @@ int GetTypeKind(){
 
 	StartPeekToken();
 	if(current_token.kind == TK_STRUCT){
-		type = STRUCT;
+		type = ESTRUCT;
 	}else if(current_token.kind == TK_MAP){
-		type = MAP;
+		type = EMAP;
 	}else if(current_token.kind == TK_ID){
-		type = NAME;
+		type = ENAME;
 	}else if(current_token.kind == TK_LBRACKET){
 		NEXT_TOKEN;
 		if(current_token.kind == TK_RBRACKET){
-			type = SLICE;
+			type = ESLICE;
 		}else if(current_token.kind == TK_ELLIPSIS){
 			// TODO 需要判断第三个token吗？
-			type = ELEMENT;
+			type = EELEMENT;
 		}else{
-			type = ARRAY;
+			type = EARRAY;
 		}
 	}
 	
@@ -550,22 +600,22 @@ AstNode ParseLiteralType(){
 	// TODO 能这样使用enum吗？
 	enum LITERAL_TYPE type = GetTypeKind();	
 	switch(type){
-		case	ARRAY:
+		case	EARRAY:
 			node = ParseArrayType();
 			break;
-		case	SLICE:
+		case	ESLICE:
 			node = ParseSliceType();
 			break;
-		case	STRUCT:
+		case	ESTRUCT:
 			node = ParseStructType();
 			break;
-		case	MAP:
+		case	EMAP:
 			node = ParseMapType();
 			break;
-		case	NAME:
+		case	ENAME:
 			node = ParseBasicType();
 			break;
-		case	ELEMENT:
+		case	EELEMENT:
 			node = ParseVariableElementType(); 
 			break;
 		default:
@@ -627,4 +677,16 @@ void SetupTypeSystem(){
 //	T(INT)->size = 5;
  	T(BYTE)->size = BYTE_SIZE;	
  	T(INT)->size = INT_SIZE;
+}
+
+AstSpecifiers ParseTypeNameType(char *typeName)
+{
+	if(typeName == NULL)	return NULL;
+	TypeName *tname = LookupTypeName(typeName);	
+
+	if(tname == NULL)	return NULL;
+
+	NEXT_TOKEN;
+
+	return tname->type;
 }

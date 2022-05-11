@@ -65,6 +65,9 @@ int CheckBlock(AstBlock block)
 			// TODO 待完善
 			AstLabelStmt labeledStmt = compoundStmt->labeledStmt;
 			AstStatement simpleStmt = compoundStmt->stmts;	
+			if(simpleStmt){
+				compoundStmt->stmts = CheckStatement(simpleStmt);
+			}
 		}else{
 			stmt = CheckStatement(stmt);
 		}
@@ -169,7 +172,7 @@ void CheckDeclaration(AstDeclaration decls)
 				while(initDec){
 					AstDeclarator dec = initDec->dec;
 					if((sym = (VariableSymbol)LookupID(dec->id)) == NULL){
-						sym = AddVariable(dec->id);
+						sym = AddVariable(dec->id, declarator->specs->ty);
 					}	
 					// 变量的初始值
 					if(initDec->init){
@@ -196,7 +199,7 @@ void CheckDeclaration(AstDeclaration decls)
 
 void CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
-	Type ty;
+	Type ty = NULL;
 
 	if(specs->kind == NK_StructSpecifier){
 		// ty = CheckStructSpecifier((AstStructSpecifier)specs->tySpecs);
@@ -242,15 +245,42 @@ RecordType StartRecord()
 	return rty;
 }
 
+Field LookupField(char *fieldName, char *structName)
+{
+	Field fld = NULL;
+	Field target = NULL;
+
+	VariableSymbol sym = (VariableSymbol)LookupID(structName);
+	if(sym == NULL) return target;
+	RecordType rty = (RecordType)sym->ty;
+	fld = rty->flds;
+	char *id = NULL;
+	while(fld){
+		if(rty->categ == STRUCT){
+			target = LookupField(fieldName, fld->id);
+			if(target){
+				id = target->id;
+			}
+		}else{
+			id = fld->id;
+			target = fld;
+		}
+		if(strcmp(fieldName, id) == 0){
+			return target;
+		}
+		fld = fld->next;
+	}
+
+	return target;
+}
+
 Field AddField(RecordType rty, char *id, Type ty)
 {
 	int fldSize = sizeof(struct field);
 	Field fld = (Field)MALLOC(fldSize);
-	//memset(fld, 0, fldSize);
 
 	int idSize = sizeof(char) * MAX_NAME_LEN;
 	fld->id = (char *)MALLOC(idSize);
-	//memset(fld->id, 0, idSize);
 	strcpy(fld->id, id);
 
 	fld->ty = ty;
@@ -391,35 +421,13 @@ AstKeyedElement LookupElement(AstKeyedElement element, char *name)
 	return NULL;
 }
 
-// ArrayType ArrayOf(Type ty, int length)
-// {
-// 	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
-// 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
-// 	aty->length = specs->expr->val.i[0];
-// 	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
-// 	aty->bty = ((AstSpecifiers)specs->type)->ty;	
-// 
-// 	return aty;
-// }
-
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
 {
-//	AstSpecifiers ty = (AstSpecifiers)specs;
-//	while(ty && ty->kind == NK_ArrayTypeSpecifier){
-//		ty = (AstArrayTypeSpecifier)ty;
-//		AstExpression length = ty->expr;	
-//		
-//		ty = ty->type;
-//	}
-
-	ArrayType aty = (ArrayType)MALLOC(sizeof(struct arrayType));
 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
-	int length = specs->expr->val.i[0];
-	aty->length = length;
+	int len = specs->expr->val.i[0];
 	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
-	int size = ((AstSpecifiers)(specs->type))->ty->size;
-	aty->size = size * length;
-	aty->bty = ((AstSpecifiers)specs->type)->ty;	
+	Type bty = ((AstSpecifiers)specs->type)->ty;
+	ArrayType aty = ArrayOf(bty, len);
 
 	return aty;
 }

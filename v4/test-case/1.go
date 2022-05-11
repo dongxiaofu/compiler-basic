@@ -2,9 +2,15 @@ package main
 
 import "unsafe"
 
+type Books struct {
+   bookId int
+}
+
 func test(){
-	var  arr[5][7]int
-	arr[3][4] = 4
+	var book Books
+	book.bookId = 5
+
+	
 }
 
 type Point3D struct{

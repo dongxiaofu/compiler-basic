@@ -135,7 +135,7 @@ AstExpression ParseUnaryExpr(){
 AstExpression ParseConversion(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
-	expr->op = OP_CONVERSION;
+	expr->op = OP_CAST;
 
 	expr->kids[0] = (AstExpression)ParseType();
 
@@ -166,8 +166,10 @@ void ParseSelectorTypeAssertion(AstExpression expr){
 		expr->kids[1] = ParseType();
 		expect_token(TK_RPARENTHESES);
 	}else{
-		expr->op = OP_DOT;
-		expr->kids[1] = ParseIdentifier();
+		// TODO 会不会是type.method？
+		expr->op = OP_MEMBER;
+		AstExpression member = ParseIdentifier();
+		expr->val.p = member->val.p;
 	}
 }
 
@@ -644,11 +646,8 @@ AstExpression ParseBasicLit(){
 	AstExpression expr;
 	CREATE_AST_NODE(expr, Expression);
 	if(current_token.kind == TK_NUM){
-		// expr->op = OP_CONST;
-		// TODO 这是不正确的。临时这样做。
-		// TODO 临时这样做。
 		expr->ty = T(INT);
-		expr->op = OP_NOT;
+		expr->op = OP_CONST;
 		union value v = {current_token.value.value_num,0};
 		expr->val = v;
 		NEXT_TOKEN;

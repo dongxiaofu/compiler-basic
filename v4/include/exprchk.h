@@ -7,7 +7,17 @@
 #include "type2.h"
 #include "expr.h"
 
+
+AstExpression Constant(Type ty, union value val);
+AstExpression ScalePointerOffset(AstExpression offset, int scale);
+
+AstExpression CheckPrimaryExpression(AstExpression expr);
 AstExpression CheckAssignmentExpression(AstExpression expr);
+
+AstExpression CheckMemberAccess(AstExpression expr);
+AstExpression CheckTypeAssert(AstExpression expr);
+AstExpression CheckFunctionCall(AstExpression expr);
+
 static AstExpression CheckPostfixExpression(AstExpression expr);
 
 // TODO 占位符，暂时无作用。

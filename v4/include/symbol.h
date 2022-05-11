@@ -49,13 +49,15 @@
 // 	struct table *outer;
 // } *Table;
 
+unsigned int SymbolHash(char *name);
+
 void InitSymbolTable();
 Symbol AddSymbol(Table tbl, Symbol sym);
 Symbol LookupID(char *name);
 Symbol LookupSymbol(Table tbl, char *name);
 char * GetSymbolKind(int kind);
 Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter);
-VariableSymbol AddVariable(char *name);
+VariableSymbol AddVariable(char *name, Type *ty);
 FunctionSymbol AddFunction(char *funcName, Signature sig);
 
 #endif
