@@ -12,6 +12,8 @@
 #define ERROR(fmt, msg)	printf(fmt, msg);\
 					exit(-2);
 
+enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM};
+
 struct mblock
 {
 	struct mblock *next;
@@ -66,7 +68,7 @@ enum nodeKind
 	// todo 直接加一个元素有问题吗？有没有其他相互关联的地方需要增加对应的东西呢？
 	NK_Declarator,
 //	NK_FunctionDeclarator,NK_Function,NK_ParameterTypeList,
-	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceDeclaration,
+	NK_ArrayTypeSpecifier,NK_StructTypeSpecifier, NK_MethodSpec, NK_InterfaceSpecifier,
 	NK_SliceType, NK_MapSpecifier, NK_ChannelType, NK_VariableElementType,
 	NK_ImportSpec, NK_ImportDeclaration, NK_PackageClause, NK_SourceFile, 
 
@@ -207,6 +209,7 @@ typedef struct signatureElement{
 
 typedef struct signature
 {
+	SignatureElement receiver;
 	SignatureElement params[PARAM_LENGTH];
 	int paramSize;
 	SignatureElement results[PARAM_LENGTH];
@@ -356,6 +359,12 @@ typedef struct functionSymbol{
 	Symbol locals;
 } *FunctionSymbol;
 
+typedef struct methodSymbol{
+	SYMBOL_COMMON
+	char *interfaceName;
+	Type receiverType;
+} *MethodSymbol;
+
 typedef struct bucketLinker{
 	Symbol sym;
 	struct bucketLinker *link;
@@ -499,12 +508,24 @@ typedef struct astMethodSpec{
     AstParameterTypeList sig;
 } *AstMethodSpec;
 
-typedef struct astInterfaceDeclaration{
+typedef struct interfaceType{
+	TYPE_COMMON
+	AstMethodSpec methods;
+} *InterfaceType;
+
+typedef struct interfaceVariableSymbol{
+	SYMBOL_COMMON
+	InitData initData;	
+	AstMethodSpec currentMethod;
+} *InterfaceVariableSymbol;
+
+typedef struct astInterfaceSpecifier{
 	AST_NODE_COMMON
-	// TODO 这个成员没有作用。
-	AstSpecifiers specs;
 	AstNode interfaceDecs;
-} *AstInterfaceDeclaration;
+
+	// TODO 语义分析后使用。
+	AstMethodSpec method;
+} *AstInterfaceSpecifier;
 
 typedef struct astSliceType{
 	AST_NODE_COMMON
@@ -634,6 +655,9 @@ typedef struct astMethodDeclaration{
         // compound-statement
 		AstBlock	block;
         int hasReturn;
+//		FunctionSymbol fsym;
+		StmtVector breakable;
+		StmtVector loops;		
 } *AstMethodDeclaration;
 
 typedef struct astPackageClause{
@@ -670,6 +694,8 @@ typedef struct astTranslationUnit{
 // static AstFunction CURRENT;
 AstFunction CURRENT;
 FunctionSymbol FSYM;
+AstMethodDeclaration CURRENT_METHOD;
+MethodSymbol MSYM;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

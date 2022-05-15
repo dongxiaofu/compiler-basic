@@ -20,13 +20,10 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		if(p->kind == NK_Function){
 			printf("%s\n", "Check function");
 			CURRENT = (AstFunction)p;
-
 			CURRENT->loops = (StmtVector)MALLOC(sizeof(struct stmtVector));
-			//memset(CURRENT->loops, 0, sizeof(struct stmtVector));
 			CURRENT->loops->index = -1;
 
 			CURRENT->breakable = (StmtVector)MALLOC(sizeof(struct stmtVector));
-			//memset(CURRENT->breakable, 0, sizeof(struct stmtVector));
 			CURRENT->breakable->index = -1;
 
 			CheckFunction((AstFunction)p);
@@ -78,7 +75,7 @@ int CheckBlock(AstBlock block)
 		}
 	}
 
-	if(lastStmt->kind == NK_ReturnStatement){
+	if(lastStmt && lastStmt->kind == NK_ReturnStatement){
 		return 1;
 	}
 
@@ -88,12 +85,25 @@ int CheckBlock(AstBlock block)
 void CheckFunction(AstFunction p)
 {
 	FunctionSymbol fsym;
+	AstFunctionDeclarator fdec =  p->fdec;
 
-	AstFunctionDeclarator fdec = p->fdec;
 	Signature sig = (Signature)MALLOC(sizeof(struct signature));
-	//memset(sig, 0, sizeof(struct signature));
 	int paramIndex = sig->paramSize - 1;
 	int resultIndex = sig->resultSize - 1;
+
+	// TODO 只有接口方法才有receiver。receiver有且仅有一个，把它当成列表，目的是扩展。
+	AstParameterTypeList receiverTyList = fdec->receiver;
+	if(receiverTyList != NULL){
+		AstParameterDeclaration receiverDecls = receiverTyList->paramDecls;
+		AstParameterDeclaration receiverDecl = receiverDecls;
+		if(receiverDecl != NULL){
+			AstDeclarator dec = receiverDecl->dec;
+			SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
+			sigElement->id = dec->id;
+			sigElement->ty = receiverDecl->specs->ty;
+			sig->receiver = sigElement;
+		}
+	}
 
 	AstParameterTypeList paramTyList = fdec->paramTyList;
 	AstParameterDeclaration paramDecls = paramTyList->paramDecls;
@@ -102,7 +112,6 @@ void CheckFunction(AstFunction p)
 		CheckDeclarationSpecifiers(paramDecl->specs);
 		AstDeclarator dec = paramDecl->dec;
 		SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
-		//memset(sigElement, 0, sizeof(struct signatureElement));
 		sigElement->id = dec->id;
 		sigElement->ty = paramDecl->specs->ty;
 		sig->params[++paramIndex] = sigElement;
@@ -119,7 +128,6 @@ void CheckFunction(AstFunction p)
 		CheckDeclarationSpecifiers(resultParamDecl->specs);
 		AstDeclarator dec = resultParamDecl->dec;
 		SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
-		//memset(sigElement, 0, sizeof(struct signatureElement));
 		if(dec != NULL){
 			sigElement->id = dec->id;
 		}
@@ -131,12 +139,14 @@ void CheckFunction(AstFunction p)
 
 	sig->resultSize = resultIndex + 1;
 
-	AstDeclarator fname = (AstDeclarator)fdec->dec;
-	if((fsym == LookupID(fname->id)) == NULL){
+	if(fsym == LookupFunction(fdec) == NULL){
+		AstDeclarator fname = fdec->dec;
 		fsym = AddFunction(fname->id, sig);
 		FSYM = fsym;
+	}else{
+		ERROR("%s\n", "redefine function");
 	}	
-
+	
 	// 检查函数体
 	AstBlock block = p->block;
 	int hasReturn = CheckBlock(block);	
@@ -173,6 +183,9 @@ void CheckDeclaration(AstDeclaration decls)
 					AstDeclarator dec = initDec->dec;
 					if((sym = (VariableSymbol)LookupID(dec->id)) == NULL){
 						sym = AddVariable(dec->id, declarator->specs->ty);
+					}else{
+						// TODO 需要优化
+						ERROR("%s\n", "variable redefine");
 					}	
 					// 变量的初始值
 					if(initDec->init){
@@ -206,6 +219,8 @@ void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		ty = CheckStructSpecifier((AstStructSpecifier)specs);
 	}else if(specs->kind == NK_ArrayTypeSpecifier){
 		ty = CheckArraySpecifier((AstArrayTypeSpecifier)specs);
+	}else if(specs->kind == NK_InterfaceSpecifier){
+		ty = CheckInterfaceSpecifier((AstInterfaceSpecifier)specs);
 	}else{
 		ty = T(INT);
 	}
@@ -529,4 +544,30 @@ InitData CheckMapInitializer(AstCompositeLit compositeLit)
 	}	
 	
 	return head->next;
+}
+
+InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs)
+{
+	InterfaceType ity = (InterfaceType)MALLOC(sizeof(struct interfaceType));
+	ity->categ = INTERFACE;
+	AstMethodSpec methodTail = NULL;
+	AstMethodSpec currentMethod = NULL;
+	AstNode methods = specs->interfaceDecs;
+	AstNode oneMethod = methods;
+	while(oneMethod){
+		if(oneMethod->kind == NK_MethodSpec){
+			if(methods == NULL){
+				methodTail = oneMethod;
+				currentMethod = methodTail;
+			}else{
+				currentMethod->next = oneMethod;
+				currentMethod = oneMethod;
+			}	
+		}
+		oneMethod = oneMethod->next;
+	}
+
+	ity->methods = methods;
+
+	return ity;
 }

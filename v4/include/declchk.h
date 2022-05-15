@@ -18,7 +18,9 @@ RecordType StartRecord();
 RecordType CheckStructSpecifier(AstStructSpecifier specs);
 MapType CheckMapSpecifier(AstMapSpecifier specs);
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
+InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs);
 void CheckDeclarationSpecifiers(AstSpecifiers specs);
+
 
 AstKeyedElement LookupElement(AstKeyedElement element, char *name);
 CanAssign(Type ty, AstExpression val);
@@ -32,6 +34,8 @@ void CheckInitializer(AstInitializer init);
 void CheckDeclaration(AstDeclaration decls);
 void CheckLocalDeclaration(AstDeclaration decls);
 int CheckBlock(AstBlock block);
+// declchk.c:109:40: warning: 'enum SYMBOL_KIND' declared inside parameter list will not be visible outside of this definition or declaration
+// void CheckFunction(AstFunction p, enum SYMBOL_KIND kind);
 void CheckFunction(AstFunction p);
 void CheckTranslationUnit(AstTranslationUnit transUnit);
 void CheckGlobalDeclaration(AstDeclaration decl);

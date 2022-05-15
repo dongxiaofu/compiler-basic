@@ -1001,7 +1001,8 @@ ParameterList  = ParameterDecl { "," ParameterDecl } .
 ParameterDecl  = [ IdentifierList ] [ "..." ] Type .
  */
 // AstNode ParseMethodDecl(){
-AstMethodDeclaration ParseMethodDecl(){
+// AstMethodDeclaration ParseMethodDecl(){
+AstFunction ParseMethodDecl(){
 
 	NEXT_TOKEN;
 
@@ -1015,7 +1016,7 @@ AstMethodDeclaration ParseMethodDecl(){
 	paramTypeList2->paramDecls = params2;
 	dec->receiver = paramTypeList2;
 
-	AstNode functionName = ParseFunctionName();
+	dec->dec = ParseFunctionName();
 
 	AstParameterTypeList paramTypeList;
 	CREATE_AST_NODE(paramTypeList, ParameterTypeList);
@@ -1029,23 +1030,20 @@ AstMethodDeclaration ParseMethodDecl(){
 	signature->paramDecls = result;
 	dec->result = signature;
 		
-//	AstFunction func;
-//	CREATE_AST_NODE(func, Function);
-//	func->fdec = fdec;
-	// return (AstNode)func;
-	AstMethodDeclaration methodDeclaration;
-	CREATE_AST_NODE(methodDeclaration, MethodDeclaration);
-	methodDeclaration->fdec = dec;
+	AstFunction func;	
+	CREATE_AST_NODE(func, Function);
+	
+	func->fdec = dec;
 
 	// 处理FunctionBody
 	AstBlock block = ParseFunctionBody();
 
-	methodDeclaration->block = block;
+	func->block = block;
 
-	return methodDeclaration;
+	return func;
 }
 
-AstNode ParseMethodDeclOrFunctionDecl(){
+AstFunction ParseMethodDeclOrFunctionDecl(){
 	unsigned char type = 0;
 	StartPeekToken();	
 	NEXT_TOKEN;
@@ -1054,12 +1052,13 @@ AstNode ParseMethodDeclOrFunctionDecl(){
 	}
 	EndPeekToken();	
 	
-	AstNode node;
+	AstFunction node;
 
+	// TODO 找时间优化，能不能把下面的两个函数合并成一个函数。
 	if(type == 0){
-		node = (AstNode)ParseFunctionDecl();
+		node = ParseFunctionDecl();
 	}else{
-		node = (AstNode)ParseMethodDecl();
+		node = ParseMethodDecl();
 	}
 
 	return node;

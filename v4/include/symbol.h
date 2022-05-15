@@ -48,15 +48,18 @@
 // 	int level;
 // 	struct table *outer;
 // } *Table;
+// enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM};
 
 unsigned int SymbolHash(char *name);
 
 void InitSymbolTable();
-Symbol AddSymbol(Table tbl, Symbol sym);
+Symbol AddSymbol(Table tbl, Symbol sym, unsigned int hashKey);
+Symbol LookupMethodID(char *name, void *receiver);
 Symbol LookupID(char *name);
-Symbol LookupSymbol(Table tbl, char *name);
+Symbol LookupFunction(AstFunctionDeclarator fdec);
+Symbol LookupSymbol(Table tbl, char *name, void *receiver);
 char * GetSymbolKind(int kind);
-Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter);
+Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int searchOuter);
 VariableSymbol AddVariable(char *name, Type *ty);
 FunctionSymbol AddFunction(char *funcName, Signature sig);
 

@@ -2,35 +2,35 @@ package main
 
 import "unsafe"
 
+type Reader interface {
+  Read(p []byte) (n int)
+}
+
+type Closer interface {
+  Close() int
+}
+
+type ReadWriter interface {
+  Reader
+  Writer
+}
+
 type Books struct {
    bookId int
 }
 
-func test(){
-	var book Books
-	book.bookId = 5
-
+func (v Books)Close() (int,int) {
 	
+	var k int = 0
+	var k2 byte = 7
+	
+	return k, 5
 }
 
-type Point3D struct{
-	y int
-	z int
+func test(){
+
 }
 
-type Line struct{
-	x int
-	pos Point3D
-}
+func test2(){
 
-line := Line{45, Point3D{y: 4, z: 12}}
-
-type TreeNode struct {
-	left, right *TreeNode
-	value any
-}
-
-type TreeNode2 struct {
-	left, right *TreeNode
-	value any
 }

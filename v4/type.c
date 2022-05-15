@@ -405,11 +405,11 @@ MethodSpec         = MethodName Signature .
 MethodName         = identifier .
 InterfaceTypeName  = TypeName .
  */
-AstInterfaceDeclaration ParseInterfaceType(){
+AstInterfaceSpecifier ParseInterfaceType(){
 	expect_token(TK_INTERFACE);
 	expect_token(TK_LBRACE);
-	AstInterfaceDeclaration interfaceDeclaration;
-	CREATE_AST_NODE(interfaceDeclaration, InterfaceDeclaration);
+	AstInterfaceSpecifier interfaceDeclaration;
+	CREATE_AST_NODE(interfaceDeclaration, InterfaceSpecifier);
 
 	AstNode header;
 	CREATE_AST_NODE(header, Node);
@@ -418,7 +418,6 @@ AstInterfaceDeclaration ParseInterfaceType(){
 	while(current_token.kind != TK_RBRACE){
 		NO_TOKEN;
 		// todo 如何区分MethodSpec和InterfaceTypeName？
-		// todo 没有想到区分二者的方法，暂时只解析MethodSpec。
 		unsigned char type = 0;
 		StartPeekToken();
 		while(current_token.kind != TK_RBRACE){
@@ -434,7 +433,7 @@ AstInterfaceDeclaration ParseInterfaceType(){
 			AstMethodSpec methodSpec = ParseMethodSpec();
 			node = (AstNode)methodSpec;
 		}else{
-			node = ParseBasicType();
+			node = ParseInterfaceTypeName();
 		}
 		if(header->next == NULL){
 			currentNode = node;

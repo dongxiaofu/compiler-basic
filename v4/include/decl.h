@@ -51,8 +51,8 @@ AstNode ParseFunctionName();
 AstNode ParseSignature();
 AstBlock ParseFunctionBody();
 AstFunction ParseFunctionDecl();
-AstMethodDeclaration ParseMethodDecl();
-AstNode ParseMethodDeclOrFunctionDecl();
+AstFunction ParseMethodDecl();
+AstFunction ParseMethodDeclOrFunctionDecl();
 
 // todo 很奇怪，先后顺序可能会导致错误。
 FieldDecl ParseFieldDecl();

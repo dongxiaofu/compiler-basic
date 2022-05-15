@@ -13,7 +13,7 @@
 
 // TODO 暂时这样。
 enum{
-	BYTE, INT, POINTER, VOID, ARRAY, STRUCT,
+	BYTE, INT, POINTER, VOID, ARRAY, STRUCT, INTERFACE,
 	FUNCTION
 };
 
@@ -77,7 +77,7 @@ AstArrayTypeSpecifier ParseArrayType();
 AstStructSpecifier ParseStructType();
 AstPointerDeclarator ParsePointerType();
 AstFunctionDeclarator ParseFunctionType();
-AstInterfaceDeclaration ParseInterfaceType();
+AstInterfaceSpecifier ParseInterfaceType();
 AstSliceType ParseSliceType();
 AstMapSpecifier ParseMapType();
 AstChannelType ParseChannelType();

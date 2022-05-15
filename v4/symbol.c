@@ -7,23 +7,26 @@
 
 
 static struct table GlobalIDs;
+static struct table GlobalInterfaces;
 static struct table Constants;
 static Table Identifiers;
+static Table InterfaceIdentifiers;
 
 void InitSymbolTable()
 {
-	GlobalIDs.buckets = NULL;
-	GlobalIDs.outer = NULL;
-	GlobalIDs.level = 0;
+	GlobalInterfaces.buckets = GlobalIDs.buckets = NULL;
+	GlobalInterfaces.outer = GlobalIDs.outer = NULL;
+	GlobalInterfaces.level = GlobalIDs.level = 0;
 
+	
 	// 常量表比较复杂，没弄懂，搁置。
 
 	Identifiers = &GlobalIDs;
+	InterfaceIdentifiers = &GlobalInterfaces;
 }
 
-Symbol AddSymbol(Table tbl, Symbol sym)
+Symbol AddSymbol(Table tbl, Symbol sym, unsigned int hashKey)
 {
-	unsigned int h = SymbolHash(sym->name);
 	if(tbl->buckets == NULL){
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
 		// int size = sizeof(struct symbol) * (SYM_HASH_MASK + 1);
@@ -36,11 +39,10 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 	
 	int linkerSize = sizeof(BucketLinker);
 	BucketLinker linker = (BucketLinker)MALLOC(linkerSize);
-	//memset(linker, 0, linkerSize);
 	linker->sym = sym;
 
-	linker->link = (BucketLinker)tbl->buckets[h];
-	tbl->buckets[h] = (Symbol)linker;
+	linker->link = (BucketLinker)tbl->buckets[hashKey];
+	tbl->buckets[hashKey] = (Symbol)linker;
 
 	sym->level = tbl->level;
 
@@ -77,16 +79,43 @@ Symbol AddSymbol(Table tbl, Symbol sym)
 // 
 // 	return sym;
 // }
+Symbol LookupMethodID(char *name, void *receiver)
+{
+	return LookupSymbol(InterfaceIdentifiers, name, receiver);
+}
 
 Symbol LookupID(char *name)
 {
-	return LookupSymbol(Identifiers, name);
+	return LookupSymbol(Identifiers, name, NULL);
 }
 
-Symbol LookupSymbol(Table tbl, char *name)
+Symbol LookupFunction(AstFunctionDeclarator fdec)
 {
-	return DoLookupSymbol(tbl, name, SEARCH_OUTER_TABLE); 
+	Symbol sym = NULL;
+	char *id = fdec->dec->id;
+	if(fdec->receiver){
+		sym = LookupMethodID(id, (void *)(fdec->receiver));
+	}else{
+		sym = LookupID(id);
+	}
+
+	return sym;
 }
+
+Symbol LookupSymbol(Table tbl, char *name, void *receiver)
+{
+	unsigned int hashKey = 0;
+	if(receiver){
+		// TODO 找时间优化这里的代码。 	
+		unsigned int h1 = SymbolHash(name);
+		unsigned int h2 = (unsigned int)receiver & SYM_HASH_MASK;
+		hashKey = (h1 + h2) & SYM_HASH_MASK;
+	}else{
+		hashKey = SymbolHash(name);
+	}
+	return DoLookupSymbol(tbl, name, hashKey, SEARCH_OUTER_TABLE); 
+}
+
 
 char * GetSymbolKind(int kind)
 {
@@ -108,13 +137,12 @@ unsigned int SymbolHash(char *name)
 	return h;
 }
 
-Symbol DoLookupSymbol(Table tbl, char *name, int  searchOuter)
+Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int  searchOuter)
 {
 	do{
-		unsigned int h = SymbolHash(name);
 		if(tbl->buckets != NULL){
 			BucketLinker linker;
-			for(linker = (BucketLinker)tbl->buckets[h]; linker; linker = linker->link){
+			for(linker = (BucketLinker)tbl->buckets[hashKey]; linker; linker = linker->link){
 				// if(name == linker->sym->name){
 				if(strcmp(name,linker->sym->name) == 0){
 					return (Symbol)linker->sym;
@@ -138,7 +166,8 @@ VariableSymbol AddVariable(char *name, Type *ty)
 //	strcpy(p->name, name);
 	p->name = name;
 
-	p = (VariableSymbol)AddSymbol(Identifiers, (Symbol)p);
+	unsigned int hashKey = SymbolHash(name);
+	p = (VariableSymbol)AddSymbol(Identifiers, (Symbol)p, hashKey);
 
 	return p;
 }
@@ -146,13 +175,27 @@ VariableSymbol AddVariable(char *name, Type *ty)
 FunctionSymbol AddFunction(char *funcName, Signature sig)
 {
 	FunctionType fty = (FunctionType)MALLOC(sizeof(struct functionType));
-	//memset(fty, 0, sizeof(struct functionType));
 	fty->sig = sig;
+
 	FunctionSymbol fsym = (FunctionSymbol)MALLOC(sizeof(struct functionSymbol));
-	//memset(fsym, 0, sizeof(struct functionSymbol));
 	fsym->name = funcName;
 	fsym->ty = fty;
-	fsym = (FunctionSymbol)AddSymbol(Identifiers, (Symbol)fsym);
+
+	// 计算tbl和哈希键
+	unsigned int h = 0;
+	Table tbl = NULL;
+	if(sig->receiver){
+		// TODO 找时间优化这里的代码。 	
+		unsigned int h1 = SymbolHash(funcName);
+		unsigned int h2 = (unsigned int)(sig->receiver) & SYM_HASH_MASK;
+		h = (h1 + h2) & SYM_HASH_MASK;
+
+		tbl = InterfaceIdentifiers; 
+	}else{
+		h = SymbolHash(funcName);
+		tbl = Identifiers;
+	}
+	fsym = (FunctionSymbol)AddSymbol(tbl, (Symbol)fsym, h);
 
 	return fsym;
 }
