@@ -28,7 +28,7 @@ func (v Books)Close() (int,int) {
 }
 
 func test(){
-
+	var i Closer
 }
 
 func test2(){

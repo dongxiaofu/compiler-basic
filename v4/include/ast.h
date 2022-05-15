@@ -347,17 +347,19 @@ typedef struct symbol{
 	SYMBOL_COMMON
 } *Symbol;
 
-typedef struct variableSymbol{
-	SYMBOL_COMMON
-	InitData initData;	
-} *VariableSymbol;
-
 typedef struct functionSymbol{
 	SYMBOL_COMMON
 	Symbol params;
 	Symbol results;
 	Symbol locals;
 } *FunctionSymbol;
+
+typedef struct variableSymbol{
+	SYMBOL_COMMON
+	InitData initData;	
+	// 接口方法
+	FunctionSymbol interfaceMethod;
+} *VariableSymbol;
 
 typedef struct methodSymbol{
 	SYMBOL_COMMON
@@ -508,11 +510,6 @@ typedef struct astMethodSpec{
     AstParameterTypeList sig;
 } *AstMethodSpec;
 
-typedef struct interfaceType{
-	TYPE_COMMON
-	AstMethodSpec methods;
-} *InterfaceType;
-
 typedef struct interfaceVariableSymbol{
 	SYMBOL_COMMON
 	InitData initData;	
@@ -603,6 +600,33 @@ typedef struct astBlock{
 	AstStatement stmt;
 } *AstBlock;
 
+#define VECTOR_SIZE	100
+// TODO 语句容器
+typedef struct stmtVector{
+	AstStatement params[VECTOR_SIZE];
+	int index;
+} *StmtVector;
+
+typedef struct astFunction
+{
+        AST_NODE_COMMON
+        AstFunctionDeclarator fdec;
+        // compound-statement
+		AstBlock block;
+        int hasReturn;
+		FunctionSymbol fsym;
+
+		StmtVector breakable;
+		StmtVector loops;		
+} *AstFunction;
+
+typedef struct interfaceType{
+	TYPE_COMMON
+	AstFunction methodDecl;
+	AstFunction methodDeclTail;
+	AstMethodSpec methods;
+} *InterfaceType;
+
 typedef struct astFunctionLit{
 	AST_NODE_COMMON
 	AstFunctionDeclarator fdecl;
@@ -627,27 +651,6 @@ typedef struct astShortVarDecl{
 	AstExpression identifierList;
 	AstExpression expressionList;
 } *AstShortVarDecl;
-
-
-#define VECTOR_SIZE	100
-// TODO 语句容器
-typedef struct stmtVector{
-	AstStatement params[VECTOR_SIZE];
-	int index;
-} *StmtVector;
-
-typedef struct astFunction
-{
-        AST_NODE_COMMON
-        AstFunctionDeclarator fdec;
-        // compound-statement
-		AstBlock block;
-        int hasReturn;
-		FunctionSymbol fsym;
-
-		StmtVector breakable;
-		StmtVector loops;		
-} *AstFunction;
 
 typedef struct astMethodDeclaration{
         AST_NODE_COMMON
@@ -696,6 +699,11 @@ AstFunction CURRENT;
 FunctionSymbol FSYM;
 AstMethodDeclaration CURRENT_METHOD;
 MethodSymbol MSYM;
+
+static InterfaceType INTERFACE_LIST = NULL;
+InterfaceType INTERFACE_CURRENT;
+static AstFunction FUNCTION_LIST = NULL;
+AstFunction FUNCTION_CURRENT;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

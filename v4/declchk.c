@@ -37,6 +37,16 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 		p = p->next;
 	}
 
+	// 获取了所有接口和函数的信息，可以处理接口和函数的关系了。
+	AstFunction func = FUNCTION_LIST;
+	// TODO 时间复杂度极高，有办法优化吗？
+	while(func){
+		if(func->fdec->receiver != NULL && func->fdec->receiver->paramDecls != NULL){
+			AppendMethod(func);
+		}
+		func = func->next;
+	}
+
 	printf("%s\n", "End Check");
 }
 
@@ -146,7 +156,6 @@ void CheckFunction(AstFunction p)
 	}else{
 		ERROR("%s\n", "redefine function");
 	}	
-	
 	// 检查函数体
 	AstBlock block = p->block;
 	int hasReturn = CheckBlock(block);	
@@ -154,6 +163,14 @@ void CheckFunction(AstFunction p)
 	if(sig->resultSize > 0 && hasReturn == 0){
 		// TODO
 		ERROR("函数必须有返回值\n", "");
+	}
+
+	// 把所有的函数存储到一个单链表中。
+	if(FUNCTION_LIST == NULL){
+		FUNCTION_LIST = FUNCTION_CURRENT = p;
+	}else{
+		FUNCTION_CURRENT->next = p;
+		FUNCTION_CURRENT = p;
 	}
 }
 
@@ -221,6 +238,7 @@ void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		ty = CheckArraySpecifier((AstArrayTypeSpecifier)specs);
 	}else if(specs->kind == NK_InterfaceSpecifier){
 		ty = CheckInterfaceSpecifier((AstInterfaceSpecifier)specs);
+		AppendInterface(ty);
 	}else{
 		ty = T(INT);
 	}
@@ -556,7 +574,7 @@ InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs)
 	AstNode oneMethod = methods;
 	while(oneMethod){
 		if(oneMethod->kind == NK_MethodSpec){
-			if(methods == NULL){
+			if(methodTail == NULL){
 				methodTail = oneMethod;
 				currentMethod = methodTail;
 			}else{
@@ -567,7 +585,55 @@ InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs)
 		oneMethod = oneMethod->next;
 	}
 
-	ity->methods = methods;
+	ity->methods = methodTail;
 
 	return ity;
+}
+
+int CompareMethod(AstFunction func, AstMethodSpec method)
+{
+	// 比较 receiver、funcName、sig
+	return 1;
+}
+
+// TODO 为一个单链表花了几分钟时间，不应该。
+// 为啥纠结？这种创建单链表的方式和语法分析中常用的哪种方式似乎不同。
+void AppendInterface(InterfaceType ty)
+{
+	if(INTERFACE_LIST == NULL){
+		INTERFACE_LIST = ty;
+		INTERFACE_CURRENT = ty;
+	}else{
+		INTERFACE_CURRENT->next = ty;
+		INTERFACE_CURRENT = ty;
+	}
+}
+
+void AppendMethod(AstFunction func)
+{
+	InterfaceType ty = INTERFACE_LIST;
+	while(ty != NULL){
+		AstMethodSpec method = ty->methods;	
+		while(method != NULL){
+			if(CompareMethod(func, method) == 1){
+				// 加入当前接口类型的接口方法链表。
+				// TODO 不知道什么原因，func->next不是0。这会破坏新建的单链表。所以，把它设置成0。
+				// 不能这样做。在源代码的AST中，所有函数在一个单链表中。此处，只能重新创建一个结点。
+				int size = sizeof(struct astFunction);
+				AstFunction method = (AstFunction)MALLOC(size);
+				memcpy(method, func, size);
+				method->next = NULL;
+				// 能使用 *method = *func吗？
+				if(ty->methodDecl == NULL){
+					ty->methodDecl = method;
+					ty->methodDeclTail = method;
+				}else{
+					ty->methodDeclTail->next = method;
+					ty->methodDeclTail = method;
+				}
+			}
+			method = method->next;
+		}
+		ty = ty->next;
+	}
 }

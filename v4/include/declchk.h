@@ -15,6 +15,10 @@ Field LookupField(char *fieldName, char *structName);
 Field AddField(RecordType rty, char *id, Type ty);
 RecordType StartRecord();
 
+int CompareMethod(AstFunction func, AstMethodSpec method);
+void AppendInterface(InterfaceType ty);
+void AppendMethod(AstFunction func);
+
 RecordType CheckStructSpecifier(AstStructSpecifier specs);
 MapType CheckMapSpecifier(AstMapSpecifier specs);
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
