@@ -23,7 +23,7 @@ RecordType CheckStructSpecifier(AstStructSpecifier specs);
 MapType CheckMapSpecifier(AstMapSpecifier specs);
 ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs);
 InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs);
-void CheckDeclarationSpecifiers(AstSpecifiers specs);
+Type CheckDeclarationSpecifiers(AstSpecifiers specs);
 
 
 AstKeyedElement LookupElement(AstKeyedElement element, char *name);

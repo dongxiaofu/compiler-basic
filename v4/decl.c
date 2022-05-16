@@ -368,6 +368,10 @@ AstVarDeclarator ParseVarSpec(){
 	AstInitDeclarator preInitDecs = initDecs;
 	AstInitDeclarator initDecsCur = initDecs;
 
+	if(expr->variable_count == 0){
+		expr = NULL;
+	}
+
 	AstExpression exprCur = expr;
 	AstExpression expr2Cur = decl;
 	while(expr2Cur != NULL){
@@ -381,13 +385,25 @@ AstVarDeclarator ParseVarSpec(){
 		AstInitializer init;
 		if(exprCur){
 			CREATE_AST_NODE(init, Initializer);
-			AstExpression expr;
-			CREATE_AST_NODE(expr, Expression);
-			memcpy(expr, exprCur, sizeof(*expr));
-			init->expr = expr;
-			// TODO exprCur一直存储着在ParseCompositeLit中设置的kind吗？
-			if(exprCur->kind == NK_CompositeLit){
+			// 花了很长很长时间才把这里写成这样。
+			// 编程是做什么？用这里的代码来说明。
+			// 没有数学、物理等领域知识，没有其他软件API用法，没有很难的语法，只有自己构建的这个
+			// 软件系统之间的联系。这个系统的不同部分，要互相配合。
+			// 之前的错误，由ParseCompositeLit的返回值和这里的旧写法不匹配导致。
+			// 我先写完这里，后写ParseCompositeLit。
+			// 写ParseCompositeLit时，忘记了会影响这里。
+			// 记住所有系统的每个细节，很难。但如果有单元测试，就能很快发现问题。
+			// 另外，遇到错误后，应该很快发现错误。
+			// 我既没有单元测试，又不能很快发现错误。所以，我焦头烂额。
+			if(exprCur->op == OP_COMPOSITELIT){
+//			if(exprCur->kind == NK_CompositeLit){
 				init->isCompositeLit = 1;
+				init->compositeLit = exprCur->kids[0];	
+			}else if(exprCur->op == OP_FUNC_LIT){
+				// TODO 其实是多余的，变量值不可能是这样的。
+				init->expr = exprCur->kids[0];
+			}else{
+				init->expr = exprCur;
 			}
 		}else{
 			init = NULL;
@@ -398,8 +414,11 @@ AstVarDeclarator ParseVarSpec(){
 		CREATE_AST_NODE(initDecsCur, InitDeclarator);
 		preInitDecs->next = initDecsCur;
 
-		if(exprCur){
+		// TODO 没有办法，当初的设计是这样的。现在，用variable_count判断，改动最小。
+		if(exprCur && exprCur->variable_count){
 			exprCur = exprCur->next;
+		}else{
+			exprCur = NULL;
 		}
 		expr2Cur = expr2Cur->next;
 	}
@@ -425,9 +444,6 @@ AstTypeDeclarator ParseTypeSpec(){
 
 	AstExpression expr = ParseIdentifier();
 
-	AstNode type;
-	CREATE_AST_NODE(type, Node); 
-
 	if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
 		// expr = ParseExpressionList();
@@ -436,7 +452,10 @@ AstTypeDeclarator ParseTypeSpec(){
 //		type = ParseType();
 	}
 
-	type = ParseType();
+	AstSpecifiers type = (AstSpecifiers)ParseType();
+	if(type){
+		type->typeAlias = (char *)(expr->val.p);		
+	}
 
 	AstTypeDeclarator decl;
 	CREATE_AST_NODE(decl, TypeDeclarator);

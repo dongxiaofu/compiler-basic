@@ -63,11 +63,13 @@ AstExpression ParseExpression(){
 	// expr = ParseBinaryExpr(7);
 	// OP_CONDITIONAL_OR 是优先级最低的二元运算符号。
 	if(current_token.kind == TK_ADD || current_token.kind == TK_MINUS || current_token.kind == TK_MUL){
-		expr = ParseUnaryExpr();
+//		expr = ParseUnaryExpr();
 	}else{
-		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+//		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
 //		expr = ParseBinaryExpr(5);
 	}
+	
+	expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
 
 	return expr;
 }
@@ -694,17 +696,18 @@ unsigned char IsCompositeLit(){
 	}
 
 	if(current_token.kind == TK_ID){
-		StartPeekToken();
-		EXPECT(TK_ID);
-		if(current_token.kind == TK_LBRACE){
-			EXPECT(TK_LBRACE);
-			if(current_token.kind == TK_CASE){
+		if(IsTypeName(current_token.value.value_str)){
+			StartPeekToken();
+			EXPECT(TK_ID);
+			if(current_token.kind == TK_LBRACE || current_token.kind == TK_LBRACKET){
 				EndPeekToken();
-				return 0;
+				return 1;
 			}
+
+			EndPeekToken();
 		}
-		EndPeekToken();
-		return 1;
+
+		return 0;
 	}
 
 	if(current_token.kind == TK_SLICE){

@@ -164,3 +164,13 @@ AstExpression CheckIdentifierList(AstExpression expr)
 
 	return expr;
 }
+
+
+void AssignInterfaceVariable(VariableSymbol sym, InitData idata)
+{
+	// TODO 检查两个参数的数据类型是否匹配
+	if(1 == 1){
+		sym->typeAlias = idata->typeAlias;
+		sym->idata = idata;
+	}
+}

@@ -19,6 +19,10 @@ type Books struct {
    bookId int
 }
 
+type Person struct{
+	age int
+}
+
 func (v Books)Close() (int,int) {
 	
 	var k int = 0
@@ -27,10 +31,18 @@ func (v Books)Close() (int,int) {
 	return k, 5
 }
 
+func (v Person)Close() (int,int) {
+	
+	var k int = 0
+	var k2 byte = 7
+	
+	return k, 5
+}
+
 func test(){
-	var i Closer
+	var i Closer = Books{4}
+	i = Person{8}
 }
 
 func test2(){
-
 }

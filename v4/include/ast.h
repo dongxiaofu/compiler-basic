@@ -159,6 +159,8 @@ typedef struct astDeclarator
     int categ : 8;  \
     int qual  : 8;  \
     int align : 16; \
+	char *id;		\
+	char *alias;	\
 	int isarray;	\
     int size;       \
     struct type *bty;
@@ -179,7 +181,6 @@ typedef struct field
 typedef struct recordType
 {
 	TYPE_COMMON
-	char *id;
 	Field flds;
 	Field *tail;	
 } *RecordType;
@@ -193,7 +194,6 @@ typedef struct arrayType
 typedef struct mapType
 {
 	TYPE_COMMON
-	char *id;
 	// 集合的key
 	Type key;
 	// 集合的value
@@ -271,6 +271,7 @@ typedef struct astToken
 	AstNode stgClasses;	\
 	AstNode tyQuals;	\
 	AstNode tySpecs;	\
+	char *typeAlias;	\
 	Type ty;
 	
 typedef struct astSpecifiers
@@ -329,6 +330,8 @@ typedef  struct initData{
 		KeyValue kv;
 	};
 	struct initData *next;
+	// type INT int 中的INT。
+	char *typeAlias;
 } *InitData;
 
 #define SYM_HASH_MASK	127
@@ -356,9 +359,9 @@ typedef struct functionSymbol{
 
 typedef struct variableSymbol{
 	SYMBOL_COMMON
-	InitData initData;	
-	// 接口方法
-	FunctionSymbol interfaceMethod;
+	InitData idata;	
+	// 接口变量的数据类型别名。
+	char *typeAlias;
 } *VariableSymbol;
 
 typedef struct methodSymbol{

@@ -207,7 +207,11 @@ void CheckDeclaration(AstDeclaration decls)
 					// 变量的初始值
 					if(initDec->init){
 						CheckInitializer((AstInitializer)initDec->init);
-						sym->initData = ((AstInitializer)initDec->init)->idata;
+						if(sym->ty->categ == INTERFACE){	
+							AssignInterfaceVariable(sym, ((AstInitializer)initDec->init)->idata); 
+						 }else{
+							sym->idata = ((AstInitializer)initDec->init)->idata;
+						}
 					}
 
 					// TODO 测试查询功能，没有作用。
@@ -227,7 +231,7 @@ void CheckDeclaration(AstDeclaration decls)
 	}
 }
 
-void CheckDeclarationSpecifiers(AstSpecifiers specs)
+Type CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
 	Type ty = NULL;
 
@@ -243,7 +247,12 @@ void CheckDeclarationSpecifiers(AstSpecifiers specs)
 		ty = T(INT);
 	}
 
+	// 接口变量会用到。
+	ty->alias = specs->typeAlias;	
+
 	specs->ty = ty;
+
+	return (Type)ty;
 }
 
 RecordType CheckStructSpecifier(AstStructSpecifier specs)
@@ -350,17 +359,15 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 		AstKeyedElement element = literalValue->keyedElement;	
 	
 		InitData head = (InitData)MALLOC(sizeof(struct initData));
-		//memset(head, 0, sizeof(struct initData));
 		InitData *init = &(head->next);
 		int offset = 0;
-		RecordType rty = CheckStructSpecifier((AstStructSpecifier)literalType);
+		RecordType rty = CheckDeclarationSpecifiers((AstSpecifiers)literalType);
 		Field fld = rty->flds;
 		if(literalValue->hasKey){
 			// {age:3,height:4}这种初始化值比较难处理。
 			while(fld){
 				AstKeyedElement targetElement = LookupElement(element, fld->id);
 				*init = (InitData)MALLOC(sizeof(struct initData));
-				//memset(*init, 0, sizeof(struct initData));
 				if(targetElement == NULL){
 					(*init)->expr = NULL;
 				}else{
@@ -383,7 +390,6 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 				}
 				
 				*init = (InitData)MALLOC(sizeof(struct initData));
-				//memset(*init, 0, sizeof(struct initData));
 				(*init)->expr = val;
 				(*init)->offset = offset;
 				offset += fld->ty->size;
@@ -395,6 +401,7 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 		}
 
 	InitData idata = head->next;
+	idata->typeAlias = rty->alias;
 
 	return idata;
 }
@@ -467,8 +474,8 @@ ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
 
 InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 {
-	AstArrayTypeSpecifier node  = (AstArrayTypeSpecifier)compositeLit->literalType;
-	ArrayType aty = CheckArraySpecifier(node);
+	AstArrayTypeSpecifier node = (AstArrayTypeSpecifier)compositeLit->literalType;
+	ArrayType aty = CheckDeclarationSpecifiers(node);
 	AstLiteralValue literalValue = compositeLit->literalValue;
 	AstKeyedElement element = literalValue->keyedElement;	
 
@@ -477,7 +484,6 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 		exit(-2);
 	}
 
-	//memset(head, 0, sizeof(struct initData));
 	InitData *init = &(head->next);
 	int offset = 0;
 
@@ -493,7 +499,6 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 	while(element != NULL && length >= 0){
 		offset = index * elementSize;
 		*init = (InitData)MALLOC(sizeof(struct initData));
-		//memset(*init, 0, sizeof(struct initData));
 		(*init)->offset = offset;
 		// TODO 这样做行吗？exlement->expr中的数据是否会被销毁？
 		// TODO element->element->expr 没有考虑嵌套。
@@ -506,7 +511,10 @@ InitData CheckArrayInitializer(AstCompositeLit compositeLit)
 		index++;
 	}
 
-	return head->next;	
+	InitData idata = head->next;
+	idata->typeAlias = aty->alias;
+
+	return idata;
 }
 
 MapType CheckMapSpecifier(AstMapSpecifier specs)
@@ -525,7 +533,8 @@ InitData CheckMapInitializer(AstCompositeLit compositeLit)
 {
 	AstMapSpecifier node  = (AstMapSpecifier)compositeLit->literalType;
 
-	MapType mty = CheckMapSpecifier(node);
+	// MapType mty = CheckMapSpecifier(node);
+	MapType mty = CheckDeclarationSpecifiers((AstSpecifiers)node);
 	int keySize = mty->size;
 	int valSize = mty->size;
 	int kvSize = keySize + valSize;
@@ -561,7 +570,10 @@ InitData CheckMapInitializer(AstCompositeLit compositeLit)
 		element = element->next;
 	}	
 	
-	return head->next;
+	InitData idata = head->next;
+	idata->typeAlias = mty->alias;
+
+	return idata;
 }
 
 InterfaceType CheckInterfaceSpecifier(AstInterfaceSpecifier specs)
