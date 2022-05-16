@@ -104,7 +104,8 @@ AstExpression CheckTypeAssert(AstExpression expr)
 
 AstExpression CheckFunctionCall(AstExpression expr)
 {
-
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
 
 	return expr;
 }

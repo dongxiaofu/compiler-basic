@@ -92,11 +92,9 @@ enum nodeKind
 
 	NK_EmptyStmt,
 
-	NK_Expression,
-
-
 	NK_ExpressionStatement,	// 没用到 
 	NK_SelectCaseStatement, NK_ExprSwitchStmt, NK_TypeSwitchStmt,
+	NK_Expression,
 	NK_IfStatement,        NK_SwitchStatement,		
     NK_ForStmt,		
 	NK_GotoStatement,       NK_BreakStmt,     NK_ContinueStatement,		

@@ -194,6 +194,7 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	}else{
 		h = SymbolHash(funcName);
 		tbl = Identifiers;
+		fty->categ = FUNCTION;
 	}
 	fsym = (FunctionSymbol)AddSymbol(tbl, (Symbol)fsym, h);
 

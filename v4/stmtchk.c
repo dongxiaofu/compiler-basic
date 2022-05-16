@@ -10,6 +10,7 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 	CheckExprSwitchStmt,
 	CheckTypeSwitchStmt,
 	CheckSelectCaseStatement,
+	CheckExpressionStmt,
 	CheckIfStatement,
 	CheckSwitchStatement,
 	CheckForStmt,
@@ -433,6 +434,13 @@ AstStatement CheckRecvStmt(AstStatement stmt)
 	}
 
 	recvStmt->receiver = CheckExpression(recvStmt->receiver);
+
+	return stmt;
+}
+
+AstStatement CheckExpressionStmt(AstStatement stmt)
+{
+	stmt = CheckExpression((AstExpression)stmt);
 
 	return stmt;
 }
