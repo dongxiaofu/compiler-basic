@@ -7,8 +7,8 @@
 // #include "symbol.h"
 //
 // 打印日志
-// #define LOG	printf
-#define LOG	
+//#define LOG	printf
+#define LOG
 #define ERROR(fmt, msg)	printf(fmt, msg);\
 					exit(-2);
 
@@ -420,7 +420,7 @@ typedef struct astLiteralValue{
 
 typedef struct astCompositeLit{
 	AST_NODE_COMMON
-	AstNode literalType;
+	AstSpecifiers literalType;
 	AstLiteralValue literalValue;
 } *AstCompositeLit;
 

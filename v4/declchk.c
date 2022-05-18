@@ -107,6 +107,7 @@ void CheckFunction(AstFunction p)
 		AstParameterDeclaration receiverDecls = receiverTyList->paramDecls;
 		AstParameterDeclaration receiverDecl = receiverDecls;
 		if(receiverDecl != NULL){
+			CheckDeclarationSpecifiers(receiverDecl->specs);
 			AstDeclarator dec = receiverDecl->dec;
 			SignatureElement sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
 			sigElement->id = dec->id;
@@ -234,21 +235,21 @@ void CheckDeclaration(AstDeclaration decls)
 Type CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
 	Type ty = NULL;
-
-	if(specs->kind == NK_StructSpecifier){
+	AstSpecifiers tySpecs = (AstSpecifiers)specs->tySpecs;
+	if(tySpecs->kind == NK_StructSpecifier){
 		// ty = CheckStructSpecifier((AstStructSpecifier)specs->tySpecs);
-		ty = CheckStructSpecifier((AstStructSpecifier)specs);
-	}else if(specs->kind == NK_ArrayTypeSpecifier){
-		ty = CheckArraySpecifier((AstArrayTypeSpecifier)specs);
-	}else if(specs->kind == NK_InterfaceSpecifier){
-		ty = CheckInterfaceSpecifier((AstInterfaceSpecifier)specs);
+		ty = CheckStructSpecifier((AstStructSpecifier)tySpecs);
+	}else if(tySpecs->kind == NK_ArrayTypeSpecifier){
+		ty = CheckArraySpecifier((AstArrayTypeSpecifier)tySpecs);
+	}else if(tySpecs->kind == NK_InterfaceSpecifier){
+		ty = CheckInterfaceSpecifier((AstInterfaceSpecifier)tySpecs);
 		AppendInterface(ty);
 	}else{
 		ty = T(INT);
 	}
 
 	// 接口变量会用到。
-	ty->alias = specs->typeAlias;	
+	ty->alias = tySpecs->typeAlias;	
 
 	specs->ty = ty;
 
@@ -280,6 +281,7 @@ RecordType StartRecord()
 {
 	RecordType rty = (RecordType)MALLOC(sizeof(struct recordType));
 	rty->kind = NK_RecordType;
+	rty->categ = STRUCT;
 	rty->id = NULL;
 	rty->flds = NULL;
 	rty->tail = &(rty->flds);
@@ -354,7 +356,7 @@ void EndRecord(RecordType rty)
 
 InitData CheckStructInitializer(AstCompositeLit compositeLit)
 {
-		AstNode literalType = compositeLit->literalType;
+		AstSpecifiers literalType = compositeLit->literalType;
 		AstLiteralValue literalValue = compositeLit->literalValue;
 		AstKeyedElement element = literalValue->keyedElement;	
 	
@@ -409,12 +411,13 @@ InitData CheckStructInitializer(AstCompositeLit compositeLit)
 InitData CheckCompositeLitInitializer(AstCompositeLit compositeLit)
 {
 	InitData idata;
-	AstNode literalType = compositeLit->literalType;
-	if(literalType->kind == NK_StructSpecifier){
+	AstSpecifiers literalType = compositeLit->literalType;
+	AstNode tySpecs = literalType->tySpecs;
+	if(tySpecs->kind == NK_StructSpecifier){
 		idata = CheckStructInitializer(compositeLit);
-	}else if(literalType->kind == NK_ArrayTypeSpecifier){
+	}else if(tySpecs->kind == NK_ArrayTypeSpecifier){
 		idata = CheckArrayInitializer(compositeLit);
-	}else if(literalType->kind == NK_MapSpecifier){
+	}else if(tySpecs->kind == NK_MapSpecifier){
 		idata = CheckMapInitializer(compositeLit);
 	}
 

@@ -592,10 +592,12 @@ int GetTypeKind(){
  * LiteralType   = StructType | ArrayType | "[" "..." "]" ElementType |
                 SliceType | MapType | TypeName .
  */
-AstNode ParseLiteralType(){
-	AstNode node;
-	CREATE_AST_NODE(node, Node);
-	
+AstSpecifiers ParseLiteralType(){
+
+	AstSpecifiers specs;	
+	CREATE_AST_NODE(specs, Specifiers);
+	AstSpecifiers node;
+
 	// TODO 能这样使用enum吗？
 	enum LITERAL_TYPE type = GetTypeKind();	
 	switch(type){
@@ -623,8 +625,10 @@ AstNode ParseLiteralType(){
 			node = ParseBasicType();
 			break;
 	}
+
+	specs->tySpecs = (AstNode)node;
  
-	return node;
+	return specs;
 }
 
 /**

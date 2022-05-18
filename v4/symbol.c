@@ -79,9 +79,9 @@ Symbol AddSymbol(Table tbl, Symbol sym, unsigned int hashKey)
 // 
 // 	return sym;
 // }
-Symbol LookupMethodID(char *name, void *receiver)
+Symbol LookupMethodID(char *name, char *receiverTypeAlias)
 {
-	return LookupSymbol(InterfaceIdentifiers, name, receiver);
+	return LookupSymbol(InterfaceIdentifiers, name, receiverTypeAlias);
 }
 
 Symbol LookupID(char *name)
@@ -89,12 +89,24 @@ Symbol LookupID(char *name)
 	return LookupSymbol(Identifiers, name, NULL);
 }
 
+// TODO 这个函数，一定要修改。因为，在其他地方，必须直接调用LookupMethodID。
 Symbol LookupFunction(AstFunctionDeclarator fdec)
 {
 	Symbol sym = NULL;
 	char *id = fdec->dec->id;
 	if(fdec->receiver){
-		sym = LookupMethodID(id, (void *)(fdec->receiver));
+		// TODO 这是从CheckFunction抄来的代码。一想到要经过这么多步骤，我就觉得烦。
+		// 这是当初的设计造成的恶果。先这样吧。
+		AstParameterTypeList receiverTyList = fdec->receiver;
+		AstParameterDeclaration receiverDecls = receiverTyList->paramDecls;
+		AstParameterDeclaration receiverDecl = receiverDecls;
+		char *receiverTypeAlias = NULL;
+		if(receiverDecl != NULL){
+			AstDeclarator dec = receiverDecl->dec;
+			Type ty = (AstSpecifiers)(receiverDecl->specs->ty);
+			receiverTypeAlias = ty->alias;
+		}
+		sym = LookupMethodID(id, receiverTypeAlias);
 	}else{
 		sym = LookupID(id);
 	}
@@ -102,13 +114,13 @@ Symbol LookupFunction(AstFunctionDeclarator fdec)
 	return sym;
 }
 
-Symbol LookupSymbol(Table tbl, char *name, void *receiver)
+Symbol LookupSymbol(Table tbl, char *name, char *receiverTypeAlias)
 {
 	unsigned int hashKey = 0;
-	if(receiver){
+	if(receiverTypeAlias){
 		// TODO 找时间优化这里的代码。 	
 		unsigned int h1 = SymbolHash(name);
-		unsigned int h2 = (unsigned int)receiver & SYM_HASH_MASK;
+		unsigned int h2 = SymbolHash(receiverTypeAlias);
 		hashKey = (h1 + h2) & SYM_HASH_MASK;
 	}else{
 		hashKey = SymbolHash(name);
@@ -187,10 +199,12 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	if(sig->receiver){
 		// TODO 找时间优化这里的代码。 	
 		unsigned int h1 = SymbolHash(funcName);
-		unsigned int h2 = (unsigned int)(sig->receiver) & SYM_HASH_MASK;
+		char *typeAlias = sig->receiver->ty->alias;
+		unsigned int h2 = SymbolHash(typeAlias);
 		h = (h1 + h2) & SYM_HASH_MASK;
 
 		tbl = InterfaceIdentifiers; 
+		fty->categ = METHOD;
 	}else{
 		h = SymbolHash(funcName);
 		tbl = Identifiers;

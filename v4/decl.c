@@ -362,7 +362,7 @@ AstVarDeclarator ParseVarSpec(){
 
 	AstSpecifiers specs;
 	CREATE_AST_NODE(specs, Specifiers);
-	specs = (AstSpecifiers)type;
+	specs->tySpecs = (AstNode)type;
 
 	// 遍历单链表B和C，创建A。
 	AstInitDeclarator preInitDecs = initDecs;
@@ -792,10 +792,12 @@ AstNode ParseFunctionName(){
 	// strcpy(functionName->id, (char *)identifier->val.p);
 
 	// TODO len应该加1吗？把字符串末尾的\0的长度也统计进来。
-	int len = strlen(identifier->val.p);
+	int len = strlen(identifier->val.p) + 1;
 	functionName->id = (char *)MALLOC(sizeof(char) * len);
+//	functionName->id = "Closer";
 	//memset(functionName->id, 0, len);
 	strcpy(functionName->id, (char *)identifier->val.p);
+//	functionName->id = (char *)identifier->val.p;
 
 	return (AstNode)functionName;
 }

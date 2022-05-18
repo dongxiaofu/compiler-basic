@@ -54,10 +54,10 @@ unsigned int SymbolHash(char *name);
 
 void InitSymbolTable();
 Symbol AddSymbol(Table tbl, Symbol sym, unsigned int hashKey);
-Symbol LookupMethodID(char *name, void *receiver);
+Symbol LookupMethodID(char *name, char *receiverTypeAlias);
 Symbol LookupID(char *name);
 Symbol LookupFunction(AstFunctionDeclarator fdec);
-Symbol LookupSymbol(Table tbl, char *name, void *receiver);
+Symbol LookupSymbol(Table tbl, char *name, char *receiverTypeAlias);
 char * GetSymbolKind(int kind);
 Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int searchOuter);
 VariableSymbol AddVariable(char *name, Type *ty);

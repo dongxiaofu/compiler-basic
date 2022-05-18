@@ -171,7 +171,9 @@ void ParseSelectorTypeAssertion(AstExpression expr){
 		// TODO 会不会是type.method？
 		expr->op = OP_MEMBER;
 		AstExpression member = ParseIdentifier();
-		expr->val.p = member->val.p;
+		if(member != NULL){
+			expr->val.p = member->val.p;
+		}
 	}
 }
 
@@ -827,7 +829,7 @@ AstCompositeLit ParseCompositeLit(){
 	AstCompositeLit node;
 	CREATE_AST_NODE(node, CompositeLit);
 	
-	node->literalType = (AstNode)ParseLiteralType();
+	node->literalType = ParseLiteralType();
 	node->literalValue = ParseLiteralValue();	
  
 	return node;
@@ -952,7 +954,10 @@ AstExpression ParseMethodExpr(){
 	// TODO 想不到更好的op名称。
 	expr->op = OP_METHOD;
 	expr->kids[0] = (AstExpression)ParseType();
-	expr->kids[1] = ParseIdentifier();
+	AstExpression method = ParseIdentifier();
+	if(method != NULL){	
+		expr->val.p = method->val.p;
+	}
 
 	return expr;
 }

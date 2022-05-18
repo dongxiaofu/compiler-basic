@@ -102,10 +102,141 @@ AstExpression CheckTypeAssert(AstExpression expr)
 	return expr;
 }
 
+AstArguments CheckArguments(AstArguments args, SignatureElement *params, int paramCount)
+{
+	// 检查参数的数据类型
+	AstExpression oneArg = args->args;
+	int cn = 0;
+	for(int i = 0; i < paramCount; i++){
+		if(oneArg == NULL){
+			break;
+		}
+
+		oneArg = CheckExpression(oneArg);
+		// TODO 怎么判断oneArg能不能赋值给params[i]？
+
+		oneArg = oneArg->next;
+		cn++;
+	}
+
+	if(cn == paramCount && oneArg == NULL){
+		printf("paramCount = %d, %s\n", paramCount, "传参正确");
+	}else{
+		if(oneArg == NULL && cn < paramCount){
+			printf("paramCount = %d, cn = %d, %s\n", paramCount, cn, "实参太少");
+		}	
+		if(oneArg != NULL && cn == paramCount){
+			printf("paramCount = %d, cn = %d, %s\n", paramCount, cn, "实参太多");
+		}
+	} 
+
+	return args;
+}
+
 AstExpression CheckFunctionCall(AstExpression expr)
 {
-	AstExpression expr0 = expr->kids[0];
-	AstExpression expr1 = expr->kids[1];
+	char *funcName = (char *)(expr->kids[0]->val.p);
+	AstArguments args = (AstArguments)expr->kids[1];
+	int op = expr->kids[0]->op;
+	char *prefix = NULL;
+	if(op == OP_ID){
+
+	}else if(op == OP_MEMBER || op == OP_METHOD){
+		prefix = (char *)(expr->kids[0]->kids[0]->val.p);
+	}else{
+		ERROR("%s\n", "CheckFunctionCall ");
+	}
+
+	FunctionSymbol fsym = NULL;
+
+	if(prefix){
+		VariableSymbol sym = LookupID(prefix);
+		char *receiverTypeAlias = sym->typeAlias;
+		if(sym == NULL){
+			ERROR("%s\n", "CheckFunctionCall 接口变量未定义");
+		}
+		if(sym->idata == NULL){
+			ERROR("%s\n", "CheckFunctionCall 接口变量没有赋值");
+		}
+
+		// 检查被调用的方法是不是接口的方法。
+
+		// 查询接口方法的符号
+		fsym = LookupMethodID(funcName, receiverTypeAlias);
+		if(fsym == NULL){
+			ERROR("%s\n", "CheckFunctionCall 没有实现这个方法");
+		}
+
+	}else{
+		FunctionSymbol fsym = LookupID(funcName);
+		if(fsym == NULL){
+			ERROR("%s\n", "CheckFunctionCall 没有实现这个函数");
+		}
+
+	}
+
+check_call:
+	printf("%s\n", "Start to check call");
+	if(fsym){
+		expr->kids[0] = fsym;	
+	}
+	Signature sig = ((FunctionType)fsym->ty)->sig;
+	SignatureElement *params = sig->params;
+	int paramCount = sig->paramSize;
+	args = CheckArguments(args, params, paramCount);	
+	expr->kids[1] = args;
+
+	return expr;
+}
+
+AstExpression CheckFunctionCall2(AstExpression expr)
+{
+	char *funcName = (char *)(expr->kids[0]->val.p);
+	char *prefix = NULL;
+	int op = expr->kids[0]->op;
+	if(op == OP_ID){
+		// TODO 为了逻辑更清晰，保留这个空分支。
+	}else if(op == OP_MEMBER || op == OP_METHOD){
+		// expr->kids[0]->kids[0] 是一个表达式，不知道怎么处理
+		// TODO 暂时只处理只有一个点号的情况。
+		prefix = (char *)(expr->kids[0]->kids[0]->val.p);
+	}else{
+		ERROR("%s\n", "CheckFunctionCall ");
+	}
+
+	int type = -1;
+	if(prefix == NULL){
+		type = 4;
+		goto start;	
+		// return expr;
+	}
+
+	if(IsTypeName(prefix) == 1){
+		type = 1;
+	}else{
+		Symbol sym = LookupID(prefix);
+		if(sym == NULL){
+			ERROR("%s\n", "CheckFunctionCall 不存在这个接口或接收者");
+		}else{
+			if(sym->ty == INTERFACE){
+				type = 2;
+			}else{
+				type = 3;
+			}
+		}
+	}
+
+start:
+
+	if(type == 1){
+
+	}else if(type == 2){
+
+	}else if(type == 3){
+
+	}else{
+		ERROR("%s\n", "CheckFunctionCall 错误的type");
+	}
 
 	return expr;
 }

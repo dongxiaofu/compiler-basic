@@ -14,7 +14,7 @@
 // TODO 暂时这样。
 enum{
 	BYTE, INT, POINTER, VOID, ARRAY, STRUCT, INTERFACE,
-	FUNCTION
+	FUNCTION, METHOD
 };
 
 #define IsObjectPtr(ty)		(ty->categ == POINTER && ty->bty->categ != FUNCTION)
@@ -84,7 +84,7 @@ AstChannelType ParseChannelType();
 AstSpecifiers ParseTypeNameType(char *typeName);
 
 AstVariableElementType ParseVariableElementType();
-AstNode ParseLiteralType();
+AstSpecifiers ParseLiteralType();
 
 AstNode ParseType();
 
