@@ -148,6 +148,8 @@ int main(int argc, char *argv[])
 		AstTranslationUnit transUnit = ParseTranslationUnit();
 
 		//signal(SIGSEGV, segv_handler);
+		FUNCTION_LIST = NULL;
+		INTERFACE_LIST = NULL;
 
 		SetupTypeSystem();
 		InitSymbolTable();
@@ -158,6 +160,7 @@ int main(int argc, char *argv[])
 //	free(cursor_tail);
 //	free(char_tail);
 //	free(current_token_tail);
+	int tmp = 5;
 
 	return 0;
 }

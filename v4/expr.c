@@ -426,7 +426,7 @@ AstExpression ParsePrimaryExpr(){
 				if(CurrentTokenIn(FIRST_Expression) == 1){
 					ParseExpression();
 					expect_comma;
-					if(current_token.kind == TK_LPARENTHESES){
+					if(current_token.kind == TK_RPARENTHESES){
 						type = 3;
 					}else if(CurrentTokenIn(FIRST_Expression) == 1){
 						type = 0;
@@ -437,7 +437,7 @@ AstExpression ParsePrimaryExpr(){
 			}else if(current_token.kind == TK_LBRACE){
 				type = 0;
 			}else if(current_token.kind == TK_DOT){
-				type = 2;
+			//	type = 2;
 			}
 		}else if(current_token.kind == TK_LPARENTHESES){
 			NEXT_TOKEN;
@@ -765,11 +765,15 @@ AstExpression ParseOperandName(){
 	StartPeekToken();
 	// 最多只需要遍历三个token。
 	for(unsigned char i = 0; i < 3; i++){
+		type = 1;
 		if(i == 1 && current_token.kind == TK_DOT){
 			type = 2;
+			NEXT_TOKEN;
+			if(current_token.kind == TK_LPARENTHESES){
+				type = 1;
+			}
 			break;
 		}
-		type = 1;
 		NEXT_TOKEN;
 	}
 	EndPeekToken();
@@ -777,6 +781,7 @@ AstExpression ParseOperandName(){
  	AstExpression expr;
  	CREATE_AST_NODE(expr, Expression);
 
+	type = 1;
 	if(type == 1){
 		AstExpression expr1 = ParseIdentifier();
 		if(expr == NULL){

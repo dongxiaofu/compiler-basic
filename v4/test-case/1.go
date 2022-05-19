@@ -8,6 +8,7 @@ type Reader interface {
 
 type Closer interface {
   Close() int
+  Say() int
 }
 
 type ReadWriter interface {
@@ -31,6 +32,11 @@ func (v Books)Close(a int, b int, c int) (int,int) {
 	return k, 5
 }
 
+func (v Books)Say() int {
+	var k4  int  = 7
+	return k4
+}
+
 func (v Person)Close() (int,int) {
 	
 	var j int  = 8
@@ -39,9 +45,13 @@ func (v Person)Close() (int,int) {
 }
 
 func test(){
+	var x interface{} = 7
 	var i Closer = Books{4}
-	i.Close(4,5,6)
+	d := i.(Books)
+	d := i.(Closer)
+	d := i.Say()
 }
 
 func test2(){
+	var y int = 4
 }

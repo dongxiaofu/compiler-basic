@@ -7,8 +7,6 @@
 #include "declchk.h"
 // #include "symbol.h"
 
-// static AstFunction CURRENT;
-
 void CheckTranslationUnit(AstTranslationUnit transUnit)
 {
 	printf("%s\n", "Start Check");
@@ -38,14 +36,14 @@ void CheckTranslationUnit(AstTranslationUnit transUnit)
 	}
 
 	// 获取了所有接口和函数的信息，可以处理接口和函数的关系了。
-	AstFunction func = FUNCTION_LIST;
-	// TODO 时间复杂度极高，有办法优化吗？
-	while(func){
-		if(func->fdec->receiver != NULL && func->fdec->receiver->paramDecls != NULL){
-			AppendMethod(func);
-		}
-		func = func->next;
-	}
+//	AstFunction func = FUNCTION_LIST;
+//	// TODO 时间复杂度极高，有办法优化吗？
+//	while(func){
+//		if(func->fdec && func->fdec->receiver != NULL && func->fdec->receiver->paramDecls != NULL){
+//			AppendMethod(func);
+//		}
+//		func = func->next;
+//	}
 
 	printf("%s\n", "End Check");
 }
@@ -157,6 +155,14 @@ void CheckFunction(AstFunction p)
 	}else{
 		ERROR("%s\n", "redefine function");
 	}	
+
+	// 把所有的函数存储到一个单链表中。
+	if(FUNCTION_LIST == NULL){
+		FUNCTION_LIST = FUNCTION_CURRENT = fsym;
+	}else{
+		FUNCTION_CURRENT->next = fsym;
+		FUNCTION_CURRENT = fsym;
+	}
 	// 检查函数体
 	AstBlock block = p->block;
 	int hasReturn = CheckBlock(block);	
@@ -164,14 +170,6 @@ void CheckFunction(AstFunction p)
 	if(sig->resultSize > 0 && hasReturn == 0){
 		// TODO
 		ERROR("函数必须有返回值\n", "");
-	}
-
-	// 把所有的函数存储到一个单链表中。
-	if(FUNCTION_LIST == NULL){
-		FUNCTION_LIST = FUNCTION_CURRENT = p;
-	}else{
-		FUNCTION_CURRENT->next = p;
-		FUNCTION_CURRENT = p;
 	}
 }
 

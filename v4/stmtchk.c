@@ -11,6 +11,7 @@ AstStatement (*StmtCheckers[])(AstStatement) = {
 	CheckTypeSwitchStmt,
 	CheckSelectCaseStatement,
 	CheckExpressionStmt,
+	CheckShortVarDecl,
 	CheckIfStatement,
 	CheckSwitchStatement,
 	CheckForStmt,
@@ -442,5 +443,24 @@ AstStatement CheckExpressionStmt(AstStatement stmt)
 {
 	stmt = CheckExpression((AstExpression)stmt);
 
+	return stmt;
+}
+
+AstStatement CheckShortVarDecl(AstStatement stmt)
+{
+	AstShortVarDecl shortVarDecl = (AstShortVarDecl)stmt;
+	AstExpression identifierList = shortVarDecl->identifierList;
+	AstExpression expressionList = shortVarDecl->expressionList;
+	AstExpression identifier = identifierList;
+	while(identifier != NULL){
+		CheckExpression(identifier);
+		identifier = identifier->next;
+	}
+
+	AstExpression expr = expressionList;
+	while(expr != NULL){
+		CheckExpression(expr);
+		expr = expr->next;
+	}
 	return stmt;
 }

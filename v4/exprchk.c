@@ -97,8 +97,160 @@ AstExpression CheckMemberAccess(AstExpression expr)
 
 AstExpression CheckTypeAssert(AstExpression expr)
 {
+	printf("start CheckTypeAssert\n");
 
+	AstExpression kids0 = expr->kids[0];
+	char *valName = (char *)(kids0->val.p);
+	VariableSymbol sym = LookupID(valName);
+	if(sym == NULL){
+		ERROR("%s\n", "CheckTypeAssert 变量未定义");
+	}
+	if(sym->ty->categ != INTERFACE){
+		ERROR("%s\n", "CheckTypeAssert 不是接口变量");
+	}	
 
+	// 开始检查i.(T)中的T
+	AstSpecifiers spec = expr->kids[1];
+	// 各种奇形怪状的数据结构，不翻看以前的代码，很难写出正确的代码。
+	AstNode tySpecs = spec->tySpecs;
+	if(spec->typeAlias == ""){
+		if(tySpecs->kind != NK_TypedefName){
+			ERROR("%s\n", "CheckTypeAssert Type只能是alias或基础数据类型");
+		}
+	}
+
+	char *name;
+	if(tySpecs && tySpecs->kind == NK_TypedefName){
+		AstTypedefName tname = (AstTypedefName)tySpecs;
+		name = tname->id;
+		if(IsDataType(name) != 1){
+			ERROR("%s\n", "CheckTypeAssert i.(T)中的T必须是数据类型");
+		}	
+	}else{
+		name = spec->typeAlias;
+	}
+	// 检查T是不是接口名
+	InterfaceType ity = INTERFACE_LIST;
+	int isInterface = 0;
+	while(ity != NULL){
+		if(ity->alias && name && strcmp(ity->alias, name) == 1){
+			isInterface = 1;
+		}
+		ity = ity->next;
+	}
+		
+	// 检查T是不是实现了一个接口
+	if(isInterface == 0){
+		FunctionSymbol fsym = FUNCTION_LIST;
+		int hash_table_size = 127 + 1;
+		int bucketLinkerSize = sizeof(struct bucketLinker);
+		// variable-sized object may not be initialized
+		// BucketLinker table[hash_table_size] = (BucketLinker *)MALLOC(bucketLinkerSize * hash_table_size);
+		// error: invalid initializer
+		// BucketLinker table[128] = (BucketLinker *)MALLOC(bucketLinkerSize * hash_table_size);
+		// 检查一个数据结构是否实现了一个接口
+		typedef struct plusBucket{
+			int count;
+			char *receiver;
+			BucketLinker linker;
+			struct plusBucket *next;
+		} *PlusBucket;
+		PlusBucket plusBucket = (PlusBucket)MALLOC(sizeof(struct plusBucket));
+		PlusBucket headPlusBucket,lastPlusBucket;
+		headPlusBucket = lastPlusBucket = plusBucket;
+		BucketLinker *table = (BucketLinker *)MALLOC(bucketLinkerSize * hash_table_size);
+		int dataTypeCount = 0;
+		while(fsym != NULL){
+			FunctionType fty = (FunctionType)fsym->ty;
+			SignatureElement receiver = fty->sig->receiver;
+			BucketLinker linker = (BucketLinker)MALLOC(bucketLinkerSize);
+			linker->sym = fsym;
+			if(receiver == NULL || receiver->ty == NULL || receiver->ty->alias == NULL){
+				fsym = fsym->next;
+				 continue;
+			}
+			if(plusBucket->receiver == NULL){
+				plusBucket->count++;
+				plusBucket->receiver = receiver->ty->alias;
+				plusBucket->linker = linker;
+			}else{
+				PlusBucket currentPlusBucket = headPlusBucket;	
+				while(currentPlusBucket != NULL){
+					if(strcmp(plusBucket->receiver, receiver->ty->alias) == 0){
+						break;
+					}
+					currentPlusBucket = currentPlusBucket->next;
+				}
+
+				if(currentPlusBucket != NULL){
+					plusBucket = currentPlusBucket;
+				}else{
+					plusBucket = (PlusBucket)MALLOC(sizeof(struct plusBucket));
+					lastPlusBucket->next = plusBucket;
+					lastPlusBucket = plusBucket;
+				}
+
+				plusBucket->count++;
+				plusBucket->receiver = receiver->ty->alias;
+				plusBucket->linker = linker;
+			}
+
+			fsym = fsym->next;
+		}
+
+		// 检查一个数据结构是否实现了一个接口
+		PlusBucket currentPlusBucket = headPlusBucket;
+		InterfaceType currentIty = sym->ty;
+		int flag2;
+		while(currentPlusBucket != NULL){
+			if(strcmp(currentPlusBucket->receiver, name) == 0){
+				flag2 = 1;
+				if(currentIty->methodCount == currentPlusBucket->count){
+					BucketLinker current = currentPlusBucket->linker;
+					AstMethodSpec method = currentIty->methods;
+					int flag;// = 0;
+					while(method != NULL){
+						flag = 0;
+						while(current != NULL){
+							// 比较两个函数是否相同
+							AstDeclarator funcName = method->funcName;
+							FunctionSymbol fsym = (FunctionSymbol)(current->sym);
+							if(funcName == NULL){
+								break;
+							}
+							if(funcName->id = NULL){
+								break;
+							}
+							if(strcmp(funcName->id, fsym->name) == 0){
+								flag = 1;
+								break;
+							}
+
+							current = current->link;
+						}
+						if(flag == 0){
+							flag2 = 0;
+							break;
+						}
+						method = method->next;
+					}
+				}
+			}else{
+			//	flag2 = 0;
+			}
+			// 只需要检查一个数据类型是不是实现了这个接口。所以，只需要找到一个符合条件的就可以了。
+			if(flag2 == 1){
+				break;
+			}	
+			currentPlusBucket = currentPlusBucket->next;
+		}
+
+		if(flag2 == 0){
+			ERROR("%s\n", "CheckTypeAssert T没有实现当前接口");
+		}
+	}
+
+	printf("end CheckTypeAssert\n");
 	return expr;
 }
 
@@ -144,7 +296,7 @@ AstExpression CheckFunctionCall(AstExpression expr)
 	}else if(op == OP_MEMBER || op == OP_METHOD){
 		prefix = (char *)(expr->kids[0]->kids[0]->val.p);
 	}else{
-		ERROR("%s\n", "CheckFunctionCall ");
+		printf("%s, 函数名是：%s\n", "CheckFunctionCall 普通函数调用", funcName);
 	}
 
 	FunctionSymbol fsym = NULL;
@@ -168,8 +320,9 @@ AstExpression CheckFunctionCall(AstExpression expr)
 		}
 
 	}else{
-		FunctionSymbol fsym = LookupID(funcName);
-		if(fsym == NULL){
+		fsym = LookupID(funcName);
+		if(fsym == NULL || fsym->ty->categ != FUNCTION){
+			printf("funcName = %s\n", funcName);
 			ERROR("%s\n", "CheckFunctionCall 没有实现这个函数");
 		}
 
@@ -257,10 +410,13 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 		case OP_DOT:	
 		case OP_MEMBER:
 			expr = CheckMemberAccess(expr);
+			break;
 		case OP_TYPE_ASSERT:
 			expr = CheckTypeAssert(expr);
+			break;
 		case OP_CALL:
 			expr = CheckFunctionCall(expr);
+			break;
 		default:
 			break;
 	}

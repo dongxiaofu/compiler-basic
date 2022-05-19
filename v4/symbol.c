@@ -23,6 +23,10 @@ void InitSymbolTable()
 
 	Identifiers = &GlobalIDs;
 	InterfaceIdentifiers = &GlobalInterfaces;
+
+
+//	INTERFACE_LIST = NULL;
+//	FUNCTION_LIST = NULL;
 }
 
 Symbol AddSymbol(Table tbl, Symbol sym, unsigned int hashKey)

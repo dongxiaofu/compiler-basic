@@ -275,13 +275,13 @@ AstQualifiedIdent ParseQualifiedIdent(){
 	CREATE_AST_NODE(ident, QualifiedIdent);
 	AstExpression expr1 = ParseIdentifier();	
 	if(expr1 == NULL){
-		ERROR("QualifiedIdent的PackageName不能是NULL\n", "");
+		ERROR("1-QualifiedIdent的PackageName不能是NULL\n", "");
 	}
 	ident->packageName = (char *)(expr1->val.p);
 	EXPECT(TK_DOT);
 	AstExpression expr2 = ParseIdentifier();	
 	if(expr2 == NULL){
-		ERROR("QualifiedIdent的identifier不能是NULL\n", "");
+		ERROR("2-QualifiedIdent的identifier不能是NULL\n", "");
 	}
 	ident->identifier = (char *)(expr2->val.p);
 

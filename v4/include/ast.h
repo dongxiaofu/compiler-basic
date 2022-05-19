@@ -88,13 +88,13 @@ enum nodeKind
 	
 	NK_ForClause, NK_RangeClause,
 
-	NK_ShortVarDecl,
+//	NK_ShortVarDecl,
 
 	NK_EmptyStmt,
 
 	NK_ExpressionStatement,	// 没用到 
 	NK_SelectCaseStatement, NK_ExprSwitchStmt, NK_TypeSwitchStmt,
-	NK_Expression,
+	NK_Expression,	NK_ShortVarDecl,
 	NK_IfStatement,        NK_SwitchStatement,		
     NK_ForStmt,		
 	NK_GotoStatement,       NK_BreakStmt,     NK_ContinueStatement,		
@@ -518,7 +518,7 @@ typedef struct interfaceVariableSymbol{
 } *InterfaceVariableSymbol;
 
 typedef struct astInterfaceSpecifier{
-	AST_NODE_COMMON
+	SPECIFIERS_COMMON
 	AstNode interfaceDecs;
 
 	// TODO 语义分析后使用。
@@ -626,6 +626,7 @@ typedef struct interfaceType{
 	AstFunction methodDecl;
 	AstFunction methodDeclTail;
 	AstMethodSpec methods;
+	int methodCount;
 } *InterfaceType;
 
 typedef struct astFunctionLit{
@@ -701,10 +702,13 @@ FunctionSymbol FSYM;
 AstMethodDeclaration CURRENT_METHOD;
 MethodSymbol MSYM;
 
-static InterfaceType INTERFACE_LIST = NULL;
+// static AstFunction CURRENT;
+// static InterfaceType INTERFACE_LIST = NULL;
+InterfaceType INTERFACE_LIST;
 InterfaceType INTERFACE_CURRENT;
-static AstFunction FUNCTION_LIST = NULL;
-AstFunction FUNCTION_CURRENT;
+// static FunctionSymbol FUNCTION_LIST = NULL;
+FunctionSymbol FUNCTION_LIST;
+FunctionSymbol FUNCTION_CURRENT;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

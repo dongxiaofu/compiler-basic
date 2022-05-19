@@ -19,6 +19,7 @@ void PushStatement(AstStatement stmt, StmtVector v);
 AstStatement PopStatement(StmtVector v);
 
 AstStatement CheckExpressionStmt(AstStatement stmt);
+AstStatement CheckShortVarDecl(AstStatement stmt);
 AstStatement CheckSendStmt(AstStatement stmt);
 AstStatement CheckRecvStmt(AstStatement stmt);
 
