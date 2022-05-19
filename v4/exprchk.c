@@ -99,6 +99,8 @@ AstExpression CheckTypeAssert(AstExpression expr)
 {
 	printf("start CheckTypeAssert\n");
 
+	int typeCheckResult = 1;
+
 	AstExpression kids0 = expr->kids[0];
 	char *valName = (char *)(kids0->val.p);
 	VariableSymbol sym = LookupID(valName);
@@ -246,9 +248,17 @@ AstExpression CheckTypeAssert(AstExpression expr)
 		}
 
 		if(flag2 == 0){
-			ERROR("%s\n", "CheckTypeAssert T没有实现当前接口");
+	//		ERROR("%s\n", "CheckTypeAssert T没有实现当前接口");
+			printf("%s\n", "CheckTypeAssert T没有实现当前接口");
+			typeCheckResult = 0;
 		}
 	}
+
+	union value val;
+	val.i[0] = typeCheckResult;
+	val.i[1] = 0;
+	expr->kids[1] = Constant(T(INT), val);	
+	expr->kids[0] = sym;
 
 	printf("end CheckTypeAssert\n");
 	return expr;
