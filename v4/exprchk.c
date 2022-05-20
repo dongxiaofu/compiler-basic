@@ -472,3 +472,149 @@ void AssignInterfaceVariable(VariableSymbol sym, InitData idata)
 		sym->idata = idata;
 	}
 }
+// Start
+AstExpression CheckCONDITIONAL_OR(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckCONDITIONAL_AND(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckEQUAL(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckNOT_EQUAL(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckLESS(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckLESS_OR_EQUAL(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckGREATER(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckGREATER_OR_EQUAL(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckADD(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckMINUS(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckBINARY_BITWISE_OR(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckBINARY_BITWISE_XOR(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckMUL(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckDIV(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckMOD(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckLEFT_SHIFT(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckRIGHT_SHIFT(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckBITWISE_AND(AstExpression expr)
+{
+
+return expr;
+}
+
+AstExpression CheckBITWISE_AND_NOT(AstExpression expr)
+{
+
+return expr;
+}
+
+// End
+
+AstExpression (*BinaryOPCheckers[])(AstExpression) = {
+	CheckCONDITIONAL_OR,
+	CheckCONDITIONAL_AND,
+	CheckEQUAL,
+	CheckNOT_EQUAL,
+	CheckLESS,
+	CheckLESS_OR_EQUAL,
+	CheckGREATER,
+	CheckGREATER_OR_EQUAL,
+	CheckADD,
+	CheckMINUS,
+	CheckBINARY_BITWISE_OR,
+	CheckBINARY_BITWISE_XOR,
+	CheckMUL,
+	CheckDIV,
+	CheckMOD,
+	CheckLEFT_SHIFT,
+	CheckRIGHT_SHIFT,
+	CheckBITWISE_AND,
+	CheckBITWISE_AND_NOT,
+};
+
+AstExpression CheckBinaryExpression(AstExpression expr)
+{
+	expr->kids[0] = CheckExpression(expr->kids[0]);
+	expr->kids[1] = CheckExpression(expr->kids[1]);
+
+	return BinaryOPCheckers[expr->op - OP_CONDITIONAL_OR](expr);
+}

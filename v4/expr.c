@@ -25,7 +25,6 @@ AstExpression ParseExpressionList(){
 	preExpr = expr;
 	while(current_token.kind==TK_COMMA){
 		NEXT_TOKEN;
-//		//memset(curExpr, 0, sizeof(*curExpr));
 		curExpr = ParseExpression();
 		curExpr->next = NULL;
 		count++;
@@ -55,23 +54,92 @@ unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
  */
 AstExpression ParseExpression(){
 	LOG("%s\n", "parse Expression");
-	AstExpression expr;
-//	CREATE_AST_NODE(expr, Expression);
-	// expr = ParseBinaryExpr(4);
-	// todo 参数prec如何确定？
-//	expr = ParseBinaryExpr(2);
-	// expr = ParseBinaryExpr(7);
-	// OP_CONDITIONAL_OR 是优先级最低的二元运算符号。
-	if(current_token.kind == TK_ADD || current_token.kind == TK_MINUS || current_token.kind == TK_MUL){
-//		expr = ParseUnaryExpr();
-	}else{
-//		expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
-//		expr = ParseBinaryExpr(5);
-	}
-	
-	expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
+	AstExpression expr = ParseBinaryExpr(Prec[OP_CONDITIONAL_OR]);
 
 	return expr;
+}
+
+AstExpression ParseFactor()
+{
+	AstExpression expr = ParseUnaryExpr();
+	return expr;
+}
+
+AstExpression ParseTerm()
+{
+	AstExpression binExpr = NULL;
+//	CREATE_AST_NODE(binExpr, Expression);
+	AstExpression expr = NULL;
+	int flag = 0;
+	do{
+		AstExpression cur;
+		// CREATE_AST_NODE(cur, Expression);
+		if(current_token.kind == TK_MUL){
+			CREATE_AST_NODE(cur, Expression);
+			cur->op = BINARY_OP;
+			cur->kids[0] = expr;
+			flag = 1;
+			NEXT_TOKEN;
+		}
+		expr = ParseFactor();
+		if(flag == 1){
+			cur->kids[1] = expr;
+		//	if(binExpr == NULL){
+		//		binExpr = cur;
+		//	}
+			binExpr = cur;
+			expr = cur;	
+		}else{
+			if(binExpr == NULL){
+			//	binExpr = expr;
+			}
+		}
+	}while(current_token.kind == TK_MUL);
+
+	if(binExpr == NULL){
+		binExpr = expr;
+	}
+	return binExpr;
+}
+
+AstExpression ParseBinaryExpr2(int prec){
+	AstExpression binExpr = NULL;
+//	CREATE_AST_NODE(binExpr, Expression);
+	AstExpression expr = NULL;
+	int flag = 0;
+//	while(1){
+		do{
+			AstExpression cur;
+			// CREATE_AST_NODE(cur, Expression);
+			if(current_token.kind == TK_ADD){
+				CREATE_AST_NODE(cur, Expression);
+				NEXT_TOKEN;
+				cur->kids[0] = expr;
+				flag = 1;
+			}
+			expr = ParseTerm();	
+			if(flag == 1){
+				cur->kids[1] = expr;
+//				if(binExpr == NULL){
+//					binExpr = cur;
+//				}
+				binExpr = cur;
+				expr = cur;
+			//	expr = binExpr;
+			}else{
+			//	cur = expr;
+//				binExpr = cur;
+			}
+			
+		}while(current_token.kind == TK_ADD);
+//	}
+	
+//	binExpr = expr;
+	if(binExpr == NULL){
+		binExpr = expr;
+	}
+
+	return binExpr;
 }
 
 // todo 这个函数难理解。
@@ -79,12 +147,15 @@ AstExpression ParseBinaryExpr(int prec){
 	LOG("%s\n", "parse BinaryExpr");
 	// OP_MUL是优先级最高的二元运算符号。
 	#define HIGHEST_BIN_PREC Prec[OP_MUL]	
+//	#define HIGHEST_BIN_PREC Prec[TK_MUL]	
 
 	AstExpression binExpr;
 	AstExpression expr;
 
-	CREATE_AST_NODE(binExpr, Expression);
-	CREATE_AST_NODE(expr, Expression);
+	int t = HIGHEST_BIN_PREC;
+
+//	CREATE_AST_NODE(binExpr, Expression);
+//	CREATE_AST_NODE(expr, Expression);
 
 	if(prec == HIGHEST_BIN_PREC){
 		expr = ParseUnaryExpr();
@@ -93,15 +164,21 @@ AstExpression ParseBinaryExpr(int prec){
 	}
 
 	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){
+		CREATE_AST_NODE(binExpr, Expression);
+		int op = BINARY_OP;
+		binExpr->op = op;
+		binExpr->kids[0] = expr;
 		NEXT_TOKEN;
 		if(prec == HIGHEST_BIN_PREC){
-			expr = ParseUnaryExpr();
+//			expr = ParseUnaryExpr();
+			binExpr->kids[1] = ParseUnaryExpr();
 		}else{
-			binExpr->op = BINARY_OP;
-			binExpr->kids[0] = expr;
+//			binExpr->op = BINARY_OP;
+	//		binExpr->kids[0] = expr;
 			binExpr->kids[1] = ParseBinaryExpr(prec + 1);
-			expr = binExpr;
+		//	expr = binExpr;
 		}
+		expr = binExpr;
 	}
 
 	return expr;
@@ -441,7 +518,7 @@ AstExpression ParsePrimaryExpr(){
 			}
 		}else if(current_token.kind == TK_LPARENTHESES){
 			NEXT_TOKEN;
-			if(CurrentTokenIn(FIRST_Expression) == 0){
+			if(CurrentTokenIn(FIRST_Expression) == 1){
 //				"(" Expression ")"
 				type = 0;
 			}

@@ -9,6 +9,9 @@ AstCompositeLit ParseCompositeLit();
 
 AstExpression ParseExpressionList();
 AstExpression ParseExpression();
+
+AstExpression ParseFactor();
+AstExpression ParseTerm();
 AstExpression ParseBinaryExpr(int prec);
 AstExpression ParseUnaryExpr();
 

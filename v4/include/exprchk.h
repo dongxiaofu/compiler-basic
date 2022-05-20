@@ -26,6 +26,29 @@ static AstExpression CheckPostfixExpression(AstExpression expr);
 // TODO 占位符，暂时无作用。
 static AstExpression CheckNOPExpression(AstExpression expr);
 
+// Start
+AstExpression CheckCONDITIONAL_OR(AstExpression expr);
+AstExpression CheckCONDITIONAL_AND(AstExpression expr);
+AstExpression CheckEQUAL(AstExpression expr);
+AstExpression CheckNOT_EQUAL(AstExpression expr);
+AstExpression CheckLESS(AstExpression expr);
+AstExpression CheckLESS_OR_EQUAL(AstExpression expr);
+AstExpression CheckGREATER(AstExpression expr);
+AstExpression CheckGREATER_OR_EQUAL(AstExpression expr);
+AstExpression CheckADD(AstExpression expr);
+AstExpression CheckMINUS(AstExpression expr);
+AstExpression CheckBINARY_BITWISE_OR(AstExpression expr);
+AstExpression CheckBINARY_BITWISE_XOR(AstExpression expr);
+AstExpression CheckMUL(AstExpression expr);
+AstExpression CheckDIV(AstExpression expr);
+AstExpression CheckMOD(AstExpression expr);
+AstExpression CheckLEFT_SHIFT(AstExpression expr);
+AstExpression CheckRIGHT_SHIFT(AstExpression expr);
+AstExpression CheckBITWISE_AND(AstExpression expr);
+AstExpression CheckBITWISE_AND_NOT(AstExpression expr);
+// End
+
+AstExpression CheckBinaryExpression(AstExpression expr);
 AstExpression CheckExpression(AstExpression expr);
 // TODO 暂时放在这里。
 AstExpression CheckExpressionList(AstExpression expr);

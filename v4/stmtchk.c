@@ -38,7 +38,7 @@ AstStatement CheckStatement(AstStatement stmt)
 		return NULL;
 	}
 
-	if(stmt->kind - NK_SelectCaseStatement < 0 || stmt->kind - NK_SelectCaseStatement >= 20){
+	if(stmt->kind - NK_SelectCaseStatement < 0 || stmt->kind - NK_SelectCaseStatement > 21){
 		printf("1stmt->kind = %d\n", stmt->kind);
 		return NULL;
 	}

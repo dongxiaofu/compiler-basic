@@ -148,7 +148,8 @@ void CheckFunction(AstFunction p)
 
 	sig->resultSize = resultIndex + 1;
 
-	if(fsym == LookupFunction(fdec) == NULL){
+	// if(fsym == LookupFunction(fdec) == NULL){
+	if(fsym = LookupFunction(fdec) == NULL){
 		AstDeclarator fname = fdec->dec;
 		fsym = AddFunction(fname->id, sig);
 		FSYM = fsym;
