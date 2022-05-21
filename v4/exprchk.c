@@ -523,6 +523,18 @@ return expr;
 
 AstExpression CheckADD(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+
+	if(BothArithType(ty1, ty2)){
+		union value val;
+		val.i[0] = val.i[1] = 0;
+		val.i[0] = expr0->val.i[0] + expr1->val.i[0];
+		return Constant(expr->ty, val);
+	}
 
 return expr;
 }

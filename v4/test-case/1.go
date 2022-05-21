@@ -6,6 +6,6 @@ func test44(){
 	var a int 
 	var b int 
 	var y int
-	y = a + b
+	y = 4 + 9
 	i.(X)
 }

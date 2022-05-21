@@ -19,6 +19,10 @@ enum{
 
 #define IsObjectPtr(ty)		(ty->categ == POINTER && ty->bty->categ != FUNCTION)
 #define IsIntegType(ty)		(BYTE <= ty->categ <= INT)
+// #define IsArithType(ty)		IsIntegType
+#define IsArithType(ty)		(BYTE <= ty->categ <= INT)
+
+#define BothArithType(ty1, ty2)	(IsArithType(ty1) && IsArithType(ty2))
 
 // TODO 定义数据类型的长度，单位是字节还是位？
 #define BYTE_SIZE 1
