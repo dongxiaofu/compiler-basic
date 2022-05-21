@@ -7,5 +7,4 @@ func test44(){
 	var b int 
 	var y int
 	y = 4 + 9
-	i.(X)
 }
