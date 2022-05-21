@@ -63,4 +63,5 @@ Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int searchOut
 VariableSymbol AddVariable(char *name, Type *ty);
 FunctionSymbol AddFunction(char *funcName, Signature sig);
 
+Symbol CreateTemp(Type ty);
 #endif

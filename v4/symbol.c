@@ -218,3 +218,12 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 
 	return fsym;
 }
+
+Symbol CreateTemp(Type ty)
+{
+	Symbol sym = (Symbol)MALLOC(sizeof(struct symbol));
+	sym->ty = ty;
+
+
+	return sym;
+}
