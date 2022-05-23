@@ -7,13 +7,13 @@
 #include "exprchk.h"
 #include "tranexpr.h"
 
-Symbol TranPrimaryExpression(AstExpression expr)
+Symbol TranslatePrimaryExpression(AstExpression expr)
 {
 
 	return expr->val.p;
 }
 
-Symbol TranMemberAccess(AstExpression expr)
+Symbol TranslateMemberAccess(AstExpression expr)
 {
 	// 获取结构体成员的内存地址。
 	AstExpression p = expr;
@@ -25,7 +25,7 @@ Symbol TranMemberAccess(AstExpression expr)
 		coff += fld->offset;
 		p = p->kids[0];
 	}
-	Symbol baseAddr = Addressof(TranExpression(p));
+	Symbol baseAddr = Addressof(TranslateExpression(p));
 
 	// 获取对应内存中的数据。
 	Symbol dst = Offset(expr->ty, baseAddr, 0, coff);
@@ -33,7 +33,7 @@ Symbol TranMemberAccess(AstExpression expr)
 	return dst;
 }
 
-Symbol TranExpression(AstExpression expr)
+Symbol TranslateExpression(AstExpression expr)
 {
 
 	return expr;
@@ -78,11 +78,11 @@ Symbol Offset(Type ty, Symbol addr, int voff, int coff)
 	return t2;
 }
 
-Symbol TranIncDecExpression(AstExpression expr)
+Symbol TranslateIncDecExpression(AstExpression expr)
 {
 	AstExpression canAsign = expr->kids[0];
 	// 写成AstExpression c = canAsign->kids[0]，行不行？
-	AstExpression c = TranExpression(canAsign->kids[0]);
+	AstExpression c = TranslateExpression(canAsign->kids[0]);
 
 	Symbol ret = CreateTemp(canAsign->ty);
 	// 生成一条中间码：
@@ -90,16 +90,16 @@ Symbol TranIncDecExpression(AstExpression expr)
 	// 2. op--Assign
 	// 3. src1--c
 	// 翻译canAsign
-	TranExpression(canAsign);
+	TranslateExpression(canAsign);
 
 	return ret;
 }
 
-Symbol TranCastExpression(AstExpression expr)
+Symbol TranslateCastExpression(AstExpression expr)
 {
 	Type ty = expr->ty;
 	Symbol t = CreateTemp(ty);
-	Symbol src = TranExpression(expr->kids[0]);
+	Symbol src = TranslateExpression(expr->kids[0]);
 	// 生成一条中间码：
 	// 1. dst--t
 	// 2. op--Assign

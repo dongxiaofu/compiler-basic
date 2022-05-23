@@ -45,33 +45,9 @@ lex.o:lex.c
 	#${CC} ${CFLAGS} -c -o $@ $<
 	${CC} ${CFLAGS} -c lex.c
 
-#stmt.o:stmt.c
-#	#${CC} ${CFLAGS} -c -o $@ $<
-#	${CC} ${CFLAGS} -c stmt.c
-#
 transtmt.o:transtmt.c
 	${CC} ${CFLAGS} -c -o $@ $<
 tranexpr.o:tranexpr.c
-	${CC} ${CFLAGS} -c -o $@ $<
-exprchk.o:exprchk.c
-	${CC} ${CFLAGS} -c -o $@ $<
-symbol.o:symbol.c
-	${CC} ${CFLAGS} -c -o $@ $<
-declchk.o:declchk.c
-	${CC} ${CFLAGS} -c -o $@ $<
-stmtchk.o:stmtchk.c
-	${CC} ${CFLAGS} -c -o $@ $<
-input.o:input.c
-	${CC} ${CFLAGS} -c -o $@ $<
-expr.o:expr.c
-	${CC} ${CFLAGS} -c -o $@ $<
-decl.o:decl.c
-	${CC} ${CFLAGS} -c -o $@ $<
-type2.o:type.c
-	${CC} ${CFLAGS} -c -o $@ $<
-stmt.o:stmt.c
-	${CC} ${CFLAGS} -c -o $@ $<
-packages.o:packages.c
 	${CC} ${CFLAGS} -c -o $@ $<
 exprchk.o:exprchk.c
 	${CC} ${CFLAGS} -c -o $@ $<

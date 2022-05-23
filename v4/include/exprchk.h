@@ -13,6 +13,7 @@ void AssignInterfaceVariable(VariableSymbol sym, InitData idata);
 AstExpression Constant(Type ty, union value val);
 AstExpression ScalePointerOffset(AstExpression offset, int scale);
 
+AstExpression CheckUnaryExpression(AstExpression expr);
 AstExpression CheckIncDecExpression(AstExpression expr);
 AstExpression CheckDeccExpression(AstExpression expr);
 AstExpression CheckPrimaryExpression(AstExpression expr);

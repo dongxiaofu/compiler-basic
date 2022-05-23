@@ -39,11 +39,12 @@ OPINFO(OP_BITWISE_AND_NOT,5,"&^",      Binary,     NOP)
 OPINFO(OP_SEND,-1, "<-",      Assignment,     NOP)
 
 
-OPINFO(OP_POS,6,"+",      Assignment,     NOP)
-OPINFO(OP_NEG,6,"-",      Assignment,     NOP)
-OPINFO(OP_BITWISE_XOR,6,"^",      Assignment,     NOP)
-OPINFO(OP_DEREF,6,"*",      Assignment,     NOP)
-OPINFO(OP_NOT,6, "!",      Assignment,     NOP)
+OPINFO(OP_POS,6,"+",      Unary,     NOP)
+OPINFO(OP_NEG,6,"-",      Unary,     NOP)
+OPINFO(OP_BITWISE_XOR,6,"^",      Unary,     NOP)
+OPINFO(OP_DEREF,6,"*",      Unary,     NOP)
+OPINFO(OP_NOT,6, "!",      Unary,     NOP)
+OPINFO(OP_ADDRESS,6, "!",      Unary,     NOP)
 OPINFO(OP_INC,7, "++",      IncDec,     NOP)
 OPINFO(OP_DEC,7, "--",      IncDec,     NOP)
 // TODO 不知道优先级

@@ -661,3 +661,34 @@ AstExpression CheckCastExpression(AstExpression expr)
 
 	return expr;
 }
+
+// 怎么识别一个表达式是不是一元表达式啊？
+// 根据表达式的op无法识别出PrimaryExpr
+AstExpression CheckUnaryExpression(AstExpression expr)
+{
+	switch(expr->op){
+		case OP_POS:		// +
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		case OP_NEG:		// -
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		case OP_NOT:			// !
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		case OP_BITWISE_XOR:		// ^ 
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		case OP_DEREF:				// *
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		case OP_ADDRESS:			// &
+			expr->kids[0] = CheckExpression(expr->kids[0]);
+			break;
+		default:					// PrimaryExpr
+			expr = CheckExpression(expr);
+			break;
+	}
+
+	return expr;
+}
