@@ -107,3 +107,48 @@ Symbol TranslateCastExpression(AstExpression expr)
 	
 	return t;
 }
+
+Symbol TranslateUnaryExpression(AstExpression expr)
+{
+	Symbol sym;
+	Symbol src = TranslateExpression(expr->kids[0]);
+	int op = expr->op;
+	
+	if(op == OP_NOT){
+
+	}
+
+	// +a -> 0 + a
+	// -a -> 0 - a
+	if(op == OP_POS || op == OP_NEG){
+		AstExpression p;
+		CREATE_AST_NODE(p, Expression);
+		p->op = (op == OP_POS ? OP_ADD : OP_MINUS);
+		p->kids[1] = expr->kids[0];
+		union value *val = (union value *)MALLOC(sizeof(union value));
+		val->i[0] = 0;
+		val->i[1] = 0;
+		p->kids[0] = Constant(T(INT), *val);
+
+		sym = TranslateExpression(expr);
+
+		return sym;
+	}
+
+	switch(op){
+		case OP_DEREF:
+			sym = Deref(expr->ty, src);
+			break;
+		case OP_ADDRESS:
+			sym = Addressof(src);
+			break;
+		case OP_BITWISE_XOR:        // ^
+			printf("%s\n", "不知道怎么实现TranslateUnaryExpression"); 
+			break;
+		default:
+			printf("%s\n", "TranslateUnaryExpression default");
+			break;
+	}
+
+	return sym;
+}

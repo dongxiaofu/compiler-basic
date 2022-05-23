@@ -7,6 +7,7 @@ Symbol Addressof(Symbol sym);
 Symbol Deref(Type ty, Symbol addr);
 Symbol Offset(Type ty, Symbol addr, int voff, int coff);
 
+Symbol TranslateUnaryExpression(AstExpression expr);
 Symbol TranslatePrimaryExpression(AstExpression expr);
 Symbol TranslateCastExpression(AstExpression expr);
 Symbol TranslateIncDecExpression(AstExpression expr);
