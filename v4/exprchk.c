@@ -630,3 +630,19 @@ AstExpression CheckBinaryExpression(AstExpression expr)
 
 	return BinaryOPCheckers[expr->op - OP_CONDITIONAL_OR](expr);
 }
+
+// 修改了expr的结构：1. 新增一层结点。2. 新结点是原来的op，旧结点的op修改成+=或-=。
+AstExpression CheckIncDecExpression(AstExpression expr)
+{
+	int op = expr->op == OP_INC ? OP_ADD_ASSIGN : OP_MINUS_ASSIGN;	
+	AstExpression root;
+	CREATE_AST_NODE(root, Expression);
+	root->op = expr->op;
+	root->kids[0] = expr;
+	// TODO 这里的val能直接这样用吗？局部变量作为AST的元素，有问题吗？
+	union value val;
+	val.i[0] = 1;
+	val.i[1] = 0;
+	expr->kids[1] = Constant(T(INT), val); 
+	return expr;
+}

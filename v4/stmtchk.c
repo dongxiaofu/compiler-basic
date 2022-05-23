@@ -306,10 +306,10 @@ AstStatement CheckCompoundStatement(AstStatement stmt)
 
 AstStatement CheckIncDecStmt(AstStatement stmt)
 {
-	AstIncDecStmt incDecStmt = AsIncDec(stmt);
+	AstIncDecStmt incDecStmt = (AstIncDecStmt)stmt;	
 	incDecStmt->expr = CheckExpression(incDecStmt->expr);
-	// TODO 不知道怎么检测是不是加号或减号，暂时不处理。
-	return stmt;
+
+	return (AstStatement)incDecStmt;
 }
 
 AstStatement CheckLabelStmt(AstStatement stmt)

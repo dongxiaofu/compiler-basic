@@ -581,18 +581,21 @@ AstIncDecStmt ParseIncDecStmt(){
 	CREATE_AST_NODE(stmt, IncDecStmt);
 	// todo 要处理expr是空的情况吗？
 	AstExpression expr = ParseExpression();
+	AstExpression rootExpr;
+	CREATE_AST_NODE(rootExpr, Expression);
+	rootExpr->kids[0] = expr;
 //	StartPeekToken();	
 //	if(current_token.kind != TK_INC && current_token.kind != TK_DEC){
 //		EndPeekToken();
 //		expect_token(TK_INC);
 		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
 			NEXT_TOKEN;
+			rootExpr->op = current_token.kind == TK_INC ? OP_INC : OP_DEC;
 		}else{
 			expect_token(TK_INC);
 		}
 //	}
-	stmt->expr = expr;
-	stmt->op = current_token.kind;	
+
 	return stmt;
 }
 

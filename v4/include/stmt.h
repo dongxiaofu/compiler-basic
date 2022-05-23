@@ -212,8 +212,6 @@ typedef struct astRecvStmt{
 typedef struct astIncDecStmt{
 	AST_STATEMENT_COMMON
 	AstExpression expr;
-	// todo token kind用int表示是最好的方式吗？
-	int op;	
 } *AstIncDecStmt;
 
 typedef struct astDeferStmt{
@@ -266,7 +264,6 @@ typedef struct astSelectStmt{
 #define AsSend(stmt)   ((AstSendStmt)stmt)
 #define AsRecv(stmt)   ((AstRecvStmt)stmt)
 #define AsAssign(stmt) ((AstAssignmentsStmt)stmt)
-#define AsIncDec(stmt) ((AstIncDecStmt)stmt)
 #define AsLoop(stmt)   ((AstLoopStatement)stmt)
 #define AsFor(stmt)    ((AstForStmt)stmt)
 #define AsGoto(stmt)   ((AstGotoStatement)stmt)

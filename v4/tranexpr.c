@@ -77,3 +77,20 @@ Symbol Offset(Type ty, Symbol addr, int voff, int coff)
 	
 	return t2;
 }
+
+Symbol TranIncDecExpression(AstExpression expr)
+{
+	AstExpression canAsign = expr->kids[0];
+	// 写成AstExpression c = canAsign->kids[0]，行不行？
+	AstExpression c = TranExpression(canAsign->kids[0]);
+
+	Symbol ret = CreateTemp(canAsign->ty);
+	// 生成一条中间码：
+	// 1. dst--ret
+	// 2. op--Assign
+	// 3. src1--c
+	// 翻译canAsign
+	TranExpression(canAsign);
+
+	return ret;
+}
