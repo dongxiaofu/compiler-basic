@@ -8,6 +8,7 @@ Symbol Deref(Type ty, Symbol addr);
 Symbol Offset(Type ty, Symbol addr, int voff, int coff);
 
 Symbol TranPrimaryExpression(AstExpression expr);
+Symbol TranCastExpression(AstExpression expr);
 Symbol TranIncDecExpression(AstExpression expr);
 Symbol TranMemberAccess(AstExpression expr);
 Symbol TranExpression(AstExpression expr);

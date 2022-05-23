@@ -94,3 +94,16 @@ Symbol TranIncDecExpression(AstExpression expr)
 
 	return ret;
 }
+
+Symbol TranCastExpression(AstExpression expr)
+{
+	Type ty = expr->ty;
+	Symbol t = CreateTemp(ty);
+	Symbol src = TranExpression(expr->kids[0]);
+	// 生成一条中间码：
+	// 1. dst--t
+	// 2. op--Assign
+	// 3. src1--src
+	
+	return t;
+}

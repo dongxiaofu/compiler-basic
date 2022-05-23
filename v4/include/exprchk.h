@@ -22,6 +22,7 @@ AstExpression CheckMemberAccess(AstExpression expr);
 AstExpression CheckTypeAssert(AstExpression expr);
 AstArguments CheckArguments(AstArguments args, SignatureElement *params, int paramCount);
 AstExpression CheckFunctionCall(AstExpression expr);
+AstExpression CheckCastExpression(AstExpression expr);
 
 static AstExpression CheckPostfixExpression(AstExpression expr);
 

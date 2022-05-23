@@ -427,6 +427,9 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 		case OP_CALL:
 			expr = CheckFunctionCall(expr);
 			break;
+		case OP_CAST:
+			expr = CheckCastExpression(expr);
+			break;
 		default:
 			break;
 	}
@@ -644,5 +647,17 @@ AstExpression CheckIncDecExpression(AstExpression expr)
 	val.i[0] = 1;
 	val.i[1] = 0;
 	expr->kids[1] = Constant(T(INT), val); 
+	return expr;
+}
+
+AstExpression CheckCastExpression(AstExpression expr)
+{
+	AstSpecifiers spec = (AstSpecifiers)expr->kids[0];
+	CheckDeclarationSpecifiers(spec);
+	Type ty = spec->ty;
+	expr->ty = ty;
+	expr->kids[0] = CheckExpression(expr->kids[1]);
+	expr->kids[1] = NULL;
+
 	return expr;
 }
