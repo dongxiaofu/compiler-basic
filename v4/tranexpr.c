@@ -152,3 +152,19 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 
 	return sym;
 }
+
+Symbol TranslateArrayIndex(AstExpression expr)
+{
+	AstExpression p = expr->kids[1];
+	int coff = 0;
+
+	while(p){
+		coff += p->kids[0]->val.i[0];
+		p = p->kids[1];
+	}
+
+	Symbol addr = (Symbol)p;	
+	Symbol dst = Offset(expr->ty, addr, NULL, coff);
+
+	return expr->isarray ? Addressof(dst) : dst;
+}
