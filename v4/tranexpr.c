@@ -155,6 +155,7 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 
 Symbol TranslateArrayIndex(AstExpression expr)
 {
+//	AstExpression p = TranslateExpression(expr->kids[1]);
 	AstExpression p = expr->kids[1];
 	int coff = 0;
 
@@ -163,8 +164,61 @@ Symbol TranslateArrayIndex(AstExpression expr)
 		p = p->kids[1];
 	}
 
-	Symbol addr = (Symbol)p;	
+	Symbol addr = TranslateExpression(p);	
 	Symbol dst = Offset(expr->ty, addr, NULL, coff);
 
 	return expr->isarray ? Addressof(dst) : dst;
+}
+
+Symbol TranslateAssignExpression(AstExpression expr)
+{
+	Symbol dst = TranslateExpression(expr->kids[0]);
+	Symbol src = TranslateExpression(expr->kids[1]);
+
+	// 生成一条中间码
+	// 1. op--MOV
+	// 2. dst--dst
+	// 3. src1--src
+
+	return dst;
+}
+
+Symbol TranslateFunctionCall(AstExpression expr)
+{
+	Symbol dst,src1,src2;
+//	int op = CALL;
+//	无返回值的函数。
+	dst = NULL;
+	src1 = TranslateExpression(expr->kids[0]);
+
+	// 必须把经过翻译之后的参数存储到新变量中。
+	// Symbol的next可能有其他作用。
+	// ArgBucket的定义不能放在这里，因为其他函数会用到它。
+	// 把ArgBucket强制转换成Symbol会导致数据错乱，但只要不修改它，使用时再将它还原成ArgBucket
+	// 就能获取正确的数据。
+//	typedef struct argBucket{
+//		Symbol sym;
+//		struct argBucket *link;
+//	} *ArgBucket;
+
+	ArgBucket firstArg = NULL;
+	ArgBucket currentArg = NULL;
+	AstExpression arg = expr->kids[1];
+	while(arg != NULL){
+		Symbol sym = (Symbol)TranslateExpression(arg);
+		if(firstArg == NULL){
+			firstArg = sym;
+			currentArg = sym;
+		}else{
+			currentArg->link = sym;
+			currentArg = sym;
+		}
+		arg = arg->next;
+	}
+
+	// 生成一条中间码，函数调用的中间代码。
+
+	// 无返回值的函数的调用，返回值应该是什么？
+	return NULL;
+	
 }

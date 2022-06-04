@@ -1076,10 +1076,12 @@ AstExpression ParseMethodExpr(){
 //
 AstExpression ParseCall()
 {
-	ParseOperandName();
+	AstExpression expr;
+	CREATE_AST_NODE(expr, Expression);
+	expr->kids[0] = ParseOperandName();
 	EXPECT(TK_LPARENTHESES);
-	ParseExpressionList();
+	expr->kids[1] = ParseExpressionList();
 	EXPECT(TK_RPARENTHESES);
 
-	return NULL;
+	return expr;
 }

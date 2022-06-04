@@ -347,7 +347,7 @@ check_call:
 	SignatureElement *params = sig->params;
 	int paramCount = sig->paramSize;
 	args = CheckArguments(args, params, paramCount);	
-	expr->kids[1] = args;
+	expr->kids[1] = args->args;
 
 	return expr;
 }

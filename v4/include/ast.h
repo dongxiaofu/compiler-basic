@@ -348,6 +348,11 @@ typedef struct symbol{
 	SYMBOL_COMMON
 } *Symbol;
 
+typedef struct argBucket{
+	Symbol sym;
+	struct argBucket *link;
+} *ArgBucket;
+
 typedef struct functionSymbol{
 	SYMBOL_COMMON
 	Symbol params;
