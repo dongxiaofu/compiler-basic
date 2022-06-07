@@ -12,7 +12,7 @@
 #define ERROR(fmt, msg)	printf(fmt, msg);\
 					exit(-2);
 
-enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM};
+enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN};
 
 struct mblock
 {
@@ -142,6 +142,7 @@ static char TypeNames[][16] = {
 union value
 {
 	int i[2];
+	int boolean;
 	float f;
 	double d;
 	void *p;

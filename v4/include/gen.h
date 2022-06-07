@@ -6,6 +6,9 @@
 #include "type2.h"
 #include "expr.h"
 
+// TODO 中间代码中的opcode
+enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,DEC, INC, NOP};
+
 typedef struct irinst
 {
 	struct irinst *prev;
@@ -35,5 +38,22 @@ struct cfgedge
 	struct cfgedge *next;
 // } *CFGEdge;
 };
+
+static BBlock CurrentBBlock;
+
+void AppendPrecursors(BBlock head, BBlock tail);
+void AppendSuccessors(BBlock head, BBlock tail);
+void DrawCFGEdge(BBlock head, BBlock tail);
+
+void AppendIRInst(IRInst irinst);
+void GenerateMov(Type ty, Symbol dst, Symbol src);
+void GenerateJmp(BBlock bb);
+void GenerateBranch(Type ty, BBlock dest, int opcode, Symbol src1, Symbol src2);
+void GenerateAssign(Type ty, int opcode, Symbol dst, Symbol src1, Symbol src2);
+void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, ArgBucket arg);
+
+BBlock CreateBBlock();
+void StartBBlock(BBlock bblock);
+
 
 #endif

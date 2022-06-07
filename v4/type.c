@@ -680,6 +680,9 @@ void SetupTypeSystem(){
 //	T(INT)->size = 5;
  	T(BYTE)->size = BYTE_SIZE;	
  	T(INT)->size = INT_SIZE;
+
+
+ 	T(BOOLEAN)->size = BOOL_SIZE;
 }
 
 AstSpecifiers ParseTypeNameType(char *typeName)
