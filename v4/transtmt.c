@@ -8,7 +8,6 @@
 #include "tranexpr.h"
 #include "transtmt.h"
 
-
 void Translate(AstTranslationUnit transUnit)
 {
 	printf("%s\n", "Start Translate");
@@ -86,7 +85,7 @@ AstStatement (*StmtTranslaters[])(AstStatement) = {
 	TranslateAssignmentsStmt
 };
 
-Symbol TranslateStatement(AstStatement stmt)
+void TranslateStatement(AstStatement stmt)
 {
 	if(stmt == NULL){
 		printf("empty stmt\n");
@@ -99,137 +98,146 @@ Symbol TranslateStatement(AstStatement stmt)
 	}
 	
 	printf("stmt index = %d\n", stmt->kind - NK_SelectCaseStatement);
-	return (*StmtTranslaters[stmt->kind - NK_SelectCaseStatement])(stmt);
+	(*StmtTranslaters[stmt->kind - NK_SelectCaseStatement])(stmt);
 }
 
-Symbol TranslateExprSwitchStmt(AstStatement stmt)
+void TranslateExprSwitchStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateTypeSwitchStmt(AstStatement stmt)
+void TranslateTypeSwitchStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateSelectCaseStatement(AstStatement stmt)
+void TranslateSelectCaseStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateExpressionStmt(AstStatement stmt)
+void TranslateExpressionStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateShortVarDecl(AstStatement stmt)
+void TranslateShortVarDecl(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateIfStatement(AstStatement stmt)
+void TranslateIfStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+	BBlock trueBB, nextBB, falseBB;
+
+	trueBB = CreateBBlock();
+	nextBB = CreateBBlock();
+
+	AstIfStatement ifStmt = AsIf(stmt);
+	if(ifStmt->simpleStmt){
+		TranslateStatement((AstStatement)ifStmt->simpleStmt);
+	}		
+
+	if(ifStmt->elseStmt == NULL){
+		TranslateBranch(Not(ifStmt->expr), nextBB, trueBB);
+
+		StartBBlock(trueBB);
+		TranslateStatement((AstStatement)ifStmt->thenStmt);
+
+	}else{
+		falseBB = CreateBBlock();
+
+		TranslateBranch(Not(ifStmt->expr), falseBB, trueBB);
+
+		StartBBlock(trueBB);
+		TranslateStatement((AstStatement)ifStmt->thenStmt);
+		GenerateJmp(nextBB);
+
+		StartBBlock(falseBB);
+		TranslateStatement(ifStmt->elseStmt);
+	}
+
+	StartBBlock(nextBB);
 }
 
-Symbol TranslateSwitchStatement(AstStatement stmt)
+void TranslateSwitchStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateForStmt(AstStatement stmt)
+void TranslateForStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateGotoStatement(AstStatement stmt)
+void TranslateGotoStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateBreakStatement(AstStatement stmt)
+void TranslateBreakStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateContinueStatement(AstStatement stmt)
+void TranslateContinueStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateReturnStatement(AstStatement stmt)
+void TranslateReturnStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateCompoundStatement(AstStatement stmt)
+void TranslateCompoundStatement(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateIncDecStmt(AstStatement stmt)
+void TranslateIncDecStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateLabelStmt(AstStatement stmt)
+void TranslateLabelStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateDeferStmt(AstStatement stmt)
+void TranslateDeferStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateFallthroughStmt(AstStatement stmt)
+void TranslateFallthroughStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateSelectStmt(AstStatement stmt)
+void TranslateSelectStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateGoStmt(AstStatement stmt)
+void TranslateGoStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateSendStmt(AstStatement stmt)
+void TranslateSendStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateRecvStmt(AstStatement stmt)
+void TranslateRecvStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
 
-Symbol TranslateAssignmentsStmt(AstStatement stmt)
+void TranslateAssignmentsStmt(AstStatement stmt)
 {
-    Symbol sym;
-    return sym;
+
 }
+
+

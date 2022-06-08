@@ -128,12 +128,19 @@ AstStatement CheckIfStatement(AstStatement stmt)
 	ifStmt->expr = CheckExpression(ifStmt->expr);
 	ifStmt->thenStmt = CheckBlock(ifStmt->thenStmt);
 
-	if(ifStmt->elseIfStmt){
-		ifStmt->elseIfStmt = CheckIfStatement(ifStmt->elseIfStmt);
-	}
+// TODO AstIfStatement的结构已经发生变化，不再把elseIfStmt存储到单独的成员中。
+//	if(ifStmt->elseIfStmt){
+//		ifStmt->elseIfStmt = CheckIfStatement(ifStmt->elseIfStmt);
+//	}
 
 	if(ifStmt->elseStmt){
-		ifStmt->elseStmt = CheckBlock(ifStmt->elseStmt);
+		if(ifStmt->elseStmt->kind == NK_Block){
+			// ifStmt->elseStmt = CheckBlock(ifStmt->elseStmt);
+			// 由于CheckBlock的参数是指针，因此，不需要依靠它的返回值获取修改之后的返回结果。
+			CheckBlock(ifStmt->elseStmt);
+		}else{
+			ifStmt->elseStmt = CheckStatement(ifStmt->elseStmt);
+		}
 	}
 
 	return stmt;

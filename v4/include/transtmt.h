@@ -1,29 +1,28 @@
 #ifndef TRAN_STMT_H
 #define TRAN_STMT_H
 
-Symbol TranslateExprSwitchStmt(AstStatement stmt);
-Symbol TranslateTypeSwitchStmt(AstStatement stmt);
-Symbol TranslateSelectCaseStatement(AstStatement stmt);
-Symbol TranslateExpressionStmt(AstStatement stmt);
-Symbol TranslateShortVarDecl(AstStatement stmt);
-Symbol TranslateIfStatement(AstStatement stmt);
-Symbol TranslateSwitchStatement(AstStatement stmt);
-Symbol TranslateForStmt(AstStatement stmt);
-Symbol TranslateGotoStatement(AstStatement stmt);
-Symbol TranslateBreakStatement(AstStatement stmt);
-Symbol TranslateContinueStatement(AstStatement stmt);
-Symbol TranslateReturnStatement(AstStatement stmt);
-Symbol TranslateCompoundStatement(AstStatement stmt);
-Symbol TranslateIncDecStmt(AstStatement stmt);
-Symbol TranslateLabelStmt(AstStatement stmt);
-Symbol TranslateDeferStmt(AstStatement stmt);
-Symbol TranslateFallthroughStmt(AstStatement stmt);
-Symbol TranslateSelectStmt(AstStatement stmt);
-Symbol TranslateGoStmt(AstStatement stmt);
-Symbol TranslateSendStmt(AstStatement stmt);
-Symbol TranslateRecvStmt(AstStatement stmt);
-Symbol TranslateAssignmentsStmt(AstStatement stmt);
-Symbol TranslateStatement(AstStatement stmt);
+void TranslateExprSwitchStmt(AstStatement stmt);
+void TranslateTypeSwitchStmt(AstStatement stmt);
+void TranslateSelectCaseStatement(AstStatement stmt);
+void TranslateExpressionStmt(AstStatement stmt);
+void TranslateShortVarDecl(AstStatement stmt);
+void TranslateIfStatement(AstStatement stmt);
+void TranslateSwitchStatement(AstStatement stmt);
+void TranslateForStmt(AstStatement stmt);
+void TranslateGotoStatement(AstStatement stmt);
+void TranslateBreakStatement(AstStatement stmt);
+void TranslateContinueStatement(AstStatement stmt);
+void TranslateReturnStatement(AstStatement stmt);
+void TranslateCompoundStatement(AstStatement stmt);
+void TranslateIncDecStmt(AstStatement stmt);
+void TranslateLabelStmt(AstStatement stmt);
+void TranslateDeferStmt(AstStatement stmt);
+void TranslateFallthroughStmt(AstStatement stmt);
+void TranslateSelectStmt(AstStatement stmt);
+void TranslateGoStmt(AstStatement stmt);
+void TranslateSendStmt(AstStatement stmt);
+void TranslateRecvStmt(AstStatement stmt);
+void TranslateAssignmentsStmt(AstStatement stmt);
 
 FunctionSymbol TranslateFunction(AstFunction function);
 void Translate(AstTranslationUnit transUnit);

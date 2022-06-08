@@ -77,7 +77,7 @@ typedef struct astIfStatement
 	AstStatement simpleStmt;
 	AstExpression expr;
 	AstBlock	thenStmt;
-	AstStatement elseIfStmt;
+	// AstStatement elseIfStmt;
 	AstBlock   elseStmt;
 } *AstIfStatement;
 
