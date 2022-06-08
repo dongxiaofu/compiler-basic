@@ -8,8 +8,14 @@
 
 void AppendIRInst(IRInst irinst)
 {
-
-
+	// TODO the code is error
+//	IRInst lastIrinst = CurrentBBlock->irinst;
+//	lastIrinst->next = irinst;
+//	irinst->prev = lastIrinst;
+	CurrentBBlock->irinst->prev->next = irinst;
+	irinst->prev = CurrentBBlock->irinst->prev->next;
+	irinst->next = CurrentBBlock->irinst;
+	CurrentBBlock->irinst->prev = irinst;
 }
 
 void GenerateMov(Type ty, Symbol dst, Symbol src)
