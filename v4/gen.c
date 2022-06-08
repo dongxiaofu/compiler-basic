@@ -12,10 +12,15 @@ void AppendIRInst(IRInst irinst)
 //	IRInst lastIrinst = CurrentBBlock->irinst;
 //	lastIrinst->next = irinst;
 //	irinst->prev = lastIrinst;
-	CurrentBBlock->irinst->prev->next = irinst;
-	irinst->prev = CurrentBBlock->irinst->prev->next;
-	irinst->next = CurrentBBlock->irinst;
-	CurrentBBlock->irinst->prev = irinst;
+//	CurrentBBlock->irinst->prev->next = irinst;
+//	irinst->prev = CurrentBBlock->irinst->prev->next;
+//	irinst->next = CurrentBBlock->irinst;
+//	CurrentBBlock->irinst->prev = irinst;
+
+	CurrentBBlock->irinst.prev->next = irinst;
+	irinst->prev = CurrentBBlock->irinst.prev->next;
+	irinst->next = &CurrentBBlock->irinst;
+	CurrentBBlock->irinst.prev = irinst;
 }
 
 void GenerateMov(Type ty, Symbol dst, Symbol src)
@@ -112,8 +117,8 @@ void DrawCFGEdge(BBlock head, BBlock tail)
 BBlock CreateBBlock()
 {
 	BBlock bblock = (BBlock)MALLOC(sizeof(struct bblock));
-	bblock->irinst->opcode = NOP;	
-	bblock->irinst->prev = bblock->irinst->next = &bblock->irinst;
+	bblock->irinst.opcode = NOP;	
+	bblock->irinst.prev = bblock->irinst.next = &bblock->irinst;
 	
 	return bblock;
 }
@@ -123,7 +128,7 @@ void StartBBlock(BBlock bblock)
 	CurrentBBlock->next = bblock;
 	bblock->prev = CurrentBBlock;
 
-	IRInst lastIrinst = CurrentBBlock->irinst->prev;
+	IRInst lastIrinst = CurrentBBlock->irinst.prev;
 	if(lastIrinst->opcode != JMP){
 		DrawCFGEdge(CurrentBBlock, bblock);
 	}

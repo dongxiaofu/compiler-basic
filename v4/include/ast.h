@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "grammer.h"
+// #include "gen.h"
 // TODO 这一行代码会导致稀奇古怪的错误。原因不明。
 // #include "symbol.h"
 //
@@ -349,6 +350,29 @@ typedef struct symbol{
 	SYMBOL_COMMON
 } *Symbol;
 
+typedef struct irinst
+{
+	struct irinst *prev;
+	struct irinst *next;
+	Type ty;
+	int opcode;
+	Symbol opds[3];
+} *IRInst;
+
+// typedef struct *cfgedge CFGEdge;
+typedef struct cfgedge *CFGEdge;
+
+typedef struct bblock
+{
+	struct bblock *prev;
+	struct bblock *next;
+//	IRInst irinst;
+	struct irinst irinst;
+	Symbol sym;
+	CFGEdge precursors;
+	CFGEdge successors;	
+} *BBlock;
+
 typedef struct argBucket{
 	Symbol sym;
 	struct argBucket *link;
@@ -359,6 +383,9 @@ typedef struct functionSymbol{
 	Symbol params;
 	Symbol results;
 	Symbol locals;
+
+	BBlock entryBB;
+	BBlock exitBB;
 } *FunctionSymbol;
 
 typedef struct variableSymbol{
@@ -622,6 +649,9 @@ typedef struct astFunction
 		AstBlock block;
         int hasReturn;
 		FunctionSymbol fsym;
+	
+		BBlock entryBB;
+		BBlock exitBB;
 
 		StmtVector breakable;
 		StmtVector loops;		
@@ -715,6 +745,8 @@ InterfaceType INTERFACE_CURRENT;
 // static FunctionSymbol FUNCTION_LIST = NULL;
 FunctionSymbol FUNCTION_LIST;
 FunctionSymbol FUNCTION_CURRENT;
+	
+BBlock CurrentBBlock;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);
