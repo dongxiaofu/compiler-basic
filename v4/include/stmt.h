@@ -129,6 +129,8 @@ typedef struct astForStmt{
 	AstRangeClause rangeClause;
 	AstStatement body;
 
+	BBlock testBB;
+	BBlock loopBB;
 	BBlock contBB;
 	BBlock nextBB;
 } *AstForStmt;
@@ -171,7 +173,7 @@ typedef struct astGotoStatement
 typedef struct astContinueStatement
 {   
 	AST_STATEMENT_COMMON
-	AstLoopStatement target;
+	AstStatement target;
 	char *id;
 } *AstContinueStatement;
 // return [expression];

@@ -176,6 +176,13 @@ void TranslateForStmt(AstStatement stmt)
 	nextBB = CreateBBlock();
 
 	AstForStmt forStmt = AsFor(stmt);
+
+	// for语句并非总是由这些基本块组成，但我简单处理成这样。
+	forStmt->testBB = testBB;
+	forStmt->loopBB = loopBB;
+	forStmt->contBB = contBB;
+	forStmt->nextBB = nextBB;
+
 	if(forStmt->condition){
 		StartBBlock(testBB);	
 		TranslateBranch(Not(forStmt->condition), nextBB, loopBB);
@@ -222,7 +229,7 @@ void TranslateBreakStatement(AstStatement stmt)
 void TranslateContinueStatement(AstStatement stmt)
 {
 	AstContinueStatement continueStmt = AsCont(stmt);
-	GenerateJmp(continueStmt->target->contBB);
+	GenerateJmp(AsFor(continueStmt->target)->contBB);
 
 	// 此处新建基本块，有什么用？
 	StartBBlock(CreateBBlock());
@@ -251,7 +258,10 @@ void TranslateCompoundStatement(AstStatement stmt)
 
 void TranslateIncDecStmt(AstStatement stmt)
 {
+	AstIncDecStmt incDecStmt = (AstIncDecStmt)stmt;
+	TranslateExpression(incDecStmt->expr);
 
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateLabelStmt(AstStatement stmt)
