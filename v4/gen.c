@@ -135,3 +135,13 @@ void StartBBlock(BBlock bblock)
 
 	CurrentBBlock = bblock;
 }
+
+void GenerateReturn(Type ty, Symbol dest)
+{
+	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
+	irinst->ty = ty;
+	irinst->opcode = RET;
+	irinst->opds[0] = dest;
+	irinst->opds[1] = irinst->opds[2] = NULL;
+	AppendIRInst(irinst);
+}

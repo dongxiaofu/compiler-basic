@@ -8,7 +8,7 @@
 #include "expr.h"
 
 // TODO 中间代码中的opcode
-enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,DEC, INC, NOP};
+enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,DEC, INC, RET, NOP};
 
 // typedef struct irinst
 // {
@@ -51,6 +51,7 @@ void AppendIRInst(IRInst irinst);
 void GenerateMov(Type ty, Symbol dst, Symbol src);
 void GenerateJmp(BBlock bb);
 void GenerateBranch(Type ty, BBlock dest, int opcode, Symbol src1, Symbol src2);
+void GenerateReturn(Type ty, Symbol dest);
 void GenerateAssign(Type ty, int opcode, Symbol dst, Symbol src1, Symbol src2);
 void GenerateFunctionCall(Type ty, Symbol recv, Symbol faddr, ArgBucket arg);
 

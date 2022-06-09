@@ -167,7 +167,43 @@ void TranslateSwitchStatement(AstStatement stmt)
 
 void TranslateForStmt(AstStatement stmt)
 {
+	BBlock initBB, testBB, loopBB, contBB, nextBB;
 
+//	initBB = CreateBBlock();
+	testBB = CreateBBlock();
+	loopBB = CreateBBlock();
+	contBB = CreateBBlock();
+	nextBB = CreateBBlock();
+
+	AstForStmt forStmt = AsFor(stmt);
+	if(forStmt->condition){
+		StartBBlock(testBB);	
+		TranslateBranch(Not(forStmt->condition), nextBB, loopBB);
+		StartBBlock(loopBB);
+		TranslateStatement((AstStatement)forStmt->body);
+		GenerateJmp(testBB);
+	}
+
+	if(forStmt->forClause){
+		AstForClause forClause = forStmt->forClause;
+		TranslateStatement(forClause->initStmt);		
+
+		StartBBlock(testBB);
+		TranslateBranch(Not(forClause->condition), nextBB, loopBB);
+
+		StartBBlock(loopBB);	
+		TranslateStatement((AstStatement)forStmt->body);
+
+		StartBBlock(contBB);
+		TranslateStatement(forClause->postStmt);
+		GenerateJmp(testBB);
+	}
+
+	if(forStmt->rangeClause){
+		ERROR("%s\n", "不支持翻译range类型的for语句");
+	}
+
+	StartBBlock(nextBB);
 }
 
 void TranslateGotoStatement(AstStatement stmt)
@@ -177,7 +213,10 @@ void TranslateGotoStatement(AstStatement stmt)
 
 void TranslateBreakStatement(AstStatement stmt)
 {
+	AstBreakStmt breakStmt = AsBreak(stmt);
+	GenerateJmp(AsFor(breakStmt->target)->nextBB);
 
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateContinueStatement(AstStatement stmt)
@@ -187,7 +226,18 @@ void TranslateContinueStatement(AstStatement stmt)
 
 void TranslateReturnStatement(AstStatement stmt)
 {
+	AstReturnStatement returnStmt = AsRet(stmt);
+	AstExpression expr = returnStmt->expr;
 
+	if(expr != NULL){
+		GenerateReturn(expr->ty, TranslateExpression(expr));
+// 我并不知道为什么要把这行代码放在下面。
+//		GenerateJmp(FSYM->exitBB);
+	}
+
+	GenerateJmp(FSYM->exitBB);
+	// 结束一个基本块后，要马上开启另一个基本块。我只能这样理解这个问题。
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateCompoundStatement(AstStatement stmt)

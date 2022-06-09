@@ -128,6 +128,8 @@ typedef struct astForStmt{
 	AstForClause forClause;
 	AstRangeClause rangeClause;
 	AstStatement body;
+
+	BBlock nextBB;
 } *AstForStmt;
 
 /**

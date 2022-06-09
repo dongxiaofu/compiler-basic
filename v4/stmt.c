@@ -392,8 +392,6 @@ AstReturnStatement ParseReturnStatement(){
 		expr = ParseExpressionList();
 	}	
 
-//	expect_semicolon;
-
 	AstReturnStatement stmt;
 	CREATE_AST_NODE(stmt, ReturnStatement);
 	
