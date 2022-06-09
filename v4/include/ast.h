@@ -688,6 +688,8 @@ typedef struct astShortVarDecl{
 	AST_NODE_COMMON
 	AstExpression identifierList;
 	AstExpression expressionList;
+	// 存储语义检查之后创建的赋值表达式单链表。
+	AstExpression expr;
 } *AstShortVarDecl;
 
 typedef struct astMethodDeclaration{

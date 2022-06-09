@@ -123,7 +123,14 @@ void TranslateExpressionStmt(AstStatement stmt)
 
 void TranslateShortVarDecl(AstStatement stmt)
 {
+	AstShortVarDecl shortVarDecl = (AstShortVarDecl)stmt;
+	AstExpression expr = shortVarDecl->expr;
+	while(expr != NULL){
+		TranslateExpression(expr);
+		expr = expr->next;
+	}
 
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateIfStatement(AstStatement stmt)

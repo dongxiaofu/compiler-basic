@@ -469,5 +469,32 @@ AstStatement CheckShortVarDecl(AstStatement stmt)
 		CheckExpression(expr);
 		expr = expr->next;
 	}
+
+	AstExpression dst = identifierList;
+	AstExpression src = expressionList;
+	AstExpression head = NULL;
+	AstExpression cur, pre;
+	
+	while(dst != NULL && src != NULL){
+
+		CREATE_AST_NODE(cur, Expression);
+		cur->op = OP_ASSIGN;
+		cur->kids[0] = dst;
+		cur->kids[1] = src;
+
+		if(head == NULL){
+			head = cur;
+			pre = cur;
+		}else{
+			pre->next = cur;	
+			pre = cur;
+		}
+
+		dst = dst->next;
+		src = src->next;
+	}
+
+	shortVarDecl->expr = head;
+
 	return stmt;
 }

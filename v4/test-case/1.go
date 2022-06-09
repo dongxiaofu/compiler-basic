@@ -2,27 +2,29 @@ package main
 
 import "unsafe"
 
-func test44(){
+func test44() int {
 	var a int 
 	var b int 
-	var y int
-	y = 4 + 9
+	var g int
+	g = 4 + 9
 
-	var x int  = 5	
+	var k int  = 5	
 	var max int = 7
 
-	if x > max {
-		x = max
+	if k > max {
+		k = max
 	}
 
-	var y,z int
+	var y int
+	var z int
 
-	if x := f(); x < y {
-	return x
-} else if x > z {
-	return z
-} else {
-	return y
-}
+	if y == 8 {
+		return y
+	}else{
+		y = 9
+	}
+
+	return 8
+
 	
 }
