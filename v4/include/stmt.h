@@ -129,6 +129,7 @@ typedef struct astForStmt{
 	AstRangeClause rangeClause;
 	AstStatement body;
 
+	BBlock contBB;
 	BBlock nextBB;
 } *AstForStmt;
 

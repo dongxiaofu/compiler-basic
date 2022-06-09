@@ -221,7 +221,11 @@ void TranslateBreakStatement(AstStatement stmt)
 
 void TranslateContinueStatement(AstStatement stmt)
 {
+	AstContinueStatement continueStmt = AsCont(stmt);
+	GenerateJmp(continueStmt->target->contBB);
 
+	// 此处新建基本块，有什么用？
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateReturnStatement(AstStatement stmt)
