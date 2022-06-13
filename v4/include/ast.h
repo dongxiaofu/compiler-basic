@@ -682,6 +682,7 @@ typedef struct astExprSwitchStmt{
 	AstStatement simpleStmt;
 	AstExpression expr;
 	AstExprCaseClause exprCaseClause;
+	int caseCount;
 } *AstExprSwitchStmt;
 
 typedef struct astShortVarDecl{

@@ -1238,7 +1238,14 @@ AstExprCaseClause ParseExprCaseClause(){
 	CREATE_AST_NODE(headExprCaseClause, ExprCaseClause);
 	AstExprCaseClause currentExprCaseClause;	
 
+	// 我在这里又花了很多时间，不能迅速理解，让我很烦。
+	// 这明明是我以前很流畅地写出的代码。可我现在却不理解。多写注释啊。
+	// 思维定势，阻碍我理解代码。
+	// 此处的循环并不是遍历单链表，而是创建单链表。
+	// 在C语言中，可以先把结点加入单链表，再给那个结点赋值。
+	// 上面两点，让我迟迟未能理解我自己以前写的代码。
 	while(current_token.kind == TK_DEFAULT || current_token.kind == TK_CASE){
+		// 把结点加入单链表。
 		AstExprCaseClause exprCaseClause;	
 		CREATE_AST_NODE(exprCaseClause, ExprCaseClause);
 		if(headExprCaseClause->next == NULL){
@@ -1248,6 +1255,7 @@ AstExprCaseClause ParseExprCaseClause(){
 			currentExprCaseClause->next = exprCaseClause;
 			currentExprCaseClause = exprCaseClause;
 		}
+		// 给结点赋值。
 		exprCaseClause->exprSwitchCase = ParseExprSwitchCase();
 		expect_token(TK_COLON);
 		exprCaseClause->statementList = ParseStatementList();
@@ -1375,7 +1383,9 @@ AstExprSwitchStmt ParseExprSwitchStmt(){
 
 	// 处理 "{" { ExprCaseClause } "}"
 	expect_token(TK_LBRACE);
-	exprSwitchStmt->exprCaseClause = ParseExprCaseClause();
+	AstExprCaseClause exprCaseClause = ParseExprCaseClause();	
+	exprSwitchStmt->exprCaseClause = exprCaseClause;
+
 	expect_token(TK_RBRACE);
 	expect_semicolon;
 	

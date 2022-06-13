@@ -137,7 +137,7 @@ Symbol TranslateIncDecExpression(AstExpression expr)
 	irinst->opcode = ADD;
 	irinst->opds[0] = ret;
 	irinst->opds[1] = c;
-	irinst->opds[1] = canAsign->kids[1];
+	irinst->opds[2] = canAsign->kids[1];
 	AppendIRInst(irinst);
 	// 生成一条中间码：
 	// 1. dst--c

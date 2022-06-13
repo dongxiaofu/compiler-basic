@@ -101,9 +101,72 @@ void TranslateStatement(AstStatement stmt)
 	(*StmtTranslaters[stmt->kind - NK_SelectCaseStatement])(stmt);
 }
 
+/**
+ * 思路是：
+ * 1. 把switch(expr)中的expr记作A，把case expr中的expr记作B，把当前case基本块记作C，
+ * 把下一个case基本块记作B，把紧跟在switch基本块后面的基本块记作N。
+ * 2. 处理第一个case，比较A和B。
+ * 3. A == B，进入C，C的最后一条中间码是跳转到N。
+ * 4. A != B, 跳转到B。 
+ */
 void TranslateExprSwitchStmt(AstStatement stmt)
 {
+	BBlock nextBB,nextCaseBB;
+	nextBB = CreateBBlock();
 
+	AstExprSwitchStmt switchStmt = AsExprSwitchStmt(stmt);
+	if(switchStmt->simpleStmt){
+		TranslateStatement((AstStatement)switchStmt->simpleStmt);
+	}
+
+	Symbol caseSym;
+	if(switchStmt->expr){
+		caseSym = TranslateExpression(switchStmt->expr);
+	}else{
+		caseSym = (Symbol)MALLOC(sizeof(struct symbol));
+		caseSym->kind = SK_BOOLEAN;
+		union value val;
+		val.boolean = 1;
+		caseSym->val = val;
+	}
+
+	// 创建了基本块也没有问题，后期应该可以优化基本块。
+	StartBBlock(CreateBBlock());
+
+	AstExprCaseClause caseClause = switchStmt->exprCaseClause;
+
+	while(caseClause){
+		// 下一个case基本块。
+		nextCaseBB = CreateBBlock();
+
+		// 处理case expr中的expr。
+		AstExpression expr = caseClause->exprSwitchCase;	
+		Symbol sym = TranslateExpression(expr);
+
+		// 如果switch (expr)中的expr不等于当前case中的expr，跳转到下一个case基本块。
+		GenerateBranch(T(VOID), nextCaseBB, JNE, caseSym, sym);
+
+		// 处理case expr:{stmts}中的stmts。
+		AstStatement statement = caseClause->statementList;
+		while(statement){
+		    TranslateStatement(statement);
+		    statement = statement->next;
+		}
+
+		// 执行完当前case基本块后，要跳转到switch基本块的下一个基本块。因为go的switch默认有
+		// 其他语言中的break效果。
+		GenerateJmp(nextBB);
+
+		// 开启下一个基本块。回到循环开头时，正在处理的case基本块就是上一个case基本块的下一个基本块。
+		// 基本块，也和C语言中的指针一样，可以先使用，再填充内容。
+		StartBBlock(nextCaseBB);
+
+		caseClause = caseClause->next;
+	}
+
+	// 这是翻译语句的惯例。翻译完当前基本块后，开启下一个基本块，开始处理下一个基本块时，
+	// 就会把所有中间码存储到这里开启的基本块nextBB中。
+	StartBBlock(nextBB);
 }
 
 void TranslateTypeSwitchStmt(AstStatement stmt)
@@ -118,7 +181,10 @@ void TranslateSelectCaseStatement(AstStatement stmt)
 
 void TranslateExpressionStmt(AstStatement stmt)
 {
+	TranslateExpression((AstExpression)stmt);
 
+	// 虽然只是处理表达式，仍然创建并加入一个基本块。多余的基本块，以后再优化。
+	StartBBlock(CreateBBlock());
 }
 
 void TranslateShortVarDecl(AstStatement stmt)
