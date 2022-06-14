@@ -51,18 +51,19 @@ OPINFO(OP_DEC,7, "--",      IncDec,     NOP)
 OPINFO(OP_RECEIVE,8, "<-",      Assignment,     NOP)
 
 // 新加的运算符。不知道放到哪里合适，先放在这里。start
+// OP_INDEX和OP_ARRAY有什么不一样？
 OPINFO(OP_INDEX,          17,   "nop",    Postfix,          NOP)
 OPINFO(OP_ID,          17,   "",    	  Primary,          NOP)
-OPINFO(OP_ARRAY,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_SLICE,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_ARRAY,          17,   "nop",    Primary,          NOP)
+OPINFO(OP_SLICE,          17,   "nop",    Primary,          NOP)
 OPINFO(OP_DOT,          17,   "nop",    Postfix,          NOP)
 
-OPINFO(OP_CONST,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_STR,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_CONST,          17,   "nop",    Primary,          NOP)
+OPINFO(OP_STR,          17,   "nop",    Primary,          NOP)
 
-OPINFO(OP_COMPOSITELIT,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_FUNC_LIT,          17,   "nop",    NOP,          NOP)
-OPINFO(OP_PACKAGE,          17,   "nop",    NOP,          NOP)
+OPINFO(OP_COMPOSITELIT,          17,   "nop",    Primary,          NOP)
+OPINFO(OP_FUNC_LIT,          17,   "nop",    Primary,          NOP)
+OPINFO(OP_PACKAGE,          17,   "nop",    Primary,          NOP)
 
 
 OPINFO(OP_MEMBER,          17,   "nop",    Postfix,          NOP)

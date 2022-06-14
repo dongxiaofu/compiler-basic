@@ -387,12 +387,58 @@ int CheckAssignOp(int op)
 
 AstStatement CheckAssignmentsStmt(AstStatement stmt)
 {
+	// 做如下检查：
+	// 1. 变量名和变量值是否一一对应。
+	// 2. 待定。
+	// 最终结果是一个语句单链表。
 	AstAssignmentsStmt assignStmt = AsAssign(stmt);
+	AstStatement nextStmt = (AstStatement)assignStmt->next;
 
-	assignStmt->expr->kids[0] = CheckExpressionList(assignStmt->expr->kids[0]);
-	assignStmt->expr->op = CheckAssignOp(assignStmt->expr->op);
-	assignStmt->expr->kids[1] = CheckExpressionList(assignStmt->expr->kids[1]);
+	AstExpression leftExpr = CheckExpressionList(assignStmt->expr->kids[0]);
+	AstExpression rightExpr = CheckExpressionList(assignStmt->expr->kids[1]);
 
+	int leftExprCount = 0;
+	int	rightExprCount = 0;
+
+	AstAssignmentsStmt currentAssignStmt = NULL;
+	AstAssignmentsStmt preAssignStmt = NULL;
+
+	while(leftExpr && rightExpr){
+
+		if(currentAssignStmt == NULL){
+			assignStmt->expr->kids[0] = leftExpr;
+			assignStmt->expr->kids[1] = rightExpr;
+			preAssignStmt = assignStmt;
+
+		}else{
+			leftExpr = CheckExpressionList(leftExpr);
+			rightExpr = CheckExpressionList(rightExpr);
+
+			CREATE_AST_NODE(currentAssignStmt, AssignmentsStmt);
+			currentAssignStmt->expr->kids[0] = leftExpr;
+			currentAssignStmt->expr->kids[1] = rightExpr;
+
+			preAssignStmt->next = currentAssignStmt;
+			preAssignStmt = currentAssignStmt;
+		}
+
+		leftExprCount++;
+		rightExprCount++;
+		leftExpr = leftExpr->next;
+		rightExpr = rightExpr->next;
+	}
+
+	// 使用assert能让我写出正确的代码。
+	assert(leftExpr == NULL || rightExpr == NULL);
+	assert(leftExprCount == rightExprCount);
+	
+	// 把a,b,c = 1,2,3这样的语句拆成了a = 1、b = 2、c = 3这样三个语句。要把
+	// 这些语句加到原来的AST中。
+	if(currentAssignStmt != NULL){
+		currentAssignStmt->next = nextStmt;
+	}
+
+	// 返回stmt或assignStmt都可以。因为，操作的是指针。
 	return stmt;
 }
 

@@ -22,6 +22,7 @@ void TranslateSelectStmt(AstStatement stmt);
 void TranslateGoStmt(AstStatement stmt);
 void TranslateSendStmt(AstStatement stmt);
 void TranslateRecvStmt(AstStatement stmt);
+void TranslateOneAssignmentsStmt(stmt);
 void TranslateAssignmentsStmt(AstStatement stmt);
 
 FunctionSymbol TranslateFunction(AstFunction function);

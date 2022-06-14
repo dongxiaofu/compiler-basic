@@ -326,7 +326,27 @@ void TranslateReturnStatement(AstStatement stmt)
 
 void TranslateCompoundStatement(AstStatement stmt)
 {
+	AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
+	while(compoundStmt != NULL){
+		if(compoundStmt->decls){
+			// TODO 不知道怎么处理。	
+		}
+	
+		if(compoundStmt->labeledStmt != NULL){
+			// TODO 不知道怎么处理。
+		}
+	
+		if(compoundStmt->stmts != NULL){
+			TranslateStatement((AstStatement)compoundStmt->stmts);
+		}
 
+		// 许多AstCompoundStatement语句连接在一起（是这样吗），但AstCompoundStatement语句的下一个
+		// 并非都是AstCompoundStatement语句。
+		if(compoundStmt->kind != NK_CompoundStatement){
+			break;
+		}
+		compoundStmt = compoundStmt->next;
+	}
 }
 
 void TranslateIncDecStmt(AstStatement stmt)
@@ -374,7 +394,17 @@ void TranslateRecvStmt(AstStatement stmt)
 
 void TranslateAssignmentsStmt(AstStatement stmt)
 {
+	while(stmt != NULL){
+		TranslateOneAssignmentsStmt(stmt);
+		stmt = stmt->next;
+	}
 
+	assert(stmt == NULL);
 }
 
-
+void TranslateOneAssignmentsStmt(stmt)
+{
+	// 暂时只处理op是=这样的赋值语句，不处理+=这样的语句。
+	AstAssignmentsStmt asStmt = AsAssign(stmt);
+	TranslateAssignmentExpression(asStmt->expr);
+}

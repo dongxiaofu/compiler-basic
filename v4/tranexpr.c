@@ -14,8 +14,27 @@ static int OPMAPS[] = {
 #undef OPINFO
 };
 
+// Symbol (*ExprCheckers)[](AstExpression) = {
+//Symbol (*ExprCheckers[])(AstExpression) = {
+// tranexpr.c:19:10: error: declaration of 'ExprCheckers' as array of functions
+// Symbol *(ExprCheckers[])(AstExpression) = {
+static Symbol (*ExprCheckers[])(AstExpression) = {
+// static Symbol (* ExprTrans[])(AstExpression)
+#define OPINFO(op, prec, name, func, opcode)    Translate##func##Expression,
+#include "opinfo.h"
+#undef OPINFO
+};
+
 Symbol TranslatePrimaryExpression(AstExpression expr)
 {
+	if(expr->op == OP_CONST){
+		Symbol tmp = (Symbol)MALLOC(sizeof(struct symbol));
+		tmp->kind = SK_CONSTANT;
+		tmp->val = expr->val;
+		tmp->ty = expr->ty;
+
+		return tmp;
+	}
 
 	return expr->val.p;
 }
@@ -42,8 +61,8 @@ Symbol TranslateMemberAccess(AstExpression expr)
 
 Symbol TranslateExpression(AstExpression expr)
 {
-
-	return expr;
+//	assert(expr != NULL);
+	return (ExprCheckers[expr->op])(expr);
 }
 
 Symbol Addressof(Symbol sym)
@@ -237,7 +256,7 @@ Symbol TranslateArrayIndex(AstExpression expr)
 	return expr->isarray ? Addressof(dst) : dst;
 }
 
-Symbol TranslateAssignExpression(AstExpression expr)
+Symbol TranslateAssignmentExpression(AstExpression expr)
 {
 	Symbol dst = TranslateExpression(expr->kids[0]);
 	Symbol src = TranslateExpression(expr->kids[1]);
@@ -429,11 +448,33 @@ Symbol TranslateBinaryExpression(AstExpression expr)
 
 	Symbol src1, src2, dst;
 	src1 = TranslateExpression(expr->kids[0]);
-	src2 = TranslateExpression(expr->kids[2]);
+	src2 = TranslateExpression(expr->kids[1]);
 
 	dst = CreateTemp(expr->ty);
 	int opcode = OPMAPS[expr->op];
 	GenerateAssign(expr->ty, opcode, dst, src1, src2);	
 
 	return dst;
+}
+
+Symbol TranslatePostfixExpression(AstExpression expr)
+{
+	Symbol sym;
+	int op = expr->op;
+	switch(op){
+		case OP_INDEX:
+			sym = TranslateArrayIndex(expr);
+			break;	
+		case OP_CALL:
+			sym = TranslateFunctionCall(expr);
+			break;
+		default:
+			{
+				ERROR("%s\n", "还不知道怎么处理\n");
+
+				break;
+			}
+		
+	}
+
 }

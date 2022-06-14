@@ -13,7 +13,7 @@
 #define ERROR(fmt, msg)	printf(fmt, msg);\
 					exit(-2);
 
-enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN};
+enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT};
 
 struct mblock
 {
