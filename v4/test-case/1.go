@@ -10,7 +10,7 @@ func test44() int {
     var z int
     var k int  = 5
     var max int = 7
-    g = 4 + 9
+    g = 13 + 28
 	a = 5
 
     if k > max {
@@ -27,6 +27,17 @@ func test44() int {
 
 	return k
     return 8
+}
 
+func max2() int {
+   var result int
+	var num3 int = 4
+	var num4 int = 5
 
+   if (num4 > num3) {
+      result = num3
+   } else {
+      result = num4
+   }
+   return result
 }

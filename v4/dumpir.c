@@ -24,6 +24,8 @@ FILE *IRFile;
 
 void DumpIR(IRInst irinst)
 {
+	fprintf(IRFile, "%s", "\t");
+
 	switch(OP){
 		case JMP:
 			{
@@ -32,7 +34,7 @@ void DumpIR(IRInst irinst)
 			}
 		case RET:
 			{
-				fprintf(IRFile, "%s %s\n", "RET", DST->name);
+				fprintf(IRFile, "%s %s\n", "return", DST->name);
 				break;
 			}
 		case MOV:
@@ -67,6 +69,11 @@ void DumpIR(IRInst irinst)
 				char *src2Name = SRC2->name;
 				char *dstName = ((BBlock)DST)->sym->name;
 				fprintf(IRFile, "if(%s %s %s) goto %s\n", src1Name, opcode, src2Name, dstName);
+				break;
+			}
+		case ADD:
+			{
+				fprintf(IRFile, "%s: %s %s %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
 				break;
 			}
 		default:
@@ -110,6 +117,7 @@ void DumpIR(IRInst irinst)
 
 void DumpBBlock(BBlock bblock)
 {
+	fprintf(IRFile, "%s:\n", bblock->sym->name);
 	// 一个基本块中的中间码组成一个双向链表。我写过一次遍历双向链表的代码。
 	// 此刻，再写一次。下一次，我就直接复用之前的代码。
 	IRInst head = &bblock->irinst;
@@ -126,6 +134,8 @@ void DumpFunction(FunctionSymbol fsym)
 	BBlock entryBB = fsym->entryBB;
 	BBlock exitBB = fsym->exitBB;
 
+	fprintf(IRFile, "function %s\n", fsym->name);
+
 	// 所有的基本块组成一个双向链表。但是，函数的基本块有出口基本块，
 	// 所以，遍历函数的基本块，只需要遍历到函数的出口基本块。
 	BBlock bb = entryBB;
@@ -133,6 +143,12 @@ void DumpFunction(FunctionSymbol fsym)
 		DumpBBlock(bb);
 		bb = bb->next;
 	}
+
+	DumpBBlock(exitBB);
+	
+	fprintf(IRFile, "\tret\n");
+
+	fprintf(IRFile, "\n\n");
 }
 
 void DumpTranslateUnit(AstTranslationUnit transUnit)
