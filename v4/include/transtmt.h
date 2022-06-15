@@ -1,6 +1,6 @@
 #ifndef TRAN_STMT_H
 #define TRAN_STMT_H
-
+void TranslateBlock(AstBlock block);
 void TranslateExprSwitchStmt(AstStatement stmt);
 void TranslateTypeSwitchStmt(AstStatement stmt);
 void TranslateSelectCaseStatement(AstStatement stmt);
@@ -26,7 +26,7 @@ void TranslateOneAssignmentsStmt(stmt);
 void TranslateAssignmentsStmt(AstStatement stmt);
 
 void PrintBBlock(BBlock bblock);
-FunctionSymbol TranslateFunction(AstFunction function);
+void TranslateFunction(AstFunction function);
 void Translate(AstTranslationUnit transUnit);
 
 #endif

@@ -7,18 +7,20 @@
 #include "exprchk.h"
 #include "tranexpr.h"
 #include "transtmt.h"
+#include "gen.h"
 
 void Translate(AstTranslationUnit transUnit)
 {
 	printf("%s\n", "Start Translate");
 
-	AstDeclaration p = transUnit->decls;
+	// AstDeclaration p = transUnit->decls;
+	AstNode p = transUnit->decls;
 	VariableSymbol sym;
 
 	while(p){
 		if(p->kind == NK_Function){
 			printf("%s\n", "Translate function loop");
-			TranslateFunction(p);
+			TranslateFunction((AstFunction)p);
 		}
 		p = p->next;
 	}
@@ -72,11 +74,20 @@ Symbol CreateLabel()
 	return sym;
 }
 
-FunctionSymbol TranslateFunction(AstFunction function)
+void TranslateFunction(AstFunction function)
 {
 	printf("%s\n", "Translate function");
 	
-	FunctionSymbol fsym = FSYM;
+	// 这是一个可笑、隐蔽、事出有因的错误。保留它，留个纪念吧。
+	// 解释这个错误。在这个函数之外，经过本函数处理之后的函数的FunctionSymbol变量中的entryBB是0x0。
+	// 这是一个不正确的数值。为什么会这样？
+	// 我在这个函数中正确处理了这个函数，然后，并没有把这种修改保存到AST中，但是，我以为，我已经把
+	// 数据保存到AST中了。我以为，我已经把数据保存到了function中。因为，大量函数都是直接操作指针的。
+	// 思维定势，让我以为，这个函数也是如此。
+	// 还有，当初，我不明白FSYM有啥用。可代码正常运行需要它，为了解决眼前问题写出一些消除错误的代码，可
+	// 最后，我又忘记了处理这个稀里糊涂写出来的FSYM。这就叫做“事出有因”。
+//	FunctionSymbol fsym = FSYM;
+	FSYM = function->fsym;
 
 	// 思路如下：
 	// 1. 创建两个基本块，分别是入口基本块和退出基本块。
@@ -88,8 +99,8 @@ FunctionSymbol TranslateFunction(AstFunction function)
 	BBlock entryBB = CreateBBlock();
 	BBlock exitBB = CreateBBlock();
 
-	fsym->entryBB = entryBB;
-	fsym->exitBB = exitBB;
+	FSYM->entryBB = entryBB;
+	FSYM->exitBB = exitBB;
 
 	CurrentBBlock = entryBB;
 
@@ -113,12 +124,7 @@ FunctionSymbol TranslateFunction(AstFunction function)
 		bb = bb->next;
 	}	
 
-	bb = entryBB;
-	while(bb != NULL){
-		PrintBBlock(bb);
-		bb = bb->next;
-	}	
-	return fsym;
+//	return fsym;
 }
 
 AstStatement (*StmtTranslaters[])(AstStatement) = {
@@ -260,6 +266,15 @@ void TranslateShortVarDecl(AstStatement stmt)
 	StartBBlock(CreateBBlock());
 }
 
+void TranslateBlock(AstBlock block)
+{
+	AstStatement stmt = block->stmt;
+	while(stmt != NULL){
+		TranslateStatement(stmt);
+		stmt = stmt->next;
+	}
+}
+
 void TranslateIfStatement(AstStatement stmt)
 {
 	BBlock trueBB, nextBB, falseBB;
@@ -276,7 +291,8 @@ void TranslateIfStatement(AstStatement stmt)
 		TranslateBranch(Not(ifStmt->expr), nextBB, trueBB);
 
 		StartBBlock(trueBB);
-		TranslateStatement((AstStatement)ifStmt->thenStmt);
+		AstBlock block = ifStmt->thenStmt;
+		TranslateBlock(block);
 
 	}else{
 		falseBB = CreateBBlock();
@@ -284,11 +300,13 @@ void TranslateIfStatement(AstStatement stmt)
 		TranslateBranch(Not(ifStmt->expr), falseBB, trueBB);
 
 		StartBBlock(trueBB);
-		TranslateStatement((AstStatement)ifStmt->thenStmt);
+		AstBlock thenBlock = ifStmt->thenStmt;
+		TranslateBlock(thenBlock);
 		GenerateJmp(nextBB);
 
 		StartBBlock(falseBB);
-		TranslateStatement(ifStmt->elseStmt);
+		AstBlock elseBlock = ifStmt->elseStmt;
+		TranslateBlock(elseBlock);
 	}
 
 	StartBBlock(nextBB);

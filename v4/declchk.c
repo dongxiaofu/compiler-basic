@@ -156,6 +156,7 @@ void CheckFunction(AstFunction p)
 		AstDeclarator fname = fdec->dec;
 		fsym = AddFunction(fname->id, sig);
 		FSYM = fsym;
+		p->fsym = fsym;
 	}else{
 		ERROR("%s\n", "redefine function");
 	}	

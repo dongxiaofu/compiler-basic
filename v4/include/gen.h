@@ -8,7 +8,12 @@
 #include "expr.h"
 
 // TODO 中间代码中的opcode
-enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,JNE,DEC, INC, RET, NOP};
+// enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,JE,JNE,JL,JLE,JG,JGE,DEC, INC, RET, NOP};
+enum {
+#define OPCODE(opcode,opcodeName, func)		opcode,
+#include "opcode.h"
+#undef OPCODE
+};
 
 // typedef struct irinst
 // {

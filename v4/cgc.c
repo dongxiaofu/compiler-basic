@@ -8,6 +8,7 @@
 #include "ast.h"
 #include "packages.h"
 #include "symbol.h"
+#include "dumpir.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
 		CheckTranslationUnit(transUnit);
 		// 翻译成中间代码
 		Translate(transUnit);
+		// 打印IR
+		DumpTranslateUnit(transUnit);
 	
 	return 0;
 }

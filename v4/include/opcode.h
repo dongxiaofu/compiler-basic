@@ -1,0 +1,56 @@
+#ifndef OPCODE
+#error "You must define OPCODE macro before include this file"
+#endif
+// enum {ADDR,DEREF,ADD,MOV,CALL,JMP,JZ,JNZ,JE,JNE,JL,JLE,JG,JGE,DEC, INC, RET, NOP}
+OPCODE(MOV, "=",  Assignment)
+// OPCODE(NOP, "+=",  Assignment)
+// OPCODE(NOP, "-=",  Assignment)
+// OPCODE(NOP, "|=",  Assignment)
+// OPCODE(NOP, "^=",  Assignment)
+// OPCODE(NOP, "*=",  Assignment)
+// OPCODE(NOP, "/=",  Assignment)
+// OPCODE(NOP, "%=",  Assignment)
+// OPCODE(NOP, "<<=",  Assignment)
+// OPCODE(NOP, ">>=",  Assignment)
+// OPCODE(NOP, "&=",  Assignment)
+// OPCODE(NOP, "&^=",  Assignment)
+// OPCODE(NOP, ":=",  Assignment)
+
+// OPCODE(NOP, "||",  Binary)
+// OPCODE(NOP, "&&",  Binary)
+OPCODE(JE, "==",  Binary)
+OPCODE(JNE, "!=",  Binary)
+OPCODE(JL, "<",  Binary)
+OPCODE(JLE, "<=",  Binary)
+OPCODE(JG, ">",  Binary)
+OPCODE(JGE, ">=",  Binary)
+OPCODE(ADD, "+",  Binary)
+OPCODE(SUB, "-",  Binary)
+OPCODE(BOR, "|",  Binary)
+OPCODE(BXOR, "^",  Binary)
+OPCODE(MUL, "*",  Binary)
+OPCODE(DIV, "/",  Binary)
+OPCODE(MOD, "%",  Binary)
+OPCODE(LSF, "<<",  Binary)
+OPCODE(RSF, ">>",  Binary)
+OPCODE(BAND, "&",  Binary)
+
+// OPCODE(NOP, "&^",  Binary)
+
+// OPCODE(NOP, "<-",  Assignment)
+
+
+// OPCODE(NOP, "+",  Unary)
+// OPCODE(NOP, "-",  Unary)
+// OPCODE(NOP, "^",  Unary)
+OPCODE(DEREF, "*",  Deref)
+OPCODE(JZ,      "",                     Branch)
+OPCODE(JNZ, "!",  Branch)
+OPCODE(INC, "++",  IncDec)
+OPCODE(DEC, "--",  IncDec)
+OPCODE(ADDR,    "&",                    Address)
+
+OPCODE(JMP,     "jmp",                  Jump)
+OPCODE(CALL,    "call",                 Call)
+OPCODE(RET, "ret", Return)
+OPCODE(NOP,     "NOP",                  NOP)

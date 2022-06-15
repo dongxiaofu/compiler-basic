@@ -2,11 +2,11 @@
 #include "ast.h"
 #include "stmt.h"
 #include "decl.h"
+#include "gen.h"
 #include "expr.h"
 #include "declchk.h"
 #include "exprchk.h"
 #include "tranexpr.h"
-#include "gen.h"
 
 static int OPMAPS[] = {
 #define OPINFO(op, prec, name, func, opcode)    opcode,
@@ -30,6 +30,9 @@ Symbol TranslatePrimaryExpression(AstExpression expr)
 	if(expr->op == OP_CONST){
 		Symbol tmp = (Symbol)MALLOC(sizeof(struct symbol));
 		tmp->kind = SK_CONSTANT;
+		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+		sprintf(name, "t%d", tmpNameNo++);
+		tmp->name = name;
 		tmp->val = expr->val;
 		tmp->ty = expr->ty;
 
@@ -395,6 +398,18 @@ void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 					GenerateBranch(kid0->ty, trueBB, JZ, src1, NULL);
 				}
 
+				break;
+			}
+		case OP_EQUAL:
+		case OP_NOT_EQUAL:
+		case OP_LESS:
+		case OP_LESS_OR_EQUAL:
+		case OP_GREATER:
+		case OP_GREATER_OR_EQUAL:
+			{
+				src1 = TranslateExpression(expr->kids[0]);
+				src2 = TranslateExpression(expr->kids[1]);
+				GenerateBranch(T(BOOLEAN), trueBB, OPMAPS[expr->op], src1, src2);
 				break;
 			}
 		default:
