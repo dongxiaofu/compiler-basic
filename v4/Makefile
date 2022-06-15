@@ -18,7 +18,8 @@ SCANNER = cgc
 #OBJS	= cgc.o decl.o lex.o expr.o input.o
 OBJS	= cgc.o decl.o lex.o expr.o input.o type2.o stmt.o packages.o declchk.o \
 			symbol.o stmtchk.o exprchk.o \
-			tranexpr.o transtmt.o gen.o
+			tranexpr.o transtmt.o gen.o  \
+			dumpir.o
 #OBJS	= stmt.o lex.o expr.o decl.o
 #OBJS	= lex.o
 
@@ -45,6 +46,8 @@ lex.o:lex.c
 	#${CC} ${CFLAGS} -c -o $@ $<
 	${CC} ${CFLAGS} -c lex.c
 
+dumpir.o:dumpir.c
+	${CC} ${CFLAGS} -c -o $@ $<
 gen.o:gen.c
 	${CC} ${CFLAGS} -c -o $@ $<
 transtmt.o:transtmt.c

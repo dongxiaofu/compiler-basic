@@ -25,6 +25,7 @@ void TranslateRecvStmt(AstStatement stmt);
 void TranslateOneAssignmentsStmt(stmt);
 void TranslateAssignmentsStmt(AstStatement stmt);
 
+void PrintBBlock(BBlock bblock);
 FunctionSymbol TranslateFunction(AstFunction function);
 void Translate(AstTranslationUnit transUnit);
 

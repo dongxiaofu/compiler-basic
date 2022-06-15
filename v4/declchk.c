@@ -58,24 +58,27 @@ int CheckBlock(AstBlock block)
 	AstStatement stmt = block->stmt;
 	AstStatement lastStmt = NULL;
 	while(stmt != NULL){
-		if(stmt->kind == NK_CompoundStatement){
-			PRINTF("check local variable\n");
-			AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
-			// 处理局部变量
-			AstDeclaration decls = (AstDeclaration)compoundStmt->decls;
-			if(decls){
-				CheckLocalDeclaration(decls);
-			}
-			// 处理其他
-			// TODO 待完善
-			AstLabelStmt labeledStmt = compoundStmt->labeledStmt;
-			AstStatement simpleStmt = compoundStmt->stmts;	
-			if(simpleStmt){
-				compoundStmt->stmts = CheckStatement(simpleStmt);
-			}
-		}else{
-			stmt = CheckStatement(stmt);
-		}
+//		if(stmt->kind == NK_CompoundStatement){
+//			PRINTF("check local variable\n");
+//			AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
+//			// 处理局部变量
+//			AstDeclaration decls = (AstDeclaration)compoundStmt->decls;
+//			if(decls){
+//				CheckLocalDeclaration(decls);
+//			}
+////			// 处理其他
+////			// TODO 待完善
+////			AstLabelStmt labeledStmt = compoundStmt->labeledStmt;
+////			AstStatement simpleStmt = compoundStmt->stmts;	
+////			if(simpleStmt){
+////				compoundStmt->stmts = CheckStatement(simpleStmt);
+////			}
+//
+//			CheckStatement(stmt);
+//		}else{
+//			stmt = CheckStatement(stmt);
+//		}
+		stmt = CheckStatement(stmt);
 
 		if(stmt){
 			lastStmt = stmt;

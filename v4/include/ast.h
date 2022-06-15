@@ -749,7 +749,11 @@ InterfaceType INTERFACE_CURRENT;
 FunctionSymbol FUNCTION_LIST;
 FunctionSymbol FUNCTION_CURRENT;
 	
+// static BBlock CurrentBBlock;
 BBlock CurrentBBlock;
+
+static int tmpNameNo = 0;
+static int BBlockNo = 0;
 
 AstTranslationUnit ParseTranslationUnit();
 int IsDataType(char *str);

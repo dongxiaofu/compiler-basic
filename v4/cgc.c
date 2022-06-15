@@ -19,6 +19,7 @@
 Heap CurrentHeap;
 struct heap ProgramHeap;
 HEAP(ProgramHeap);
+// int tmpNameNo;
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}	
 
+//	tmpNameNo = 0;
 	CurrentHeap = &ProgramHeap;
 	ReadSourceFile(argv[1]);	
 	// 初始化扫描器

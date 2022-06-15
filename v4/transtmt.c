@@ -23,6 +23,54 @@ void Translate(AstTranslationUnit transUnit)
 		p = p->next;
 	}
 }
+	
+// 调试工具
+void PrintBBlock(BBlock bblock)
+{
+	IRInst irinst = bblock->irinst.next;
+	// 怎么遍历双向链表？
+	while(irinst != &bblock->irinst){
+		if(irinst->opcode == JMP){
+			BBlock target = (BBlock)irinst->opds[0];
+			printf("%s %s\n", "JMP", target->sym->name);
+		}else if(irinst->opcode == RET){
+			if(irinst->opds[0]->kind == SK_CONSTANT){
+				printf("%s %d\n", "RET", irinst->opds[0]->val.i[0]);
+			}else{
+				printf("%s %s\n", "RET", irinst->opds[0]->name);
+			}
+		}else{
+		printf("dst name = %s,", irinst->opds[0]->name);
+		if(irinst->opds[1] != NULL){
+			if(irinst->opds[1]->kind == SK_CONSTANT){
+				printf("src val = %d,", irinst->opds[1]->val.i[0]);
+			}else{
+				printf("src name = %s,", irinst->opds[1]->name);
+			}
+		}
+
+		if(irinst->opds[2] != NULL){
+			if(irinst->opds[2]->kind == SK_CONSTANT){
+				printf("src2 val = %d,", irinst->opds[2]->val.i[0]);
+			}else{
+				printf("src2 name = %s,", irinst->opds[2]->name);
+			}
+		}
+		}
+
+		printf("\n");
+		irinst = irinst->next;
+	}
+}
+
+Symbol CreateLabel()
+{
+	Symbol sym = (Symbol)MALLOC(sizeof(struct symbol));
+	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+	sprintf(sym->name, "BB%d", BBlockNo++);
+
+	return sym;
+}
 
 FunctionSymbol TranslateFunction(AstFunction function)
 {
@@ -46,17 +94,30 @@ FunctionSymbol TranslateFunction(AstFunction function)
 	CurrentBBlock = entryBB;
 
 	// 翻译函数体
-	TranslateStatement(function->block->stmt);
+	// 这个错误很有意思，它是我错误理解AST的产物，把它保留一段时间。
+//	TranslateStatement(function->block->stmt);
+	AstBlock block = function->block;
+	AstStatement stmt = block->stmt;
+	while(stmt != NULL){
+		TranslateStatement(stmt);
+		stmt = stmt->next;
+	}
 	
 	StartBBlock(exitBB);	
 
 	// 遍历基本块链表
 	BBlock bb = entryBB;
 	while(bb != NULL){
-
+		bb->sym = CreateLabel();
+//		PrintBBlock(bb);
 		bb = bb->next;
 	}	
 
+	bb = entryBB;
+	while(bb != NULL){
+		PrintBBlock(bb);
+		bb = bb->next;
+	}	
 	return fsym;
 }
 
@@ -327,7 +388,7 @@ void TranslateReturnStatement(AstStatement stmt)
 void TranslateCompoundStatement(AstStatement stmt)
 {
 	AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
-	while(compoundStmt != NULL){
+//	while(compoundStmt != NULL){
 		if(compoundStmt->decls){
 			// TODO 不知道怎么处理。	
 		}
@@ -343,10 +404,10 @@ void TranslateCompoundStatement(AstStatement stmt)
 		// 许多AstCompoundStatement语句连接在一起（是这样吗），但AstCompoundStatement语句的下一个
 		// 并非都是AstCompoundStatement语句。
 		if(compoundStmt->kind != NK_CompoundStatement){
-			break;
+//			break;
 		}
-		compoundStmt = compoundStmt->next;
-	}
+//		compoundStmt = compoundStmt->next;
+//	}
 }
 
 void TranslateIncDecStmt(AstStatement stmt)
@@ -394,7 +455,7 @@ void TranslateRecvStmt(AstStatement stmt)
 
 void TranslateAssignmentsStmt(AstStatement stmt)
 {
-	while(stmt != NULL){
+	while(stmt != NULL && stmt->kind == NK_AssignmentsStmt){
 		TranslateOneAssignmentsStmt(stmt);
 		stmt = stmt->next;
 	}

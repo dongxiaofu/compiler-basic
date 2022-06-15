@@ -18,7 +18,10 @@ void AppendIRInst(IRInst irinst)
 //	CurrentBBlock->irinst->prev = irinst;
 
 	CurrentBBlock->irinst.prev->next = irinst;
-	irinst->prev = CurrentBBlock->irinst.prev->next;
+	// 隐蔽的错误，保留一段时间，自我警醒。
+	// 这个错误，把irinst的前驱设置成了它自己。
+	// irinst->prev = CurrentBBlock->irinst.prev->next;
+	irinst->prev = CurrentBBlock->irinst.prev;
 	irinst->next = &CurrentBBlock->irinst;
 	CurrentBBlock->irinst.prev = irinst;
 }
@@ -40,7 +43,7 @@ void GenerateJmp(BBlock bb)
 	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
 	irinst->ty = T(VOID);
 	irinst->opcode = JMP;
-	irinst->opds[0] = bb;
+	irinst->opds[0] = (Symbol)bb;
 	irinst->opds[1] = irinst->opds[2] = NULL;
 	AppendIRInst(irinst);
 }

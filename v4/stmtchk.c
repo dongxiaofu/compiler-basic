@@ -126,7 +126,10 @@ AstStatement CheckIfStatement(AstStatement stmt)
 	}
 
 	ifStmt->expr = CheckExpression(ifStmt->expr);
-	ifStmt->thenStmt = CheckBlock(ifStmt->thenStmt);
+	// 我用CheckBlock的返回值来返回函数是否有return语句的数据，但这样不能返回处理之后的AST。
+	// 幸运的是，并不需要返回处理之后的AST，因为，我操作的是指针。
+//	ifStmt->thenStmt = CheckBlock(ifStmt->thenStmt);
+	CheckBlock(ifStmt->thenStmt);
 
 // TODO AstIfStatement的结构已经发生变化，不再把elseIfStmt存储到单独的成员中。
 //	if(ifStmt->elseIfStmt){
@@ -402,41 +405,43 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 
 	AstAssignmentsStmt currentAssignStmt = NULL;
 	AstAssignmentsStmt preAssignStmt = NULL;
-
-	while(leftExpr && rightExpr){
-
-		if(currentAssignStmt == NULL){
 			assignStmt->expr->kids[0] = leftExpr;
 			assignStmt->expr->kids[1] = rightExpr;
-			preAssignStmt = assignStmt;
 
-		}else{
-			leftExpr = CheckExpressionList(leftExpr);
-			rightExpr = CheckExpressionList(rightExpr);
-
-			CREATE_AST_NODE(currentAssignStmt, AssignmentsStmt);
-			currentAssignStmt->expr->kids[0] = leftExpr;
-			currentAssignStmt->expr->kids[1] = rightExpr;
-
-			preAssignStmt->next = currentAssignStmt;
-			preAssignStmt = currentAssignStmt;
-		}
-
-		leftExprCount++;
-		rightExprCount++;
-		leftExpr = leftExpr->next;
-		rightExpr = rightExpr->next;
-	}
-
-	// 使用assert能让我写出正确的代码。
-	assert(leftExpr == NULL || rightExpr == NULL);
-	assert(leftExprCount == rightExprCount);
-	
-	// 把a,b,c = 1,2,3这样的语句拆成了a = 1、b = 2、c = 3这样三个语句。要把
-	// 这些语句加到原来的AST中。
-	if(currentAssignStmt != NULL){
-		currentAssignStmt->next = nextStmt;
-	}
+//	while(leftExpr && rightExpr){
+//
+//		if(currentAssignStmt == NULL){
+//			assignStmt->expr->kids[0] = leftExpr;
+//			assignStmt->expr->kids[1] = rightExpr;
+//			preAssignStmt = assignStmt;
+//
+//		}else{
+//			leftExpr = CheckExpressionList(leftExpr);
+//			rightExpr = CheckExpressionList(rightExpr);
+//
+//			CREATE_AST_NODE(currentAssignStmt, AssignmentsStmt);
+//			currentAssignStmt->expr->kids[0] = leftExpr;
+//			currentAssignStmt->expr->kids[1] = rightExpr;
+//
+//			preAssignStmt->next = currentAssignStmt;
+//			preAssignStmt = currentAssignStmt;
+//		}
+//
+//		leftExprCount++;
+//		rightExprCount++;
+//		leftExpr = leftExpr->next;
+//		rightExpr = rightExpr->next;
+//	}
+//
+//	// 使用assert能让我写出正确的代码。
+//	assert(leftExpr == NULL || rightExpr == NULL);
+//	assert(leftExprCount == rightExprCount);
+//	
+//	// 把a,b,c = 1,2,3这样的语句拆成了a = 1、b = 2、c = 3这样三个语句。要把
+//	// 这些语句加到原来的AST中。
+//	if(currentAssignStmt != NULL){
+//		currentAssignStmt->next = nextStmt;
+//	}
 
 	// 返回stmt或assignStmt都可以。因为，操作的是指针。
 	return stmt;
