@@ -7,11 +7,12 @@
 #include "exprchk.h"
 #include "tranexpr.h"
 #include "dumpir.h"
+#include "output.h"
 
-#define DST irinst->opds[0]
-#define SRC1 irinst->opds[1]
-#define SRC2 irinst->opds[2]
-#define OP irinst->opcode
+// #define DST irinst->opds[0]
+// #define SRC1 irinst->opds[1]
+// #define SRC2 irinst->opds[2]
+// #define OP irinst->opcode
 
 char *OPCODENAMES[] = {
 #define OPCODE(opcode, opcodeName, func) opcodeName,

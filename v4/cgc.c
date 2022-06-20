@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
 		Translate(transUnit);
 		// 打印IR
 		DumpTranslateUnit(transUnit);
+		// 生成汇编代码
+		EmitTranslationUnit(transUnit);
 	
 	return 0;
 }
