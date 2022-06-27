@@ -17,6 +17,46 @@ char *ASMTemplate[] = {
 void PutASMCode(int code, Symbol opds[])
 {
 	char *fmt = ASMTemplate[code];
+
+	fprintf(ASMFile, "\t");
+
+	while(*fmt){
+		switch(*fmt){
+			case '%':
+				fmt++;
+				if(*fmt == '%'){
+					fprintf(ASMFile, "%");
+				}else{
+					int i = *fmt - '0';
+					if(opds[i]->reg == NULL){
+						fprintf(ASMFile, "%s", GetAccessName(opds[i]));
+					}else{
+						fprintf(ASMFile, "%s", opds[i]->reg->name);
+					}
+				}
+				break;
+			case ';':
+				fprintf(ASMFile, "\n\t");
+				break;
+			default:
+				fprintf(ASMFile, "%c", *fmt);
+				break;
+		}
+
+		fmt++;
+	}
+
 	fprintf(ASMFile, "\t");
 	fprintf(ASMFile, "%s\n", fmt);	
+}
+
+char *GetAccessName(Symbol sym)
+{
+	if(sym->aname != NULL){
+		return sym->aname;
+	}
+
+	sym->aname = sym->name;
+
+	return sym->aname;
 }

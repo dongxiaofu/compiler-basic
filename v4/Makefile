@@ -20,7 +20,7 @@ OBJS	= cgc.o decl.o lex.o expr.o input.o type2.o stmt.o packages.o declchk.o \
 			symbol.o stmtchk.o exprchk.o \
 			tranexpr.o transtmt.o gen.o  \
 			dumpir.o	\
-			emit.o x86.o x86linux.o
+			emit.o x86.o x86linux.o reg.o
 #OBJS	= stmt.o lex.o expr.o decl.o
 #OBJS	= lex.o
 
@@ -52,6 +52,8 @@ x86.o:x86.c
 x86linux.o:x86linux.c
 	${CC} ${CFLAGS} -c -o $@ $<
 emit.o:emit.c
+	${CC} ${CFLAGS} -c -o $@ $<
+reg.o:reg.c
 	${CC} ${CFLAGS} -c -o $@ $<
 
 dumpir.o:dumpir.c

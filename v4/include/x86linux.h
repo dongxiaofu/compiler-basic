@@ -8,6 +8,7 @@
 #include "expr.h"
 #include "symbol.h"
 
+char *GetAccessName(Symbol sym);
 void PutASMCode(int code, Symbol opds[]);
 
 #endif

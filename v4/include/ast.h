@@ -13,7 +13,7 @@
 #define ERROR(fmt, msg)	printf(fmt, msg);\
 					exit(-2);
 
-enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT};
+enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT, SK_REGISTER, SK_IREGISTER};
 
 struct mblock
 {
@@ -340,10 +340,14 @@ typedef  struct initData{
 #define SYMBOL_COMMON	\
 	int kind;	\
 	char *name;	\
+	char *aname;	\
 	Type ty;	\
 	int level;	\
 	union value val;	\
-	struct symbol *link;	\
+	struct symbol *reg;	\	
+	int needwb;		\
+	int ref;			\
+	struct symbol *link;\
 	struct symbol *next;
 
 typedef struct symbol{

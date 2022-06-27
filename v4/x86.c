@@ -84,6 +84,7 @@ void EmitAddress(IRInst irinst)
 void EmitJump(IRInst irinst)
 {
 	BBlock block = (BBlock)DST;
+	DST = block->sym;
 	PutASMCode(X86_JMP, irinst->opds);
 }
 
