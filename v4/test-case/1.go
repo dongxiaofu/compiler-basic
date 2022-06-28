@@ -8,10 +8,12 @@ func test44() int {
     var g int
     var y int
     var z int
+	var ptr *int
     var k int  = 5
     var max int = 7
     g = 13 + 28
 	a = 5
+	ptr = &k
 
     if k > max {
         k = max

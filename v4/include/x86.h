@@ -7,6 +7,10 @@
 #include "ast.h"
 #include "expr.h"
 
+void AddVarToReg(Symbol reg, Symbol v);
+void AllocateReg(IRInst inst, int index);
+void ModifyVar(Symbol p);
+
 void EmitPrologue();
 void EmitEpilogue();
 
