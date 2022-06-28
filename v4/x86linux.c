@@ -5,6 +5,7 @@
 #include "declchk.h"
 #include "symbol.h"
 #include "x86.h"
+#include "reg.h"
 #include "x86linux.h"
 #include "output.h"
 
@@ -59,4 +60,27 @@ char *GetAccessName(Symbol sym)
 	sym->aname = sym->name;
 
 	return sym->aname;
+}
+
+void SetupRegisters()
+{
+	// 4位
+	X86Regs[EAX] = CreateReg("%eax", "(%eax)", EAX);
+	X86Regs[EBX] = CreateReg("%ebx", "(%ebx)", EBX);
+	X86Regs[ECX] = CreateReg("%ecx", "(%ecx)", ECX);
+	X86Regs[EDX] = CreateReg("%edx", "(%edx)", EDX);
+	X86Regs[EDI] = CreateReg("%edi", "(%edi)", EDI);
+	X86Regs[ESI] = CreateReg("%esi", "(%esi)", ESI);
+	// 2位
+	X86WordRegs[EAX] = CreateReg("%ax", NULL, EAX);
+	X86WordRegs[EBX] = CreateReg("%bx", NULL, EBX);
+	X86WordRegs[ECX] = CreateReg("%cx", NULL, ECX);
+	X86WordRegs[EDX] = CreateReg("%dx", NULL, EDX);
+	X86WordRegs[EDI] = CreateReg("%di", NULL, EDI);
+	X86WordRegs[ESI] = CreateReg("%si", NULL, ESI);
+	// 1位
+	X86ByteRegs[EAX] = CreateReg("%al", NULL, EAX);
+	X86ByteRegs[EBX] = CreateReg("%bl", NULL, EBX);
+	X86ByteRegs[ECX] = CreateReg("%cl", NULL, ECX);
+	X86ByteRegs[EDX] = CreateReg("%dl", NULL, EDX);
 }

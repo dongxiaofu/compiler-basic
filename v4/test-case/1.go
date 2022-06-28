@@ -14,6 +14,7 @@ func test44() int {
     g = 13 + 28
 	a = 5
 	ptr = &k
+	a = *ptr
 
     if k > max {
         k = max

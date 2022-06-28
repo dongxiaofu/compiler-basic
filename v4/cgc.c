@@ -9,6 +9,7 @@
 #include "packages.h"
 #include "symbol.h"
 #include "dumpir.h"
+#include "x86linux.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
 
 		SetupTypeSystem();
 		InitSymbolTable();
+		SetupRegisters();
 
 		// 语义分析
 		CheckTranslationUnit(transUnit);

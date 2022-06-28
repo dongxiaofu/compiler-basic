@@ -4,6 +4,7 @@
 #include "expr.h"
 #include "declchk.h"
 #include "symbol.h"
+#include "gen.h"
 #include "x86.h"
 #include "x86linux.h"
 #include "output.h"
@@ -13,6 +14,14 @@ enum ASMCODE {
 #include "x86linux.tpl"
 #undef TEMPLATE
 };
+
+void Move(int code, Symbol dst, Symbol src)
+{
+	Symbol opds[2];
+	opds[0] = dst;
+	opds[1] = src;
+	PutASMCode(code, opds);
+}
 
 void AddVarToReg(Symbol reg, Symbol v)
 {
@@ -56,6 +65,22 @@ void ModifyVar(Symbol p)
 	p->needwb = 1;
 }
 
+Symbol PutInReg(Symbol v)
+{
+	// 如果v在寄存器中，直接返回这个寄存器。
+	Symbol reg;
+	if(v->reg != NULL){
+		return v->reg;
+	}
+	// v不在这个寄存器中
+	// 分配一个寄存器
+	reg = GetReg();
+	// 生成Mov指令
+	Move(X86_MOVI4, reg, v);
+	// 返回这个寄存器
+	return reg;
+}
+
 void EmitPrologue()
 {
 	PutASMCode(X86_PROLOGUE, NULL);
@@ -93,6 +118,30 @@ void EmitIRInst(IRInst irinst)
 	return;
 }
 
+void EmitMove(IRInst irinst)
+{
+	Symbol reg;
+	// 只处理INT类型数据。
+	// SRC1是常量，只生成一条Move指令。
+	// SRC1不是常量
+	if(SRC1->kind == SK_CONSTANT){
+		Move(X86_MOVI4, DST, SRC1);
+		return;
+	}
+	// 给DST和SRC1分配寄存器，先给SRC1分配寄存器
+	AllocateReg(irinst, 1);
+	AllocateReg(irinst, 0);
+	// 如果DST和SRC1都在内存中，生成两条MOV指令。
+	if(DST->reg == NULL && SRC1->reg == NULL){
+		reg = GetReg();
+		Move(X86_MOVI4, reg, SRC1);
+		Move(X86_MOVI4, DST, reg);
+	}else{
+		// 如果是其他情况，只生成一条MOV指令。
+		Move(X86_MOVI4, DST, SRC1);
+	}
+}
+
 void EmitAssignment(IRInst irinst)
 {
 
@@ -105,7 +154,14 @@ void EmitBinary(IRInst irinst)
 
 void EmitDeref(IRInst irinst)
 {
-
+	Symbol reg;
+	// 把SRC1放到寄存器中
+	reg = PutInReg(SRC1);
+	// 修改当前中间码：opcode修改成MOV，SRC1修改成寄存器的next
+	irinst->opcode = MOV;
+	SRC1 = reg->next;
+	// 生成MOV指令
+	EmitMove(irinst);
 }
 
 void EmitBranch(IRInst irinst)

@@ -7,7 +7,7 @@
 #include "ast.h"
 #include "expr.h"
 
-enum {EAX, EBX, ECX, EDX, EBP, ESP, EDI, ESI};
+// enum {EAX, EBX, ECX, EDX, EBP, ESP, EDI, ESI};
 
 #define NO_REG -1
 

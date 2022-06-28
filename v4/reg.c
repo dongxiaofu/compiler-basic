@@ -10,9 +10,9 @@
 #include "reg.h"
 #include <limits.h>
 
-Symbol X86Regs[ESI + 1];
-Symbol X86WordRegs[ESI + 1];
-Symbol X86ByteRegs[ESI + 1];
+// Symbol X86Regs[ESI + 1];
+// Symbol X86WordRegs[ESI + 1];
+// Symbol X86ByteRegs[ESI + 1];
 
 int UsedRegs = 0;
 
@@ -27,7 +27,7 @@ Symbol CreateReg(char *name, char *iname, int no)
 
 	if(iname != NULL){
 		reg->next = (Symbol)MALLOC(sizeof(struct symbol));
-		reg->next->name = reg->next->aname = name;
+		reg->next->name = reg->next->aname = iname;
 		reg->next->kind = SK_IREGISTER;
 	}
 

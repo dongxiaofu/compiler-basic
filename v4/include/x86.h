@@ -7,13 +7,16 @@
 #include "ast.h"
 #include "expr.h"
 
+void Move(int code, Symbol dst, Symbol src);
 void AddVarToReg(Symbol reg, Symbol v);
 void AllocateReg(IRInst inst, int index);
 void ModifyVar(Symbol p);
+Symbol PutInReg(Symbol v);
 
 void EmitPrologue();
 void EmitEpilogue();
 
+void EmitMove(IRInst irinst);
 void EmitAssignment(IRInst irinst);
 void EmitBinary(IRInst irinst);
 void EmitDeref(IRInst irinst);

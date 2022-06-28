@@ -10,5 +10,6 @@
 
 char *GetAccessName(Symbol sym);
 void PutASMCode(int code, Symbol opds[]);
+void SetupRegisters();
 
 #endif
