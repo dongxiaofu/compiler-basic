@@ -24,6 +24,7 @@ void EmitBranch(IRInst irinst);
 void EmitIncDec(IRInst irinst);
 void EmitAddress(IRInst irinst);
 void EmitJump(IRInst irinst);
+void PushArgument(Symbol arg);
 void EmitCall(IRInst irinst);
 void EmitReturn(IRInst irinst);
 void EmitNOP(IRInst irinst);

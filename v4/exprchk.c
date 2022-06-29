@@ -341,8 +341,9 @@ AstExpression CheckFunctionCall(AstExpression expr)
 check_call:
 	printf("%s\n", "Start to check call");
 	if(fsym){
-		expr->kids[0] = fsym;	
+//		expr->kids[0] = fsym;	
 	}
+	expr->kids[0] = CheckExpression(expr->kids[0]);
 	Signature sig = ((FunctionType)fsym->ty)->sig;
 	SignatureElement *params = sig->params;
 	int paramCount = sig->paramSize;
@@ -445,7 +446,6 @@ static AstExpression CheckNOPExpression(AstExpression expr)
 
 AstExpression CheckExpression(AstExpression expr)
 {
-
 	return ExperCheckers[expr->op](expr);
 }
 

@@ -14,7 +14,7 @@
 					exit(-2);
 
 enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT, SK_REGISTER, SK_IREGISTER,
-	SK_Temp
+	SK_Temp, SK_Function, SK_Struct
 };
 
 struct mblock

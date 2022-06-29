@@ -45,7 +45,7 @@ void DumpIR(IRInst irinst)
 			}
 		case CALL:
 			{
-
+				fprintf(IRFile, "call %s\n", SRC1->name);
 				break;
 			}
 		case JZ:
@@ -85,33 +85,33 @@ void DumpIR(IRInst irinst)
 			}
 
 	}
-		if(irinst->opcode == JMP){
-			BBlock target = (BBlock)irinst->opds[0];
-			printf("%s %s\n", "JMP", target->sym->name);
-		}else if(irinst->opcode == RET){
-			if(irinst->opds[0]->kind == SK_CONSTANT){
-				printf("%s %d\n", "RET", irinst->opds[0]->val.i[0]);
-			}else{
-				printf("%s %s\n", "RET", irinst->opds[0]->name);
-			}
-		}else{
-		printf("dst name = %s,", irinst->opds[0]->name);
-		if(irinst->opds[1] != NULL){
-			if(irinst->opds[1]->kind == SK_CONSTANT){
-				printf("src val = %d,", irinst->opds[1]->val.i[0]);
-			}else{
-				printf("src name = %s,", irinst->opds[1]->name);
-			}
-		}
-
-		if(irinst->opds[2] != NULL){
-			if(irinst->opds[2]->kind == SK_CONSTANT){
-				printf("src2 val = %d,", irinst->opds[2]->val.i[0]);
-			}else{
-				printf("src2 name = %s,", irinst->opds[2]->name);
-			}
-		}
-		}
+//		if(irinst->opcode == JMP){
+//			BBlock target = (BBlock)irinst->opds[0];
+//			printf("%s %s\n", "JMP", target->sym->name);
+//		}else if(irinst->opcode == RET){
+//			if(irinst->opds[0]->kind == SK_CONSTANT){
+//				printf("%s %d\n", "RET", irinst->opds[0]->val.i[0]);
+//			}else{
+//				printf("%s %s\n", "RET", irinst->opds[0]->name);
+//			}
+//		}else{
+//		printf("dst name = %s,", irinst->opds[0]->name);
+//		if(irinst->opds[1] != NULL){
+//			if(irinst->opds[1]->kind == SK_CONSTANT){
+//				printf("src val = %d,", irinst->opds[1]->val.i[0]);
+//			}else{
+//				printf("src name = %s,", irinst->opds[1]->name);
+//			}
+//		}
+//
+//		if(irinst->opds[2] != NULL){
+//			if(irinst->opds[2]->kind == SK_CONSTANT){
+//				printf("src2 val = %d,", irinst->opds[2]->val.i[0]);
+//			}else{
+//				printf("src2 name = %s,", irinst->opds[2]->name);
+//			}
+//		}
+//		}
 
 		printf("\n");
 }

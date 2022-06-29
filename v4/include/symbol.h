@@ -60,8 +60,9 @@ Symbol LookupFunction(AstFunctionDeclarator fdec);
 Symbol LookupSymbol(Table tbl, char *name, char *receiverTypeAlias);
 char * GetSymbolKind(int kind);
 Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int searchOuter);
-VariableSymbol AddVariable(char *name, Type *ty);
+VariableSymbol AddVariable(char *name, Type ty);
 FunctionSymbol AddFunction(char *funcName, Signature sig);
 
+Symbol IntConstant(int i);
 Symbol CreateTemp(Type ty);
 #endif

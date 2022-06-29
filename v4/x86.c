@@ -191,9 +191,45 @@ void EmitJump(IRInst irinst)
 	PutASMCode(X86_JMP, irinst->opds);
 }
 
+void PushArgument(Symbol arg)
+{
+	if(arg->kind == SK_Struct){
+		// esi、edi、ecx的值将被修改，在修改前先把这些寄存器中的值回写到内存中。
+		SpillReg(X86Regs[ESI]);
+		SpillReg(X86Regs[EDI]);
+		SpillReg(X86Regs[ECX]);
+		// "leal %0, %%esi;subl %2, %%esp;movl %%esp, %%edi;movl %1, %%ecx;rep movsb"
+		Symbol opds[3];
+		// opds[0]，看了UCC才写出来。
+		opds[0] = arg;
+		opds[1] = arg->ty->size;
+		opds[2] = arg->ty->size;
+		PutASMCode(X86_PUSHB, opds);
+	}else{
+		PutASMCode(X86_PUSH, &arg);
+	}
+}
+
 void EmitCall(IRInst irinst)
 {
-
+	int stackSize = 0;
+	ArgBucket arg;
+	arg = (ArgBucket)(SRC2);
+	// 参数入栈
+	while(arg != NULL){
+		// 参数入栈
+		PushArgument(arg->sym);
+		stackSize += arg->sym->ty->size;
+		arg = arg->link;
+	}
+	// call 函数名
+	int asmCode = SRC1->kind == SK_Function ? X86_CALL : X86_ICALL;
+	PutASMCode(asmCode, irinst->opds);
+	// 回收参数占用的栈空间
+	if(stackSize != 0){
+		Symbol opd = IntConstant(stackSize);
+		PutASMCode(X86_REDUCEF, &opd);
+	}
 }
 
 void EmitReturn(IRInst irinst)

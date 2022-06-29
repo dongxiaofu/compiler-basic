@@ -170,11 +170,18 @@ Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int  searchOu
 	return NULL;
 }
 
-VariableSymbol AddVariable(char *name, Type *ty)
+VariableSymbol AddVariable(char *name, Type ty)
 {
 	int size = sizeof(struct variableSymbol);
 	VariableSymbol p = (VariableSymbol)MALLOC(size);	
 	p->ty = ty;
+	int sk = -1;
+	if(ty->categ == STRUCT){
+		sk = SK_Struct;
+	}
+	if(sk != -1){
+		p->kind = sk;
+	}
 	// TODO 只存储name的内存地址还是把name指向的数据复制过来？
 //	p->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);	
 //	//memset(p->name, 0, MAX_NAME_LEN);
@@ -196,6 +203,7 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	FunctionSymbol fsym = (FunctionSymbol)MALLOC(sizeof(struct functionSymbol));
 	fsym->name = funcName;
 	fsym->ty = fty;
+	fsym->kind = SK_Function;
 
 	// 计算tbl和哈希键
 	unsigned int h = 0;
@@ -217,6 +225,19 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	fsym = (FunctionSymbol)AddSymbol(tbl, (Symbol)fsym, h);
 
 	return fsym;
+}
+
+Symbol IntConstant(int v)
+{
+	Symbol sym = (Symbol)MALLOC(sizeof(struct symbol));
+	union value val;
+	val.i[0] = v;
+	val.i[1] = 0;
+
+	sym->ty = T(INT);
+	sym->val = val;
+	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+	sprintf(sym->name, "%d", v);
 }
 
 Symbol CreateTemp(Type ty)
