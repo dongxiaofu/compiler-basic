@@ -16,6 +16,10 @@ static AstExpression (*ExperCheckers[])(AstExpression) = {
 // static AstExpression CheckAssignmentExpression(AstExpression expr)
 AstExpression CheckAssignmentExpression(AstExpression expr)
 {
+	Type ty;
+	expr->kids[0] = CheckExpression(expr->kids[0]);
+	expr->kids[1] = CheckExpression(expr->kids[1]);
+	expr->ty = expr->kids[0]->ty;
 	return expr;
 }
 
@@ -531,6 +535,8 @@ AstExpression CheckADD(AstExpression expr)
 	AstExpression expr1 = expr->kids[1];
 	ty1 = expr0->ty;
 	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 	if(BothArithType(ty1, ty2)){
 		union value val;
@@ -539,7 +545,7 @@ AstExpression CheckADD(AstExpression expr)
 		return Constant(expr->ty, val);
 	}
 
-return expr;
+	return expr;
 }
 
 AstExpression CheckMINUS(AstExpression expr)

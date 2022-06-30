@@ -680,9 +680,11 @@ void SetupTypeSystem(){
 //	T(INT)->size = 5;
  	T(BYTE)->size = BYTE_SIZE;	
  	T(INT)->size = INT_SIZE;
-
-
  	T(BOOLEAN)->size = BOOL_SIZE;
+
+	for(int i = UINT8; i <= BOOLEAN; i++){
+		T(i)->categ = i;
+	}
 }
 
 AstSpecifiers ParseTypeNameType(char *typeName)
@@ -695,4 +697,21 @@ AstSpecifiers ParseTypeNameType(char *typeName)
 	NEXT_TOKEN;
 
 	return tname->type;
+}
+
+int TypeCode(int categ)
+{
+	int typeCode[] = {
+		U1, U2, U4, U8,
+		I1, I2, I4, I8,	
+		F4, F8,
+		F8, F16,
+		U1, U2,
+		U4, I4,
+		U4,
+		V,
+		B, B
+	};
+
+	return typeCode[categ];
 }

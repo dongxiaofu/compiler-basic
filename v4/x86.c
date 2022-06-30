@@ -144,7 +144,31 @@ void EmitMove(IRInst irinst)
 
 void EmitAssignment(IRInst irinst)
 {
+	// 根据中间码的ty的成员cate和中间码的opcode计算出x86linux.tpl中的汇编指令模板的code。
+	// 处理t0:a+b这样的中间码。
+	
+	int tcode = TypeCode(irinst->ty->categ);
+	assert(tcode == U4 || tcode == I4);
+	int code = ASM_CODE(irinst->opcode, tcode);
 
+	switch(code){
+		case X86_ADDI4:
+		case X86_ADDU4:
+			{
+				AllocateReg(irinst, 1);
+				AllocateReg(irinst, 2);
+				AllocateReg(irinst, 0);
+				if(DST->reg != SRC1->reg){
+					Move(X86_MOVI4, DST, SRC1);
+				}
+				
+				PutASMCode(code, irinst->opds);
+				break;
+			}
+		default:
+			ERROR("%s\n", "EmitAssignment default");
+			break;
+	}
 }
 
 void EmitBinary(IRInst irinst)
@@ -212,6 +236,9 @@ void PushArgument(Symbol arg)
 
 void EmitCall(IRInst irinst)
 {
+	Symbol recv;
+	Type rty = irinst->ty;
+
 	int stackSize = 0;
 	ArgBucket arg;
 	arg = (ArgBucket)(SRC2);
@@ -230,11 +257,52 @@ void EmitCall(IRInst irinst)
 		Symbol opd = IntConstant(stackSize);
 		PutASMCode(X86_REDUCEF, &opd);
 	}
+
+	recv = irinst->opds[0];
+	if(recv == NULL){
+		return;
+	}
+
+	switch(rty->size){
+		case 1:
+			Move(X86_MOVI1, DST, X86ByteRegs[EAX]);
+			break;
+		case 2:
+			Move(X86_MOVI2, DST, X86WordRegs[EAX]);
+			break;
+		case 4:
+			Move(X86_MOVI4, DST, X86Regs[EAX]);
+			break;
+		case 8:
+			printf("%s\n", "EmitCall todo");
+			break;
+		default:
+			assert(0);
+	}
 }
 
 void EmitReturn(IRInst irinst)
 {
-
+	Type ty = irinst->ty;
+	int size = ty->size;
+	switch(size){
+		case 1:
+			Move(X86_MOVI1, X86ByteRegs[EAX], DST);
+			break;
+		case 2:
+			Move(X86_MOVI2, X86WordRegs[EAX], DST);
+			break;
+		case 4:
+			{
+				Move(X86_MOVI4, X86Regs[EAX], DST);	
+				break;
+			}
+		case 8:
+			printf("todo\n");
+			break;
+		default:
+			assert(0);
+	}
 }
 
 void EmitNOP(IRInst irinst)

@@ -13,11 +13,22 @@
 
 // TODO 暂时这样。
 enum{
-	UINT8,UINT16,UINT32,UINT64,INT8,INT16,INT32,INT64,FLOAT32,FLOAT64,COMPLEX64,COMPLEX128,BYTE,RUNE,
-	INT, BOOLEAN, POINTER, VOID, ARRAY, STRUCT, INTERFACE,
-	FUNCTION, METHOD
+	UINT8,UINT16,UINT32,UINT64,
+	INT8,INT16,INT32,INT64,
+	FLOAT32,FLOAT64,
+	COMPLEX64,COMPLEX128,
+	BYTE,RUNE,
+	INT, UINT,
+	POINTER, 
+	VOID,
+	ARRAY, STRUCT,
+	INTERFACE, FUNCTION, METHOD, BOOLEAN
 };
 
+enum {I1, U1, I2, U2, I4, U4, I8, U8, F4, F8, F16, V, B};
+
+// #define ASM_CODE(opcode, tcode)		(opcode << 2 + tcode - I4)
+#define ASM_CODE(opcode, tcode)		((opcode << 2) + tcode - I4)
 #define IsObjectPtr(ty)		(ty->categ == POINTER && ty->bty->categ != FUNCTION)
 #define IsIntegType(ty)		(BYTE <= ty->categ <= INT)
 // #define IsArithType(ty)		IsIntegType
@@ -32,7 +43,8 @@ enum{
 
 // Type Types[INT - VOID + 1];
 // static struct type Types[INT - VOID + 1];
-struct type Types[FUNCTION - BYTE + 1];
+// struct type Types[FUNCTION - BYTE + 1];
+struct type Types[BOOLEAN - UINT8 + 1];
 
 // #define T(categ)	Types[VOID + categ]
 // #define T(categ)	Types + categ
@@ -93,6 +105,8 @@ AstVariableElementType ParseVariableElementType();
 AstSpecifiers ParseLiteralType();
 
 AstNode ParseType();
+
+int TypeCode(int categ);
 
  static AstNode (*TypeListParsers[])() = {
  	#define TYPEINFO(kind,name)	Parse##name##Type,

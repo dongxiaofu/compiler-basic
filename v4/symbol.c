@@ -243,12 +243,11 @@ Symbol IntConstant(int v)
 Symbol CreateTemp(Type ty)
 {
 	Symbol sym = (Symbol)MALLOC(sizeof(struct symbol));
+	sym->kind = SK_Temp;
 	sym->ty = ty;
 	// sym->name = sprintf("t%d", tmpNameNo++);
 	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	sprintf(sym->name, "t%d", tmpNameNo++);
-	// Symbol的kind怎么确定？
-
 
 	return sym;
 }
