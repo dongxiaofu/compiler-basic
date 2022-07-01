@@ -202,6 +202,7 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 	Symbol sym;
 	Symbol src = TranslateExpression(expr->kids[0]);
 	int op = expr->op;
+	expr->ty = expr->kids[0]->ty;
 	
 	if(op == OP_NOT){
 		return TranslateBranchExpression(expr);
@@ -232,8 +233,12 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 			sym = Addressof(src);
 			break;
 		case OP_BITWISE_XOR:        // ^
-			printf("%s\n", "不知道怎么实现TranslateUnaryExpression"); 
-			break;
+			{
+				int opcode = OPMAPS[expr->op];
+				sym = CreateTemp(expr->ty);
+				GenerateAssign(expr->ty,opcode,sym, src, NULL);  	
+				break;
+			}
 		default:
 			printf("%s\n", "TranslateUnaryExpression default");
 			break;

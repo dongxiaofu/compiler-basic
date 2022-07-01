@@ -152,6 +152,17 @@ void EmitAssignment(IRInst irinst)
 	int code = ASM_CODE(irinst->opcode, tcode);
 
 	switch(code){
+		case X86_NEGI4: case X86_NEGU4:
+		case X86_COMPI4:case X86_COMPU4:
+			{
+				AllocateReg(irinst, 1);
+				AllocateReg(irinst, 0);
+				if(DST->reg != SRC1->reg){
+					Move(X86_MOVI4, DST, SRC1);
+				}
+				PutASMCode(code, irinst->opds);
+				break;
+			}
 		case X86_ADDI4:
 		case X86_ADDU4:
 		case X86_SUBI4:

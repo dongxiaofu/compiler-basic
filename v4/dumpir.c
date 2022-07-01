@@ -23,8 +23,7 @@ char *OPCODENAMES[] = {
 // 存储中间码的文件的句柄。
 FILE *IRFile;
 
-void DumpIR(IRInst irinst)
-{
+void DumpIR(IRInst irinst) {
 	fprintf(IRFile, "%s", "\t");
 
 	switch(OP){
@@ -70,6 +69,11 @@ void DumpIR(IRInst irinst)
 				char *src2Name = SRC2->name;
 				char *dstName = ((BBlock)DST)->sym->name;
 				fprintf(IRFile, "if(%s %s %s) goto %s\n", src1Name, opcode, src2Name, dstName);
+				break;
+			}
+		case BCOM:
+			{
+				fprintf(IRFile, "%s :^%s\n", DST->name, SRC1->name);	
 				break;
 			}
 		case ADD:
