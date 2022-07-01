@@ -178,6 +178,22 @@ void EmitAssignment(IRInst irinst)
 				PutASMCode(code, irinst->opds);
 				break;
 			}
+		case X86_LSHI4: case X86_RSHI4:
+		case X86_LSHU4: case X86_RSHU4:
+			{
+				AllocateReg(irinst, 1);
+				if(SRC2->kind != SK_CONSTANT){
+					if(SRC2->reg != X86Regs[ECX]){
+						SpillReg(X86Regs[ECX]);
+						Move(X86_MOVI4, X86Regs[ECX], SRC2);
+						UsedRegs |= 1 << ECX;
+					}
+					SRC2 = X86ByteRegs[ECX];
+				}
+				AllocateReg(irinst, 0);
+				PutASMCode(code, irinst->opds);
+				break;
+			}
 		default:
 			ERROR("%s\n", "EmitAssignment default");
 			break;

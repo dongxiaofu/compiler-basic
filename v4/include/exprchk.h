@@ -46,8 +46,8 @@ AstExpression CheckBINARY_BITWISE_XOR(AstExpression expr);
 AstExpression CheckMUL(AstExpression expr);
 AstExpression CheckDIV(AstExpression expr);
 AstExpression CheckMOD(AstExpression expr);
-AstExpression CheckLEFT_SHIFT(AstExpression expr);
-AstExpression CheckRIGHT_SHIFT(AstExpression expr);
+AstExpression CheckLSF(AstExpression expr);
+AstExpression CheckRSF(AstExpression expr);
 AstExpression CheckBITWISE_AND(AstExpression expr);
 AstExpression CheckBITWISE_AND_NOT(AstExpression expr);
 // End

@@ -765,6 +765,7 @@ enum {EAX, EBX, ECX, EDX, EBP, ESP, EDI, ESI};
 Symbol X86Regs[ESI + 1];
 Symbol X86WordRegs[ESI + 1];
 Symbol X86ByteRegs[ESI + 1];
+static int UsedRegs = 0;
 
 
 AstTranslationUnit ParseTranslationUnit();

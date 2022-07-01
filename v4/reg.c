@@ -14,7 +14,7 @@
 // Symbol X86WordRegs[ESI + 1];
 // Symbol X86ByteRegs[ESI + 1];
 
-int UsedRegs = 0;
+// int UsedRegs = 0;
 
 Symbol CreateReg(char *name, char *iname, int no)
 {

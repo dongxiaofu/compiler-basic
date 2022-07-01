@@ -598,14 +598,30 @@ AstExpression CheckMOD(AstExpression expr)
 return expr;
 }
 
-AstExpression CheckLEFT_SHIFT(AstExpression expr)
+// a << 5
+AstExpression CheckLSF(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 return expr;
 }
 
-AstExpression CheckRIGHT_SHIFT(AstExpression expr)
+// a >> 5
+AstExpression CheckRSF(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 return expr;
 }
@@ -640,8 +656,8 @@ AstExpression (*BinaryOPCheckers[])(AstExpression) = {
 	CheckMUL,
 	CheckDIV,
 	CheckMOD,
-	CheckLEFT_SHIFT,
-	CheckRIGHT_SHIFT,
+	CheckLSF,
+	CheckRSF,
 	CheckBITWISE_AND,
 	CheckBITWISE_AND_NOT,
 };

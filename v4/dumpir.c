@@ -82,6 +82,11 @@ void DumpIR(IRInst irinst) {
 				fprintf(IRFile, "%s: %s %s %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
 				break;
 			}
+		case RSF: case LSF:
+			{
+				fprintf(IRFile, "%s: %s %s  %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
+				break;
+			}
 		default:
 			{
 
