@@ -30,9 +30,9 @@ enum {I1, U1, I2, U2, I4, U4, I8, U8, F4, F8, F16, V, B};
 // #define ASM_CODE(opcode, tcode)		(opcode << 2 + tcode - I4)
 #define ASM_CODE(opcode, tcode)		((opcode << 2) + tcode - I4)
 #define IsObjectPtr(ty)		(ty->categ == POINTER && ty->bty->categ != FUNCTION)
-#define IsIntegType(ty)		(BYTE <= ty->categ <= INT)
+#define IsIntegType(ty)		(BYTE <= ty->categ && ty->categ <= INT)
 // #define IsArithType(ty)		IsIntegType
-#define IsArithType(ty)		(BYTE <= ty->categ <= INT)
+#define IsArithType(ty)		(BYTE <= ty->categ && ty->categ <= INT)
 
 #define BothArithType(ty1, ty2)	(IsArithType(ty1) && IsArithType(ty2))
 

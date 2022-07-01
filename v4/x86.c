@@ -154,6 +154,8 @@ void EmitAssignment(IRInst irinst)
 	switch(code){
 		case X86_ADDI4:
 		case X86_ADDU4:
+		case X86_SUBI4:
+		case X86_SUBU4:
 			{
 				AllocateReg(irinst, 1);
 				AllocateReg(irinst, 2);

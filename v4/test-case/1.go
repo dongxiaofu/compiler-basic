@@ -12,5 +12,6 @@ func test44() int {
     var k int  = 5
     var max int = 7
 	z = k + max
+	g = z - k
     return 8
 }
