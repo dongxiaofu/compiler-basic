@@ -78,6 +78,7 @@ void DumpIR(IRInst irinst) {
 			}
 		case ADD:
 		case SUB:
+		case MUL: case DIV: case MOD:
 			{
 				fprintf(IRFile, "%s: %s %s %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
 				break;

@@ -707,7 +707,7 @@ int TypeCode(int categ)
 		F4, F8,
 		F8, F16,
 		U1, U2,
-		U4, I4,
+		I4, U4,
 		U4,
 		V,
 		B, B

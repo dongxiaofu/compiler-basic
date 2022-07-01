@@ -18,8 +18,8 @@ enum ASMCODE {
 void Move(int code, Symbol dst, Symbol src)
 {
 	Symbol opds[2];
-	opds[0] = dst;
-	opds[1] = src;
+	opds[1] = dst;
+	opds[0] = src;
 	PutASMCode(code, opds);
 }
 
@@ -156,11 +156,33 @@ void EmitAssignment(IRInst irinst)
 		case X86_COMPI4:case X86_COMPU4:
 			{
 				AllocateReg(irinst, 1);
+				goto put_code;
+				break;
+			}
+		case X86_MULU4: 
+		case X86_DIVI4: case X86_DIVU4:
+		case X86_MODI4: case X86_MODU4:
+			{
+				AllocateReg(irinst, 1);
+				AllocateReg(irinst, 2);
 				AllocateReg(irinst, 0);
-				if(DST->reg != SRC1->reg){
-					Move(X86_MOVI4, DST, SRC1);
+				// 被乘数应该放在EAX中。
+				SpillReg(X86Regs[EAX]);
+				if(SRC1->reg != X86Regs[EAX]){
+					Move(X86_MOVI4, X86Regs[EAX], SRC1);
 				}
+
+				SpillReg(X86Regs[EDX]);
+
 				PutASMCode(code, irinst->opds);
+
+				if(code == X86_MODI4 || code == X86_MODU4){
+					// Move(X86_MOVI4, DST, X86Regs[EDX]);
+					AddVarToReg(X86Regs[EDX], DST);
+				}else{
+					// Move(X86_MOVI4, DST, X86Regs[EAX]);
+					AddVarToReg(X86Regs[EDX], DST);
+				}
 				break;
 			}
 		case X86_ADDI4:
@@ -170,12 +192,7 @@ void EmitAssignment(IRInst irinst)
 			{
 				AllocateReg(irinst, 1);
 				AllocateReg(irinst, 2);
-				AllocateReg(irinst, 0);
-				if(DST->reg != SRC1->reg){
-					Move(X86_MOVI4, DST, SRC1);
-				}
-				
-				PutASMCode(code, irinst->opds);
+				goto put_code;
 				break;
 			}
 		case X86_LSHI4: case X86_RSHI4:
@@ -190,13 +207,21 @@ void EmitAssignment(IRInst irinst)
 					}
 					SRC2 = X86ByteRegs[ECX];
 				}
-				AllocateReg(irinst, 0);
-				PutASMCode(code, irinst->opds);
+				goto put_code;
 				break;
 			}
 		default:
-			ERROR("%s\n", "EmitAssignment default");
+			AllocateReg(irinst, 1);
+			AllocateReg(irinst, 2);
+			goto put_code;
 			break;
+		put_code:
+			AllocateReg(irinst, 0);
+			if(DST->reg != SRC1->reg){
+				Move(X86_MOVI4, DST, SRC1);
+			}
+			
+			PutASMCode(code, irinst->opds);
 	}
 }
 

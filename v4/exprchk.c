@@ -582,18 +582,39 @@ return expr;
 
 AstExpression CheckMUL(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 return expr;
 }
 
 AstExpression CheckDIV(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 return expr;
 }
 
 AstExpression CheckMOD(AstExpression expr)
 {
+	Type ty1,ty2;
+	AstExpression expr0 = expr->kids[0];
+	AstExpression expr1 = expr->kids[1];
+	ty1 = expr0->ty;
+	ty2 = expr1->ty;
+	
+	expr->ty = ty1;
 
 return expr;
 }
