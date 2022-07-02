@@ -31,19 +31,19 @@ void EmitFunctions(AstTranslationUnit transUnit)
 	}
 }
 
-void EmitFunction(FunctionSymbol fsym)
-{
-	// 函数名	
-	fprintf(ASMFile, "%s:\n", fsym->name);
-	// 对齐
-	// 序言
-	EmitPrologue();
-	// 处理函数的基本块
-	BBlock bblock = fsym->entryBB;
-	while(bblock != NULL){
-		EmitBBlock(bblock);
-		bblock = bblock->next;
-	}
-	// 后记
-	EmitEpilogue();
-}
+// void EmitFunction(FunctionSymbol fsym)
+// {
+// 	// 函数名	
+// 	fprintf(ASMFile, "%s:\n", fsym->name);
+// 	// 对齐
+// 	// 序言
+// 	EmitPrologue();
+// 	// 处理函数的基本块
+// 	BBlock bblock = fsym->entryBB;
+// 	while(bblock != NULL){
+// 		EmitBBlock(bblock);
+// 		bblock = bblock->next;
+// 	}
+// 	// 后记
+// 	EmitEpilogue();
+// }

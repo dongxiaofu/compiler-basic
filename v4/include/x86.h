@@ -13,6 +13,7 @@ void AllocateReg(IRInst inst, int index);
 void ModifyVar(Symbol p);
 Symbol PutInReg(Symbol v);
 
+void LayoutFrame(FunctionSymbol fsym, int firstParamPos);
 void EmitPrologue();
 void EmitEpilogue();
 
@@ -29,6 +30,7 @@ void EmitCall(IRInst irinst);
 void EmitReturn(IRInst irinst);
 void EmitNOP(IRInst irinst);
 
+void EmitFunction(FunctionSymbol fsym);
 void EmitIRInst(IRInst irinst);
 void EmitBBlock(BBlock bblock);
 

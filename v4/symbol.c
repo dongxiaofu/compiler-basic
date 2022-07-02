@@ -192,6 +192,11 @@ VariableSymbol AddVariable(char *name, Type ty)
 	unsigned int hashKey = SymbolHash(name);
 	p = (VariableSymbol)AddSymbol(Identifiers, (Symbol)p, hashKey);
 
+	if(FUNCTION_CURRENT != NULL){
+		*(FUNCTION_CURRENT->lastv) = (Symbol)p;
+		FUNCTION_CURRENT->lastv = &(p->next);
+	}
+
 	return p;
 }
 
@@ -200,10 +205,35 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	FunctionType fty = (FunctionType)MALLOC(sizeof(struct functionType));
 	fty->sig = sig;
 
+	// 处理参数
+	VariableSymbol param, firstParam, preParam;
+	param = firstParam = preParam = NULL;
+	// SignatureElement paramPtr = sig->params;
+	SignatureElement *paramPtr = sig->params;
+	int paramSize = sig->paramSize; 
+	for(int i = 0; i < paramSize; i++){
+		param = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+		param->name = (*paramPtr)->id;
+		param->ty = (*paramPtr)->ty;
+		if(firstParam == NULL){
+			firstParam = param;
+		}
+	
+		if(preParam != NULL){
+			preParam->next = param;
+		}else{
+			preParam = param;
+		}
+		preParam = param;
+
+		paramPtr++;
+	}
+
 	FunctionSymbol fsym = (FunctionSymbol)MALLOC(sizeof(struct functionSymbol));
 	fsym->name = funcName;
 	fsym->ty = fty;
 	fsym->kind = SK_Function;
+	fsym->params = firstParam;
 
 	// 计算tbl和哈希键
 	unsigned int h = 0;

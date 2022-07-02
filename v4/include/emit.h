@@ -7,7 +7,7 @@
 #include "ast.h"
 #include "expr.h"
 
-void EmitFunction(FunctionSymbol fsym);
+// void EmitFunction(FunctionSymbol fsym);
 void EmitFunctions(AstTranslationUnit transUnit);
 void EmitTranslationUnit(AstTranslationUnit transUnit);
 

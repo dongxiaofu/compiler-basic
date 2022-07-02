@@ -389,6 +389,8 @@ typedef struct functionSymbol{
 	Symbol params;
 	Symbol results;
 	Symbol locals;
+	// lastv 是一个多用途双指针。
+	Symbol *lastv;
 
 	BBlock entryBB;
 	BBlock exitBB;
@@ -396,6 +398,7 @@ typedef struct functionSymbol{
 
 typedef struct variableSymbol{
 	SYMBOL_COMMON
+	int offset;
 	InitData idata;	
 	// 接口变量的数据类型别名。
 	char *typeAlias;

@@ -169,6 +169,8 @@ void CheckFunction(AstFunction p)
 		FUNCTION_CURRENT->next = fsym;
 		FUNCTION_CURRENT = fsym;
 	}
+
+	FUNCTION_CURRENT->lastv = &(FUNCTION_CURRENT->locals);
 	// 检查函数体
 	AstBlock block = p->block;
 	int hasReturn = CheckBlock(block);	

@@ -81,6 +81,27 @@ Symbol PutInReg(Symbol v)
 	return reg;
 }
 
+void LayoutFrame(FunctionSymbol fsym, int firstParamPos)
+{
+	// 处理函数的参数
+	int offset = STACK_SIZE * firstParamPos;
+	VariableSymbol param = AsVar(fsym->params);
+	while(param != NULL){
+		param->offset = offset;
+		offset += param->ty->size;	
+		param = AsVar(param->next);
+	}
+
+	// 处理局部变量
+	offset = 0;
+	VariableSymbol localVariable = AsVar(fsym->locals);
+	while(localVariable != NULL){
+		offset -= localVariable->ty->size;
+		localVariable->offset = offset;
+		localVariable = AsVar(localVariable->next);
+	}
+}
+
 void EmitPrologue()
 {
 	PutASMCode(X86_PROLOGUE, NULL);
@@ -362,4 +383,22 @@ void EmitReturn(IRInst irinst)
 void EmitNOP(IRInst irinst)
 {
 
+}
+
+void EmitFunction(FunctionSymbol fsym)
+{
+	// 函数名	
+	fprintf(ASMFile, "%s:\n", fsym->name);
+	// 对齐
+	LayoutFrame(fsym, PRESERVE_REGS + 1);
+	// 序言
+	EmitPrologue();
+	// 处理函数的基本块
+	BBlock bblock = fsym->entryBB;
+	while(bblock != NULL){
+		EmitBBlock(bblock);
+		bblock = bblock->next;
+	}
+	// 后记
+	EmitEpilogue();
 }
