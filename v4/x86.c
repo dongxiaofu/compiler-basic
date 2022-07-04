@@ -92,6 +92,14 @@ void LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 		param = AsVar(param->next);
 	}
 
+	// 处理函数的返回值。
+	VariableSymbol result = AsVar(fsym->results);
+	while(result != NULL){
+		result->offset = offset;
+		offset += result->ty->size;
+		result = AsVar(result->next);
+	}
+
 	// 处理局部变量
 	offset = 0;
 	VariableSymbol localVariable = AsVar(fsym->locals);
@@ -161,6 +169,15 @@ void EmitMove(IRInst irinst)
 		// 如果是其他情况，只生成一条MOV指令。
 		Move(X86_MOVI4, DST, SRC1);
 	}
+}
+
+void EmitIndirectMove(IRInst irinst)
+{
+	UsedRegs = 0;
+	Symbol reg = PutInReg(DST);
+	irinst->opcode = MOV;
+	DST = reg->next;
+	EmitMove(irinst);
 }
 
 void EmitAssignment(IRInst irinst)
@@ -315,15 +332,52 @@ void EmitCall(IRInst irinst)
 	Type rty = irinst->ty;
 
 	int stackSize = 0;
-	ArgBucket arg;
-	arg = (ArgBucket)(SRC2);
+	Symbol arg;
+
+	// 接收返回值的参数入栈。
+//	arg = (ArgBucket)(rty->sig->recv);
+//	while(arg != NULL){
+//		// 参数入栈
+//		PushArgument(arg->sym);
+//		stackSize += arg->sym->ty->size;
+//		arg = arg->link;
+//	}
+
+	FunctionSymbol fsym = (FunctionSymbol)SRC1;
 	// 参数入栈
+	// int functionParamCount = FSYM->paramCount;
+	int functionParamCount = fsym->paramCount;
+	int paramCount = 0; 
+	arg = SRC2;
 	while(arg != NULL){
+		UsedRegs = 0;
+		// 只处理真正的参数。
+		if(paramCount == functionParamCount) break;
 		// 参数入栈
-		PushArgument(arg->sym);
-		stackSize += arg->sym->ty->size;
-		arg = arg->link;
+		PushArgument(arg);
+		stackSize += arg->ty->size;
+		paramCount++;
+		arg = arg->next;
 	}
+
+	Symbol tempReceiver = arg;	
+	// 接收返回值的参数入栈。
+	{
+		// VariableSymbol result = FSYM->results;
+//		VariableSymbol receiver = FSYM->receivers;
+//		Symbol tempReceiver = arg;	
+		while(arg != NULL){
+			stackSize += arg->ty->size;
+			UsedRegs = 0;
+			Symbol opds[2];
+			opds[0] = GetReg();
+			opds[1] = (Symbol)arg;
+			PutASMCode(X86_ADDR, opds);
+			PutASMCode(X86_PUSH, opds);
+		
+			arg = arg->next;
+		}
+	}	
 	// call 函数名
 	int asmCode = SRC1->kind == SK_Function ? X86_CALL : X86_ICALL;
 	PutASMCode(asmCode, irinst->opds);
@@ -332,6 +386,30 @@ void EmitCall(IRInst irinst)
 		Symbol opd = IntConstant(stackSize);
 		PutASMCode(X86_REDUCEF, &opd);
 	}
+
+	// 接收返回值
+	Symbol result = fsym->results; 
+	while(tempReceiver != NULL){
+		IRInst irinst;
+		
+//		irinst = (IRInst)MALLOC(sizeof(struct irinst));;
+//		Symbol reg = GetReg();
+//		DST = reg;
+//		SRC1 = tempReceiver;
+//		EmitDeref(irinst);
+
+		irinst = (IRInst)MALLOC(sizeof(struct irinst));	
+		irinst->opcode = MOV;
+		SRC1 = tempReceiver;
+		DST = result;
+	//	EmitIndirectMove(irinst);	
+		EmitMove(irinst);
+
+		tempReceiver = tempReceiver->next;
+		result = result->next;
+	}
+
+	return;
 
 	recv = irinst->opds[0];
 	if(recv == NULL){
@@ -358,27 +436,43 @@ void EmitCall(IRInst irinst)
 
 void EmitReturn(IRInst irinst)
 {
-	Type ty = irinst->ty;
-	int size = ty->size;
-	switch(size){
-		case 1:
-			Move(X86_MOVI1, X86ByteRegs[EAX], DST);
-			break;
-		case 2:
-			Move(X86_MOVI2, X86WordRegs[EAX], DST);
-			break;
-		case 4:
-			{
-				Move(X86_MOVI4, X86Regs[EAX], DST);	
-				break;
-			}
-		case 8:
-			printf("todo\n");
-			break;
-		default:
-			assert(0);
-	}
+	// 需要获取函数的参数。从哪里获取？
+//	FunctionType ty = (FunctionType)(irinst->ty);
+//	Symbol firstParam = FSYM->params;
+	VariableSymbol result = FSYM->results;
+//	while(result != NULL){
+		irinst->opcode = IMOV;
+		SRC1 = DST;
+		DST = (Symbol)result;
+		EmitIndirectMove(irinst);
+
+//		result = result->next;
+//	}
 }
+
+// void EmitReturn(IRInst irinst)
+// {
+// 	Type ty = irinst->ty;
+// 	int size = ty->size;
+// 	switch(size){
+// 		case 1:
+// 			Move(X86_MOVI1, X86ByteRegs[EAX], DST);
+// 			break;
+// 		case 2:
+// 			Move(X86_MOVI2, X86WordRegs[EAX], DST);
+// 			break;
+// 		case 4:
+// 			{
+// 				Move(X86_MOVI4, X86Regs[EAX], DST);	
+// 				break;
+// 			}
+// 		case 8:
+// 			printf("todo\n");
+// 			break;
+// 		default:
+// 			assert(0);
+// 	}
+// }
 
 void EmitNOP(IRInst irinst)
 {

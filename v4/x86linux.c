@@ -53,6 +53,22 @@ void PutASMCode(int code, Symbol opds[])
 
 char *GetAccessName(Symbol sym)
 {
+	VariableSymbol var;
+
+	if(sym->kind == SK_CONSTANT){
+		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+		sprintf(name, "$%d", sym->val.i[0]);
+		return name;
+	}
+
+	if(sym->kind == SK_Variable || sym->kind == SK_Temp){
+		var = AsVar(sym);
+		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+		sprintf(name, "%d(%s)", var->offset, "%ebp");
+		
+		return name;
+	}
+	
 	if(sym->aname != NULL){
 		return sym->aname;
 	}

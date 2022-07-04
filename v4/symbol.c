@@ -175,7 +175,7 @@ VariableSymbol AddVariable(char *name, Type ty)
 	int size = sizeof(struct variableSymbol);
 	VariableSymbol p = (VariableSymbol)MALLOC(size);	
 	p->ty = ty;
-	int sk = -1;
+	int sk = SK_Variable;
 	if(ty->categ == STRUCT){
 		sk = SK_Struct;
 	}
@@ -264,20 +264,38 @@ Symbol IntConstant(int v)
 	val.i[0] = v;
 	val.i[1] = 0;
 
+	sym->kind = SK_CONSTANT;
 	sym->ty = T(INT);
 	sym->val = val;
 	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	sprintf(sym->name, "%d", v);
+
+	return sym;
 }
 
 Symbol CreateTemp(Type ty)
 {
-	Symbol sym = (Symbol)MALLOC(sizeof(struct symbol));
+	VariableSymbol sym = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
 	sym->kind = SK_Temp;
 	sym->ty = ty;
 	// sym->name = sprintf("t%d", tmpNameNo++);
 	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	sprintf(sym->name, "t%d", tmpNameNo++);
 
-	return sym;
+	*(FUNCTION_CURRENT->lastv) = sym;
+	FUNCTION_CURRENT->lastv = &(sym->next);
+
+	return (Symbol)sym;
+}
+
+Symbol CreateParam(Type ty)
+{
+	VariableSymbol sym = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+	sym->kind = SK_Variable;
+	sym->ty = ty;
+	// sym->name = sprintf("t%d", tmpNameNo++);
+	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+	sprintf(sym->name, "p%d", receiverNameNo++);
+
+	return (Symbol)sym;
 }

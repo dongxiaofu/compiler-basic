@@ -133,6 +133,9 @@ void CheckFunction(AstFunction p)
 
 	sig->paramSize = paramIndex + 1;
 
+	VariableSymbol receiver;
+	VariableSymbol receiverHead = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+	VariableSymbol *lastReceiver = &(receiverHead->next);
 	AstParameterTypeList resultList = fdec->result;
 	AstParameterDeclaration resultParamDecls = resultList->paramDecls;
 	AstParameterDeclaration resultParamDecl = resultParamDecls;
@@ -146,6 +149,18 @@ void CheckFunction(AstFunction p)
 		sigElement->ty = resultParamDecl->specs->ty;
 		sig->results[++resultIndex] = sigElement;
 
+		receiver = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+		if(dec != NULL){
+			receiver->name = dec->id;
+		}else{
+			// TODO 生成一个临时名称。
+		}
+		// 返回值的kind是什么？暂定为SK_Variable。
+		receiver->kind = SK_Variable;
+		receiver->ty = resultParamDecl->specs->ty;
+		*lastReceiver = receiver;
+		lastReceiver = &(receiver->next);	
+
 		resultParamDecl = resultParamDecl->next;
 	}
 
@@ -156,6 +171,9 @@ void CheckFunction(AstFunction p)
 	if((fsym = LookupFunction(fdec)) == NULL){
 		AstDeclarator fname = fdec->dec;
 		fsym = AddFunction(fname->id, sig);
+		fsym->results = (Symbol)receiverHead->next;
+		fsym->paramCount = sig->paramSize;
+		fsym->receiverCount = sig->resultSize;
 		FSYM = fsym;
 		p->fsym = fsym;
 	}else{

@@ -25,7 +25,8 @@ void EmitFunctions(AstTranslationUnit transUnit)
 	while(p){
 		if(p->kind == NK_Function){
 			AstFunction func = (AstFunction)p;
-			EmitFunction(func->fsym);
+			FSYM = func->fsym;
+			EmitFunction(FSYM);
 		}
 		p = p->next;
 	}

@@ -75,7 +75,7 @@ AstExpression CheckPrimaryExpression(AstExpression expr)
 	
 	p = LookupID(expr->val.p);	
 	if(p == NULL){
-		ERROR("%s\n", "CheckPrimaryExpression error");
+		ERROR("%s\n", "CheckPrimaryExpression error:变量未定义");
 	}else{
 		expr->ty = p->ty;
 		expr->val.p = p;
@@ -272,6 +272,8 @@ AstArguments CheckArguments(AstArguments args, SignatureElement *params, int par
 {
 	// 检查参数的数据类型
 	AstExpression oneArg = args->args;
+	AstExpression firstArg = NULL;
+	AstExpression newArg = NULL;
 	int cn = 0;
 	for(int i = 0; i < paramCount; i++){
 		if(oneArg == NULL){
@@ -279,8 +281,19 @@ AstArguments CheckArguments(AstArguments args, SignatureElement *params, int par
 		}
 
 		oneArg = CheckExpression(oneArg);
+		CREATE_AST_NODE(newArg, Expression);
+		*newArg = *oneArg;
+	
+		if(firstArg == NULL){
+			newArg->next = NULL;
+		//	firstArg = oneArg;
+		}else{
+			newArg->next = firstArg;
+//			firstArg->next = newArg;
+		}
+		firstArg = newArg;
 		// TODO 怎么判断oneArg能不能赋值给params[i]？
-
+		
 		oneArg = oneArg->next;
 		cn++;
 	}
@@ -295,6 +308,8 @@ AstArguments CheckArguments(AstArguments args, SignatureElement *params, int par
 			printf("paramCount = %d, cn = %d, %s\n", paramCount, cn, "实参太多");
 		}
 	} 
+
+	args->args = firstArg;
 
 	return args;
 }
@@ -334,12 +349,29 @@ AstExpression CheckFunctionCall(AstExpression expr)
 		}
 
 	}else{
-		fsym = LookupID(funcName);
+		fsym = (FunctionSymbol)LookupID(funcName);
 		if(fsym == NULL || fsym->ty->categ != FUNCTION){
 			printf("funcName = %s\n", funcName);
 			ERROR("%s\n", "CheckFunctionCall 没有实现这个函数");
 		}
 
+		// 对接收返回值的变量进行处理
+		Symbol result = fsym->results;
+		AstExpression receiver = expr->receiver; 
+		while(result != NULL && receiver != NULL){
+			// 如果用事先声明了变量接收返回值，将满足这个条件。
+			if(receiver->ty != NULL)	continue;
+			receiver->ty = result->ty;
+
+			result = result->next;
+			receiver = receiver->next;
+		}	
+
+		if(expr->receiver != NULL  && (receiver != NULL || result != NULL)){
+			ERROR("%s\n", "CheckFunctionCall 接收返回值的变量和返回值的数据不匹配");
+		}
+
+		fsym->receivers = expr->receiver;
 	}
 
 check_call:

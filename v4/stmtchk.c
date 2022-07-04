@@ -390,6 +390,7 @@ int CheckAssignOp(int op)
 
 AstStatement CheckAssignmentsStmt(AstStatement stmt)
 {
+	AstExpression rightExpr;
 	// 做如下检查：
 	// 1. 变量名和变量值是否一一对应。
 	// 2. 待定。
@@ -398,7 +399,14 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 	AstStatement nextStmt = (AstStatement)assignStmt->next;
 
 	AstExpression leftExpr = CheckExpressionList(assignStmt->expr->kids[0]);
-	AstExpression rightExpr = CheckExpressionList(assignStmt->expr->kids[1]);
+	rightExpr = assignStmt->expr->kids[1];
+	if(rightExpr->op == OP_CALL){
+		rightExpr = CheckExpressionList(rightExpr);
+		rightExpr->receiver = leftExpr;
+		return stmt;
+	}
+
+	rightExpr = CheckExpressionList(rightExpr);
 
 	int leftExprCount = 0;
 	int	rightExprCount = 0;
@@ -510,12 +518,23 @@ AstStatement CheckShortVarDecl(AstStatement stmt)
 	AstExpression identifierList = shortVarDecl->identifierList;
 	AstExpression expressionList = shortVarDecl->expressionList;
 	AstExpression identifier = identifierList;
+
+	AstExpression expr = expressionList;
+	
+	if(expr->op == OP_CALL){
+		expr->receiver = identifierList;
+		CheckExpression(expr);
+		
+		shortVarDecl->expr = expr;
+
+		return stmt; 
+	}
+
 	while(identifier != NULL){
 		CheckExpression(identifier);
 		identifier = identifier->next;
 	}
 
-	AstExpression expr = expressionList;
 	while(expr != NULL){
 		CheckExpression(expr);
 		expr = expr->next;

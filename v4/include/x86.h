@@ -18,6 +18,7 @@ void EmitPrologue();
 void EmitEpilogue();
 
 void EmitMove(IRInst irinst);
+void EmitIndirectMove(IRInst irinst);
 void EmitAssignment(IRInst irinst);
 void EmitBinary(IRInst irinst);
 void EmitDeref(IRInst irinst);

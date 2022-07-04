@@ -14,7 +14,7 @@
 					exit(-2);
 
 enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT, SK_REGISTER, SK_IREGISTER,
-	SK_Temp, SK_Function, SK_Struct
+	SK_Variable, SK_Temp, SK_Function, SK_Struct
 };
 
 struct mblock
@@ -238,6 +238,8 @@ struct astExpression
 	struct astExpression *kids[2];
 	union value val;
 	int variable_count;
+	// 接收函数返回值的变量。
+	struct astExpression *receiver;
 };
 
 typedef struct astExpression      *AstExpression;
@@ -389,6 +391,9 @@ typedef struct functionSymbol{
 	Symbol params;
 	Symbol results;
 	Symbol locals;
+	Symbol receivers;
+	int paramCount;
+	int receiverCount;
 	// lastv 是一个多用途双指针。
 	Symbol *lastv;
 
@@ -743,6 +748,7 @@ typedef struct astTranslationUnit{
     p->next = NULL; 
 
 #define PRINTF printf
+#define AsVar(param)   ((VariableSymbol)param)
 
 // static AstFunction CURRENT;
 AstFunction CURRENT;
@@ -762,6 +768,7 @@ FunctionSymbol FUNCTION_CURRENT;
 BBlock CurrentBBlock;
 
 static int tmpNameNo = 0;
+static int receiverNameNo = 0;
 static int BBlockNo = 0;
 
 enum {EAX, EBX, ECX, EDX, EBP, ESP, EDI, ESI};

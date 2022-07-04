@@ -105,7 +105,7 @@ Symbol GetRegInternal(int width)
 		SpillReg(X86Regs[regNo]);
 	}
 
-	UsedRegs |= 1 << regNo;
+//	UsedRegs |= 1 << regNo;
 	
 	return regs[regNo];
 }
@@ -120,7 +120,8 @@ int SelectSpillReg(int endReg)
 	for(int i = EAX; i <= endReg; i++){
 		// 排除esp、ebp和在一条中间码中被使用了的寄存器。
 		reg = X86Regs[i];
-		if(reg == NULL || (1 << i & UsedRegs)){
+		// if(reg == NULL || (1 << i & UsedRegs)){
+		if(reg == NULL){
 			continue;
 		}
 

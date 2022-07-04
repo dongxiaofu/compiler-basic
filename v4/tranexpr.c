@@ -28,15 +28,12 @@ static Symbol (*ExprCheckers[])(AstExpression) = {
 Symbol TranslatePrimaryExpression(AstExpression expr)
 {
 	if(expr->op == OP_CONST){
-		Symbol tmp = (Symbol)MALLOC(sizeof(struct symbol));
-		tmp->kind = SK_CONSTANT;
-		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
-		sprintf(name, "t%d", tmpNameNo++);
-		tmp->name = name;
-		tmp->val = expr->val;
-		tmp->ty = expr->ty;
-
-		return tmp;
+//		Symbol tmp = CreateTemp(expr->ty);
+//		tmp->kind = SK_CONSTANT;
+//		tmp->val = expr->val;
+//
+//		return tmp;
+		return IntConstant(expr->val.i[0]);
 	}
 
 	return expr->val.p;
@@ -281,37 +278,52 @@ Symbol TranslateAssignmentExpression(AstExpression expr)
 Symbol TranslateFunctionCall(AstExpression expr)
 {
 	Symbol dst,src1,src2;
-//	int op = CALL;
 //	无返回值的函数。
 	dst = NULL;
 	src1 = TranslateExpression(expr->kids[0]);
 
-	// 必须把经过翻译之后的参数存储到新变量中。
-	// Symbol的next可能有其他作用。
-	// ArgBucket的定义不能放在这里，因为其他函数会用到它。
-	// 把ArgBucket强制转换成Symbol会导致数据错乱，但只要不修改它，使用时再将它还原成ArgBucket
-	// 就能获取正确的数据。
-//	typedef struct argBucket{
-//		Symbol sym;
-//		struct argBucket *link;
-//	} *ArgBucket;
+	Symbol param;
+	Symbol paramHead = (Symbol)MALLOC(sizeof(struct symbol));
+	Symbol *lastParam = &(paramHead->next);
 
-	ArgBucket firstArg = NULL;
-	ArgBucket currentArg = NULL;
 	AstExpression arg = expr->kids[1];
 	while(arg != NULL){
-		Symbol sym = (Symbol)TranslateExpression(arg);
-		if(firstArg == NULL){
-			firstArg = sym;
-			currentArg = sym;
-		}else{
-			currentArg->link = sym;
-			currentArg = sym;
-		}
+		param = (Symbol)TranslateExpression(arg);
+		*lastParam = param;
+		lastParam = &(param->next);
+
 		arg = arg->next;
 	}
 
-	GenerateFunctionCall(T(INT), dst, src1, firstArg);
+	AstExpression result = expr->receiver;
+	VariableSymbol resultHead = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+	VariableSymbol resultSymbol;
+	VariableSymbol *resultSymbolNextPtr = &(resultHead->next);
+
+	FunctionSymbol fsym = (FunctionSymbol)src1;
+//	fsym->results = (Symbol)resultHead->next;
+	// 这是一个因粗心导致的错误。也不完全是因为粗心，写到这里，忘记了FSYM的含义。
+//	AstExpression receiver = FSYM->receivers;
+	Symbol receiver = fsym->results;
+	Symbol receiverSym;
+	while(receiver != NULL){
+		receiverSym = CreateParam(receiver->ty);
+		receiverSym->kind = SK_Variable;
+		*lastParam = receiverSym;
+		lastParam = &(receiverSym->next);
+
+		resultSymbol = CreateTemp(receiver->ty);
+		resultSymbol->kind = SK_Variable;
+		resultSymbol->name = (char *)(result->val.p);
+		*resultSymbolNextPtr = resultSymbol;
+		resultSymbolNextPtr = &(resultSymbol->next);
+
+		result = result->next;
+		receiver = receiver->next;
+	}
+	fsym->results = (Symbol)resultHead->next;
+
+	GenerateFunctionCall(T(INT), dst, src1, paramHead->next);
 
 	// 无返回值的函数的调用，返回值应该是什么？
 	return dst;

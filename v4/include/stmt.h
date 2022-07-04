@@ -277,7 +277,7 @@ typedef struct astSelectStmt{
 #define AsBreak(stmt)  ((AstBreakStmt)stmt)
 #define AsRet(stmt)    ((AstReturnStatement)stmt)
 #define AsComp(stmt)   ((AstCompoundStatement)stmt)
-#define AsVar(param)   ((VariableSymbol)param)
+// #define AsVar(param)   ((VariableSymbol)param)
 
 int IsAssignOp(int token_kind);
 // 解析AstAssignmentsStmt中的运算符。

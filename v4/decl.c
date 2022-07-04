@@ -211,6 +211,7 @@ AstExpression ParseIdentifier(){
 	LOG("%s\n", "parse Identifier");
 	AstExpression expr = NULL;
 	CREATE_AST_NODE(expr, Expression);
+	expr->op = OP_ID;
 	// expr->val->p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	expr->val.p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	// TODO 初始化申请到的变量，清除脏数据。

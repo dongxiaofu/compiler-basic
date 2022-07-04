@@ -392,8 +392,10 @@ void TranslateReturnStatement(AstStatement stmt)
 	AstReturnStatement returnStmt = AsRet(stmt);
 	AstExpression expr = returnStmt->expr;
 
-	if(expr != NULL){
-		GenerateReturn(expr->ty, TranslateExpression(expr));
+	while(expr != NULL){
+		// GenerateReturn(expr->ty, TranslateExpression(expr));
+		GenerateReturn(FSYM->ty, TranslateExpression(expr));
+		expr = expr->next;
 // 我并不知道为什么要把这行代码放在下面。
 //		GenerateJmp(FSYM->exitBB);
 	}
