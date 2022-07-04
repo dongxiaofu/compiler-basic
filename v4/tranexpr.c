@@ -305,9 +305,15 @@ Symbol TranslateFunctionCall(AstExpression expr)
 //	AstExpression receiver = FSYM->receivers;
 	Symbol receiver = fsym->receivers;
 	while(receiver != NULL){
-		resultSymbol = CreateTemp(receiver->ty);
-		resultSymbol->kind = SK_Variable;
-		resultSymbol->name = (char *)(result->val.p);
+		AstNode val = (AstNode)(result->val.p);
+
+		if(val->kind == SK_Variable){
+			resultSymbol = (VariableSymbol)(result->val.p);
+		}else{
+			resultSymbol = CreateTemp(receiver->ty);
+			resultSymbol->kind = SK_Variable;
+			resultSymbol->name = (char *)(result->val.p);
+		}
 		*resultSymbolNextPtr = resultSymbol;
 		resultSymbolNextPtr = &(resultSymbol->next);
 

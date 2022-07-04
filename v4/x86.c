@@ -83,21 +83,29 @@ Symbol PutInReg(Symbol v)
 
 void LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 {
+	int functionParamCount = fsym->paramCount;
+	int paramCount = 0;
+	int functionReceiverCount = fsym->receiverCount;
+	int receiverCount = 0;
 	// 处理函数的参数
 	int offset = STACK_SIZE * firstParamPos;
 	VariableSymbol param = AsVar(fsym->params);
-	while(param != NULL){
+//	while(param != NULL){
+	while(paramCount < functionParamCount){
 		param->offset = offset;
 		offset += param->ty->size;	
 		param = AsVar(param->next);
+		paramCount++;
 	}
 
 	// 处理函数的返回值。
 	VariableSymbol result = AsVar(fsym->results);
-	while(result != NULL){
+//	while(result != NULL){
+	while(receiverCount < functionReceiverCount){
 		result->offset = offset;
 		offset += result->ty->size;
 		result = AsVar(result->next);
+		receiverCount++;
 	}
 
 	// 处理局部变量
@@ -366,7 +374,10 @@ void EmitCall(IRInst irinst)
 		// VariableSymbol result = FSYM->results;
 //		VariableSymbol receiver = FSYM->receivers;
 //		Symbol tempReceiver = arg;	
+		int functionReceiverCount = fsym->receiverCount;
+		int receiverCount = 0;
 		while(arg != NULL){
+			if(receiverCount == functionReceiverCount) break;
 			stackSize += arg->ty->size;
 			UsedRegs = 0;
 			Symbol opds[2];
@@ -375,6 +386,7 @@ void EmitCall(IRInst irinst)
 			PutASMCode(X86_ADDR, opds);
 			PutASMCode(X86_PUSH, opds);
 		
+			receiverCount++;
 			arg = arg->next;
 		}
 	}	

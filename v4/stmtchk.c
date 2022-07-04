@@ -403,6 +403,9 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 	if(rightExpr->op == OP_CALL){
 		rightExpr = CheckExpressionList(rightExpr);
 		rightExpr->receiver = leftExpr;
+		stmt = (AstStatement)rightExpr;
+		stmt->kind = NK_Expression;
+		stmt->next = nextStmt;
 		return stmt;
 	}
 
@@ -522,6 +525,29 @@ AstStatement CheckShortVarDecl(AstStatement stmt)
 	AstExpression expr = expressionList;
 	
 	if(expr->op == OP_CALL){
+		char *funcName = (char *)(expr->kids[0]->val.p);
+		FunctionSymbol fsym = LookupID(funcName);
+//		VariableSymbol head = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+//		VariableSymbol *ptr = &(head->next);
+//		VariableSymbol p;
+		AstExpression head = (AstExpression)MALLOC(sizeof(struct astExpression));
+		AstExpression *ptr = &(head->next);
+		Symbol p;
+		Type ty;
+		AstExpression identifier = identifierList;
+		VariableSymbol receiver = fsym->receivers;	
+		int receiverCount = fsym->receiverCount;
+		for(int i = 0; i < receiverCount; i++){
+			char *name = (char *)(identifier->val.p);
+			ty = receiver->ty;
+			p = AddVariable(name, ty);
+	//		*ptr = p;
+	//		ptr = &(p->next);
+			identifier->val.p = p;
+
+			receiver = receiver->next;
+			identifier = identifier->next;
+		}
 		expr->receiver = identifierList;
 		CheckExpression(expr);
 		
