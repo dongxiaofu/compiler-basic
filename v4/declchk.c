@@ -149,6 +149,13 @@ void CheckFunction(AstFunction p)
 		sigElement->ty = resultParamDecl->specs->ty;
 		sig->results[++resultIndex] = sigElement;
 
+		sigElement = (SignatureElement)MALLOC(sizeof(struct signatureElement));
+		if(dec != NULL){
+			sigElement->id = dec->id;
+		}
+		sigElement->ty = resultParamDecl->specs->ty;
+		sig->params[++paramIndex] = sigElement;
+
 		receiver = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
 		if(dec != NULL){
 			receiver->name = dec->id;
@@ -165,13 +172,14 @@ void CheckFunction(AstFunction p)
 	}
 
 	sig->resultSize = resultIndex + 1;
+	sig->newParamSize = paramIndex + 1;
 
 	// if(fsym == LookupFunction(fdec) == NULL){
 	// if(fsym = LookupFunction(fdec) == NULL){
 	if((fsym = LookupFunction(fdec)) == NULL){
 		AstDeclarator fname = fdec->dec;
 		fsym = AddFunction(fname->id, sig);
-		fsym->results = (Symbol)receiverHead->next;
+		fsym->receivers = (Symbol)receiverHead->next;
 		fsym->paramCount = sig->paramSize;
 		fsym->receiverCount = sig->resultSize;
 		FSYM = fsym;

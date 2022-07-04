@@ -210,7 +210,8 @@ FunctionSymbol AddFunction(char *funcName, Signature sig)
 	param = firstParam = preParam = NULL;
 	// SignatureElement paramPtr = sig->params;
 	SignatureElement *paramPtr = sig->params;
-	int paramSize = sig->paramSize; 
+	// int paramSize = sig->paramSize; 
+	int paramSize = sig->newParamSize; 
 	for(int i = 0; i < paramSize; i++){
 		param = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
 		param->name = (*paramPtr)->id;
@@ -296,6 +297,9 @@ Symbol CreateParam(Type ty)
 	// sym->name = sprintf("t%d", tmpNameNo++);
 	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
 	sprintf(sym->name, "p%d", receiverNameNo++);
+
+	*(FUNCTION_CURRENT->lastv) = sym;
+	FUNCTION_CURRENT->lastv = &(sym->next);
 
 	return (Symbol)sym;
 }

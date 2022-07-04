@@ -356,7 +356,7 @@ AstExpression CheckFunctionCall(AstExpression expr)
 		}
 
 		// 对接收返回值的变量进行处理
-		Symbol result = fsym->results;
+		Symbol result = fsym->receivers;
 		AstExpression receiver = expr->receiver; 
 		while(result != NULL && receiver != NULL){
 			// 如果用事先声明了变量接收返回值，将满足这个条件。
@@ -371,7 +371,7 @@ AstExpression CheckFunctionCall(AstExpression expr)
 			ERROR("%s\n", "CheckFunctionCall 接收返回值的变量和返回值的数据不匹配");
 		}
 
-		fsym->receivers = expr->receiver;
+//		fsym->receivers = expr->receiver;
 	}
 
 check_call:

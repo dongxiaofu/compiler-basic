@@ -301,27 +301,31 @@ Symbol TranslateFunctionCall(AstExpression expr)
 	VariableSymbol *resultSymbolNextPtr = &(resultHead->next);
 
 	FunctionSymbol fsym = (FunctionSymbol)src1;
-//	fsym->results = (Symbol)resultHead->next;
 	// 这是一个因粗心导致的错误。也不完全是因为粗心，写到这里，忘记了FSYM的含义。
 //	AstExpression receiver = FSYM->receivers;
-	Symbol receiver = fsym->results;
-	Symbol receiverSym;
+	Symbol receiver = fsym->receivers;
 	while(receiver != NULL){
-		receiverSym = CreateParam(receiver->ty);
-		receiverSym->kind = SK_Variable;
-		*lastParam = receiverSym;
-		lastParam = &(receiverSym->next);
-
 		resultSymbol = CreateTemp(receiver->ty);
 		resultSymbol->kind = SK_Variable;
 		resultSymbol->name = (char *)(result->val.p);
 		*resultSymbolNextPtr = resultSymbol;
 		resultSymbolNextPtr = &(resultSymbol->next);
 
-		result = result->next;
+		result = (AstExpression)result->next;
 		receiver = receiver->next;
 	}
+
 	fsym->results = (Symbol)resultHead->next;
+
+	receiver = fsym->receivers;
+	Symbol receiverSym;
+	while(receiver != NULL){
+		receiverSym = CreateParam(receiver->ty);
+		receiverSym->kind = SK_Variable;
+		*lastParam = receiverSym;
+		lastParam = &(receiverSym->next);
+		receiver = receiver->next;
+	}
 
 	GenerateFunctionCall(T(INT), dst, src1, paramHead->next);
 

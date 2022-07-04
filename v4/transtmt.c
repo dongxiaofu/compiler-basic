@@ -392,13 +392,19 @@ void TranslateReturnStatement(AstStatement stmt)
 	AstReturnStatement returnStmt = AsRet(stmt);
 	AstExpression expr = returnStmt->expr;
 
+	Symbol dstHead = (Symbol)MALLOC(sizeof(struct symbol));
+	Symbol dst;
+	Symbol *dstPtr = &(dstHead->next);
+
 	while(expr != NULL){
-		// GenerateReturn(expr->ty, TranslateExpression(expr));
-		GenerateReturn(FSYM->ty, TranslateExpression(expr));
+		dst = TranslateExpression(expr);
+		*dstPtr = dst;
+		dstPtr = &(dst->next);
+
 		expr = expr->next;
-// 我并不知道为什么要把这行代码放在下面。
-//		GenerateJmp(FSYM->exitBB);
 	}
+
+	GenerateReturn(FSYM->ty, dstHead->next);
 
 	GenerateJmp(FSYM->exitBB);
 	// 结束一个基本块后，要马上开启另一个基本块。我只能这样理解这个问题。

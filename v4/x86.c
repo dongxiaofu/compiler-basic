@@ -389,7 +389,9 @@ void EmitCall(IRInst irinst)
 
 	// 接收返回值
 	Symbol result = fsym->results; 
-	while(tempReceiver != NULL){
+	int receiverCount = fsym->receiverCount;
+//	while(tempReceiver != NULL){
+	for(int i = 0; i < receiverCount; i++){
 		IRInst irinst;
 		
 //		irinst = (IRInst)MALLOC(sizeof(struct irinst));;
@@ -440,14 +442,18 @@ void EmitReturn(IRInst irinst)
 //	FunctionType ty = (FunctionType)(irinst->ty);
 //	Symbol firstParam = FSYM->params;
 	VariableSymbol result = FSYM->results;
+	VariableSymbol src = AsVar(DST);
+	int receiverCount = FSYM->receiverCount;
+	for(int i = 0; i < receiverCount; i++){
 //	while(result != NULL){
 		irinst->opcode = IMOV;
-		SRC1 = DST;
+		SRC1 = src;
 		DST = (Symbol)result;
 		EmitIndirectMove(irinst);
 
-//		result = result->next;
-//	}
+		result = result->next;
+		src = src->next;
+	}
 }
 
 // void EmitReturn(IRInst irinst)

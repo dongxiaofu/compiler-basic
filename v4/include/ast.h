@@ -214,6 +214,7 @@ typedef struct signature
 	SignatureElement receiver;
 	SignatureElement params[PARAM_LENGTH];
 	int paramSize;
+	int newParamSize;
 	SignatureElement results[PARAM_LENGTH];
 	int resultSize;
 } *Signature;
@@ -388,9 +389,13 @@ typedef struct argBucket{
 
 typedef struct functionSymbol{
 	SYMBOL_COMMON
+	// 函数的参数
 	Symbol params;
+	// 接收函数返回值的变量
 	Symbol results;
+	// 函数的局部变量
 	Symbol locals;
+	// 函数返回值声明
 	Symbol receivers;
 	int paramCount;
 	int receiverCount;
