@@ -30,6 +30,7 @@ AstDeclaration declaration(){
 			decl = (AstDeclaration)ParseMethodDeclOrFunctionDecl();
 			break;
 		case TK_SINGLE_LINE_COMMENT:
+		case TK_MULTI_LINE_COMMENTS:
 			// TODO 先这样，不存储单行注释。
 			LOG("%s\n", "parse single line comment");
 			decl = NULL;
