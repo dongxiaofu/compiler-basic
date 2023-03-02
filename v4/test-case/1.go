@@ -2,13 +2,15 @@ package main
 
 import "fmt"
 
-// 函数体外的注释。------444-
 
 func main(){
-// 注释。-------
 	var a int
-	// 注释。------333-
+	var b int
 
-	// test compile
 	a = 78
+	/***
+	 ** **some code 1 /* 嵌套//
+*	 some code 2
+* *	*/
+	b = 78
 }

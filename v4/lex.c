@@ -246,6 +246,34 @@ void skip_single_line_comment(char *str)
 		str++;
 		ch = *CURSOR;
 	}
+
+	get_next_char();
+}
+
+void skip_mutli_line_comments(char *str)
+{
+	int is_have_end_flag = 0;
+
+	char ch = *CURSOR;
+	while(1){
+		*str = current_char;
+		str++;
+		if(current_char == '*'){
+			get_next_char();
+			*str = current_char;
+			str++;
+			if(current_char == '/'){
+				get_next_char();
+			//	*str = current_char;
+			//	str++;
+				is_have_end_flag = 1;
+				break;
+			}
+		}
+		get_next_char();
+	}
+
+	if(is_have_end_flag == 0)	EXPECT(TK_MULTI_LINE_COMMENTS);
 }
 
 int get_token_kind(char *token_name)
@@ -475,6 +503,10 @@ int ScanSlash(){
 		get_next_char();	
 		skip_single_line_comment(current_token_value.value_str);
 		return TK_SINGLE_LINE_COMMENT;
+	}else if(current_char == '*'){		// 多行注释
+		get_next_char();
+		skip_mutli_line_comments(current_token_value.value_str);
+		return TK_MULTI_LINE_COMMENTS;
 	}else{
 		return TK_DIV;		// /
 	}
@@ -539,7 +571,7 @@ Token *ScanToken(){
 		int token_kind = scanners[current_char]();
 		token->kind = token_kind;	
 		// TODO 寻机优化这种特殊处理的方式。
-		if(token_kind == TK_STRING || token_kind == TK_SINGLE_LINE_COMMENT){
+		if(token_kind == TK_STRING || token_kind == TK_SINGLE_LINE_COMMENT || token_kind == TK_MULTI_LINE_COMMENTS){
 			strcpy(token->value.value_str, current_token_value.value_str);
 		}else{
 			strcpy(token->value.value_str, token_names[token_kind]);
