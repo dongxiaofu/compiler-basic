@@ -89,10 +89,6 @@ Token get_token()
 		get_next_char();
 	}
 try_again:
-	if(is_single_line_comment(current_char)){
-		char str[200];
-		skip_single_line_comment(str);
-	}
 	// 跳过空白符
 	while(is_whitespace(current_char)){
 		get_next_char();

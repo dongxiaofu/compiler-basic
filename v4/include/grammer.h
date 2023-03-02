@@ -3,7 +3,8 @@
 //  tokens that may be first token in a declaration
 #define FIRST_DECLARATION                                           \
     TK_CONST,    \
-    TK_VAR,	TK_TYPE, TK_FUNC
+    TK_VAR,	TK_TYPE, TK_FUNC,	\
+	TK_SINGLE_LINE_COMMENT
 //    TK_STRUCT,   TK_ID,	TK_VAR,	TK_TYPE, TK_FUNC
 // fisrt token of an expression
 // 第二行是一元运算符，unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .

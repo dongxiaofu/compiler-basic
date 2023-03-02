@@ -134,6 +134,7 @@ AstTranslationUnit ParseSourceFile(){
 	AstDeclaration currentDecl = NULL;
 	while(CurrentTokenIn(FIRST_Declaration) == 1){
 		AstDeclaration next = declaration();
+		if(next == NULL)	continue;
 		PreCheckTypeName(next);
 		if(sourceFile->decls == NULL){
 			currentDecl = next;

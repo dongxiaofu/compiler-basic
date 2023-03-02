@@ -29,6 +29,12 @@ AstDeclaration declaration(){
 			LOG("%s\n", "parse func");
 			decl = (AstDeclaration)ParseMethodDeclOrFunctionDecl();
 			break;
+		case TK_SINGLE_LINE_COMMENT:
+			// TODO 先这样，不存储单行注释。
+			LOG("%s\n", "parse single line comment");
+			decl = NULL;
+			NEXT_TOKEN;
+			break;
 		default:
 			LOG("%s\n", "parse decl error");
 			printf("parse decl error\n");
