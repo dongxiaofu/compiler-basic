@@ -18,8 +18,10 @@ enum ASMCODE {
 void Move(int code, Symbol dst, Symbol src)
 {
 	Symbol opds[2];
-	opds[1] = dst;
-	opds[0] = src;
+//	opds[1] = dst;
+//	opds[0] = src;
+	opds[0] = dst;
+	opds[1] = src;
 	PutASMCode(code, opds);
 }
 
@@ -336,6 +338,7 @@ void PushArgument(Symbol arg)
 
 void EmitCall(IRInst irinst)
 {
+	fprintf(ASMFile, "Call start\n");
 	Symbol recv;
 	Type rty = irinst->ty;
 
@@ -400,6 +403,8 @@ void EmitCall(IRInst irinst)
 	}
 
 	// 接收返回值
+	// result 接收函数返回值的变量。
+	// tempReceiver 函数返回值声明。
 	Symbol result = fsym->results; 
 	int receiverCount = fsym->receiverCount;
 //	while(tempReceiver != NULL){
@@ -416,12 +421,15 @@ void EmitCall(IRInst irinst)
 		irinst->opcode = MOV;
 		SRC1 = tempReceiver;
 		DST = result;
+//		SRC1 = result;
+//		DST = tempReceiver;
 	//	EmitIndirectMove(irinst);	
 		EmitMove(irinst);
 
 		tempReceiver = tempReceiver->next;
 		result = result->next;
 	}
+	fprintf(ASMFile, "Call end\n");
 
 	return;
 
