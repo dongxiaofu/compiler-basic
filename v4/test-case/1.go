@@ -1,15 +1,18 @@
 package main
 
-import "unsafe"
+import "fmt"
 
-
-
-func test44(x1 int, x2 int) (y int, b int) {
-    return 8,12
-}
-
-func max() {
-	var k1 int
-	g1, g2 := test44(4,9)
-	k1 = g1 + g2
+func main() {
+    const (
+            a = iota   //0
+            b          //1
+            c          //2
+            d = "ha"   //独立值，iota += 1
+            e          //"ha"   iota += 1
+            f = 100    //iota +=1
+            g          //100  iota +=1
+            h = iota   //7,恢复计数
+            i          //8
+    )
+    fmt.Println(a,b,c,d,e,f,g,h,i)
 }
