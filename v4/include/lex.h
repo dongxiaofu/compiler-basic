@@ -150,8 +150,9 @@ void StartPeekToken();
 void EndPeekToken();
 
 int is_whitespace(char ch);
-
 void get_next_char();
+int is_single_line_comment(char ch);
+void skip_single_line_comment(char *str);
 
 int get_token_kind(char *token_name);
 

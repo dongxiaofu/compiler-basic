@@ -89,10 +89,18 @@ Token get_token()
 		get_next_char();
 	}
 try_again:
+	if(is_single_line_comment(current_char)){
+		char str[200];
+		skip_single_line_comment(str);
+	}
 	// 跳过空白符
 	while(is_whitespace(current_char)){
 		get_next_char();
 	}
+
+//	if(is_single_line_comment(current_char)){
+//		skip_single_line_comment();
+//	}
 
 // try_again:
 	// TK_EOF的值是82，R的值也是82，导致奇怪的问题。
@@ -214,7 +222,35 @@ void get_next_char()
 	CURSOR++;
 }
 
+int is_single_line_comment(char ch)
+{
+//	char ch = *CURSOR;
+	if(ch == '/'){
+		ch = *CURSOR;
+		if(ch != '/'){
+			CURSOR--;
+			// TODO 遇到非法注释，怎么处理？
+			return 0;
+		}else{
+			CURSOR++;
+			return 1;
+		}
+	}else{
+//		CURSOR++;
+		return 0;
+	}
+}
 
+void skip_single_line_comment(char *str)
+{
+	char ch = *CURSOR;
+	while(ch != '\n'){
+		*str = ch;
+		CURSOR++;
+		str++;
+		ch = *CURSOR;
+	}
+}
 
 int get_token_kind(char *token_name)
 {
@@ -439,6 +475,10 @@ int ScanSlash(){
 	if(current_char == '='){
 		get_next_char();	
 		return TK_DIV_ASSIGN;	// /=
+	}else if(current_char == '/'){ 	// // 单行注释
+		get_next_char();	
+		skip_single_line_comment(current_token_value.value_str);
+		return TK_SINGLE_LINE_COMMENT;
 	}else{
 		return TK_DIV;		// /
 	}
@@ -503,10 +543,10 @@ Token *ScanToken(){
 		int token_kind = scanners[current_char]();
 		token->kind = token_kind;	
 		// TODO 寻机优化这种特殊处理的方式。
-		if(token_kind != TK_STRING){
-			strcpy(token->value.value_str, token_names[token_kind]);
-		}else{
+		if(token_kind == TK_STRING || token_kind == TK_SINGLE_LINE_COMMENT){
 			strcpy(token->value.value_str, current_token_value.value_str);
+		}else{
+			strcpy(token->value.value_str, token_names[token_kind]);
 		}
 	}else{
 		int len = 0;
