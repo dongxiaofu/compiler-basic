@@ -139,6 +139,8 @@ static char is_dump_token = 0;
 #define expect_semicolon if(current_token.kind == TK_SEMICOLON) expect_token(TK_SEMICOLON);
 #define expect_ellipsis if(current_token.kind == TK_ELLIPSIS) expect_token(TK_ELLIPSIS);
 #define expect_comma if(current_token.kind == TK_COMMA) expect_token(TK_COMMA);
+#define expect_single_line_comment if(current_token.kind == TK_SINGLE_LINE_COMMENT)	expect_token(TK_SINGLE_LINE_COMMENT);
+#define expect_multi_line_comments if(current_token.kind == TK_MULTI_LINE_COMMENTS) expect_token(TK_MULTI_LINE_COMMENTS);
 
 #define BINARY_OP       TokenOps[current_token.kind - TK_ASSIGN].bop
 #define UNARY_OP        TokenOps[current_token.kind - TK_ASSIGN].uop

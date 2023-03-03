@@ -8,6 +8,12 @@
  * "package" PackageName .
  */
 AstPackageClause ParsePackageClause(){
+	expect_single_line_comment;
+	expect_multi_line_comments;
+
+	expect_multi_line_comments;
+	expect_single_line_comment;
+	
 	AstPackageClause packageClause;
 	CREATE_AST_NODE(packageClause, PackageClause);
 
@@ -117,6 +123,12 @@ AstTranslationUnit ParseSourceFile(){
 
 	sourceFile->packageClause = ParsePackageClause();
 	expect_semicolon;
+
+	// TODO 这并不能处理所有的注释。我暂时不想处理这个问题了。
+	expect_single_line_comment;
+	expect_multi_line_comments;
+	expect_multi_line_comments;
+	expect_single_line_comment;
 	
 	AstImportDeclaration currentImportDecl = NULL;
 	while(current_token.kind == TK_IMPORT){
@@ -128,6 +140,11 @@ AstTranslationUnit ParseSourceFile(){
 			currentImportDecl->next = currentImportDecl;
 			currentImportDecl = next;
 		}
+	expect_single_line_comment;
+	expect_multi_line_comments;
+
+	expect_multi_line_comments;
+	expect_single_line_comment;
 		expect_semicolon;
 	}
 

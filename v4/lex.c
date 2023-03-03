@@ -218,21 +218,22 @@ void get_next_char()
 	CURSOR++;
 }
 
+// TODO 这个函数没有被使用。
 int is_single_line_comment(char ch)
 {
 //	char ch = *CURSOR;
-	if(ch == '/'){
-		ch = *CURSOR;
-		if(ch != '/'){
+	if(current_char == '/'){
+		get_next_char();
+		if(current_char != '/'){
+			// 有必要回退吗？有必要。此函数只检查是不是单行注释，不处理非注释标志的字符。
 			CURSOR--;
 			// TODO 遇到非法注释，怎么处理？
 			return 0;
 		}else{
-			CURSOR++;
+			get_next_char();
 			return 1;
 		}
 	}else{
-//		CURSOR++;
 		return 0;
 	}
 }
