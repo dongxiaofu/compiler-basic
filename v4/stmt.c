@@ -655,7 +655,8 @@ int ParseAssignmentsOp(){
 	// 	expect_token(TK_ASSIGN);
 	// }
 
-	int op = current_token.kind;
+	int op = TokenOps[current_token.kind - TK_ASSIGN].bop;
+//	int op = current_token.kind;
 	NEXT_TOKEN;	
 
 	return op;

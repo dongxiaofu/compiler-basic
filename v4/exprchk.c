@@ -17,9 +17,15 @@ static AstExpression (*ExperCheckers[])(AstExpression) = {
 AstExpression CheckAssignmentExpression(AstExpression expr)
 {
 	Type ty;
+//	expr->kids[0] = Adjust(CheckExpression(expr->kids[0]));
+//	expr->kids[1] = Adjust(CheckExpression(expr->kids[1]));
 	expr->kids[0] = CheckExpression(expr->kids[0]);
 	expr->kids[1] = CheckExpression(expr->kids[1]);
+
+	expr->kids[0] = Adjust(expr->kids[0]);
+	expr->kids[1] = Adjust(expr->kids[1]);
 	expr->ty = expr->kids[0]->ty;
+
 	return expr;
 }
 
@@ -58,7 +64,9 @@ AstExpression Adjust(AstExpression expr)
 {
 	if(expr->ty->categ == ARRAY){
 		expr->ty = PointerTo(expr->ty->bty);
-		expr->ty->isarray = 1;
+		// TODO 写出了这样可笑的代码。疏忽。
+		// expr->ty->isarray = 1;
+		expr->isarray = 1;
 	}
 
 
@@ -71,11 +79,22 @@ AstExpression CheckPrimaryExpression(AstExpression expr)
 		return expr;
 	}
 
+	if(expr->op == OP_STR){
+		expr->op = OP_ID;
+		expr->val.p = AddString(expr->ty, (String)(expr->val.p));
+		// TODO 不知道有什么用。
+		expr->lvalue = 1;
+	
+		return expr;
+	}
+
 	Symbol p;
 	
 	p = LookupID(expr->val.p);	
 	if(p == NULL){
-		ERROR("%s\n", "CheckPrimaryExpression error:变量未定义");
+//		ERROR("%s:%s\n", "CheckPrimaryExpression error:变量未定义。", expr->val.p);
+		printf("%s:%s\n", "CheckPrimaryExpression error:变量未定义。", expr->val.p);
+		exit(-2);
 	}else{
 		expr->ty = p->ty;
 		expr->val.p = p;
@@ -490,6 +509,7 @@ AstExpression CheckExpressionList(AstExpression expr)
 	AstExpression current = expr;
 	while(current){
 		CheckExpression(current);
+		current = Adjust(current);
 		current = current->next;
 	}
 	return expr;

@@ -153,6 +153,7 @@ AstExpression ParseBinaryExpr(int prec){
 	AstExpression expr;
 
 	int t = HIGHEST_BIN_PREC;
+	int b = 4;
 
 //	CREATE_AST_NODE(binExpr, Expression);
 //	CREATE_AST_NODE(expr, Expression);
@@ -166,6 +167,9 @@ AstExpression ParseBinaryExpr(int prec){
 	while(IsBinaryOp() == 1 && Prec[BINARY] == prec){
 		CREATE_AST_NODE(binExpr, Expression);
 		int op = BINARY_OP;
+		if(op == OP_ASSIGN){
+			t = 5;
+		}
 		binExpr->op = op;
 		binExpr->kids[0] = expr;
 		NEXT_TOKEN;
@@ -735,8 +739,19 @@ AstExpression ParseBasicLit(){
 	}else if(current_token.kind == TK_STRING){
 		// TODO 可能不正确。临时这样做。
 		expr->op = OP_STR;
-		expr->val.p = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);;
-		strcpy(expr->val.p, current_token.value.value_str);
+
+		// TODO 在这里消耗了比较多时间。
+		// value究竟是使用malloc分配内存还是使用局部变量分配内存？
+		String value = (String)MALLOC(sizeof(struct string));
+		int str_length = current_token.value.value_num;
+		// String 的p成员一定需要分配内存。
+		value->str = (char *)MALLOC(sizeof(char) * str_length);;
+		value->length = str_length;
+		strncpy(value->str, current_token.value.value_str, str_length);
+		expr->val.p = value;
+
+		expr->ty = ArrayOf(T(BYTE), str_length); 
+
 		NEXT_TOKEN;
 	}
 

@@ -12,6 +12,9 @@ void EmitTranslationUnit(AstTranslationUnit transUnit)
 {
 	ASMFile = fopen("as.asm", "w+");
 
+	// 处理字符串
+	EmitString();
+
 	EmitFunctions(transUnit);
 
 	fclose(ASMFile);

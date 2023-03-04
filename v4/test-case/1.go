@@ -1,32 +1,10 @@
-
-// test comment
 package main
-
-// test comment
 import "fmt"
 
-// test comment
-	/***
-	 ** **some code 1 /* 嵌套//
-*	 some code 2
-* *	*/
 
-// test comment
-func main(){
-	var a int
-// test comment
-	var b int
-
-	a = 78
-	/***
-	 ** **some code 1 /* 嵌套//
-*	 some code 2
-* *	*/
-// test comment
-	b = 78
+func main() {
+	var str1 string
+	var str2 string
+	str1 = "Hello, World"
+	str2 = "How are you?Jim"
 }
-	/***
-	 ** **some code 1 /* 嵌套//
-*	 some code 2
-* *	*/
-// test comment

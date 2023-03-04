@@ -522,3 +522,20 @@ void EmitFunction(FunctionSymbol fsym)
 	// 后记
 	EmitEpilogue();
 }
+
+void EmitString()
+{
+	Symbol p = Strings->next;
+
+	while(p != NULL){
+		fprintf(ASMFile, ".%s:\t", p->name);
+		fprintf(ASMFile, ".string \"%s\"",  ((String)(p->val.p))->str);
+		fprintf(ASMFile, "\n");
+		
+		p = p->next;
+	} 
+
+	fprintf(ASMFile, "\n");
+	fprintf(ASMFile, "\n");
+	fprintf(ASMFile, "\n");
+}

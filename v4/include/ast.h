@@ -14,7 +14,7 @@
 					exit(-2);
 
 enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT, SK_REGISTER, SK_IREGISTER,
-	SK_Variable, SK_Temp, SK_Function, SK_Struct
+	SK_Variable, SK_Temp, SK_Function, SK_Struct, SK_String
 };
 
 struct mblock
@@ -141,6 +141,10 @@ static char TypeNames[][16] = {
     int variable_count;
 //    TypeDerivList tyDrvList;
 
+typedef struct string{
+	char *str;
+	int length;
+} *String;
 // Token Value
 union value
 {
@@ -772,9 +776,14 @@ FunctionSymbol FUNCTION_CURRENT;
 // static BBlock CurrentBBlock;
 BBlock CurrentBBlock;
 
+Symbol StringTail;
+Symbol Strings;
+
 static int tmpNameNo = 0;
 static int receiverNameNo = 0;
 static int BBlockNo = 0;
+static int strNo = 0;
+
 
 enum {EAX, EBX, ECX, EDX, EBP, ESP, EDI, ESI};
 Symbol X86Regs[ESI + 1];

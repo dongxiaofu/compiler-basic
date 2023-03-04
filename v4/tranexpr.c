@@ -36,6 +36,14 @@ Symbol TranslatePrimaryExpression(AstExpression expr)
 		return IntConstant(expr->val.i[0]);
 	}
 
+	// if(expr->op == OP_STR && (expr->isarray == 1)){
+	// TODO 存在关于位域的疑难问题。
+	// if(expr->op == OP_STR || expr->isarray == 1){
+	if(expr->op == OP_STR || expr->isarray){
+
+		return Addressof(expr->val.p);
+	}
+
 	return expr->val.p;
 }
 

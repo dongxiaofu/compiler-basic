@@ -66,4 +66,5 @@ FunctionSymbol AddFunction(char *funcName, Signature sig);
 Symbol IntConstant(int i);
 Symbol CreateTemp(Type ty);
 Symbol CreateParam(Type ty);
+Symbol AddString(Type ty, String value);
 #endif

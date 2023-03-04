@@ -574,6 +574,7 @@ Token *ScanToken(){
 		// TODO 寻机优化这种特殊处理的方式。
 		if(token_kind == TK_STRING || token_kind == TK_SINGLE_LINE_COMMENT || token_kind == TK_MULTI_LINE_COMMENTS){
 			strcpy(token->value.value_str, current_token_value.value_str);
+			token->value.value_num = current_token_value.value_num;
 		}else{
 			strcpy(token->value.value_str, token_names[token_kind]);
 		}
@@ -623,7 +624,10 @@ int ScanStrintLiterals(){
 	
 	get_next_char();
 	
-	strcpy(current_token_value.value_str, temp);
+	current_token_value.value_num = len + 1;
+	// TODO 有没有必要指定长度？
+	// strcpy(current_token_value.value_str, temp);
+	strncpy(current_token_value.value_str, temp, len + 1);
 
 	return TK_STRING;
 }

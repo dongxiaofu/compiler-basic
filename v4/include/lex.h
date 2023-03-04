@@ -22,7 +22,7 @@
 typedef int (*Scanner)(void);
 static Scanner scanners[256];
 
-typedef union{
+typedef struct{
 	char value_str[MAX_NAME_LEN];
 	int value_num;
 }Value;

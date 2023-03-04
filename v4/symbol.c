@@ -24,6 +24,8 @@ void InitSymbolTable()
 	Identifiers = &GlobalIDs;
 	InterfaceIdentifiers = &GlobalInterfaces;
 
+	Strings = (Symbol)MALLOC(sizeof(struct symbol));
+	StringTail = Strings;
 
 //	INTERFACE_LIST = NULL;
 //	FUNCTION_LIST = NULL;
@@ -300,6 +302,22 @@ Symbol CreateParam(Type ty)
 
 	*(FUNCTION_CURRENT->lastv) = sym;
 	FUNCTION_CURRENT->lastv = &(sym->next);
+
+	return (Symbol)sym;
+}
+
+Symbol AddString(Type ty, String value)
+{
+	VariableSymbol sym = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+	sym->kind = SK_String;
+	sym->ty = ty;
+	sym->val.p = (void *)value;
+
+	sym->name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+	sprintf(sym->name, "str%d", strNo++);
+
+	StringTail->next = sym;	
+	StringTail = sym;
 
 	return (Symbol)sym;
 }

@@ -7,6 +7,7 @@
 #include "type2.h"
 #include "expr.h"
 
+AstExpression Adjust(AstExpression expr);
 
 void AssignInterfaceVariable(VariableSymbol sym, InitData idata);
 
