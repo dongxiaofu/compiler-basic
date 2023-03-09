@@ -51,6 +51,15 @@ void AllocateReg(IRInst inst, int index)
 	AddVarToReg(reg, p);
 }
 
+/**
+ * 1. 一个寄存器reg中的数据可能是多个变量的值。
+ * 2. 换句话说，多个值相同的变量把这个值存储在reg中。
+ * 3. 这些变量存储在reg的link中。准确地说，reg的link指向由这样的变量组成的链表。
+ * 4. 现在要修改这个变量，具体操作是：
+ * 4.1. 把reg的数据回写到对应的变量中。
+ * 4.2. 把当前变量p存储到reg中。
+ *
+ */
 void ModifyVar(Symbol p)
 {
 	Symbol reg = p->reg;
@@ -307,6 +316,12 @@ void EmitAddress(IRInst irinst)
 	AllocateReg(irinst, 0);
 	PutASMCode(X86_ADDR, irinst->opds);
 	// 为什么必须有这一句？
+	// 1. DST被分配了寄存器reg。
+	// 2. leal会存储数据到reg中。
+	// 3. reg中的旧数据怎么处理？
+	// 4. 不能直接丢弃reg中的旧数据。可能某个变量把数据存储在reg中，还经过了一些计算。
+	// 5. 在往reg中写入新数据时，要把reg中的旧数据回写到变量中。
+	// 6. 我举不出这样的例子。留心。看看今后能不能遇到这样的例子。 
 	ModifyVar(DST);
 }
 

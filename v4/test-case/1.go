@@ -3,8 +3,8 @@ import "fmt"
 
 
 func main() {
-	var str1 string
-	var str2 string
-	str1 = "Hello, World"
-	str2 = "How are you?Jim"
+	var str11 string
+	var str22 string
+	str11 = "Hello, World"
+	str22 = "How are you?Jim"
 }

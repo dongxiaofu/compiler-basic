@@ -67,6 +67,8 @@ int FindEmptyReg(int endReg)
 	for(int i = EAX; i <= endReg; i++){
 		Symbol reg = X86Regs[i];
 		if(reg != NULL && reg->link == NULL && (!((1 << i) & UsedRegs)) ){
+			// TODO 是不是要修改UsedRegs？
+			UsedRegs |= (1 << i);
 			return i;
 		}
 	}

@@ -68,6 +68,12 @@ char *GetAccessName(Symbol sym)
 		
 		return name;
 	}
+
+	if(sym->kind == SK_String){
+		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+		sprintf(name, ".%s", sym->name);
+		return name;
+	}
 	
 	if(sym->aname != NULL){
 		return sym->aname;
