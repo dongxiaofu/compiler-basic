@@ -141,6 +141,8 @@ void EmitEpilogue()
 
 void EmitBBlock(BBlock bblock)
 {
+	fprintf(ASMFile, "%s:\n", bblock->sym->name);
+
 	IRInst head = &(bblock->irinst);
 	IRInst inst = head->next;
 

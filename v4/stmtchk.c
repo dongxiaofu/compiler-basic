@@ -205,7 +205,8 @@ AstStatement CheckForStmt(AstStatement stmt)
 		forStmt->rangeClause = CheckRangeClause(forStmt->rangeClause);
 	}
 
-	forStmt->body = CheckBlock(forStmt->body);
+//	forStmt->body = CheckBlock(forStmt->body);
+	CheckBlock(forStmt->body);
 
 	PopStatement(CURRENT->loops);
 	PopStatement(CURRENT->breakable);

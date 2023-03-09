@@ -351,7 +351,9 @@ void TranslateForStmt(AstStatement stmt)
 		TranslateBranch(Not(forClause->condition), nextBB, loopBB);
 
 		StartBBlock(loopBB);	
-		TranslateStatement((AstStatement)forStmt->body);
+//		TranslateStatement((AstStatement)forStmt->body);
+		AstBlock block = forStmt->body;
+		TranslateBlock(block);
 
 		StartBBlock(contBB);
 		TranslateStatement(forClause->postStmt);
