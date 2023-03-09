@@ -582,13 +582,14 @@ AstIncDecStmt ParseIncDecStmt(){
 	AstExpression rootExpr;
 	CREATE_AST_NODE(rootExpr, Expression);
 	rootExpr->kids[0] = expr;
+	stmt->expr = rootExpr;
 //	StartPeekToken();	
 //	if(current_token.kind != TK_INC && current_token.kind != TK_DEC){
 //		EndPeekToken();
 //		expect_token(TK_INC);
 		if(current_token.kind == TK_INC || current_token.kind == TK_DEC){
-			NEXT_TOKEN;
 			rootExpr->op = current_token.kind == TK_INC ? OP_INC : OP_DEC;
+			NEXT_TOKEN;
 		}else{
 			expect_token(TK_INC);
 		}

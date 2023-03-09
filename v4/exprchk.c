@@ -750,13 +750,16 @@ AstExpression CheckIncDecExpression(AstExpression expr)
 	AstExpression root;
 	CREATE_AST_NODE(root, Expression);
 	root->op = expr->op;
+//	root->kids[0] = CheckExpression(expr);
 	expr->op = op;
-	root->kids[0] = expr;
+	root->kids[0] = CheckExpression(expr->kids[0]);
 	// TODO 这里的val能直接这样用吗？局部变量作为AST的元素，有问题吗？
 	union value val;
 	val.i[0] = 1;
 	val.i[1] = 0;
-	expr->kids[1] = Constant(T(INT), val); 
+	// expr->kids[1] = Constant(T(INT), val); 
+//	root->kids[1] = Constant(T(INT), val); 
+	root->kids[1] = IntConstant(1);
 	return root;
 }
 

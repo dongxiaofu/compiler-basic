@@ -44,6 +44,17 @@ Symbol TranslatePrimaryExpression(AstExpression expr)
 		return Addressof(expr->val.p);
 	}
 
+//	if(expr->op == OP_ID){
+//		p = (Symbol)LookupID(expr->val.p);
+//		if(p == NULL){
+//			// TODO 这种情况怎么办？
+//			assert(p != NULL);
+//		}else{
+//			expr->ty = p->ty;
+//		}
+//		expr->val.p = p;
+//	}
+
 	return expr->val.p;
 }
 
@@ -156,7 +167,8 @@ Symbol TranslateIncDecExpression(AstExpression expr)
 {
 	AstExpression canAsign = expr->kids[0];
 	// 写成AstExpression c = canAsign->kids[0]，行不行？
-	AstExpression c = TranslateExpression(canAsign->kids[0]);
+	// AstExpression c = TranslateExpression(canAsign->kids[0]);
+	Symbol c = TranslateExpression(canAsign);
 
 	Symbol ret = CreateTemp(canAsign->ty);
 	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
@@ -164,7 +176,8 @@ Symbol TranslateIncDecExpression(AstExpression expr)
 	irinst->opcode = ADD;
 	irinst->opds[0] = ret;
 	irinst->opds[1] = c;
-	irinst->opds[2] = canAsign->kids[1];
+	// irinst->opds[2] = canAsign->kids[1];
+	irinst->opds[2] = expr->kids[1];
 	AppendIRInst(irinst);
 	// 生成一条中间码：
 	// 1. dst--c

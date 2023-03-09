@@ -317,6 +317,9 @@ AstStatement CheckCompoundStatement(AstStatement stmt)
 AstStatement CheckIncDecStmt(AstStatement stmt)
 {
 	AstIncDecStmt incDecStmt = (AstIncDecStmt)stmt;	
+	assert(incDecStmt->expr != NULL);
+//	assert(incDecStmt->expr->kids[0] != NULL);
+	// incDecStmt->expr = CheckExpression(incDecStmt->expr->kids[0]);
 	incDecStmt->expr = CheckExpression(incDecStmt->expr);
 
 	return (AstStatement)incDecStmt;
@@ -460,8 +463,7 @@ AstStatement CheckAssignmentsStmt(AstStatement stmt)
 
 AstStatement CheckSimpleStmt(AstStatement stmt)
 {
-
-	return stmt;
+	return CheckStatement(stmt);
 }
 
 void PushStatement(AstStatement stmt, StmtVector v)
