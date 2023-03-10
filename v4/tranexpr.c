@@ -457,7 +457,11 @@ void TranslateBranch(AstExpression expr, BBlock trueBB, BBlock falseBB)
 			{
 				src1 = TranslateExpression(expr->kids[0]);
 				src2 = TranslateExpression(expr->kids[1]);
-				GenerateBranch(T(BOOLEAN), trueBB, OPMAPS[expr->op], src1, src2);
+				// 前面被注释的两行，在调试过程中，为了满足后面的模块的需要，改成了第三行。
+				// GenerateBranch(T(BOOLEAN), trueBB, OPMAPS[expr->op], src1, src2);
+				// GenerateBranch(src1->ty, trueBB, OPMAPS[expr->op], src1, src2);
+				// src2和src1的顺序由cmp指令和jge指令的语法决定。
+				GenerateBranch(src1->ty, trueBB, OPMAPS[expr->op], src2, src1);
 				break;
 			}
 		default:

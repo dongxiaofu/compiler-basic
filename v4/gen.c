@@ -56,6 +56,7 @@ void GenerateBranch(Type ty, BBlock dest, int opcode, Symbol src1, Symbol src2)
 	irinst->ty = ty;
 	irinst->opcode = opcode;
 	irinst->opds[0] = (Symbol)dest;
+//	irinst->opds[0] = dest->sym;
 	irinst->opds[1] = src1;
 	irinst->opds[2] = src2;
 	AppendIRInst(irinst);

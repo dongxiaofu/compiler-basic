@@ -303,7 +303,13 @@ void EmitDeref(IRInst irinst)
 
 void EmitBranch(IRInst irinst)
 {
+	int tcode = TypeCode(irinst->ty->categ);
+	assert(tcode == U4 || tcode == I4);
+	int code = ASM_CODE(irinst->opcode, tcode);
 
+//	DST = ((BBlock)(irinst->opds[0]))->sym;
+	DST = ((BBlock)(DST))->sym;
+	PutASMCode(code, irinst->opds);
 }
 
 void EmitIncDec(IRInst irinst)

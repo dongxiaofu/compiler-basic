@@ -57,7 +57,9 @@ char *GetAccessName(Symbol sym)
 
 	if(sym->kind == SK_CONSTANT){
 		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
-		sprintf(name, "$%d", sym->val.i[0]);
+//		sprintf(name, "$%d", sym->val.i[0]);
+//		sprintf(name, "$%d", sym->name);
+		sprintf(name, "$%s", sym->name);
 		return name;
 	}
 
