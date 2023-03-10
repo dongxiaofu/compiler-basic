@@ -65,6 +65,7 @@ FunctionSymbol AddFunction(char *funcName, Signature sig);
 
 Symbol IntConstant(int i);
 Symbol CreateTemp(Type ty);
+void DefineTemp(Symbol temp, Type ty, int opcode, Symbol src1, Symbol src2);
 Symbol CreateParam(Type ty);
 Symbol AddString(Type ty, String value);
 #endif

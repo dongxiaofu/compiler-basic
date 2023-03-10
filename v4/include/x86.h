@@ -13,8 +13,8 @@ void AllocateReg(IRInst inst, int index);
 void ModifyVar(Symbol p);
 Symbol PutInReg(Symbol v);
 
-void LayoutFrame(FunctionSymbol fsym, int firstParamPos);
-void EmitPrologue();
+int LayoutFrame(FunctionSymbol fsym, int firstParamPos);
+void EmitPrologue(int local_variable_size);
 void EmitEpilogue();
 
 void EmitMove(IRInst irinst);

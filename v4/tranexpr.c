@@ -97,6 +97,8 @@ Symbol Addressof(Symbol sym)
 
 	AppendIRInst(irinst);
 
+	DefineTemp(tmp, tmp->ty, ADDR, sym, NULL);
+
 	return tmp;
 }
 
@@ -118,39 +120,54 @@ Symbol Deref(Type ty, Symbol addr)
 	return tmp;
 }
 
-Symbol Offset(Type ty, Symbol addr, int voff, int coff)
+Symbol Offset(Type ty, Symbol base, int voff, int coff)
 {
+	VariableSymbol p = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+	p->kind = SK_Offset;
+	p->offset = coff;
+	p->ty = ty;
+	p->link = base;
+	// TODO 以后修改成根据base-name的长度自动分配内存。
+	char *name = (char *)MALLOC(16);
+	sprintf(name, "%s[%d]", (char *)base->name, coff);
+	p->name = name;
+//	p->val.p = addr;
+
+	return (Symbol)p;
 	// 计算最终地址
-	Symbol t1 = CreateTemp(T(POINTER));
-	// 生成一条中间码
-	// 1. dst--tmp
-	// 2. OP--Add
-	// 3. src1--addr
-	// 4. src2--coff
-	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
-	irinst->ty = T(POINTER);
-	irinst->opcode = ADD;
-	irinst->opds[0] = t1;
-	irinst->opds[1] = addr;
-	union value val;
-	val.i[0] = coff;
-	val.i[1] = 0; 
-	irinst->opds[2] = Constant(T(INT), val);
-	AppendIRInst(irinst);
-	// 获取对应内存中的数据
-	Symbol t2 = CreateTemp(ty);
-	// 生成一条中间码：
-	// 1. dst--t2
-	// 2. OP--Deref
-	// 3. src1--addr or t1?
-	IRInst irinst2 = (IRInst)MALLOC(sizeof(struct irinst));
-	irinst2->ty = ty;
-	irinst2->opcode = DEREF;
-	irinst2->opds[0] = t2;
-	irinst2->opds[1] = t1;
-	AppendIRInst(irinst2);
-	
-	return t2;
+//	Symbol t1 = CreateTemp(T(POINTER));
+//	// 生成一条中间码
+//	// 1. dst--tmp
+//	// 2. OP--Add
+//	// 3. src1--addr
+//	// 4. src2--coff
+//	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
+//	irinst->ty = T(POINTER);
+//	irinst->opcode = ADD;
+//	irinst->opds[0] = t1;
+//	irinst->opds[1] = addr;
+////	union value val;
+////	val.i[0] = coff;
+////	val.i[1] = 0; 
+//	// irinst->opds[2] = Constant(T(INT), val);
+//	irinst->opds[2] = IntConstant(coff);
+//	AppendIRInst(irinst);
+//
+////	return t1;
+//	// 获取对应内存中的数据
+//	Symbol t2 = CreateTemp(ty);
+//	// 生成一条中间码：
+//	// 1. dst--t2
+//	// 2. OP--Deref
+//	// 3. src1--addr or t1?
+//	IRInst irinst2 = (IRInst)MALLOC(sizeof(struct irinst));
+//	irinst2->ty = ty;
+//	irinst2->opcode = DEREF;
+//	irinst2->opds[0] = t2;
+//	irinst2->opds[1] = t1;
+//	AppendIRInst(irinst2);
+//	
+//	return t2;
 }
 
 /**
@@ -268,16 +285,24 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 Symbol TranslateArrayIndex(AstExpression expr)
 {
 //	AstExpression p = TranslateExpression(expr->kids[1]);
-	AstExpression p = expr->kids[1];
+//	AstExpression p = expr->kids[1];
+	AstExpression p = expr;
 	int coff = 0;
 
-	while(p){
-		coff += p->kids[0]->val.i[0];
-		p = p->kids[1];
-	}
+//	while(p){
+//	//	coff += p->kids[0]->val.i[0];
+//		coff += p->val.i[0];
+//		p = p->kids[1];
+//	}
 
+	do{
+		coff += p->kids[1]->val.i[0];
+		p = p->kids[0];
+	}while(p->op == OP_INDEX);	
+
+//	Symbol addr = TranslateExpression(expr->kids[0]);	
 	Symbol addr = TranslateExpression(p);	
-	Symbol dst = Offset(expr->ty, addr, NULL, coff);
+	Symbol dst = Offset(expr->ty, AsVar(addr)->def->src1, NULL, coff);
 
 	return expr->isarray ? Addressof(dst) : dst;
 }

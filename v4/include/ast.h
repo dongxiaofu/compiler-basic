@@ -14,7 +14,7 @@
 					exit(-2);
 
 enum SYMBOL_KIND {INTERFACE_SYM, OTHER_SYM, SK_BOOLEAN, SK_CONSTANT, SK_REGISTER, SK_IREGISTER,
-	SK_Variable, SK_Temp, SK_Function, SK_Struct, SK_String
+	SK_Variable, SK_Temp, SK_Function, SK_Struct, SK_String, SK_Offset
 };
 
 struct mblock
@@ -391,6 +391,15 @@ typedef struct argBucket{
 	struct argBucket *link;
 } *ArgBucket;
 
+typedef struct valueDef{
+	Symbol dst;
+	int opcode;
+	Symbol src1;
+	Symbol src2;
+	Symbol def;
+	Symbol link;
+} *ValueDef;
+
 typedef struct functionSymbol{
 	SYMBOL_COMMON
 	// 函数的参数
@@ -412,6 +421,7 @@ typedef struct functionSymbol{
 
 typedef struct variableSymbol{
 	SYMBOL_COMMON
+	ValueDef def;
 	int offset;
 	InitData idata;	
 	// 接口变量的数据类型别名。

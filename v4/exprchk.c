@@ -29,6 +29,34 @@ AstExpression CheckAssignmentExpression(AstExpression expr)
 	return expr;
 }
 
+AstExpression FoldConstant(AstExpression expr)
+{
+	union value val;
+	AstExpression kid0, kid1;
+
+	val.i[0] = val.i[1] = 0;
+	kid0 = expr->kids[0];
+	kid1 = expr->kids[1];
+
+	assert(kid0 != NULL);
+	assert(kid1 != NULL);
+
+	switch(expr->op){
+		case OP_MUL:
+			{
+				val.i[0] = kid0->val.i[0] * kid1->val.i[0];
+				break;
+			}
+		default:
+			{
+				printf("%s--%s--%d\n", __FILE__, __BASE_FILE__, __LINE__);
+				exit(-1);
+			}
+	}
+
+	return Constant(expr->kids[0]->ty, val);
+}
+
 AstExpression Constant(Type ty, union value val)
 {
 	AstExpression expr;
@@ -57,7 +85,7 @@ AstExpression ScalePointerOffset(AstExpression offset, int scale)
 	val.i[1] = 0;
 	expr->kids[1] = Constant(offset->ty, val);	
 
-	return expr;
+	return FoldConstant(expr);
 }
 
 AstExpression Adjust(AstExpression expr)
@@ -468,7 +496,8 @@ static AstExpression CheckPostfixExpression(AstExpression expr)
 			expr->kids[1] = Adjust(CheckExpression(expr->kids[1]));
 			if(IsObjectPtr(expr->kids[0]->ty) == 1 && IsIntegType(expr->kids[1]->ty) == 1){
 				expr->ty = expr->kids[0]->ty->bty;
-				expr->kids[1] = ScalePointerOffset(expr->kids[0],expr->ty->size);
+				// expr->kids[1] = ScalePointerOffset(expr->kids[0],expr->ty->size);
+				expr->kids[1] = ScalePointerOffset(expr->kids[1],expr->ty->size);
 				return expr;
 			}
 			

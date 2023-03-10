@@ -76,6 +76,15 @@ char *GetAccessName(Symbol sym)
 		sprintf(name, ".%s", sym->name);
 		return name;
 	}
+
+	if(sym->kind == SK_Offset){
+		int n = AsVar(sym)->offset;
+		Symbol base = sym->link;
+		n += AsVar(base)->offset;
+		char *name = (char *)MALLOC(sizeof(char) * MAX_NAME_LEN);
+		sprintf(name, "%d(%%ebp)", n);
+		return name;
+	}
 	
 	if(sym->aname != NULL){
 		return sym->aname;

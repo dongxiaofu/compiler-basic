@@ -291,6 +291,18 @@ Symbol CreateTemp(Type ty)
 	return (Symbol)sym;
 }
 
+void DefineTemp(Symbol temp, Type ty, int opcode, Symbol src1, Symbol src2)
+{
+	ValueDef valueDef = (ValueDef)MALLOC(sizeof(struct valueDef));
+
+	valueDef->dst = temp;
+	valueDef->opcode = opcode;
+	valueDef->src1 = src1;
+	valueDef->src2 = src2;
+
+	AsVar(temp)->def = valueDef;
+}
+
 Symbol CreateParam(Type ty)
 {
 	VariableSymbol sym = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));

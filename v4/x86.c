@@ -92,7 +92,7 @@ Symbol PutInReg(Symbol v)
 	return reg;
 }
 
-void LayoutFrame(FunctionSymbol fsym, int firstParamPos)
+int LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 {
 	int functionParamCount = fsym->paramCount;
 	int paramCount = 0;
@@ -127,11 +127,20 @@ void LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 		localVariable->offset = offset;
 		localVariable = AsVar(localVariable->next);
 	}
+
+	int offset_init = -4;
+	offset = offset + offset_init;
+
+//	fprintf(ASMFile, "subl %d, esp", offset);
+	return offset;
 }
 
-void EmitPrologue()
+// void EmitPrologue()
+void EmitPrologue(int local_variable_size)
 {
 	PutASMCode(X86_PROLOGUE, NULL);
+	
+	fprintf(ASMFile, "\tsubl $%d, esp\n", local_variable_size);
 }
 
 void EmitEpilogue()
@@ -533,9 +542,9 @@ void EmitFunction(FunctionSymbol fsym)
 	// 函数名	
 	fprintf(ASMFile, "%s:\n", fsym->name);
 	// 对齐
-	LayoutFrame(fsym, PRESERVE_REGS + 1);
+	int local_variable_size = LayoutFrame(fsym, PRESERVE_REGS + 1);
 	// 序言
-	EmitPrologue();
+	EmitPrologue(local_variable_size);
 	// 处理函数的基本块
 	BBlock bblock = fsym->entryBB;
 	while(bblock != NULL){

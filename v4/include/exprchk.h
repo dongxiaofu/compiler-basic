@@ -12,6 +12,7 @@ AstExpression Adjust(AstExpression expr);
 void AssignInterfaceVariable(VariableSymbol sym, InitData idata);
 
 AstExpression Constant(Type ty, union value val);
+AstExpression FoldConstant(AstExpression expr);
 AstExpression ScalePointerOffset(AstExpression offset, int scale);
 
 AstExpression CheckUnaryExpression(AstExpression expr);
