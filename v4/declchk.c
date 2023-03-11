@@ -500,8 +500,10 @@ ArrayType CheckArraySpecifier(AstArrayTypeSpecifier specs)
 {
 	// TODO 数组的长度不总是可折叠的数据。这里是简化了问题。
 	int len = specs->expr->val.i[0];
-	CheckDeclarationSpecifiers((AstSpecifiers)specs->type);
-	Type bty = ((AstSpecifiers)specs->type)->ty;
+	// CheckDeclarationSpecifiers((AstSpecifiers)specs->tySpecs);
+//	CheckDeclarationSpecifiers((AstSpecifiers)specs);
+//	Type bty = ((AstSpecifiers)specs->tySpecs)->ty;
+	Type bty = CheckDeclarationSpecifiers((AstSpecifiers)specs);
 	ArrayType aty = ArrayOf(bty, len);
 
 	return aty;

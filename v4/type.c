@@ -302,7 +302,8 @@ AstArrayTypeSpecifier ParseArrayType(){
 	expect_token(TK_LBRACKET);	
 	spec->expr = (AstExpression)ParseExpression();
 	expect_token(TK_RBRACKET);	
-	spec->type = (AstNode)ParseType();
+//	spec->type = (AstNode)ParseType();
+	spec->tySpecs = (AstNode)ParseType();
 
 	return spec;
 }
