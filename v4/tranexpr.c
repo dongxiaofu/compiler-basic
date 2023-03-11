@@ -331,15 +331,42 @@ Symbol TranslateFunctionCall(AstExpression expr)
 	Symbol param;
 	Symbol paramHead = (Symbol)MALLOC(sizeof(struct symbol));
 	Symbol *lastParam = &(paramHead->next);
+	unsigned int symbol_size = sizeof(struct symbol);
 
 	AstExpression arg = expr->kids[1];
 	while(arg != NULL){
 		param = (Symbol)TranslateExpression(arg);
-		*lastParam = param;
-		lastParam = &(param->next);
+		Symbol outter_param = (Symbol)MALLOC(symbol_size);
+		outter_param->inner = param;
+		*lastParam = outter_param;
+		lastParam = &(outter_param->next);
 
 		arg = arg->next;
 	}
+//	while(arg != NULL){
+//		// void *paramCopy;
+//		Symbol paramCopy;
+//		unsigned int size = 0;
+//		if(arg->op == OP_CONST){
+//			size = sizeof(struct symbol);
+//			paramCopy = (Symbol)MALLOC(size);
+//		}else{
+//			size = sizeof(struct variableSymbol);
+//			paramCopy = (VariableSymbol)MALLOC(size);
+//		}
+//		param = (Symbol)TranslateExpression(arg);
+//		// TODO 如果是max(a,b)，那么应该VariableSymbol。
+//		// 如果是max(1,2)，那么应该用什么数据类型？我不知道。先这样吧。
+//		memcpy(paramCopy, param, size);
+//		*lastParam = paramCopy; 
+//		lastParam = &(paramCopy->next);
+//
+//		arg = arg->next;
+//	}
+
+	// 破坏环形链表。
+	// 不在需要了。
+//	*lastParam = NULL;
 
 	AstExpression result = expr->receiver;
 	VariableSymbol resultHead = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));

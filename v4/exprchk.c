@@ -90,6 +90,12 @@ AstExpression ScalePointerOffset(AstExpression offset, int scale)
 
 AstExpression Adjust(AstExpression expr)
 {
+	// TODO 为什么会有这一段代码？处理数据时出现错误，为了避免错误，我加上的。
+	// 从领域逻辑上考虑，我确实不知道为什么expr的ty会是NULL。
+	if(expr->ty == NULL){
+		return expr;
+	}
+
 	if(expr->ty->categ == ARRAY){
 		expr->ty = PointerTo(expr->ty->bty);
 		// TODO 写出了这样可笑的代码。疏忽。

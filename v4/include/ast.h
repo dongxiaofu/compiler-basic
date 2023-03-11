@@ -357,7 +357,8 @@ typedef  struct initData{
 	int needwb;		\
 	int ref;			\
 	struct symbol *link;\
-	struct symbol *next;
+	struct symbol *next;\
+	struct symbol *inner;
 
 typedef struct symbol{
 	SYMBOL_COMMON

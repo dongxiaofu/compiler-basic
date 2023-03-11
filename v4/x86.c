@@ -103,7 +103,12 @@ int LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 	VariableSymbol param = AsVar(fsym->params);
 //	while(param != NULL){
 	while(paramCount < functionParamCount){
+		// TODO 这句其实可以不要了。
 		param->offset = offset;
+		Symbol variable = LookupID(param->name);
+		AsVar(variable)->offset = offset;
+		assert(variable != NULL);
+//		memcpy(variable, param, sizeof(struct variableSymbol));
 		offset += param->ty->size;	
 		param = AsVar(param->next);
 		paramCount++;
@@ -130,6 +135,7 @@ int LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 
 	int offset_init = -4;
 	offset = offset + offset_init;
+	offset *= -1;
 
 //	fprintf(ASMFile, "subl %d, esp", offset);
 	return offset;
@@ -365,6 +371,14 @@ void PushArgument(Symbol arg)
 		PutASMCode(X86_PUSHB, opds);
 	}else{
 		PutASMCode(X86_PUSH, &arg);
+		return;
+		char *name = arg->name;
+		Symbol variable = LookupID(name);
+		assert(variable != NULL);
+		Symbol opds[1];
+		opds[0] = variable;
+		PutASMCode(X86_PUSH, opds);
+//		PutASMCode(X86_PUSHB, opds);
 	}
 }
 
@@ -397,8 +411,13 @@ void EmitCall(IRInst irinst)
 		// 只处理真正的参数。
 		if(paramCount == functionParamCount) break;
 		// 参数入栈
-		PushArgument(arg);
-		stackSize += arg->ty->size;
+		// TODO 
+		// 就在这里处理。把TranslateFunctionCall中的冒牌参数替换成真正的数据。
+		// 面临一个问题：临时变量，从哪里查询它？局部变量可以从变量表中查。
+		// 能不能再想想办法从源头上解决问题？
+		Symbol actual_arg = arg->inner;
+		PushArgument(actual_arg);
+		stackSize += actual_arg->ty->size;
 		paramCount++;
 		arg = arg->next;
 	}

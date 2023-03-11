@@ -128,6 +128,9 @@ void CheckFunction(AstFunction p)
 		sigElement->ty = paramDecl->specs->ty;
 		sig->params[++paramIndex] = sigElement;
 
+		// TODO 就在把参数加入变量列表。
+		AddVariable(dec->id, paramDecl->specs->ty);
+
 		paramDecl = paramDecl->next;
 	}
 

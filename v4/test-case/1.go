@@ -2,22 +2,40 @@ package main
 
 import "fmt"
 
-func main() {
-   // var n [8][10]int /* n 是一个长度为 10 的数组 */
-   var n [10][5]int /* n 是一个长度为 10 的数组 */
-	var arr[10]int
-//   var i,j,k int
+/* 函数返回两个数的最大值 */
+func max(num1, num2 int) int {
+   /* 定义局部变量 */
+   var result int
 
-	n[2][1] = 99
-	arr[3] = 50
-
-//   /* 为数组 n 初始化元素 */        
-//   for i = 3; i < 10; i++ {
-//		j = 5
-//		k = j + i
-//		j = k - 8
-////      n[i] = i + 100 /* 设置元素为 i + 100 */
-//   }
-
-   /* 输出每个数组元素的值 */
+   if (num1 > num2) {
+      result = num1
+   } else {
+      result = num2
+   }
+   return result
 }
+
+func main() {
+   /* 定义局部变量 */
+   var a int = 100
+   var b int = 200
+   var ret int
+
+   /* 调用函数并返回最大值 */
+   ret = max(3, b)
+
+  // fmt.Printf( "最大值是 : %d\n", ret )
+}
+
+// /* 函数返回两个数的最大值 */
+// func max(num1, num2 int) int {
+//    /* 定义局部变量 */
+//    var result int
+// 
+//    if (num1 > num2) {
+//       result = num1
+//    } else {
+//       result = num2
+//    }
+//    return result
+// }
