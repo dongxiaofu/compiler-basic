@@ -22,7 +22,9 @@ func main() {
    var ret int
 
    /* 调用函数并返回最大值 */
-   ret = max(3, b)
+//   ret = max(3, b)
+   ret = a + max(3, b)
+  // ret = a + b +  a
 
   // fmt.Printf( "最大值是 : %d\n", ret )
 }

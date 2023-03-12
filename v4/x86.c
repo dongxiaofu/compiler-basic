@@ -33,11 +33,12 @@ void AddVarToReg(Symbol reg, Symbol v)
 	v->reg = reg;
 }
 
-void AllocateReg(IRInst inst, int index)
+void AllocateReg(IRInst irinst, int index)
 {
 	Symbol reg, p;
 	
-	p = inst->opds[index];
+	p = irinst->opds[index];
+	if(p == NULL)	return;
 	// 目标操作数的kind不是SK_Temp，不分配寄存器。
 	if(p->kind != SK_Temp){
 		return;
@@ -46,6 +47,14 @@ void AllocateReg(IRInst inst, int index)
 	if(p->reg != NULL){
 		return;
 	}
+
+	// TODO 抄UCC的。我并未理解。
+	if(index == 0 && SRC1->reg != NULL){
+		reg = SRC1->reg;
+		reg->link = NULL;
+		AddVarToReg(reg, p);
+	}
+
 	// 获取一个寄存器，把目标操作数存储到寄存器中。
 	reg = GetReg();
 	AddVarToReg(reg, p);
@@ -98,13 +107,14 @@ int LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 	int paramCount = 0;
 	int functionReceiverCount = fsym->receiverCount;
 	int receiverCount = 0;
-	// 处理函数的参数
+	// 处理函数的参数--形参
 	int offset = STACK_SIZE * firstParamPos;
 	VariableSymbol param = AsVar(fsym->params);
 //	while(param != NULL){
 	while(paramCount < functionParamCount){
 		// TODO 这句其实可以不要了。
 		param->offset = offset;
+		// 形参一定在变量表中。
 		Symbol variable = LookupID(param->name);
 		AsVar(variable)->offset = offset;
 		assert(variable != NULL);
@@ -115,11 +125,14 @@ int LayoutFrame(FunctionSymbol fsym, int firstParamPos)
 	}
 
 	// 处理函数的返回值。
-	VariableSymbol result = AsVar(fsym->results);
+	// 注意，这里使用临时变量接收函数的返回值。
+	// VariableSymbol result = AsVar(fsym->results);
+	VariableSymbol result = AsVar(fsym->resultsTemp);
 //	while(result != NULL){
 	while(receiverCount < functionReceiverCount){
-		result->offset = offset;
-		offset += result->ty->size;
+		VariableSymbol inner_result = (VariableSymbol)result->inner;
+		inner_result->offset = offset;
+		offset += inner_result->ty->size;
 		result = AsVar(result->next);
 		receiverCount++;
 	}
@@ -432,11 +445,12 @@ void EmitCall(IRInst irinst)
 		int receiverCount = 0;
 		while(arg != NULL){
 			if(receiverCount == functionReceiverCount) break;
-			stackSize += arg->ty->size;
+			Symbol actual_arg = arg->inner;
+			stackSize += actual_arg->ty->size;
 			UsedRegs = 0;
 			Symbol opds[2];
 			opds[0] = GetReg();
-			opds[1] = (Symbol)arg;
+			opds[1] = (Symbol)actual_arg;
 			PutASMCode(X86_ADDR, opds);
 			PutASMCode(X86_PUSH, opds);
 		
@@ -456,7 +470,8 @@ void EmitCall(IRInst irinst)
 	// 接收返回值
 	// result 接收函数返回值的变量。
 	// tempReceiver 函数返回值声明。
-	Symbol result = fsym->results; 
+	// Symbol result = fsym->results; 
+	Symbol result = fsym->resultsTemp; 
 	int receiverCount = fsym->receiverCount;
 //	while(tempReceiver != NULL){
 	for(int i = 0; i < receiverCount; i++){
@@ -470,14 +485,16 @@ void EmitCall(IRInst irinst)
 
 		irinst = (IRInst)MALLOC(sizeof(struct irinst));	
 		irinst->opcode = MOV;
-		SRC1 = tempReceiver;
-		DST = result;
+		SRC1 = tempReceiver->inner;
+		DST = result->inner;
 //		SRC1 = result;
 //		DST = tempReceiver;
 	//	EmitIndirectMove(irinst);	
 		EmitMove(irinst);
 
+		// tempReceiver是用来接收返回值的参数。
 		tempReceiver = tempReceiver->next;
+		// result是fsym->resultsTemp中的元素，是主调函数中用来接收返回值的临时变量。
 		result = result->next;
 	}
 	fprintf(ASMFile, "Call end\n");
@@ -512,14 +529,15 @@ void EmitReturn(IRInst irinst)
 	// 需要获取函数的参数。从哪里获取？
 //	FunctionType ty = (FunctionType)(irinst->ty);
 //	Symbol firstParam = FSYM->params;
-	VariableSymbol result = FSYM->results;
+	// VariableSymbol result = FSYM->results;
+	VariableSymbol result = FSYM->resultsTemp;
 	VariableSymbol src = AsVar(DST);
 	int receiverCount = FSYM->receiverCount;
 	for(int i = 0; i < receiverCount; i++){
 //	while(result != NULL){
 		irinst->opcode = IMOV;
 		SRC1 = src;
-		DST = (Symbol)result;
+		DST = (Symbol)result->inner;
 		EmitIndirectMove(irinst);
 
 		result = result->next;

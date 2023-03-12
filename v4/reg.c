@@ -114,6 +114,8 @@ Symbol GetRegInternal(int width)
 
 int SelectSpillReg(int endReg)
 {
+	return 2;
+	// TODO 暂时无法把下面的代码修改正确。先简化。
 	int index = NO_REG;
 	int refMin = INT_MAX;
 	int ref = 0;
@@ -130,8 +132,11 @@ int SelectSpillReg(int endReg)
 		// 找出使用次数最少的寄存器。
 		p = reg->link;
 		while(p != NULL){
-			if(p->needwb && p->ref > 0){
-				ref += p->ref;
+			// TODO 理解不了p->ref。先简化。
+			// if(p->needwb && p->ref > 0){
+			if(p->needwb){
+				// ref += p->ref;
+				ref++;
 			}
 
 			p = p->link;

@@ -376,40 +376,67 @@ Symbol TranslateFunctionCall(AstExpression expr)
 	FunctionSymbol fsym = (FunctionSymbol)src1;
 	// 这是一个因粗心导致的错误。也不完全是因为粗心，写到这里，忘记了FSYM的含义。
 //	AstExpression receiver = FSYM->receivers;
+	// 函数返回值声明
 	Symbol receiver = fsym->receivers;
+//	while(receiver != NULL){
+//		AstNode val = (AstNode)(result->val.p);
+//
+//		if(val->kind == SK_Variable){
+//			resultSymbol = (VariableSymbol)(result->val.p);
+//		}else{
+//			resultSymbol = CreateTemp(receiver->ty);
+//			resultSymbol->kind = SK_Variable;
+//			resultSymbol->name = (char *)(result->val.p);
+//		}
+//		*resultSymbolNextPtr = resultSymbol;
+//		resultSymbolNextPtr = &(resultSymbol->next);
+//
+//		result = (AstExpression)result->next;
+//		receiver = receiver->next;
+//	}
+	
+	// 统一用临时变量接收函数的返回值。
 	while(receiver != NULL){
-		AstNode val = (AstNode)(result->val.p);
+		resultSymbol = CreateTemp(receiver->ty);
+		resultSymbol->kind = SK_Variable;
 
-		if(val->kind == SK_Variable){
-			resultSymbol = (VariableSymbol)(result->val.p);
-		}else{
-			resultSymbol = CreateTemp(receiver->ty);
-			resultSymbol->kind = SK_Variable;
-			resultSymbol->name = (char *)(result->val.p);
-		}
-		*resultSymbolNextPtr = resultSymbol;
+		Symbol outter_param = (Symbol)MALLOC(symbol_size);
+		outter_param->inner = resultSymbol;
+
+		*resultSymbolNextPtr = outter_param;
 		resultSymbolNextPtr = &(resultSymbol->next);
 
-		result = (AstExpression)result->next;
 		receiver = receiver->next;
 	}
 
-	fsym->results = (Symbol)resultHead->next;
+	// TODO 原本用来接收函数的返回值的变量怎么办？
+	fsym->resultsTemp = (Symbol)resultHead->next;
 
+	// 有多少个返回值就新增多少个变量。
+	// 函数返回值声明
 	receiver = fsym->receivers;
 	Symbol receiverSym;
 	while(receiver != NULL){
 		receiverSym = CreateParam(receiver->ty);
 		receiverSym->kind = SK_Variable;
-		*lastParam = receiverSym;
-		lastParam = &(receiverSym->next);
+
+		Symbol outter_param = (Symbol)MALLOC(symbol_size);
+		outter_param->inner = receiverSym;
+		*lastParam = outter_param;
+		lastParam = &(outter_param->next);
 		receiver = receiver->next;
 	}
 
 	GenerateFunctionCall(T(INT), dst, src1, paramHead->next);
 
 	// 无返回值的函数的调用，返回值应该是什么？
-	return dst;
+//	return dst;
+
+//	return (Symbol)fsym;
+//	不能直接返回函数，而是返回用来接收函数的返回值的那批参数。
+//	很需要直接知道这批参数的开头位置。可我不想现在去改，想快点看到结果。
+//	TODO 以后再优化。
+	return fsym->resultsTemp->inner;	
 }
 
 AstExpression Not(AstExpression expr)

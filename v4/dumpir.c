@@ -23,6 +23,22 @@ char *OPCODENAMES[] = {
 // 存储中间码的文件的句柄。
 FILE *IRFile;
 
+void DumpFunctionCall(IRInst irinst) {
+	// DST--无用
+	// SRC1--函数名
+	// SRC2--参数链表
+	fprintf(IRFile, "%s(", SRC1->name);
+	// 打印参数和接收返回值的参数。
+	Symbol param = SRC2;
+	while(param != NULL){
+		Symbol arg = param->inner;
+		fprintf(IRFile, "%s,", arg->name);
+		param = param->next;
+	}
+
+	fprintf(IRFile, ")\n");
+}
+
 void DumpIR(IRInst irinst) {
 	fprintf(IRFile, "%s", "\t");
 
@@ -44,7 +60,8 @@ void DumpIR(IRInst irinst) {
 			}
 		case CALL:
 			{
-				fprintf(IRFile, "call %s\n", SRC1->name);
+//				fprintf(IRFile, "call %s\n", SRC1->name);
+				DumpFunctionCall(irinst);
 				break;
 			}
 		case JZ:
@@ -80,7 +97,7 @@ void DumpIR(IRInst irinst) {
 		case SUB:
 		case MUL: case DIV: case MOD:
 			{
-				fprintf(IRFile, "%s: %s %s %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
+//				fprintf(IRFile, "%s: %s %s %s\n", DST->name, SRC1->name, OPCODENAMES[OP], SRC2->name);
 				break;
 			}
 		case RSF: case LSF:

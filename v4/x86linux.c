@@ -29,12 +29,15 @@ void PutASMCode(int code, Symbol opds[])
 					fprintf(ASMFile, "%");
 				}else{
 					int i = *fmt - '0';
+					// TODO 仅仅只是为了容错。以后再优化。
+					if(opds[i] == NULL)	goto Label_break;
 					if(opds[i]->reg == NULL){
 						fprintf(ASMFile, "%s", GetAccessName(opds[i]));
 					}else{
 						fprintf(ASMFile, "%s", opds[i]->reg->name);
 					}
 				}
+Label_break:
 				break;
 			case ';':
 				fprintf(ASMFile, "\n\t");

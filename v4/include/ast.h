@@ -407,6 +407,8 @@ typedef struct functionSymbol{
 	Symbol params;
 	// 接收函数返回值的变量
 	Symbol results;
+	// 接收函数返回值的变量
+	Symbol resultsTemp;
 	// 函数的局部变量
 	Symbol locals;
 	// 函数返回值声明
