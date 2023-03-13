@@ -328,11 +328,27 @@ Symbol TranslateFunctionCall(AstExpression expr)
 	dst = NULL;
 	src1 = TranslateExpression(expr->kids[0]);
 
+	FunctionSymbol fsym = (FunctionSymbol)src1;
+
 	Symbol param;
+	VariableSymbol *resultSymbolNextPtr;
+	int isFirstCall = 0;
+	VariableSymbol resultHead;
+
 	Symbol paramHead = (Symbol)MALLOC(sizeof(struct symbol));
 	Symbol *lastParam = &(paramHead->next);
+	// if(FUNCTION_CURRENT->resultsTemp != NULL){
+	if(fsym->resultsTemp != NULL){
+		resultSymbolNextPtr = &(fsym->resultsTemp->next);
+	}else{
+		resultHead = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
+		resultSymbolNextPtr = &(resultHead->next);
+		isFirstCall = 1;
+	}
+	
 	unsigned int symbol_size = sizeof(struct symbol);
 
+	// 实参。
 	AstExpression arg = expr->kids[1];
 	while(arg != NULL){
 		param = (Symbol)TranslateExpression(arg);
@@ -369,11 +385,9 @@ Symbol TranslateFunctionCall(AstExpression expr)
 //	*lastParam = NULL;
 
 	AstExpression result = expr->receiver;
-	VariableSymbol resultHead = (VariableSymbol)MALLOC(sizeof(struct variableSymbol));
 	VariableSymbol resultSymbol;
-	VariableSymbol *resultSymbolNextPtr = &(resultHead->next);
 
-	FunctionSymbol fsym = (FunctionSymbol)src1;
+//	FunctionSymbol fsym = (FunctionSymbol)src1;
 	// 这是一个因粗心导致的错误。也不完全是因为粗心，写到这里，忘记了FSYM的含义。
 //	AstExpression receiver = FSYM->receivers;
 	// 函数返回值声明
@@ -395,9 +409,14 @@ Symbol TranslateFunctionCall(AstExpression expr)
 //		receiver = receiver->next;
 //	}
 	
+	Symbol returnSym = NULL;
 	// 统一用临时变量接收函数的返回值。
+	// 这是什么？不添加到实参链表中，是最终接收返回值的临时变量。
 	while(receiver != NULL){
 		resultSymbol = CreateTemp(receiver->ty);
+		if(returnSym == NULL){
+			returnSym = resultSymbol;
+		}
 		resultSymbol->kind = SK_Variable;
 
 		Symbol outter_param = (Symbol)MALLOC(symbol_size);
@@ -410,10 +429,17 @@ Symbol TranslateFunctionCall(AstExpression expr)
 	}
 
 	// TODO 原本用来接收函数的返回值的变量怎么办？
-	fsym->resultsTemp = (Symbol)resultHead->next;
+	// TODO 这里很容易弄错。我看了半天才把这里改正确。
+//	fsym->resultsTemp = (Symbol)resultsTempHead;
+//	fsym->resultsTemp = (Symbol)resultHead->next;
+	if(isFirstCall){
+		fsym->resultsTemp = (Symbol)resultHead->next;
+	}
 
 	// 有多少个返回值就新增多少个变量。
 	// 函数返回值声明
+	// 这是什么？接收函数返回值的参数。它们本来不是函数的参数，是为了接收函数的返回值新增的参数。
+	// 前面那个循环创建的链表，
 	receiver = fsym->receivers;
 	Symbol receiverSym;
 	while(receiver != NULL){
@@ -436,7 +462,8 @@ Symbol TranslateFunctionCall(AstExpression expr)
 //	不能直接返回函数，而是返回用来接收函数的返回值的那批参数。
 //	很需要直接知道这批参数的开头位置。可我不想现在去改，想快点看到结果。
 //	TODO 以后再优化。
-	return fsym->resultsTemp->inner;	
+//	return fsym->resultsTemp->inner;	
+	return returnSym;
 }
 
 AstExpression Not(AstExpression expr)

@@ -473,6 +473,7 @@ void EmitCall(IRInst irinst)
 	// Symbol result = fsym->results; 
 	Symbol result = fsym->resultsTemp; 
 	int receiverCount = fsym->receiverCount;
+	fprintf(ASMFile, "Call what  start\n");
 //	while(tempReceiver != NULL){
 	for(int i = 0; i < receiverCount; i++){
 		IRInst irinst;
@@ -497,6 +498,10 @@ void EmitCall(IRInst irinst)
 		// result是fsym->resultsTemp中的元素，是主调函数中用来接收返回值的临时变量。
 		result = result->next;
 	}
+	
+	fsym->resultsTemp = result;
+
+	fprintf(ASMFile, "Call what  end\n");
 	fprintf(ASMFile, "Call end\n");
 
 	return;
