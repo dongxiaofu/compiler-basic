@@ -423,7 +423,8 @@ Symbol TranslateFunctionCall(AstExpression expr)
 		outter_param->inner = resultSymbol;
 
 		*resultSymbolNextPtr = outter_param;
-		resultSymbolNextPtr = &(resultSymbol->next);
+		// resultSymbolNextPtr = &(resultSymbol->next);
+		resultSymbolNextPtr = &(outter_param->next);
 
 		receiver = receiver->next;
 	}
