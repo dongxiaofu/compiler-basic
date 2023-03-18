@@ -112,13 +112,13 @@ try_again:
 			// get_next_char();
 			goto try_again;
 		}
-	}else if(isalpha(current_char)){ // 是字母
+	}else if(isalpha(current_char) || current_char == '_'){ // 是字母
 		int len = 0;
 		do{
 			token.value.value_str[len] = current_char;
 			len++;
 			get_next_char();
-		}while( isalnum(current_char)  );	// 是字母或数字
+		}while( isalnum(current_char)  || current_char == '_' );	// 是字母或数字
 
 		token.value.value_str[len] = 0;
 		token.kind = get_keyword_kind(token.value.value_str);	

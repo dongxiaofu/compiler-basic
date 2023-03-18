@@ -2,10 +2,11 @@ package main
 
 import "fmt"
 
-func swap(x, y string) (string, string) {
-   return y, x
-}
-
 func main() {
-   a, b := swap("Google", "Runoob")
+   /* 定义局部变量 */
+   var a int = 100
+   var b int= 200
+	var x int
+
+   _,x = a,b
 }

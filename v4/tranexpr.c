@@ -116,6 +116,8 @@ Symbol Deref(Type ty, Symbol addr)
 	irinst->opds[1] = addr;
 
 	AppendIRInst(irinst);	
+
+	DefineTemp(tmp, ty, DEREF, addr, NULL);
 	
 	return tmp;
 }
@@ -262,8 +264,10 @@ Symbol TranslateUnaryExpression(AstExpression expr)
 
 	switch(op){
 		case OP_DEREF:
-			sym = Deref(expr->ty, src);
-			break;
+			{
+				sym = Deref(expr->ty, src);
+				break;
+			}
 		case OP_ADDRESS:
 			sym = Addressof(src);
 			break;
@@ -312,11 +316,19 @@ Symbol TranslateAssignmentExpression(AstExpression expr)
 	Symbol dst = TranslateExpression(expr->kids[0]);
 	Symbol src = TranslateExpression(expr->kids[1]);
 
-	// 生成一条中间码
-	// 1. op--MOV
-	// 2. dst--dst
-	// 3. src1--src
-	GenerateMov(expr->ty, dst, src);
+	if(dst->kind == SK_Temp && AsVar(dst)->def->opcode == DEREF){
+		Symbol addr = AsVar(dst)->def->src1;
+//		GenerateIndirectMove(expr->ty, addr, src);
+//		dst = Deref(expr->ty, addr);
+		GenerateIndirectMove(addr->ty, addr, src);
+		dst = Deref(expr->kids[0]->ty, addr);
+	}else{
+		// 生成一条中间码
+		// 1. op--MOV
+		// 2. dst--dst
+		// 3. src1--src
+		GenerateMov(expr->ty, dst, src);
+	}
 
 	return dst;
 }

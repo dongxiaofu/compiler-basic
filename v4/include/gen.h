@@ -54,6 +54,7 @@ void DrawCFGEdge(BBlock head, BBlock tail);
 
 void AppendIRInst(IRInst irinst);
 void GenerateMov(Type ty, Symbol dst, Symbol src);
+void GenerateIndirectMove(Type ty, Symbol dst, Symbol src);
 void GenerateJmp(BBlock bb);
 void GenerateBranch(Type ty, BBlock dest, int opcode, Symbol src1, Symbol src2);
 void GenerateReturn(Type ty, Symbol dest);

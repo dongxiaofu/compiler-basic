@@ -36,6 +36,16 @@ void GenerateMov(Type ty, Symbol dst, Symbol src)
 	AppendIRInst(irinst);
 }
 
+void GenerateIndirectMove(Type ty, Symbol dst, Symbol src)
+{
+	IRInst irinst = (IRInst)MALLOC(sizeof(struct irinst));
+	irinst->ty = dst->ty;
+	irinst->opcode = IMOV;
+	irinst->opds[0] = dst;
+	irinst->opds[1] = src;
+	AppendIRInst(irinst);
+}
+
 void GenerateJmp(BBlock bb)
 {
 	DrawCFGEdge(CurrentBBlock, bb);

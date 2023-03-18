@@ -109,6 +109,8 @@ AstExpression Adjust(AstExpression expr)
 
 AstExpression CheckPrimaryExpression(AstExpression expr)
 {
+	if(strcmp(expr->val.p, "_") == 0)	return expr;
+
 	if(expr->op == OP_CONST){
 		return expr;
 	}

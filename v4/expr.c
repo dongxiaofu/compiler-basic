@@ -680,7 +680,7 @@ AstExpression ParseOperand(){
                     divider: varDivider,
             }
      */
-	if(current_token.kind == TK_ID){
+	if(current_token.kind == TK_ID || current_token.kind == TK_UNDERSCORE){
 		char *str = (char *)current_token.value.value_str;	
 		if(IsTypeName(str) == 1) goto literal;
 		expr = ParseOperandName();
