@@ -418,7 +418,32 @@ void TranslateCompoundStatement(AstStatement stmt)
 	AstCompoundStatement compoundStmt = (AstCompoundStatement)stmt;
 //	while(compoundStmt != NULL){
 		if(compoundStmt->decls){
-			// TODO 不知道怎么处理。	
+			if(compoundStmt->decls->kind == NK_VarDeclaration){
+				AstVarDeclaration decl = (AstVarDeclaration)compoundStmt->decls;
+				while(decl){
+					AstVarDeclarator declarator = (AstVarDeclarator)decl->decs;
+					while(declarator){
+						AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
+						while(initDec){
+							if(initDec->init){
+								InitData idata = ((AstInitializer)initDec->init)->idata;
+								// TODO 先简化处理吧。
+								Symbol dst = LookupID(initDec->dec->id);
+								assert(dst != NULL);
+								Symbol src = TranslateExpression(idata->expr);
+								Type ty = dst->ty;
+								GenerateMov(ty, dst, src);
+
+							}
+							initDec = (AstInitDeclarator)initDec->next;
+						}
+
+						declarator = declarator->next;
+					}
+
+					decl = decl->next;
+				}
+			}
 		}
 	
 		if(compoundStmt->labeledStmt != NULL){
