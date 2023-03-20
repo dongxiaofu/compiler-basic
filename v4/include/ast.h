@@ -623,6 +623,8 @@ typedef struct astTypeDeclarator{
 	AstSpecifiers specs;
 	// init-declarator-list:		id, id=300,
 	AstNode initDecs;
+	// 1--AliasDecl；2--TypeDef
+	int category;
 } *AstTypeDeclarator;
 
 typedef struct astTypeDeclaration{
@@ -771,6 +773,10 @@ typedef struct astTranslationUnit{
 
 #define PRINTF printf
 #define AsVar(param)   ((VariableSymbol)param)
+#define AsAstVarDeclaration(declaration)	((AstVarDeclaration)declaration)
+#define AsAstVarDeclarator(declarator)		((AstVarDeclarator)declarator)
+#define AsAstTypeDeclaration(declaration)	((AstTypeDeclaration)declaration)
+#define AsAstTypeDeclarator(declarator)		((AstTypeDeclarator)declarator)
 
 // static AstFunction CURRENT;
 AstFunction CURRENT;

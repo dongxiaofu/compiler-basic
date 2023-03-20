@@ -161,6 +161,7 @@ Symbol DoLookupSymbol(Table tbl, char *name, unsigned int hashKey, int  searchOu
 		if(tbl->buckets != NULL){
 			BucketLinker linker;
 			for(linker = (BucketLinker)tbl->buckets[hashKey]; linker; linker = linker->link){
+				// TODO 和UCC的不同之处。我不清楚自己当初为什么这样做。
 				// if(name == linker->sym->name){
 				if(strcmp(name,linker->sym->name) == 0){
 					return (Symbol)linker->sym;
@@ -178,9 +179,10 @@ VariableSymbol AddVariable(char *name, Type ty)
 	VariableSymbol p = (VariableSymbol)MALLOC(size);	
 	p->ty = ty;
 	int sk = SK_Variable;
-	if(ty->categ == STRUCT){
-		sk = SK_Struct;
-	}
+	// TODO 不知道当年为什么这样写。我要暂时去掉这个修改。
+//	if(ty->categ == STRUCT){
+//		sk = SK_Struct;
+//	}
 	if(sk != -1){
 		p->kind = sk;
 	}

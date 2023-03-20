@@ -214,10 +214,96 @@ void CheckGlobalDeclaration(AstDeclaration decls){
 	CheckDeclaration(decls);
 }
 
+void CheckDeclaration(AstDeclaration decls)
+{
+	AstDeclaration decl = decls;
+//	while(decl){
+		// TODO 复制粘贴导致的可笑的错误。
+		// if(decls->kind == NK_VarDeclaration){
+		if(decl->kind == NK_VarDeclaration){
+			AstVarDeclarator declarator = AsAstVarDeclarator(AsAstVarDeclaration(decl)->decs);	
+			while(declarator){
+				// 处理说明符
+				CheckDeclarationSpecifiers(declarator->specs);
+				VariableSymbol sym;
+				VariableSymbol sym2;
+				// TODO var a,b int = 2,4
+				AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
+				// CG 处理a,b
+				while(initDec){
+					AstDeclarator dec = initDec->dec;
+					if((sym = (VariableSymbol)LookupID(dec->id)) == NULL){
+						sym = AddVariable(dec->id, declarator->specs->ty);
+					}else{
+						// TODO 需要优化
+						ERROR("%s\n", "variable redefine-238");
+					}	
+					// 变量的初始值
+					if(initDec->init){
+						CheckInitializer((AstInitializer)initDec->init);
+						if(sym->ty->categ == INTERFACE){	
+							AssignInterfaceVariable(sym, ((AstInitializer)initDec->init)->idata); 
+						 }else{
+							sym->idata = ((AstInitializer)initDec->init)->idata;
+						}
+					}
+
+					// TODO 测试查询功能，没有作用。
+					sym2 = (VariableSymbol)LookupID(dec->id);
+
+					initDec = (AstInitDeclarator)initDec->next;
+				}
+				declarator = declarator->next;
+			}
+		}else if(decls->kind == NK_ConstDeclaration){
+
+		// }else{
+		}else if(decl->kind == NK_TypeDeclaration){
+			AstTypeDeclarator declarator = AsAstTypeDeclarator(AsAstTypeDeclaration(decl)->decs);	
+			while(declarator){
+				// 处理说明符
+				CheckDeclarationSpecifiers(declarator->specs);
+				VariableSymbol sym;
+				VariableSymbol sym2;
+				// TODO var a,b int = 2,4
+				AstInitDeclarator initDec = (AstInitDeclarator)declarator->initDecs;
+				// CG 处理a,b
+				while(initDec){
+					AstDeclarator dec = initDec->dec;
+					if((sym = (VariableSymbol)LookupID(dec->id)) == NULL){
+						sym = AddVariable(dec->id, declarator->specs->ty);
+					}else{
+						// TODO 需要优化
+						ERROR("%s\n", "variable redefine-276");
+					}	
+					// 变量的初始值
+					if(initDec->init){
+						CheckInitializer((AstInitializer)initDec->init);
+						if(sym->ty->categ == INTERFACE){	
+							AssignInterfaceVariable(sym, ((AstInitializer)initDec->init)->idata); 
+						 }else{
+							sym->idata = ((AstInitializer)initDec->init)->idata;
+						}
+					}
+
+					// TODO 测试查询功能，没有作用。
+					sym2 = (VariableSymbol)LookupID(dec->id);
+
+					initDec = (AstInitDeclarator)initDec->next;
+				}
+				declarator = declarator->next;
+			}
+		}else{
+			// TODO 存在上面三者情况外的其他情况吗？
+		}
+//		decl = decl->next;
+//	}
+}
+
 // TODO 必须加static吗？
 // static void CheckGlobalDeclaration(AstDeclaration decl)
 // void CheckGlobalDeclaration(AstDeclaration decls)
-void CheckDeclaration(AstDeclaration decls)
+void CheckDeclaration2(AstDeclaration decls)
 {
 	if(decls->kind == NK_VarDeclaration){
 		AstVarDeclaration decl = (AstVarDeclaration)decls;
@@ -238,7 +324,7 @@ void CheckDeclaration(AstDeclaration decls)
 						sym = AddVariable(dec->id, declarator->specs->ty);
 					}else{
 						// TODO 需要优化
-						ERROR("%s\n", "variable redefine");
+						ERROR("%s\n", "variable redefine-324");
 					}	
 					// 变量的初始值
 					if(initDec->init){
@@ -264,6 +350,7 @@ void CheckDeclaration(AstDeclaration decls)
 
 	}else{
 		printf("%s\n", "todo");
+		
 	}
 }
 
@@ -335,7 +422,8 @@ Field LookupField(char *fieldName, char *structName)
 	fld = rty->flds;
 	char *id = NULL;
 	while(fld){
-		if(rty->categ == STRUCT){
+		// if(rty->categ == STRUCT){
+		if(fld->ty->categ == STRUCT){
 			target = LookupField(fieldName, fld->id);
 			if(target){
 				id = target->id;

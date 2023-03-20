@@ -450,14 +450,17 @@ TypeDef = identifier Type .
 AstTypeDeclarator ParseTypeSpec(){
 	LOG("%s\n", "parse TypeSpec");
 
+	int category = 0;
 	AstExpression expr = ParseIdentifier();
 
 	if(current_token.kind == TK_ASSIGN){
 		NEXT_TOKEN;
+		category = 1;
 		// expr = ParseExpressionList();
 //		expr = ParseExpression();
 	}else{
 //		type = ParseType();
+		category = 2;
 	}
 
 	AstSpecifiers type = (AstSpecifiers)ParseType();
@@ -486,6 +489,7 @@ AstTypeDeclarator ParseTypeSpec(){
 
 	decl->specs = specs; 
 	decl->initDecs = initDecs; 
+	decl->category = category;
 
 	return decl;
 }

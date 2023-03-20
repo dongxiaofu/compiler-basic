@@ -70,10 +70,14 @@ Symbol TranslateMemberAccess(AstExpression expr)
 		coff += fld->offset;
 		p = p->kids[0];
 	}
-	Symbol baseAddr = Addressof(TranslateExpression(p));
+//	Symbol baseAddr = Addressof(TranslateExpression(p));
+	Symbol baseAddr = TranslateExpression(p);
 
 	// 获取对应内存中的数据。
-	Symbol dst = Offset(expr->ty, baseAddr, 0, coff);
+//	Symbol dst = Offset(expr->ty, baseAddr, 0, coff);
+	// TODO UCC不是这样做的。我先这样简化处理吧。
+	Symbol dst = Offset(expr->ty, AsVar(baseAddr)->def->src1, 0, coff);
+//	Symbol dst = Offset(expr->ty, p, 0, coff);
 
 	return dst;
 }
@@ -654,6 +658,9 @@ Symbol TranslatePostfixExpression(AstExpression expr)
 		case OP_CALL:
 			sym = TranslateFunctionCall(expr);
 			break;
+		case OP_MEMBER:
+			sym = TranslateMemberAccess(expr);
+			break;	
 		default:
 			{
 				ERROR("%s\n", "还不知道怎么处理\n");

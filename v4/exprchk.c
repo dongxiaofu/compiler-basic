@@ -109,13 +109,14 @@ AstExpression Adjust(AstExpression expr)
 
 AstExpression CheckPrimaryExpression(AstExpression expr)
 {
-	if(strcmp(expr->val.p, "_") == 0)	return expr;
+//	if(strcmp(expr->val.p, "_") == 0)	return expr;
 
 	if(expr->op == OP_CONST){
 		return expr;
 	}
 
 	if(expr->op == OP_STR){
+		if(strcmp(expr->val.p, "_") == 0)	return expr;
 		expr->op = OP_ID;
 		expr->val.p = AddString(expr->ty, (String)(expr->val.p));
 		// TODO 不知道有什么用。
@@ -144,7 +145,13 @@ AstExpression CheckMemberAccess(AstExpression expr)
 {
 	expr->kids[0] = CheckExpression(expr->kids[0]);
 	
-	Field fld = LookupField(expr->val.p, expr->kids[0]->val.p);	
+	// Field fld = LookupField(expr->val.p, expr->kids[0]->val.p);	
+	Symbol sym = (Symbol)(expr->kids[0]->val.p);
+	if(sym == NULL){
+		ERROR("%s\n", CheckMemberAccess);
+	}
+
+	Field fld = LookupField(expr->val.p, sym->name);	
 	if(fld == NULL){
 		ERROR("%s\n", CheckMemberAccess);
 	}
