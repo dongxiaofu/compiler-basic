@@ -148,12 +148,16 @@ AstExpression CheckMemberAccess(AstExpression expr)
 	// Field fld = LookupField(expr->val.p, expr->kids[0]->val.p);	
 	Symbol sym = (Symbol)(expr->kids[0]->val.p);
 	if(sym == NULL){
-		ERROR("%s\n", CheckMemberAccess);
+		// TODO 需优化这种错误信息。
+		printf("there is no struct in file:%s in line:%d\n", __BASE_FILE__, __LINE__);
+		exit(-1);
 	}
 
 	Field fld = LookupField(expr->val.p, sym->name);	
 	if(fld == NULL){
-		ERROR("%s\n", CheckMemberAccess);
+		// TODO 需优化这种错误信息。
+		printf("%s has no member %s in file:%s in line: %d\n", sym->name, expr->val.p, __BASE_FILE__, __LINE__);
+		exit(-1);
 	}
 	expr->ty = fld->ty;
 	expr->val.p = fld;

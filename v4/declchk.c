@@ -430,9 +430,10 @@ Field LookupField(char *fieldName, char *structName)
 			}
 		}else{
 			id = fld->id;
-			target = fld;
+//			target = fld;
 		}
 		if(strcmp(fieldName, id) == 0){
+			target = fld;
 			return target;
 		}
 		fld = fld->next;

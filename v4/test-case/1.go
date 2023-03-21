@@ -31,7 +31,7 @@ func main() {
    Book2.title = "Python"
    Book2.author = "wwwrunoobcom"
    Book2.subject = "Python"
-   Book2.book_id2 = 6495700
+   Book2.book_id = 6495700
 
    /* 打印 Book1 信息 */
 //   fmt.Printf( "Book 1 title : %s\n", Book1.title)
