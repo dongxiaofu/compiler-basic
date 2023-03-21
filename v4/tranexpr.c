@@ -70,8 +70,8 @@ Symbol TranslateMemberAccess(AstExpression expr)
 		coff += fld->offset;
 		p = p->kids[0];
 	}
-//	Symbol baseAddr = Addressof(TranslateExpression(p));
-	Symbol baseAddr = TranslateExpression(p);
+	Symbol baseAddr = Addressof(TranslateExpression(p));
+//	Symbol baseAddr = TranslateExpression(p);
 
 	// 获取对应内存中的数据。
 //	Symbol dst = Offset(expr->ty, baseAddr, 0, coff);
@@ -90,6 +90,18 @@ Symbol TranslateExpression(AstExpression expr)
 
 Symbol Addressof(Symbol sym)
 {
+	// 获取def链表
+	int h = ((int)sym + (int)ADDR + (int)0) % FSYM_VALUE_DEF_TABLE_SIZE;
+	ValueDef def = FSYM->valueDefTable[h];
+	// 遍历def链表
+	while(def){
+		// TODO 我记得UCC不是这样判断的。可是，我根据现在的具体情况写出这样的代码也不错。
+		if(def->opcode == ADDR && def->src1 == sym)	break;
+		def = def->link;
+	}
+	
+	if(def && def->dst != NULL)	return def->dst;
+
 	// 内地地址的type是指针。
 	Symbol tmp = CreateTemp(T(POINTER));
 	// 生成一条中间码，tmp是dst，OP是ADDR，src1是sym。
@@ -102,6 +114,12 @@ Symbol Addressof(Symbol sym)
 	AppendIRInst(irinst);
 
 	DefineTemp(tmp, tmp->ty, ADDR, sym, NULL);
+
+//	AsVar(tmp)->def->link = def;	
+//	FSYM->valueDefTable[h] = AsVar(tmp)->def;
+	// TODO 注意上面的错误写法。这种操作，我还不是非常熟练。
+	AsVar(tmp)->def->link = FSYM->valueDefTable[h];
+	FSYM->valueDefTable[h] = AsVar(tmp)->def;
 
 	return tmp;
 }

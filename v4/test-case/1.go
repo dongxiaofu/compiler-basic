@@ -22,6 +22,7 @@ func main() {
 //
    /* book 1 描述 */
 	 Book1.title = "Go"
+   Book1.book_id = 6495407
 	 Book1.author = "wwwrunoobcom"
    Book1.subject = "Go"
    Book1.book_id = 6495407

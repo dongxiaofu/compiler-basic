@@ -41,6 +41,8 @@ union align
 
 #define HEAP(hp)    struct heap  hp = { &hp.head }
 
+#define FSYM_VALUE_DEF_TABLE_SIZE	15
+
 int HeapAllocate(Heap heap, int size);
 
 // 打印日志
@@ -420,6 +422,9 @@ typedef struct functionSymbol{
 
 	BBlock entryBB;
 	BBlock exitBB;
+
+	// TODO 先直接把这个数组的大小设置为15吧。我随意设置的。
+	ValueDef valueDefTable[FSYM_VALUE_DEF_TABLE_SIZE];
 } *FunctionSymbol;
 
 typedef struct variableSymbol{

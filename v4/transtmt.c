@@ -88,6 +88,10 @@ void TranslateFunction(AstFunction function)
 	// 最后，我又忘记了处理这个稀里糊涂写出来的FSYM。这就叫做“事出有因”。
 //	FunctionSymbol fsym = FSYM;
 	FSYM = function->fsym;
+	// TODO 能用其他方式初始化数组吗？比如，使用memset把数组的所有元素设置成0。
+	for(int i = 0; i < FSYM_VALUE_DEF_TABLE_SIZE; i++){
+		FSYM->valueDefTable[i] = 0;
+	}
 
 	// 思路如下：
 	// 1. 创建两个基本块，分别是入口基本块和退出基本块。
