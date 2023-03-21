@@ -357,7 +357,17 @@ void CheckDeclaration2(AstDeclaration decls)
 Type CheckDeclarationSpecifiers(AstSpecifiers specs)
 {
 	Type ty = NULL;
-	AstSpecifiers tySpecs = (AstSpecifiers)specs->tySpecs;
+	AstSpecifiers tySpecs = NULL;
+	// TODO 为什么写出这样一段代码？没有什么特殊原因，我根据具体情况见招拆招罢了。
+	// 根据typeAlias的值来区分两种情况，妥当吗？
+	if(specs->typeAlias){
+		TypeName *tname = LookupTypeName(specs->typeAlias);
+		assert(tname != NULL);
+		tySpecs = tname->type;
+	}else{
+		tySpecs = (AstSpecifiers)specs->tySpecs;
+	}
+	assert(tySpecs != NULL);
 	if(tySpecs->kind == NK_StructSpecifier){
 		// ty = CheckStructSpecifier((AstStructSpecifier)specs->tySpecs);
 		ty = CheckStructSpecifier((AstStructSpecifier)tySpecs);
@@ -367,6 +377,7 @@ Type CheckDeclarationSpecifiers(AstSpecifiers specs)
 		ty = CheckInterfaceSpecifier((AstInterfaceSpecifier)tySpecs);
 		AppendInterface(ty);
 	}else{
+		// TODO 需要补充。
 		ty = T(INT);
 	}
 
@@ -422,16 +433,19 @@ Field LookupField(char *fieldName, char *structName)
 	fld = rty->flds;
 	char *id = NULL;
 	while(fld){
+// TODO 究竟是否需要这样做？从我遇到的具体情况看，不需要。或许还存在我没有想到的案例要求这样做。
+// 先简化处理吧。
 		// if(rty->categ == STRUCT){
-		if(fld->ty->categ == STRUCT){
-			target = LookupField(fieldName, fld->id);
-			if(target){
-				id = target->id;
-			}
-		}else{
-			id = fld->id;
-//			target = fld;
-		}
+//		if(fld->ty->categ == STRUCT){
+//			target = LookupField(fieldName, fld->id);
+//			if(target){
+//				id = target->id;
+//			}
+//		}else{
+//			id = fld->id;
+////			target = fld;
+//		}
+		id = fld->id;
 		if(strcmp(fieldName, id) == 0){
 			target = fld;
 			return target;

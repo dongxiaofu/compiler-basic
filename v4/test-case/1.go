@@ -14,11 +14,13 @@ type Books struct {
     author string
     subject string
     book_id2 int
+
+	book Books
  }
 
 func main() {
    var Book1 Books        /* 声明 Book1 为 Books 类型 */
-   var Book2 Books        /* 声明 Book2 为 Books 类型 */
+   var Book2 Books2        /* 声明 Book2 为 Books 类型 */
 //
    /* book 1 描述 */
 	 Book1.title = "Go"
@@ -28,10 +30,14 @@ func main() {
    Book1.book_id = 6495407
 
  /* book 2 描述 */
+	Book2.book = Book1
    Book2.title = "Python"
    Book2.author = "wwwrunoobcom"
    Book2.subject = "Python"
-   Book2.book_id = 6495700
+   Book2.book_id2 = 6495700
+	Book2.book = Book1
+	Book2.book_id2 = Book2.book_id2 + 3
+	Book2.book_id2 = Book2.book_id2 + Book1.book_id
 
    /* 打印 Book1 信息 */
 //   fmt.Printf( "Book 1 title : %s\n", Book1.title)
