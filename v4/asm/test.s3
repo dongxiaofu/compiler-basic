@@ -1,0 +1,45 @@
+
+.globl	num
+
+num:	.long	45
+
+
+.text
+
+.globl	max
+
+max:
+	pushl %ebp
+	pushl %ebx
+	pushl %esi
+	pushl %edi
+	movl %esp, %ebp
+
+	movl %ebp, %esp
+	popl %edi
+	popl %esi
+	popl %ebx
+	popl %ebp
+	ret
+
+.globl	main
+main:
+	pushl %ebp
+	pushl %ebx
+	pushl %esi
+	pushl %edi
+	movl %esp, %ebp
+	subl $8, %esp
+.BB0:
+	movl num, %eax
+	movl %eax, -4(%ebp)
+	movl -4(%ebp), %eax
+	movl %eax, -8(%ebp)
+	movl num, %eax
+	movl %ebp, %esp
+	popl %edi
+	popl %esi
+	popl %ebx
+	popl %ebp
+	ret
+

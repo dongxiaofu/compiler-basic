@@ -1,0 +1,22 @@
+function max
+	num1 = 100;
+	num2 = 200;
+	t0 : num1 + num2;
+	num = t0;
+	return num;
+	ret
+
+
+function main
+	num1 = num;
+	num2 = 5;
+	num3 : max(num1, num2);
+	num4 = num;
+	t1 : num3 - num4;
+	num5 = t1;
+	t2 : num5 + 2;
+	num5 = t2;
+	return num5;
+	ret
+
+

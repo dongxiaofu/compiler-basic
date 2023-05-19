@@ -1,0 +1,18 @@
+function max
+{
+  (= num
+     (+ num1
+        num2))
+
+  (ret num)
+}
+
+function main
+{
+  (= num5
+     (+ num5
+        2))
+
+  (ret num5)
+}
+
