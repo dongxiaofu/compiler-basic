@@ -7,4 +7,4 @@
 make clean
 make
 /home/cg/code/compiler/vm/cg-asm/cg_assembler test.s > ./log
-cp -rvf ./test.cxe ../cvm/
+#cp -rvf ./test.cxe ../cvm/

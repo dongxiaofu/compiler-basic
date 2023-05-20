@@ -478,6 +478,10 @@ Symbol GetSymbol(char *name)
 
 int GetNextToken()
 {
+	if(sourceCode[lexer->currentLine] == 0){
+		return TYPE_TOKEN_INVALID;
+	}
+
 	int length = strlen(sourceCode[lexer->currentLine]);
 	lexer->index0 = lexer->index1;	
 
@@ -653,10 +657,12 @@ int GetNextTokenExceptNewLine()
 
 char *GetCurrentTokenLexeme()
 {
+	// TODO 不确定这一行代码有没有问题。
+//	if(strcmp(lexer->lexeme, 0) == 0)	return NULL;
+	if(lexer->lexeme[0] == 0)	return NULL;
 	char *name = (char *)MALLOC(sizeof(char) * MAX_SIZE);
 	strcpy(name,  lexer->lexeme);
 	return name;
-//	return lexer->lexeme;
 }
 
 int GetImmediateVal(char *immediateOprand)
@@ -702,9 +708,9 @@ void RestLexer()
 	lexer->currentFuncIndex = NO_FUNCTION;
 }
 
-void AssmblSourceFile()
+
+void FindFunctionOrLabel()
 {
-	// 第一次遍历。
 	int token;
 	char ch;
 	char label[MAX_SIZE];
@@ -820,211 +826,324 @@ void AssmblSourceFile()
 			}
 		}
 	}
+}
 
-	// 重置词法分析器
-	RestLexer();
-	// 第二次遍历
-	token = TYPE_TOKEN_INVALID;
-	while(True){
-		token = GetNextToken();
-		if(token == TYPE_TOKEN_INVALID)	break;
-		if(token == TYPE_TOKEN_INDENT || token == TYPE_TOKEN_FUNCTION || token == TYPE_TOKEN_LABEL){
-			char *name = GetCurrentTokenLexeme();
-			if(strcmp(name, "max") == 0){
-				int a = 4;
-			}
-			Function func = GetFunction(name);
-			Label label = GetLabel(name);
-			InstrLookup instrLookup;
-			memset(&instrLookup, 0, sizeof(InstrLookup));
-			instrLookup.opcode = -1;
-			GetInstrByMnemonic(name, &instrLookup);
-
-			if(func != NULL){
-				printf("deal with func:%s\n", name);
-				lexer->currentFuncIndex = func->index;
-			}
-
-			if(label != NULL){
-				printf("deal with label:%s\n", name);
-				currentLabel = label;
-				currentLabel->targetIndex = INVALID_INSTR_STREAM_INDEX;
-			}
-
-			// 处理指令。
-			if(instrLookup.opcode != -1){
-				printf("deal with instr:%s\n", name);
-				if(strcmp(name, "call") == 0){
-					int b = 4;
-				}
-
-				// 吃两个不知道名字的红色水果时想到这个方法。
-				// 这没有什么领域知识，见招拆招而已，具体问题具体分析。
-				if(currentLabel != NULL && currentLabel->targetIndex == INVALID_INSTR_STREAM_INDEX){
-					currentLabel->targetIndex = instrStreamIndex;
-				}
-				
-				if(lexer->currentFuncIndex == NO_FUNCTION){
-					printf("instr should be in a function\n");
-					exit(-1);
-				}
-
-				Function currentFunction = GetFunctionByIndex(lexer->currentFuncIndex);	
-				if(currentFunction != NULL && 
-					currentFunction->entryPoint == INVALID_INSTR_STREAM_INDEX){
-					currentFunction->entryPoint = instrStreamIndex;
-				}
-
-				int oprandNum = instrLookup.oprandNum;
-				InstrStream[instrStreamIndex].opcode = instrLookup.opcode;
-				InstrStream[instrStreamIndex].oprandNum = oprandNum;
-				Op opList = (Op)MALLOC(oprandNum * sizeof(struct _Op));
-				Op oprand;
-				OpType opType;
-				for(int i = 0; i < oprandNum; i++){
-					token = GetNextToken();
-					char *oprandLexeme = GetCurrentTokenLexeme();
-					opType = instrLookup.oprand[i]; 
-					// 立即数
-					if(token == TYPE_TOKEN_IMMEDIATE){
-						if(opType & OP_FLAG_TYPE_INT){
-							int num = GetImmediateVal(oprandLexeme);
-							opList[i].iType = OP_TYPE_INT;
-							opList[i].iIntLiteral = num;
-						}
-					}
-
-					// 寄存器
-					if(token == TYPE_TOKEN_REGISTER){
-						if(opType & OP_FLAG_TYPE_REG){
-							int regIndex = GetRegIndex(oprandLexeme);
-							if(regIndex == REG_INVALID){
-								printf("invalid register\n");
-								exit(-1);
-							}
-							opList[i].iType = OP_TYPE_REG;
-							opList[i].iReg = regIndex; 
-						}
-					}
-
-					// 函数
-					// if(token == TYPE_TOKEN_FUNCTION){
-					if(token == TYPE_TOKEN_INDENT){
-						Function func = GetFunction(oprandLexeme);
-						if(func != NULL){
-							if(opType & OP_FLAG_TYPE_FUNC_NAME){
-								opList[i].iType = OP_TYPE_FUNC_INDEX;
-								opList[i].iFuncIndex = func->index;
-							} 
-						}
-
-						// 行标签
-						Label label = GetLabel(oprandLexeme);
-						if(label != NULL){
-							if(opType & OP_FLAG_TYPE_LINE_LABEL){
-								if(label == NULL){
-									printf("%s label undefined\n", oprandLexeme);
-									exit(-1);
-								}
-								// 如果label在后面没有再用到，这句可以删掉。
-								// 可我不知道label在后面有没有再用到。如果我记得我写过的代码，我就
-								// 能知道label在后面有没有用到。
-								// label->targetIndex = instrStreamIndex;
-//								opList[i].iType = OP_TYPE_INSTR_INDEX;
-								// 这行代码，是疏忽。我没有设置label->targetIndex的值，却在这里
-								// 把它赋值给其他变量。可笑！写到后面忘了前面，因此有了这个错误。
-								// opList[i].iInstrIndex = label->targetIndex;
-								// opList[i].iInstrIndex = instrStreamIndex;
-			//					opList[i].iInstrIndex = currentLabel->targetIndex;
-			//					重新修改后，可以从label中获取正确的targetIndex了。
-//								opList[i].iInstrIndex = label->targetIndex;
-
-								opList[i].iType = OP_TYPE_LABEL_INDEX;
-								opList[i].iLabelIndex = label->index;
-							}
-						}
-
-						if(func == NULL && label == NULL){
-							int a = 5;
-							printf("oprandLexeme = %s\n", oprandLexeme);
-							// TODO 操作数是一个identifier，但不是函数也不是标签，会是字符串吗？
-							// 可能是全局变量。
-							// 找了很久才找到这个地方，在这里处理全局变量。
-							opList[i].iType = OP_TYPE_MEM;
-							int length = strlen(oprandLexeme);
-							opList[i].iMemory.length = length;
-							// opList[i].iMemory.length = length - 1;
-							opList[i].iMemory.name = oprandLexeme;
-						}
-					}
-
-					if(token == TYPE_TOKEN_INT){
-						int iOffsetIndex = atoi(oprandLexeme);
-						ch = GetLookAheadChar();
-						if(ch != '('){
-							printf("need a (\n");
-							exit(-1);
-						}
-						GetNextToken();		// 跳过(
-						token = GetNextToken();
-						if(token != TYPE_TOKEN_REGISTER){
-							printf("need a register\n");
-							exit(-1);
-						}
-//						oprandLexeme = GetCurrentTokenLexeme();
-						strcpy(oprandLexeme, GetCurrentTokenLexeme());
-						ch = GetLookAheadChar();
-						if(ch != ')'){
-							printf("need a (\n");
-							exit(-1);
-						}
-						GetNextToken();		// 跳过)
-
-						opList[i].iType = OP_TYPE_REG_MEM;
-						opList[i].iReg = GetRegIndex(oprandLexeme);
-						opList[i].iOffsetIndex = iOffsetIndex;
-					}
-
-					// 跳过逗号。
-					if(i < oprandNum - 1)	GetNextToken();	
-				}
-
-				InstrStream[instrStreamIndex].opList = opList;
-				instrStreamIndex++;
-			}
-		}	
+int CheckTokenType(int token)
+{
+	if(token == TYPE_TOKEN_INVALID){
+		return TOKEN_INVALID;
 	}
 
-	// 把指令流中的标签索引换成标签的targetIndex。
-	// 我想不到更好的方法，先这样做吧。
-	for(int i = 0; i < instrStreamIndex; i++){
-		Instr instr = InstrStream[i];
-		int oprandNum = instr.oprandNum;
-		for(int j = 0; j < oprandNum; j++){
-			Op oprand = &(instr.opList[j]);
-			if(oprand->iType == OP_TYPE_LABEL_INDEX){
-				int index = oprand->iLabelIndex;
-				Label label = GetLabelByIndex(index);
-				if(label != NULL){
-					int targetIndex = label->targetIndex;
-					if(targetIndex == INVALID_INSTR_STREAM_INDEX){
-						printf("label %s point to invalid instruction\n", label->name);
-						exit(-1);
-					}
-					oprand->iInstrIndex = targetIndex;
-					oprand->iType = OP_TYPE_INSTR_INDEX;	
-				}else{
-					printf("invalid label\n");
-					exit(-1);
-				}	
-			}
+	char *name = GetCurrentTokenLexeme();
+	if(name == NULL){ 
+		return TOKEN_INVALID;
+	}
+
+	Function func = GetFunction(name);
+	if(func != NULL){
+		return TOKEN_FUNC;
+	}
+
+	Label label = GetLabel(name);
+	if(label != NULL){
+		return TOKEN_LABEL;
+	}
+
+	InstrLookup instrLookup;
+	memset(&instrLookup, 0, sizeof(InstrLookup));
+	instrLookup.opcode = -1;
+	GetInstrByMnemonic(name, &instrLookup);
+	if(instrLookup.opcode -= -1){
+		return TOKEN_INSTR;
+	}
+
+	return TOKEN_IDENT;
+}
+
+void DealWithOprandImmediate(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex)
+{
+	int i = opIndex;
+	OpType opType = instrLookup.oprand[i];
+
+	if(!(opType & OP_FLAG_TYPE_INT))	return;
+
+	int num = GetImmediateVal(oprandLexeme);
+	opList[i].iType = OP_TYPE_INT;
+	opList[i].iIntLiteral = num;
+}
+
+void DealWithOprandRegister(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex)
+{
+	OpType opType = instrLookup.oprand[opIndex];
+
+	if((opType & OP_FLAG_TYPE_REG) == 0) return;
+
+    int regIndex = GetRegIndex(oprandLexeme);
+    if(regIndex == REG_INVALID){
+        printf("invalid register\n");
+        exit(-1);
+    }
+
+    opList[opIndex].iType = OP_TYPE_REG;
+    opList[opIndex].iReg = regIndex;
+}
+
+void DealWithOprandIndent(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex)
+{
+	OpType opType = instrLookup.oprand[opIndex];
+	// TODO 懒得把下面的i修改成opIndex。
+	int i = opIndex;
+	Function func = GetFunction(oprandLexeme);
+	if(func != NULL) {
+	    if (opType & OP_FLAG_TYPE_FUNC_NAME) {
+	        opList[i].iType = OP_TYPE_FUNC_INDEX;
+	        opList[i].iFuncIndex = func->index;
+	    }
+
+		return;
+	}
+	
+	// 行标签
+	Label label = GetLabel(oprandLexeme);
+	if(label != NULL) {
+	    if(opType & OP_FLAG_TYPE_LINE_LABEL) {
+	        if(label == NULL) {
+	            printf("%s label undefined\n", oprandLexeme);
+	            exit(-1);
+	        }
+	        opList[i].iType = OP_TYPE_LABEL_INDEX;
+	        opList[i].iLabelIndex = label-> index;
+	    }
+
+		return;
+	}
+	
+	if(func == NULL && label == NULL) {
+	    printf("oprandLexeme = %s\n", oprandLexeme);
+	    // TODO 操作数是一个identifier，但不是函数也不是标签，会是字符串吗？
+	    // 可能是全局变量。
+	    // 找了很久才找到这个地方，在这里处理全局变量。
+	    opList[i].iType = OP_TYPE_MEM;
+	    int length = strlen(oprandLexeme);
+	    opList[i].iMemory.length = length;
+	    // opList[i].iMemory.length = length - 1;
+	    opList[i].iMemory.name = oprandLexeme;
+		
+		return;
+	}
+}
+
+// TODO 这个函数并不是处理Int数据。先这样吧。
+// 它处理-4(%ebp)这样的操作数。
+void DealWithOprandInt(char * oprandLexeme, Op opList, int opIndex)
+{
+	char ch;
+	int iOffsetIndex = atoi(oprandLexeme);
+	ch = GetLookAheadChar();
+	if(ch != '(') {
+	    printf("need a (\n");
+	    exit(-1);
+	}
+	GetNextToken(); // 跳过(
+	int token = GetNextToken();
+	if(token != TYPE_TOKEN_REGISTER) {
+	    printf("need a register\n");
+	    exit(-1);
+	}
+	//						oprandLexeme = GetCurrentTokenLexeme();
+	strcpy(oprandLexeme, GetCurrentTokenLexeme());
+	ch = GetLookAheadChar();
+	if(ch != ')') {
+	    printf("need a (\n");
+	    exit(-1);
+	}
+	GetNextToken(); // 跳过)
+	
+	opList[opIndex].iType = OP_TYPE_REG_MEM;
+	opList[opIndex].iReg = GetRegIndex(oprandLexeme);
+	opList[opIndex].iOffsetIndex = iOffsetIndex;
+}
+
+void DealWithOprand(InstrLookup instrLookup)
+{
+	// TODO instrLookup是非法数据怎么办？
+	int oprandNum = instrLookup.oprandNum;
+	InstrStream[instrStreamIndex].opcode = instrLookup.opcode;
+	InstrStream[instrStreamIndex].oprandNum = oprandNum;
+	InstrStream[instrStreamIndex].opList = (Op) MALLOC(oprandNum * sizeof(struct _Op));
+	Op opList = InstrStream[instrStreamIndex].opList;
+	Op oprand;
+	OpType opType;
+	for (int i = 0; i < oprandNum; i++) {
+		int token = GetNextToken();
+		char *oprandLexeme = GetCurrentTokenLexeme();
+		
+		switch(token){
+			case TYPE_TOKEN_IMMEDIATE:
+				DealWithOprandImmediate(instrLookup, opList, oprandLexeme, i);
+				break;
+			case TYPE_TOKEN_REGISTER:
+				DealWithOprandRegister(instrLookup, opList, oprandLexeme, i);
+				break;
+			case TYPE_TOKEN_INDENT:
+				DealWithOprandIndent(instrLookup, opList, oprandLexeme, i);
+				break;
+			case TYPE_TOKEN_INT:
+				DealWithOprandInt(oprandLexeme, opList, i);
+				break;
 		}
 	}
+}
 
+void DealWithInstruction()
+{
+	int token = TYPE_TOKEN_INVALID;
+
+	while(True){
+		token = GetNextToken();
+
+		if(token == TYPE_TOKEN_INVALID) break;
+
+		char *name = GetCurrentTokenLexeme();
+
+		Function func = GetFunction(name);
+		if(func != NULL){
+        	printf("deal with func:%s\n", name);
+        	lexer->currentFuncIndex = func->index;
+
+			return;
+        }
+
+		Label label = GetLabel(name);
+		if(label != NULL){
+			printf("deal with label:%s\n", name);
+			currentLabel = label;
+			currentLabel->targetIndex = INVALID_INSTR_STREAM_INDEX;
+
+			return;
+        }
+
+		// 处理指令。
+		InstrLookup instrLookup;
+		memset(&instrLookup, 0, sizeof(InstrLookup));
+		instrLookup.opcode = -1;
+		GetInstrByMnemonic(name, & instrLookup);
+		if(instrLookup.opcode != -1){
+		    printf("deal with instr:%s\n", name);
+		
+		    // 吃两个不知道名字的红色水果时想到这个方法。
+		    // 这没有什么领域知识，见招拆招而已，具体问题具体分析。
+		    if(currentLabel != NULL && currentLabel-> targetIndex == INVALID_INSTR_STREAM_INDEX) {
+		        currentLabel->targetIndex = instrStreamIndex;
+		    }
+		
+		    if(lexer->currentFuncIndex == NO_FUNCTION){
+		        printf("instr should be in a function\n");
+		        exit(-1);
+		    }
+		
+		    Function currentFunction = GetFunctionByIndex(lexer->currentFuncIndex);
+		    if(currentFunction != NULL &&
+		        currentFunction->entryPoint == INVALID_INSTR_STREAM_INDEX) {
+		        currentFunction->entryPoint = instrStreamIndex;
+		    }
+
+			DealWithOprand(instrLookup);
+		}
+	}	
+}
+
+
+void AssembleInstruction()
+{
+	int isOver = 0;
+
+	while(True){
+		int token = GetNextToken();
+		char *name = GetCurrentTokenLexeme();
+		int tokenType = CheckTokenType(token);
+		switch(tokenType){
+			case TOKEN_INVALID:
+				{
+					isOver = 1;
+					break;
+				}
+			case TOKEN_FUNC:
+				{
+					printf("deal with func:%s\n", name);
+					Function func = GetFunction(name);
+					lexer->currentFuncIndex = func->index;
+					break;
+				}
+			case TOKEN_LABEL:
+				{
+					printf("deal with label:%s\n", name);
+					currentLabel = GetLabel(name);
+					currentLabel->targetIndex = INVALID_INSTR_STREAM_INDEX;
+					break;
+				}
+			case TOKEN_INSTR:
+				{
+					DealWithInstruction();
+					break;
+				}
+			case TOKEN_IDENT:
+				{
+					// do nothing
+					break;
+				}
+			default:
+				{
+					printf("there is an error in %d\n", __LINE__);
+					isOver = 1;
+					break;
+				}
+		}
+
+		if(isOver == 1)	break;
+	}
+}
+
+void ReplaceLabelWithInstrStreamIndex()
+{
+	// 把指令流中的标签索引换成标签的targetIndex。
+	// 我想不到更好的方法，先这样做吧。
+	for(int i = 0; i < instrStreamIndex; i++) {
+	    Instr instr = InstrStream[i];
+	    int oprandNum = instr.oprandNum;
+	    for(int j = 0; j < oprandNum; j++) {
+	        Op oprand = &(instr.opList[j]);
+	        if(oprand->iType != OP_TYPE_LABEL_INDEX)	continue;
+
+			int index = oprand->iLabelIndex;
+			Label label = GetLabelByIndex(index);
+			if(label != NULL) {
+			    int targetIndex = label->targetIndex;
+			    if(targetIndex == INVALID_INSTR_STREAM_INDEX){
+			        printf("label %s point to invalid instruction\n", label->name);
+			        exit(-1);
+			    }
+			    oprand->iInstrIndex = targetIndex;
+			    oprand->iType = OP_TYPE_INSTR_INDEX;
+			}else{
+			    printf("invalid label\n");
+			    exit(-1);
+			}
+	    }
+	}
+}
+
+void AssmblSourceFile()
+{
+	// 遍历源代码，找出所有的函数、标签。
+	FindFunctionOrLabel();
+	// 重置词法分析器
+    RestLexer();
+	// 处理指令。
+	AssembleInstruction();
+	// 把指令中的函数名、标签名换成它们对应的指令索引。
+	ReplaceLabelWithInstrStreamIndex();
 	gScriptHeader->instrNum = instrStreamIndex;
-
-	printf("the second loop is over\n");
-
 }
 
 void SaveVariable()
@@ -1492,7 +1611,7 @@ int main(int argc, char *argv[])
 
 	printf("instr count = %d\n", instrStreamIndex);
 
-	BuildXE();
+//	BuildXE();
 
 	int i = 0;
 	while(False){

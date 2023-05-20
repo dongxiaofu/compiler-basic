@@ -118,6 +118,13 @@ typedef struct heap
 #define INVALID_INSTR_STREAM_INDEX	-1
 #define NO_FUNCTION -1
 
+// tokenType
+#define TOKEN_INVALID			1
+#define TOKEN_FUNC				2
+#define TOKEN_LABEL				3
+#define TOKEN_INSTR				4
+#define TOKEN_IDENT				5
+
 typedef struct _OpMemory
 {
 	int length;
@@ -322,6 +329,20 @@ int GetImmediateVal(char *immediateOprand);
 int GetRegIndex(char *regName);
 
 void RestLexer();
+void FindFunctionOrLabel();
+
+int CheckTokenType(int token);
+
+void DealWithOprandImmediate(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex);
+void DealWithOprandRegister(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex);
+void DealWithOprandIndent(InstrLookup instrLookup, Op opList, char *oprandLexeme, int opIndex);
+void DealWithOprandInt(char *oprandLexeme, Op opList, int opIndex);
+void DealWithOprand(InstrLookup instrLookup);
+void DealWithInstruction();
+
+void ReplaceLabelWithInstrStreamIndex();
+void AssembleInstruction();
+
 void AssmblSourceFile();
 
 void SaveVariable();

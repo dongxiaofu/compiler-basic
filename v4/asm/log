@@ -1,71 +1,7 @@
 parse file test.s
-lineNum = 68
-variable name = num, index = 0, val = 45
-function-index = 0, max
-label-index = 0, .BB0
-function-index = 1, main
-label-index = 1, .BB1
-read file over2
-deal with func:max
-deal with func:max
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:movl
-deal with instr:subl
-deal with label:.BB0
-deal with instr:movl
-deal with instr:movl
-deal with instr:movl
-deal with instr:addl
-deal with instr:movl
-oprandLexeme = num
-deal with instr:movl
-oprandLexeme = num
-deal with instr:movl
-deal with instr:popl
-deal with instr:popl
-deal with instr:popl
-deal with instr:popl
-deal with instr:ret
-deal with func:main
-deal with func:main
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:movl
-deal with instr:subl
-deal with label:.BB1
-deal with instr:movl
-oprandLexeme = num
-deal with instr:movl
-deal with instr:movl
-deal with instr:pushl
-deal with instr:pushl
-deal with instr:call
-deal with instr:addl
-deal with instr:movl
-deal with instr:movl
-oprandLexeme = num
-deal with instr:movl
-deal with instr:movl
-deal with instr:subl
-deal with instr:movl
-deal with instr:movl
-deal with instr:addl
-deal with instr:movl
-deal with instr:movl
-deal with instr:movl
-deal with instr:popl
-deal with instr:popl
-deal with instr:popl
-deal with instr:popl
-deal with instr:ret
-read file over2
+lineNum = 70
 the second loop is over
-instr count = 47
+instr count = 0
 the third loop start
 no string
 variableName = num, variableValue = 45, dataType = .long, address = 0
