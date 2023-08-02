@@ -255,12 +255,18 @@ char GetLookAheadChar()
 	int currentIndex = lexer->index1;
 	int currentLine = lexer->currentLine;
 
+	// TODO 需要在这里检查吗？
+	if(sourceCode[currentLine] == 0x0){
+		return END_OF_FILE;
+	}
+
 	if(lexer->string_state != STATE_IN_STRING){
 		while(1){
 			char *line = sourceCode[currentLine];
 			if(currentIndex >= strlen(line)){
 				currentLine++;
-				// TODO 换行遇到文件结束怎么处理？
+				// TODO 换行遇到文件结束怎么处理？像下面这样处理。
+				if(sourceCode[currentLine] == 0x0) return END_OF_FILE;
 			}
 
 			if(!IsWhitespace(line[currentIndex]))	break;
@@ -476,6 +482,7 @@ Symbol GetSymbol(char *name)
 	return NULL;
 }
 
+// 能解析出换行符，但是能自动换行。
 int GetNextToken()
 {
 	if(sourceCode[lexer->currentLine] == 0){
@@ -483,26 +490,37 @@ int GetNextToken()
 	}
 
 	int length = strlen(sourceCode[lexer->currentLine]);
-	lexer->index0 = lexer->index1;	
+	// TODO 不应该有这行代码。
+	// lexer->index0 = lexer->index1;	
 
 	if(lexer->string_state == STATE_END_STRING){
 		lexer->string_state = STATE_NO_STRING;
 	}
 
+	// 移动到后面去了。
 	// 检查是否要换行。
 	// if(lexer->index0 == length - 1){
-	if(lexer->index0 >= length){
-		int line = SkipToNewline();
-		if(line == END_OF_FILE){
-			printf("read file over\n");
-			return TYPE_TOKEN_INVALID;
-//			exit(-1);
-		}
-	}
+//	if(lexer->index0 >= length){
+//		int line = SkipToNewline();
+//		if(line == END_OF_FILE){
+//			printf("read file over\n");
+//			return TYPE_TOKEN_INVALID;
+////			exit(-1);
+//		}
+//	}
 
+	// 这个循环的作用是什么？跳过空白行。
 	while(1){
 		// SkipToNewline();
+		// TODO 我觉得这里是一个明显的错误。currentLine超过lineNum后，无法获得
+		// 正常的token。如果在循环外面没有进行容错处理，就出现错误了。
+		// 看了许久，我才敢认为：这是一个错误。
 		if(lexer->currentLine > lexer->lineNum)	break;
+		// TODO 这里也是一个错误吗？
+		// 不理解这个条件是什么意思。
+		// 当lexer->index0是0时，说明在一行数据的开头。
+		// 这个流程，真是一点都不好！我重看了很多次，才勉强认为它是没有问题的。
+		// 牵涉的代码还挺多的，还需要执行循环一两次后才有效，太不直观了。
 		if(lexer->index0 != 0)	break;
 		if(sourceCode[lexer->currentLine] && sourceCode[lexer->currentLine][lexer->index0] != '\n'){
 			 break;
@@ -549,14 +567,17 @@ int GetNextToken()
 		end = lexer->index1 + 1;
 		lexer->index1++;
 	}
+	// lexer->index0 = lexer->index1;	
 
 	int count = 0;
 	memset(lexer->lexeme, 0, sizeof(char) * MAX_SIZE);
 	for(int i = lexer->index0; i < end; i++){
-//		printf("%c", sourceCode[lexer->currentLine][i]);
+		// printf("line:%s\n", sourceCode[lexer->currentLine]);
 		lexer->lexeme[count++] = sourceCode[lexer->currentLine][i];
 	}
 	lexer->lexeme[count] = 0;
+	lexer->index0 = lexer->index1;	
+
 
 	if(strlen(lexer->lexeme) > 1){
 		if(lexer->string_state == STATE_IN_STRING){
@@ -565,7 +586,7 @@ int GetNextToken()
 		}
 	}
 
-	lexer->token_type = TYPE_TOKEN_INVALID;
+	lexer->token_type = TYPE_TOKEN_INDENT;
 
 	if(strlen(lexer->lexeme) == 1){
 		if(lexer->lexeme[0] == '"'){
@@ -640,6 +661,30 @@ int GetNextToken()
 
 	if(strcmp(lexer->lexeme, ".align") == 0){
 		lexer->token_type = TYPE_TOKEN_ALIGN;
+	}
+
+	if(strncmp(lexer->lexeme, "@", 1) == 0){
+		lexer->token_type = TYPE_TOKEN_ALIGN;
+	}
+
+	if(strcmp(lexer->lexeme, ".section") == 0){
+		lexer->token_type = TYPE_TOKEN_SECTION;
+	}
+
+//	if(strcmp(lexer->lexeme, ".rodata") == 0){
+//		lexer->token_type = TYPE_TOKEN_RODATA;
+//	}
+
+	// 检查是否要换行。
+	// if(lexer->index0 == length - 1){
+	if(lexer->index0 + 1 >= length){
+	// if(lexer->index0 >= length){
+		int line = SkipToNewline();
+		if(line == END_OF_FILE){
+			printf("read file over\n");
+			return TYPE_TOKEN_INVALID;
+//			exit(-1);
+		}
 	}
 
 	return lexer->token_type;
@@ -721,6 +766,8 @@ void FindFunctionOrLabel()
 		if(token == END_OF_FILE)	break;
 		
 		ch = GetLookAheadChar();
+		// TODO 不明白，前面对token的判断为什么没有阻止程序执行到这里。
+		if(ch == END_OF_FILE)	break; 
 		if(ch == ':'){
 			GetNextToken();
 			ch = GetLookAheadChar();
@@ -1057,11 +1104,24 @@ void DealWithInstruction()
 void AssembleInstruction()
 {
 	int isOver = 0;
+	while(True){
+		int token = GetNextToken();
+		printf("token = %d\n", token);
+		if(token == TYPE_TOKEN_INVALID)	break; 
+		char *name = GetCurrentTokenLexeme();
+		printf("name = %s\n", name);
+		int tokenType = CheckTokenType(token);
+		printf("tokenType = %d\n", tokenType);
+	}
+
+	return;
 
 	while(True){
 		int token = GetNextToken();
 		char *name = GetCurrentTokenLexeme();
+		printf("name = %s\n", name);
 		int tokenType = CheckTokenType(token);
+		printf("tokenType = %d\n", tokenType);
 		switch(tokenType){
 			case TOKEN_INVALID:
 				{
@@ -1593,6 +1653,83 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
+char IsData(int token)
+{
+	int result;
+	switch(token){
+		case TYPE_TOKEN_DATA:
+		case TYPE_TOKEN_SECTION:
+		case TYPE_TOKEN_TEXT:
+			result = 1;
+			break;
+		default:
+			result = 0;
+	}
+
+	return result;
+}
+
+void ParseData()
+{
+	printf("开始处理数据\n");
+
+	int isEnd = 0;
+	int token = GetNextToken();
+		char *name = GetCurrentTokenLexeme();
+		printf("0 ParseData name = %s\n", name);
+
+	while(1){
+		int isGlobl = 0;
+		int isData = 0;
+		int nextToken;
+		do{
+			nextToken = GetLookAheadToken();
+			if(nextToken == TYPE_TOKEN_GLOBL){
+				SkipToNewline();
+				isGlobl = 1;
+			}
+
+			nextToken = GetLookAheadToken();
+			if(IsData(nextToken)){
+				isData = 1;	
+				isGlobl = 0;
+			}else{
+				if(nextToken == TYPE_TOKEN_GLOBL){
+					isGlobl = 1;	
+				}else{
+					isGlobl = 0;
+				}
+			}
+		}while(isGlobl == 1);
+		
+		if(isData == 1)	break;
+		
+//		while(nextToken = GetLookAheadToken()){
+//			if(IsData(nextToken))	break;
+//			if(nextToken == TYPE_TOKEN_GLOBL) SkipToNewline();
+//		}
+
+		token = GetNextToken();
+		printf("token = %d\n", token);
+		if(token == TYPE_TOKEN_INVALID)	break; 
+		char *name = GetCurrentTokenLexeme();
+		printf("ParseData name = %s\n", name);
+
+		// 跳出循环
+//		int nextToken = GetLookAheadToken();
+//		if(IsData(nextToken))	break;
+//		// token = GetNextTokenExceptNewLine();
+//		// token = GetNextToken();
+//		if(nextToken == TYPE_TOKEN_GLOBL){
+//		// if(token == TYPE_TOKEN_GLOBL){
+//			  SkipToNewline();
+//			// SkipToNewline();
+//		}
+	}
+
+	printf("处理数据结束\n");
+}
+
 int main(int argc, char *argv[])
 {
 	CurrentHeap = &ProgramHeap;
@@ -1607,6 +1744,19 @@ int main(int argc, char *argv[])
 
 	LoadFile(filename);
 
+	while(True){
+		int nextToken = GetLookAheadToken();
+//		int token = GetNextToken();
+		if(IsData(nextToken)){
+//		if(IsData(token)){
+			ParseData();
+		}
+
+		if(lexer->currentLine > 130)	break;
+	}
+	
+	return 0;
+
 	AssmblSourceFile();
 
 	printf("instr count = %d\n", instrStreamIndex);
@@ -1618,6 +1768,9 @@ int main(int argc, char *argv[])
 		GetNextToken();
 		printf("type = %d, val = %s\n", lexer->token_type, lexer->lexeme);
 		i++;
+
+		ParseData();
+
 		if(lexer->currentLine > 130)	break;
 	}
 

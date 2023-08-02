@@ -2,11 +2,33 @@
 
 .data
 
+.str0:	.string	"How are you?\012"
+.str1:	.string	"Fine, thank you.\012"
+.str2:	.string	"Fine\012"
+.str3:	.string	"How are you?Fine, thank you.\012"
+.str4:	.string	"Hello,World\012"
 
 
+.align 4
 .globl	num
 
 num:	.long	45
+
+.globl	string0
+
+string0:	.long	.str0
+
+.globl	string1
+
+string1:	.long	.str1
+
+.globl	string2
+
+string2:	.long	.str2
+
+.globl	string3
+
+string3:	.long	.str3
 
 
 .text
@@ -19,13 +41,17 @@ max:
 	pushl %esi
 	pushl %edi
 	movl %esp, %ebp
-	subl $12, %esp
+	subl $24, %esp
 .BB0:
-	movl $100, -4(%ebp)
-	movl $200, -8(%ebp)
-	movl -4(%ebp), %eax
-	addl -8(%ebp), %eax
-	movl %eax, num
+	leal .str4, %eax
+	movl %eax, -4(%ebp)
+	movl -4(%ebp), %ecx
+	movl %ecx, -8(%ebp)
+	movl $100, -12(%ebp)
+	movl $200, -16(%ebp)
+	movl -12(%ebp), %ecx
+	addl -16(%ebp), %ecx
+	movl %ecx, num
 	movl num, %eax
 	movl %ebp, %esp
 	popl %edi

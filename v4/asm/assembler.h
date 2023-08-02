@@ -60,6 +60,9 @@ typedef struct heap
 
 #define TYPE_TOKEN_COMM						23	// .comm
 #define TYPE_TOKEN_ALIGN					24	// .align
+#define TYPE_TOKEN_TYPE						25	// @object
+#define TYPE_TOKEN_SECTION					26	// .section
+#define TYPE_TOKEN_RODATA					27	// .rodata
 
 #define DATA_TYPE_INVALID					-1
 #define DATA_TYPE_INT						0
@@ -350,3 +353,8 @@ void BuildXE();
 void LoadFile(char *filename);
 // void *MALLOC(int size);
 int HeapAllocate(Heap heap, int size);
+
+
+// 新增
+char IsData(int token);
+void ParseData();

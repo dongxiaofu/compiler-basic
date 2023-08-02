@@ -1,8 +1,11 @@
 function max
+	t0 :&str4;
+	str11 = t0;
+	str12 = str11;
 	num1 = 100;
 	num2 = 200;
-	t0 : num1 + num2;
-	num = t0;
+	t1 : num1 + num2;
+	num = t1;
 	return num;
 	ret
 
