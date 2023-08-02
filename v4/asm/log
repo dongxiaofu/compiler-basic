@@ -1,10 +1,14 @@
 parse file ch.s
-lineNum = 213
+lineNum = 214
+0 ParseData name = .file
+0 ParseData name = "
+0 ParseData name = ch.c
+0 ParseData name = "
 开始处理数据
-0 ParseData name = .text
+1 ParseData name = .text
 处理数据结束
 开始处理数据
-0 ParseData name = .data
+1 ParseData name = .data
 token = 19
 ParseData name = .type
 token = 19
@@ -31,7 +35,7 @@ token = 1
 ParseData name = 65
 处理数据结束
 开始处理数据
-0 ParseData name = .section
+1 ParseData name = .section
 token = 19
 ParseData name = .rodata
 token = 19
@@ -60,7 +64,7 @@ token = 1
 ParseData name = 66
 处理数据结束
 开始处理数据
-0 ParseData name = .data
+1 ParseData name = .data
 token = 24
 ParseData name = .align
 token = 1
@@ -91,7 +95,7 @@ token = 1
 ParseData name = 14
 处理数据结束
 开始处理数据
-0 ParseData name = .section
+1 ParseData name = .section
 token = 19
 ParseData name = .rodata
 token = 19
@@ -108,7 +112,7 @@ token = 6
 ParseData name = "
 处理数据结束
 开始处理数据
-0 ParseData name = .data
+1 ParseData name = .data
 token = 24
 ParseData name = .align
 token = 1
@@ -167,7 +171,7 @@ token = 1
 ParseData name = 140
 处理数据结束
 开始处理数据
-0 ParseData name = .section
+1 ParseData name = .section
 token = 19
 ParseData name = .rodata
 token = 19
@@ -184,7 +188,7 @@ token = 6
 ParseData name = "
 处理数据结束
 开始处理数据
-0 ParseData name = .data
+1 ParseData name = .data
 token = 24
 ParseData name = .align
 token = 1
@@ -215,7 +219,7 @@ token = 19
 ParseData name = .LC1
 处理数据结束
 开始处理数据
-0 ParseData name = .section
+1 ParseData name = .section
 token = 19
 ParseData name = .rodata
 token = 19
@@ -280,7 +284,7 @@ token = 6
 ParseData name = "
 处理数据结束
 开始处理数据
-0 ParseData name = .text
+1 ParseData name = .text
 token = 19
 ParseData name = .type
 token = 19

@@ -1676,7 +1676,7 @@ void ParseData()
 	int isEnd = 0;
 	int token = GetNextToken();
 		char *name = GetCurrentTokenLexeme();
-		printf("0 ParseData name = %s\n", name);
+		printf("1 ParseData name = %s\n", name);
 
 	while(1){
 		int isGlobl = 0;
@@ -1750,6 +1750,10 @@ int main(int argc, char *argv[])
 		if(IsData(nextToken)){
 //		if(IsData(token)){
 			ParseData();
+		}else{
+			GetNextToken();
+			char *name = GetCurrentTokenLexeme();
+			printf("0 ParseData name = %s\n", name);
 		}
 
 		if(lexer->currentLine > 130)	break;
