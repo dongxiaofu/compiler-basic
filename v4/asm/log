@@ -36,7 +36,7 @@ ParseData name = 65
 处理数据结束
 开始处理数据
 1 ParseData name = .section
-token = 19
+token = 27
 ParseData name = .rodata
 token = 19
 ParseData name = .type
@@ -96,7 +96,7 @@ ParseData name = 14
 处理数据结束
 开始处理数据
 1 ParseData name = .section
-token = 19
+token = 27
 ParseData name = .rodata
 token = 19
 ParseData name = .LC0
@@ -172,7 +172,7 @@ ParseData name = 140
 处理数据结束
 开始处理数据
 1 ParseData name = .section
-token = 19
+token = 27
 ParseData name = .rodata
 token = 19
 ParseData name = .LC1
@@ -220,7 +220,7 @@ ParseData name = .LC1
 处理数据结束
 开始处理数据
 1 ParseData name = .section
-token = 19
+token = 27
 ParseData name = .rodata
 token = 19
 ParseData name = .LC2

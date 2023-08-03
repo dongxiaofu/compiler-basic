@@ -671,9 +671,9 @@ int GetNextToken()
 		lexer->token_type = TYPE_TOKEN_SECTION;
 	}
 
-//	if(strcmp(lexer->lexeme, ".rodata") == 0){
-//		lexer->token_type = TYPE_TOKEN_RODATA;
-//	}
+	if(strcmp(lexer->lexeme, ".rodata") == 0){
+		lexer->token_type = TYPE_TOKEN_RODATA;
+	}
 
 	// 检查是否要换行。
 	// if(lexer->index0 == length - 1){
