@@ -675,6 +675,18 @@ int GetNextToken()
 		lexer->token_type = TYPE_TOKEN_RODATA;
 	}
 
+	if(strcmp(lexer->lexeme, ".type") == 0){
+		lexer->token_type = TYPE_TOKEN_TYPE;
+	}
+
+	if(strcmp(lexer->lexeme, ".size") == 0){
+		lexer->token_type = TYPE_TOKEN_SIZE;
+	}
+
+	if(strcmp(lexer->lexeme, "@object") == 0){
+		lexer->token_type = TYPE_TOKEN_OBJECT;
+	}
+
 	// 检查是否要换行。
 	// if(lexer->index0 == length - 1){
 	if(lexer->index0 + 1 >= length){
@@ -1658,10 +1670,16 @@ char IsData(int token)
 	int result;
 	switch(token){
 		case TYPE_TOKEN_DATA:
-		case TYPE_TOKEN_SECTION:
 		case TYPE_TOKEN_TEXT:
+		case TYPE_TOKEN_SECTION:
 			result = 1;
 			break;
+	//	case TYPE_TOKEN_SECTION:
+	//		{
+	//			result = 1;
+	//			GetNextToken();
+	//			break;
+	//		}
 		default:
 			result = 0;
 	}
@@ -1677,11 +1695,20 @@ void ParseData()
 	int token = GetNextToken();
 		char *name = GetCurrentTokenLexeme();
 		printf("1 ParseData name = %s\n", name);
+		if(token == TYPE_TOKEN_RODATA){
+			token = GetNextToken();
+		}
+
+	DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+	dataEntryArray[dataEntryArrayIndex++] = entry;
 
 	while(1){
 		int isGlobl = 0;
 		int isData = 0;
 		int nextToken;
+
+		// entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+
 		do{
 			nextToken = GetLookAheadToken();
 			if(nextToken == TYPE_TOKEN_GLOBL){
@@ -1702,12 +1729,10 @@ void ParseData()
 			}
 		}while(isGlobl == 1);
 		
-		if(isData == 1)	break;
-		
-//		while(nextToken = GetLookAheadToken()){
-//			if(IsData(nextToken))	break;
-//			if(nextToken == TYPE_TOKEN_GLOBL) SkipToNewline();
-//		}
+		if(isData == 1){
+			dataEntryArrayIndex--;
+			break;
+		}
 
 		token = GetNextToken();
 		printf("token = %d\n", token);
@@ -1715,16 +1740,74 @@ void ParseData()
 		char *name = GetCurrentTokenLexeme();
 		printf("ParseData name = %s\n", name);
 
-		// 跳出循环
-//		int nextToken = GetLookAheadToken();
-//		if(IsData(nextToken))	break;
-//		// token = GetNextTokenExceptNewLine();
-//		// token = GetNextToken();
-//		if(nextToken == TYPE_TOKEN_GLOBL){
-//		// if(token == TYPE_TOKEN_GLOBL){
-//			  SkipToNewline();
-//			// SkipToNewline();
-//		}
+		// 就在这里处理数据。
+//		DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+		// .size   ch1, 1
+		if(token == TYPE_TOKEN_SIZE){
+			// 跳过ch1
+			GetNextToken();
+			// 跳过,
+			GetNextToken();
+			token = GetNextToken();
+			char *name = GetCurrentTokenLexeme();
+			entry->size = atoi(name);
+		}
+
+		// .type   ch1, @object
+		else if(token == TYPE_TOKEN_TYPE){
+			// 跳过ch1
+			GetNextToken();
+			// 跳过,
+			GetNextToken();
+			token = GetNextToken();
+			int symbolType = -1;
+			if(token == TYPE_TOKEN_OBJECT){
+				symbolType = SYMBOL_TYPE_OBJECT;
+			}
+
+			entry->symbolType = symbolType; 
+		}
+
+		// .byte   65
+		else if(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING){
+			if(token == TYPE_TOKEN_BYTE){
+				entry->dataType = DATA_TYPE_BYTE;
+			}else if(token == TYPE_TOKEN_LONG){
+				entry->dataType = DATA_TYPE_LONG;
+			}else if(token == TYPE_TOKEN_STRING){
+				entry->dataType = DATA_TYPE_STRING;
+			}
+
+			// "how are you?"
+			if(token == TYPE_TOKEN_STRING){
+				// 跳过"
+		//		GetNextToken();
+//				token = GetNextToken();
+				char *name = GetCurrentTokenLexeme();
+				entry->val.strVal = name;
+				// 跳过"
+				GetNextToken();
+			}else{
+				token = GetNextToken();
+				char *name = GetCurrentTokenLexeme();
+				entry->val.numVal = atoi(name);
+			}
+
+			// 处理完数据的值，这就意味着处理完一条数据。
+			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+			dataEntryArray[dataEntryArrayIndex++] = entry;
+		}
+
+		// 获取符号的名称，例如ch1:
+		else if(token ==  TYPE_TOKEN_INDENT){
+			char ch = GetLookAheadChar();
+			if(ch == ':'){
+				memset(entry->name, 0, 200);
+				strcpy(entry->name, GetCurrentTokenLexeme());
+				GetNextToken();
+			}
+		}
+		
 	}
 
 	printf("处理数据结束\n");

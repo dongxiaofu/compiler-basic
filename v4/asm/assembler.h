@@ -60,9 +60,11 @@ typedef struct heap
 
 #define TYPE_TOKEN_COMM						23	// .comm
 #define TYPE_TOKEN_ALIGN					24	// .align
-#define TYPE_TOKEN_TYPE						25	// @object
+#define TYPE_TOKEN_OBJECT					25	// @object
 #define TYPE_TOKEN_SECTION					26	// .section
 #define TYPE_TOKEN_RODATA					27	// .rodata
+#define TYPE_TOKEN_TYPE					28	// .type
+#define TYPE_TOKEN_SIZE						29	// .size
 
 #define DATA_TYPE_INVALID					-1
 #define DATA_TYPE_INT						0
@@ -282,6 +284,39 @@ Instr InstrStream[MAX_INSTR_NUM];
 ScriptHeader gScriptHeader;
 
 #define STACK_SCALE_VALUE		4
+
+// 新增
+// section name
+#define SECTION_TEXT	1
+#define SECTION_DATA	2
+#define SECTION_RODATA	3
+
+// 例如@object。还有哪些值？不清楚。
+#define SYMBOL_TYPE_OBJECT	1
+
+// 数据类型，例如byte
+#define DATA_TYPE_BYTE		1
+#define DATA_TYPE_LONG		2
+#define DATA_TYPE_STRING	3
+
+union DataEntryValue{
+	char *strVal;
+	int numVal;	
+};
+
+typedef struct dataEntry{
+	int symbolType;
+	int size;
+	char name[200];
+	int dataType;
+	int section;
+	union DataEntryValue val;
+} *DataEntry;
+
+DataEntry dataEntryArray[100];
+// error: increment of read-only variable 'dataEntryArrayIndex'
+// const int dataEntryArrayIndex = 0;
+static int dataEntryArrayIndex = 0;
 
 void *MALLOC(int size);
 
