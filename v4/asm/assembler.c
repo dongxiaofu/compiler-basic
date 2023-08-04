@@ -757,7 +757,7 @@ int GetRegIndex(char *regName)
 void RestLexer()
 {
 	lexer->currentFuncIndex = 0;
-	lexer->currentLine = 0;
+	lexer->currentLine = 1;
 	lexer->index0 = lexer->index1 = 0;
 //	lexer->lineNum = 0;
 	lexer->string_state = STATE_NO_STRING;
@@ -1687,8 +1687,13 @@ char IsData(int token)
 	return result;
 }
 
+#define MAX_LINE 213
+
 void ParseData()
 {
+//	if(lexer->currentLine > MAX_LINE) return;
+//	if(lexer->currentLine == lexer->lineNum) break;
+
 	printf("开始处理数据\n");
 
 	int isEnd = 0;
@@ -1839,7 +1844,9 @@ int main(int argc, char *argv[])
 			printf("0 ParseData name = %s\n", name);
 		}
 
-		if(lexer->currentLine > 130)	break;
+		// if(lexer->currentLine > 130)	break;
+		// if(lexer->currentLine > MAX_LINE) break;
+		if(lexer->currentLine == lexer->lineNum) break;
 	}
 	
 	return 0;
