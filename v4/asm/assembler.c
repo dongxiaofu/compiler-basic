@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "elf.h"
 #include "assembler.h"
 
 Heap CurrentHeap;
@@ -1775,28 +1776,56 @@ void ParseData()
 
 		// .byte   65
 		else if(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING){
-			if(token == TYPE_TOKEN_BYTE){
-				entry->dataType = DATA_TYPE_BYTE;
-			}else if(token == TYPE_TOKEN_LONG){
-				entry->dataType = DATA_TYPE_LONG;
-			}else if(token == TYPE_TOKEN_STRING){
-				entry->dataType = DATA_TYPE_STRING;
-			}
+			// 数组、浮点数的值都是多个十进制数据。
+			// 因为只是标志位，取值只需0和1即可，所以我用char。总觉得不符合惯例。
+			char isFirstValue = 0;
+			DataEntryValueNode head = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode));
+			DataEntryValueNode node = NULL;
+			DataEntryValueNode preNode = NULL;
+			do{
 
-			// "how are you?"
-			if(token == TYPE_TOKEN_STRING){
-				// 跳过"
-		//		GetNextToken();
-//				token = GetNextToken();
-				char *name = GetCurrentTokenLexeme();
-				entry->val.strVal = name;
-				// 跳过"
-				GetNextToken();
-			}else{
+				if(token == TYPE_TOKEN_BYTE){
+					entry->dataType = DATA_TYPE_BYTE;
+				}else if(token == TYPE_TOKEN_LONG){
+					entry->dataType = DATA_TYPE_LONG;
+				}else if(token == TYPE_TOKEN_STRING){
+					entry->dataType = DATA_TYPE_STRING;
+				}
+
+				if(node == NULL){
+					node = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode)); 
+					head->next = node;
+				//	preNode = node;
+				}
+
+				preNode = node;
+				// "how are you?"
+				if(token == TYPE_TOKEN_STRING){
+					// 跳过"
+			//		GetNextToken();
+//					token = GetNextToken();
+					char *name = GetCurrentTokenLexeme();
+					node->val.strVal = name;
+					// 跳过"
+					GetNextToken();
+				}else{
+					token = GetNextToken();
+					char *name = GetCurrentTokenLexeme();
+					node->val.numVal = atoi(name);
+				}
+
+				node = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode));
+				preNode->next = node;
+
+			// while后面有没有分号？看了资料，有。若被人知道我连这都忘记了，会被认为基础很差。呵呵。
+			// 谁没有提笔忘字的时候？
+			// 是否应该调用一次GetNextToken？不需要。
 				token = GetNextToken();
-				char *name = GetCurrentTokenLexeme();
-				entry->val.numVal = atoi(name);
-			}
+			}while(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING);
+
+			preNode->next = NULL;
+
+			entry->valPtr = head->next;
 
 			// 处理完数据的值，这就意味着处理完一条数据。
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
@@ -1816,6 +1845,56 @@ void ParseData()
 	}
 
 	printf("处理数据结束\n");
+}
+
+void BuildELF()
+{
+	// ELF文件头
+	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(sizeof(Elf32_Ehdr));
+	ehdr->e_ident[0] = 'E';
+	ehdr->e_ident[1] = 'L';
+	ehdr->e_ident[2] = 'F';
+
+	ehdr->e_ident[3] = 1;
+	ehdr->e_ident[4] = 1;
+	ehdr->e_ident[5] = 1;
+
+	for(int i = 6; i < 16; i++){
+		ehdr->e_ident[i] = 0;
+	}
+
+	ehdr->e_type =	ET_REL; 	
+	ehdr->e_machine = EM_386;
+	ehdr->e_version = 1;
+	ehdr->e_entry = 0;
+	ehdr->e_phoff = 0;
+	// TODO 需计算。
+	ehdr->e_shoff = 0;
+	// TODO 不知道设置成什么值。
+	ehdr->e_flags = 0;
+	// 是一个固定值。
+	ehdr->e_ehsize = 52;
+	ehdr->e_phentsize = 0;
+	ehdr->e_phnum = 0;
+	ehdr->e_shentsize = 40;
+	// TODO 段表条目的数量，待定。
+	ehdr->e_shnum = 13;
+	// TODO .shstrtab在段表中的索引。
+	ehdr->e_shstrndx = 0;
+
+	// 段的内容
+	// TODO .text和.rel.text太麻烦了，先不处理。
+	// .text
+	// .rel.text
+	// .data
+	//
+	// .rel.data
+	// .rodata
+	// .symtab
+	// .strtab
+	// .shstrtab
+	
+	// 段表
 }
 
 int main(int argc, char *argv[])
@@ -1848,6 +1927,9 @@ int main(int argc, char *argv[])
 		// if(lexer->currentLine > MAX_LINE) break;
 		if(lexer->currentLine == lexer->lineNum) break;
 	}
+
+	// 生成可重定位文件。
+	BuildELF();
 	
 	return 0;
 

@@ -7,5 +7,6 @@ int main(int argc, char *argv[])
 	// ch[0] = (0xFF | num);
 	ch[0] = (0xFF & num);
 
+
 	return 0;
 }

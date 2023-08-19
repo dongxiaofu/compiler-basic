@@ -8,7 +8,10 @@ int sum(int a, int b);
 // int num2 = sum(4,5);
 //            ^~~
 // int num2 = sum(4,5);
-
+char *str[2] = {"hello", "world"};
+double num13[3] = {4.9,5.2,3.7};
+float num11 = 4.1;
+double num12 = 5.8;
 char ch1 = 'A';
 const char ch2 = 'B';
 int num1 = 14;

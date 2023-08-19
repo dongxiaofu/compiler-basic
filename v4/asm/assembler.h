@@ -304,13 +304,19 @@ union DataEntryValue{
 	int numVal;	
 };
 
+// TODO 这种结构设计得合理吗？可以使用。
+typedef struct dataEntryValueNode{
+	union DataEntryValue val;
+	struct dataEntryValueNode *next;
+} *DataEntryValueNode;
+
 typedef struct dataEntry{
 	int symbolType;
 	int size;
 	char name[200];
 	int dataType;
 	int section;
-	union DataEntryValue val;
+	DataEntryValueNode valPtr;
 } *DataEntry;
 
 DataEntry dataEntryArray[100];
@@ -393,3 +399,4 @@ int HeapAllocate(Heap heap, int size);
 // 新增
 char IsData(int token);
 void ParseData();
+void BuildELF();
