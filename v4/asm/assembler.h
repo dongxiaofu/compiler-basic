@@ -65,6 +65,7 @@ typedef struct heap
 #define TYPE_TOKEN_RODATA					27	// .rodata
 #define TYPE_TOKEN_TYPE					28	// .type
 #define TYPE_TOKEN_SIZE						29	// .size
+#define TYPE_TOKEN_DOT_INDENT			    30	// 例如，.LC0
 
 #define DATA_TYPE_INVALID					-1
 #define DATA_TYPE_INT						0
@@ -298,6 +299,20 @@ ScriptHeader gScriptHeader;
 #define DATA_TYPE_BYTE		1
 #define DATA_TYPE_LONG		2
 #define DATA_TYPE_STRING	3
+
+union SectionDataVal{
+   int numVal;
+   char *strVal;
+   // 和系统的命名风格一致，所以，这两个变量名比较怪异。
+   Elf32_Sym *Elf32_Sym_Val;
+   Elf32_Rel *Elf32_Rel_Val;
+   // TODO 不知道怎么存储机器指令。
+};
+
+typedef struct sectionDataNode{
+   union SectionDataVal val;
+   struct sectionDataNode *next;
+}* SectionDataNode;
 
 union DataEntryValue{
 	char *strVal;

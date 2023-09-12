@@ -635,6 +635,10 @@ int GetNextToken()
 	if(IsImmediateOperand(lexer->lexeme)){
 		lexer->token_type = TYPE_TOKEN_IMMEDIATE;
 	}
+
+	if(strncmp(lexer->lexeme, ".", 1) == 0){
+	//	lexer->token_type = TYPE_TOKEN_DOT_INDENT;
+	}
 	
 	if(strcmp(lexer->lexeme, ".long") == 0){
 		lexer->token_type = TYPE_TOKEN_LONG;
@@ -1698,12 +1702,17 @@ void ParseData()
 	printf("开始处理数据\n");
 
 	int isEnd = 0;
-	int token = GetNextToken();
-		char *name = GetCurrentTokenLexeme();
-		printf("1 ParseData name = %s\n", name);
-		if(token == TYPE_TOKEN_RODATA){
-			token = GetNextToken();
-		}
+	// TODO 我暂时发现这段代码无用，先去掉。
+//	int token = GetNextToken();
+//		char *name = GetCurrentTokenLexeme();
+//		printf("1 ParseData name = %s\n", name);
+//		if(token == TYPE_TOKEN_RODATA){
+//			token = GetNextToken();
+//		}
+
+	int token;
+	char *name;
+	int currentSection = SECTION_TEXT;
 
 	DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 	dataEntryArray[dataEntryArrayIndex++] = entry;
@@ -1713,43 +1722,39 @@ void ParseData()
 		int isData = 0;
 		int nextToken;
 
-		// entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
-
-		do{
-			nextToken = GetLookAheadToken();
-			if(nextToken == TYPE_TOKEN_GLOBL){
-				SkipToNewline();
-				isGlobl = 1;
-			}
-
-			nextToken = GetLookAheadToken();
-			if(IsData(nextToken)){
-				isData = 1;	
-				isGlobl = 0;
-			}else{
-				if(nextToken == TYPE_TOKEN_GLOBL){
-					isGlobl = 1;	
-				}else{
-					isGlobl = 0;
-				}
-			}
-		}while(isGlobl == 1);
-		
-		if(isData == 1){
-			dataEntryArrayIndex--;
-			break;
-		}
-
 		token = GetNextToken();
 		printf("token = %d\n", token);
 		if(token == TYPE_TOKEN_INVALID)	break; 
 		char *name = GetCurrentTokenLexeme();
 		printf("ParseData name = %s\n", name);
 
+		// 就在这里获取.section
+		if(IsData(token)){
+			if(token == TYPE_TOKEN_DATA){
+	//			entry->section = SECTION_DATA; 
+				currentSection = SECTION_DATA;
+			}else if(token == TYPE_TOKEN_SECTION){
+				nextToken = GetLookAheadToken();
+				if(nextToken == TYPE_TOKEN_RODATA){
+	//				entry->section = SECTION_RODATA;
+					currentSection = SECTION_RODATA;
+				}else if(nextToken == TYPE_TOKEN_DATA){
+	//				entry->section = SECTION_DATA; 
+					currentSection = SECTION_DATA;
+				}else if(nextToken == TYPE_TOKEN_TEXT){
+					// TODO 是否要在这里记录.text？
+				}
+				GetNextToken();
+			
+			}else{
+				// TODO 执行到这里，就出错了。
+			} 
+		}
+
 		// 就在这里处理数据。
 //		DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 		// .size   ch1, 1
-		if(token == TYPE_TOKEN_SIZE){
+		else if(token == TYPE_TOKEN_SIZE){
 			// 跳过ch1
 			GetNextToken();
 			// 跳过,
@@ -1775,7 +1780,8 @@ void ParseData()
 		}
 
 		// .byte   65
-		else if(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING){
+		// else if(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING){
+		else if(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_KEYWORD_STRING){
 			// 数组、浮点数的值都是多个十进制数据。
 			// 因为只是标志位，取值只需0和1即可，所以我用char。总觉得不符合惯例。
 			char isFirstValue = 0;
@@ -1788,7 +1794,7 @@ void ParseData()
 					entry->dataType = DATA_TYPE_BYTE;
 				}else if(token == TYPE_TOKEN_LONG){
 					entry->dataType = DATA_TYPE_LONG;
-				}else if(token == TYPE_TOKEN_STRING){
+				}else if(token == TYPE_TOKEN_KEYWORD_STRING){
 					entry->dataType = DATA_TYPE_STRING;
 				}
 
@@ -1800,9 +1806,10 @@ void ParseData()
 
 				preNode = node;
 				// "how are you?"
-				if(token == TYPE_TOKEN_STRING){
+				if(token == TYPE_TOKEN_KEYWORD_STRING){
 					// 跳过"
-			//		GetNextToken();
+					GetNextToken();
+					GetNextToken();
 //					token = GetNextToken();
 					char *name = GetCurrentTokenLexeme();
 					node->val.strVal = name;
@@ -1810,8 +1817,13 @@ void ParseData()
 					GetNextToken();
 				}else{
 					token = GetNextToken();
-					char *name = GetCurrentTokenLexeme();
-					node->val.numVal = atoi(name);
+					if(token == TYPE_TOKEN_INDENT){
+						char *name = GetCurrentTokenLexeme();
+						node->val.strVal = name;
+					}else{
+						char *name = GetCurrentTokenLexeme();
+						node->val.numVal = atoi(name);
+					}
 				}
 
 				node = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode));
@@ -1820,12 +1832,17 @@ void ParseData()
 			// while后面有没有分号？看了资料，有。若被人知道我连这都忘记了，会被认为基础很差。呵呵。
 			// 谁没有提笔忘字的时候？
 			// 是否应该调用一次GetNextToken？不需要。
-				token = GetNextToken();
+				int nextToken = GetLookAheadToken();
+				if(nextToken == TYPE_TOKEN_BYTE || nextToken == TYPE_TOKEN_LONG || nextToken == TYPE_TOKEN_STRING){
+					token = GetNextToken();
+				}
+				//	token = GetNextToken();
 			}while(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING);
 
 			preNode->next = NULL;
 
 			entry->valPtr = head->next;
+			entry->section = currentSection;
 
 			// 处理完数据的值，这就意味着处理完一条数据。
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
@@ -1893,6 +1910,69 @@ void BuildELF()
 	// .symtab
 	// .strtab
 	// .shstrtab
+	
+	// .text TODO
+	SectionDataNode relTextDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode dataDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode relDataDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode rodataDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode symtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode strtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+	SectionDataNode shstrtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+
+	// 初始化节点。
+	SectionDataNode relTextDataNode , dataDataNode , relDataDataNode , rodataDataNode , \
+        symtabDataNode , strtabDataNode , shstrtabDataNode;
+
+    SectionDataNode preRelTextDataNode , preDataDataNode , preRelDataDataNode , preRodataDataNode , \
+        preSymtabDataNode , preStrtabDataNode , preShstrtabDataNode;
+
+	relTextDataNode = dataDataNode = relDataDataNode = rodataDataNode = \
+		symtabDataNode = strtabDataNode = shstrtabDataNode = NULL;	
+
+	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
+		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
+
+	// 遍历dataEntryArray
+	for(int i = 0; i < 100; i++){
+		DataEntry entry = dataEntryArray[i];
+		if(entry->section == SECTION_TEXT){
+
+		}else if(entry->section == SECTION_DATA){
+			// TODO 这这部分代码中，还应该获取.rel.data的数据。但我现在不知道怎么做。
+			if(dataDataNode == NULL){
+				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+				dataDataHead = dataDataNode;
+			}
+
+			preDataDataNode = dataDataNode;
+			// 真可恶！我发现，在这里要进行一个遍历。
+			DataEntryValueNode valPtr = entry->valPtr;
+			while(valPtr != NULL){
+				// TODO 处理string似乎是多此一举。在.data中不存在字符串。
+				if(entry->dataType == DATA_TYPE_STRING){
+					dataDataNode->val.strVal = valPtr->val.strVal;
+				}else{
+					dataDataNode->val.numVal = valPtr->val.numVal;
+				}
+
+				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+				preDataDataNode->next = dataDataNode;
+				// 在这里，心算不明白链表的一些细节。
+				valPtr = valPtr->next;
+			}
+
+
+		}else if(entry->section == SECTION_RODATA){
+
+
+		}else{
+
+			printf("error section %d\n", __LINE__);
+			exit(2);
+		}
+
+	}
 	
 	// 段表
 }
