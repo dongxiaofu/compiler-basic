@@ -1904,7 +1904,6 @@ void BuildELF()
 	// .text
 	// .rel.text
 	// .data
-	//
 	// .rel.data
 	// .rodata
 	// .symtab
@@ -1942,7 +1941,7 @@ void BuildELF()
 			// TODO 这这部分代码中，还应该获取.rel.data的数据。但我现在不知道怎么做。
 			if(dataDataNode == NULL){
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
-				dataDataHead = dataDataNode;
+				dataDataHead->next = dataDataNode;
 			}
 
 			preDataDataNode = dataDataNode;
@@ -1964,17 +1963,36 @@ void BuildELF()
 
 
 		}else if(entry->section == SECTION_RODATA){
+			if(rodataDataNode == NULL){
+				rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+				rodataDataHead->next = rodataDataNode;
+			}
 
+			preRodataDataNode = rodataDataNode;
+			// 真可恶！我发现，在这里要进行一个遍历。
+			DataEntryValueNode valPtr = entry->valPtr;
+			if(entry->dataType == DATA_TYPE_STRING){
+				rodataDataNode->val.strVal = valPtr->val.strVal;
+			}else{
+				rodataDataNode->val.numVal = valPtr->val.numVal;
+			}
+
+			rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+			preRodataDataNode->next = rodataDataNode;
 
 		}else{
 
 			printf("error section %d\n", __LINE__);
-			exit(2);
+			break;
+			// exit(2);
 		}
 
 	}
 	
 	// 段表
+	
+
+	printf("BuildELF is over\n");
 }
 
 int main(int argc, char *argv[])
@@ -2010,6 +2028,8 @@ int main(int argc, char *argv[])
 
 	// 生成可重定位文件。
 	BuildELF();
+
+	printf("Game over\n");
 	
 	return 0;
 
