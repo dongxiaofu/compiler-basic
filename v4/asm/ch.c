@@ -8,7 +8,10 @@ int sum(int a, int b);
 // int num2 = sum(4,5);
 //            ^~~
 // int num2 = sum(4,5);
+static char ch7;
+char ch4;
 char *str[2] = {"hello", "world"};
+int num33,num34;
 double num13[3] = {4.9,5.2,3.7};
 float num11 = 4.1;
 double num12 = 5.8;
@@ -29,8 +32,10 @@ char *my_str_cg = "How are you";
 int main(int argc, char *argv[])
 {
 	int x = sum(5,9);
-	const char ch3 = 'D';
-	static char ch4 = 'E';
+	const char ch38 = 'D';
+	static char ch44 = 'E';
+	static char ch55;
+	static int num66;
 	printf("%d", num1);
 	printf(my_str_cg);
 	printf(my_str_ak);

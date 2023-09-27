@@ -66,6 +66,7 @@ typedef struct heap
 #define TYPE_TOKEN_TYPE					28	// .type
 #define TYPE_TOKEN_SIZE						29	// .size
 #define TYPE_TOKEN_DOT_INDENT			    30	// 例如，.LC0
+#define TYPE_TOKEN_LOCAL					31	// .local
 
 #define DATA_TYPE_INVALID					-1
 #define DATA_TYPE_INT						0
@@ -291,6 +292,16 @@ ScriptHeader gScriptHeader;
 #define SECTION_TEXT	1
 #define SECTION_DATA	2
 #define SECTION_RODATA	3
+#define SECTION_BSS		4
+#define SECTION_COM		5
+#define SECTION_ABS		6
+#define SECTION_UND		7
+
+// .symtab中的一些特殊Ndx
+#define SECTION_NDX_UND 0x0000
+#define SECTION_NDX_ABS 0xfff1
+#define SECTION_NDX_COM 0xfff2
+
 
 // 例如@object。还有哪些值？不清楚。
 #define SYMBOL_TYPE_OBJECT	1
@@ -331,13 +342,32 @@ typedef struct dataEntry{
 	char name[200];
 	int dataType;
 	int section;
+	int isRel;		// 是否需要重定位
+	int align;		// 对齐
 	DataEntryValueNode valPtr;
 } *DataEntry;
+
+typedef struct strtabEntry{
+	char name[100];
+	int offset;
+	int length;
+} *StrtabEntry;
 
 DataEntry dataEntryArray[100];
 // error: increment of read-only variable 'dataEntryArrayIndex'
 // const int dataEntryArrayIndex = 0;
 static int dataEntryArrayIndex = 0;
+
+StrtabEntry strtabEntryArray[100];
+static int strtabEntryArrayIndex = 0;
+static int strtabEntryOffset = 0;
+
+#define SHSTRTAB_ENTRY_ARRAY_SIZE	9
+char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+
+#define BSS_DATA_ENTRY_ARRAY_SIZE 100
+DataEntry bssDataEntryArray[BSS_DATA_ENTRY_ARRAY_SIZE];
+static int bssDataEntryArrayIndex = 0;
 
 void *MALLOC(int size);
 
@@ -412,6 +442,8 @@ int HeapAllocate(Heap heap, int size);
 
 
 // 新增
+int FindStrtabEntry(char *name);
+int FindShstrtabEntry(char *name);
 char IsData(int token);
 void ParseData();
 void BuildELF();

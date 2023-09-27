@@ -692,6 +692,14 @@ int GetNextToken()
 		lexer->token_type = TYPE_TOKEN_OBJECT;
 	}
 
+	if(strcmp(lexer->lexeme, ".local") == 0){
+		lexer->token_type = TYPE_TOKEN_LOCAL;
+	}
+
+	if(strcmp(lexer->lexeme, ".comm") == 0){
+		lexer->token_type = TYPE_TOKEN_COMM;
+	}
+
 	// 检查是否要换行。
 	// if(lexer->index0 == length - 1){
 	if(lexer->index0 + 1 >= length){
@@ -1670,6 +1678,34 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
+int FindStrtabEntry(char *name)
+{
+	int index = -1;
+
+	for(int i = 0; i < 100; i++){
+		StrtabEntry entry = strtabEntryArray[i];
+		if(strcmp(entry->name, name) == 0){
+			return i;
+		}
+	}
+
+	return index;
+}
+
+int FindShstrtabEntry(char *name)
+{
+	int index = -1;
+
+	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+		char *entry = shstrtabEntryArray[i];
+		if(strcmp(entry, name) == 0){
+			return i;
+		}
+	}
+
+	return index;
+}
+
 char IsData(int token)
 {
 	int result;
@@ -1696,20 +1732,9 @@ char IsData(int token)
 
 void ParseData()
 {
-//	if(lexer->currentLine > MAX_LINE) return;
-//	if(lexer->currentLine == lexer->lineNum) break;
-
 	printf("开始处理数据\n");
 
 	int isEnd = 0;
-	// TODO 我暂时发现这段代码无用，先去掉。
-//	int token = GetNextToken();
-//		char *name = GetCurrentTokenLexeme();
-//		printf("1 ParseData name = %s\n", name);
-//		if(token == TYPE_TOKEN_RODATA){
-//			token = GetNextToken();
-//		}
-
 	int token;
 	char *name;
 	int currentSection = SECTION_TEXT;
@@ -1752,7 +1777,6 @@ void ParseData()
 		}
 
 		// 就在这里处理数据。
-//		DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 		// .size   ch1, 1
 		else if(token == TYPE_TOKEN_SIZE){
 			// 跳过ch1
@@ -1789,7 +1813,6 @@ void ParseData()
 			DataEntryValueNode node = NULL;
 			DataEntryValueNode preNode = NULL;
 			do{
-
 				if(token == TYPE_TOKEN_BYTE){
 					entry->dataType = DATA_TYPE_BYTE;
 				}else if(token == TYPE_TOKEN_LONG){
@@ -1818,6 +1841,11 @@ void ParseData()
 				}else{
 					token = GetNextToken();
 					if(token == TYPE_TOKEN_INDENT){
+						// 这里就是识别.rel.data的地方。
+						// 默认为不需要重定位的数据。如果已经标识了此entry的重定位属性，就无需再标识。
+						if(entry->isRel == 0){
+							entry->isRel = 1;
+						}
 						char *name = GetCurrentTokenLexeme();
 						node->val.strVal = name;
 					}else{
@@ -1831,12 +1859,10 @@ void ParseData()
 
 			// while后面有没有分号？看了资料，有。若被人知道我连这都忘记了，会被认为基础很差。呵呵。
 			// 谁没有提笔忘字的时候？
-			// 是否应该调用一次GetNextToken？不需要。
 				int nextToken = GetLookAheadToken();
 				if(nextToken == TYPE_TOKEN_BYTE || nextToken == TYPE_TOKEN_LONG || nextToken == TYPE_TOKEN_STRING){
 					token = GetNextToken();
 				}
-				//	token = GetNextToken();
 			}while(token == TYPE_TOKEN_BYTE || token == TYPE_TOKEN_LONG || token == TYPE_TOKEN_STRING);
 
 			preNode->next = NULL;
@@ -1856,7 +1882,72 @@ void ParseData()
 				memset(entry->name, 0, 200);
 				strcpy(entry->name, GetCurrentTokenLexeme());
 				GetNextToken();
+
+				// 检查变量名的首字符是不是点号。
+			//	if(strncmp(entry->name, ".", 1) != 0){
+				if(entry->symbolType == SYMBOL_TYPE_OBJECT){
+					StrtabEntry strtabEntry = (StrtabEntry)MALLOC(sizeof(struct strtabEntry));
+					memset(strtabEntry->name,0,200);
+					strcpy(strtabEntry->name, entry->name);
+					strtabEntry->length = strlen(strtabEntry->name);
+					strtabEntry->offset = strtabEntryOffset;
+					strtabEntryOffset += strtabEntry->length;
+					strtabEntryArray[strtabEntryArrayIndex++] = strtabEntry;
+				}
 			}
+		}else if(token == TYPE_TOKEN_LOCAL){
+			// 解析 .local  num66.2504 这种数据。
+			// .comm   num66.2504,4,4
+			// DataEntry bssDataEntry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+			DataEntry bssDataEntry = entry;
+
+			bssDataEntry->section = SECTION_BSS;
+			bssDataEntry->symbolType = SYMBOL_TYPE_OBJECT;
+
+			GetNextToken();
+			memset(bssDataEntry->name,0,200);
+			strcpy(bssDataEntry->name, GetCurrentTokenLexeme());
+			// 跳过 .comm
+			GetNextToken();
+			// 跳过 num66.2504
+			GetNextToken();
+			// 解析 length
+			GetNextToken();
+			char *lengthStr = GetCurrentTokenLexeme();
+			int length = atoi(lengthStr);
+			bssDataEntry->size = length;
+			// 解析 alignment
+			GetNextToken();
+			char *alignmentStr = GetCurrentTokenLexeme();
+			int alignment = atoi(alignmentStr);
+			bssDataEntry->align = alignment;
+
+			// dataEntryArray[dataEntryArrayIndex++] = bssDataEntry;
+
+			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+			dataEntryArray[dataEntryArrayIndex++] = entry;
+
+//			bssDataEntryArray[bssDataEntryArrayIndex++] = bssDataEntry;
+		}else if(token == TYPE_TOKEN_COMM){
+			// 处理 .comm   ch4,1,1
+			entry->section = SECTION_COM;
+			// 跳过 .ch4
+			GetNextToken();
+			memset(entry->name,0,200);
+			strcpy(entry->name, GetCurrentTokenLexeme());
+			// 解析 length
+			GetNextToken();
+			char *lengthStr = GetCurrentTokenLexeme();
+			int length = atoi(lengthStr);
+			entry->size = length;
+			// 解析 alignment
+			GetNextToken();
+			char *alignmentStr = GetCurrentTokenLexeme();
+			int alignment = atoi(alignmentStr);
+			entry->align = alignment;
+
+			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+			dataEntryArray[dataEntryArrayIndex++] = entry;
 		}
 		
 	}
