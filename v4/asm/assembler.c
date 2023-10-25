@@ -2007,21 +2007,25 @@ void ParseData()
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
-	}else if(token == TYPE_TOKEN_CALL){
+		}else if(token == TYPE_TOKEN_CALL){
+			// 处理 call sum
+			// 跳过call
+			GetNextToken();
+			// 获取call，存储到name。
+			char *name = GetCurrentTokenLexeme();
+			if(FindDataEntry(name) != -1)	continue;
 		
-		// 处理 call sum
-		entry->section = SECTION_TEXT;
-		entry->symbolType = SYMBOL_TYPE_NOTYPE;
-		// 跳过call
-		GetNextToken();
-		memset(entry->name,0,200);
-		strcpy(entry->name, GetCurrentTokenLexeme());
-
-		AddStrtabEntry(entry);
-
-		entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
-		dataEntryArray[dataEntryArrayIndex++] = entry;
-	}
+			entry->section = SECTION_TEXT;
+			entry->symbolType = SYMBOL_TYPE_NOTYPE;
+		
+			memset(entry->name,0,200);
+			strcpy(entry->name, name);
+		
+			AddStrtabEntry(entry);
+		
+			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+			dataEntryArray[dataEntryArrayIndex++] = entry;
+		}
 	}
 
 	printf("处理数据结束\n");
