@@ -1747,6 +1747,20 @@ char IsData(int token)
 
 #define MAX_LINE 213
 
+void TestStrtabEntryArray()
+{
+	printf("\nstring in strtab start\n");
+
+	int index = 0;
+	while(1){
+		StrtabEntry strtabEntry = strtabEntryArray[index++];
+		if(strtabEntry == NULL)	break;
+		printf("%s\n", strtabEntry->name);
+	}
+
+	printf("\nstring in strtab start\n");
+}
+
 void AddStrtabEntry(DataEntry entry)
 {
 	StrtabEntry strtabEntry = (StrtabEntry)MALLOC(sizeof(struct strtabEntry));
@@ -1997,6 +2011,8 @@ void ParseData()
 	}
 
 	printf("处理数据结束\n");
+
+	TestStrtabEntryArray();
 }
 
 void CalculateDataEntryOffset()
