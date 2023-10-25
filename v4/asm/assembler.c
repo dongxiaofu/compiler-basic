@@ -1756,15 +1756,31 @@ char IsData(int token)
 
 #define MAX_LINE 213
 
+void TestDataEntryArray()
+{
+	printf("\nstring in dataEntryArray start\n");
+
+	int index = 0;
+	while(1){
+		DataEntry entry = dataEntryArray[index];
+		if(entry == NULL)	break;
+		printf("%d---%s\n", index, entry->name);
+		index++;
+	}
+
+	printf("\nstring in dataEntryArray end\n");
+}
+
 void TestStrtabEntryArray()
 {
 	printf("\nstring in strtab start\n");
 
 	int index = 0;
 	while(1){
-		StrtabEntry strtabEntry = strtabEntryArray[index++];
+		StrtabEntry strtabEntry = strtabEntryArray[index];
 		if(strtabEntry == NULL)	break;
-		printf("%s\n", strtabEntry->name);
+		printf("%d---%s\n", index, strtabEntry->name);
+		index++;
 	}
 
 	printf("\nstring in strtab start\n");
@@ -1937,24 +1953,51 @@ void ParseData()
 		else if(token ==  TYPE_TOKEN_INDENT){
 			char ch = GetLookAheadChar();
 			if(ch == ':'){
+				char *name2 = GetCurrentTokenLexeme();
+				printf("name2 = %s\n", name2);
 				memset(entry->name, 0, 200);
-				strcpy(entry->name, GetCurrentTokenLexeme());
+				char *name = GetCurrentTokenLexeme();
+				// strcpy(entry->name, name); 
 				GetNextToken();
 
 				// 检查变量名的首字符是不是点号。
 				if(entry->symbolType == SYMBOL_TYPE_OBJECT){
+					printf("name3 = %s\n", name);
+					strcpy(entry->name, name); 
 					AddStrtabEntry(entry);
-					entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
-					dataEntryArray[dataEntryArrayIndex++] = entry;
+					// strcpy(entry->name, name); 
+				//	entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+				//	dataEntryArray[dataEntryArrayIndex++] = entry;
+					// strcpy(entry->name, name); 
 				// TODO 不知道两种情况有没有差异，先这样做。
 				}else if(entry->symbolType == SYMBOL_TYPE_FUNC){
-					AddStrtabEntry(entry);
-					entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
-					dataEntryArray[dataEntryArrayIndex++] = entry;
+					printf("name4 = %s\n", name);
+					int targetIndex = FindDataEntry(name);
+					strcpy(entry->name, name); 
+					if(targetIndex == -1){
+						AddStrtabEntry(entry);
+						// TODO 最好把下面的代码放到遇到ret指令的时候。
+						entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+						dataEntryArray[dataEntryArrayIndex++] = entry;
+					}else{
+					//	AddStrtabEntry(entry);
+						// TODO 这里需要写更多代码，因为还要处理函数中的指令。
+						DataEntry targetEntry = dataEntryArray[targetIndex];
+						int dataEntrySize = sizeof(struct dataEntry);
+						memcpy(targetEntry, entry, dataEntrySize);
+						// 本来，当前entry要用来存储已经存在的函数。但是这个函数重复了，所以，
+						// 用这个entry存储新的数据，
+						// 更新那个已经存在的函数在dataEntryArray中对应的元素。
+						memset(entry, 0, dataEntrySize); 
+					}
 				}else{
+					printf("name5 = %s\n", name);
 					// ch1:
 					// 在汇编代码中出现上面这样的字符串，只有三种情况：变量名，函数名，函数中的标签。
 					// 不是前面两种情况，只能是第三种情况（函数中的标签）。像这种情况，直接跳过。
+					strcpy(entry->name, name); 
+//					entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+//					dataEntryArray[dataEntryArrayIndex++] = entry;
 				}
 			}
 		}else if(token == TYPE_TOKEN_LOCAL){
@@ -2027,7 +2070,10 @@ void ParseData()
 			GetNextToken();
 			// 获取call，存储到name。
 			char *name = GetCurrentTokenLexeme();
-			if(FindDataEntry(name) != -1)	continue;
+			if(FindDataEntry(name) != -1){
+			//	memset(entry, 0, sizeof(struct dataEntry));
+				continue;
+			}
 		
 			entry->section = SECTION_TEXT;
 			entry->symbolType = SYMBOL_TYPE_NOTYPE;
@@ -2043,6 +2089,8 @@ void ParseData()
 	}
 
 	printf("处理数据结束\n");
+
+	TestDataEntryArray();
 
 	TestStrtabEntryArray();
 }
