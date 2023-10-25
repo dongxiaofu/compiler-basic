@@ -457,5 +457,6 @@ int FindDataEntry(char *name);
 int FindStrtabEntry(char *name);
 int FindShstrtabEntry(char *name);
 char IsData(int token);
+void AddStrtabEntry(DataEntry entry);
 void ParseData();
 void BuildELF();

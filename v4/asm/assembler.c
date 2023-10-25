@@ -1747,6 +1747,17 @@ char IsData(int token)
 
 #define MAX_LINE 213
 
+void AddStrtabEntry(DataEntry entry)
+{
+	StrtabEntry strtabEntry = (StrtabEntry)MALLOC(sizeof(struct strtabEntry));
+	memset(strtabEntry->name,0,200);
+	strcpy(strtabEntry->name, entry->name);
+	strtabEntry->length = strlen(strtabEntry->name);
+	strtabEntry->offset = strtabEntryOffset;
+	strtabEntryOffset += strtabEntry->length;
+	strtabEntryArray[strtabEntryArrayIndex++] = strtabEntry;
+}
+
 void ParseData()
 {
 	printf("开始处理数据\n");
@@ -1933,22 +1944,27 @@ void ParseData()
 			GetNextToken();
 			// 跳过 num66.2504
 			GetNextToken();
+			// 跳过逗号
+			GetNextToken();
 			// 解析 length
 			GetNextToken();
 			char *lengthStr = GetCurrentTokenLexeme();
 			int length = atoi(lengthStr);
 			bssDataEntry->size = length;
+			// 跳过逗号
+			GetNextToken();
 			// 解析 alignment
 			GetNextToken();
 			char *alignmentStr = GetCurrentTokenLexeme();
 			int alignment = atoi(alignmentStr);
 			bssDataEntry->align = alignment;
 
+			AddStrtabEntry(entry);
+
 			// dataEntryArray[dataEntryArrayIndex++] = bssDataEntry;
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
-
 //			bssDataEntryArray[bssDataEntryArrayIndex++] = bssDataEntry;
 		}else if(token == TYPE_TOKEN_COMM){
 			// 处理 .comm   ch4,1,1
@@ -1957,16 +1973,22 @@ void ParseData()
 			GetNextToken();
 			memset(entry->name,0,200);
 			strcpy(entry->name, GetCurrentTokenLexeme());
+			// 跳过逗号
+			GetNextToken();
 			// 解析 length
 			GetNextToken();
 			char *lengthStr = GetCurrentTokenLexeme();
 			int length = atoi(lengthStr);
 			entry->size = length;
+			// 跳过逗号
+			GetNextToken();
 			// 解析 alignment
 			GetNextToken();
 			char *alignmentStr = GetCurrentTokenLexeme();
 			int alignment = atoi(alignmentStr);
 			entry->align = alignment;
+
+			AddStrtabEntry(entry);
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
@@ -2138,10 +2160,7 @@ void BuildELF()
 			preRodataDataNode->next = rodataDataNode;
 
 		}else{
-
 			printf("error section %d\n", __LINE__);
-	//		break;
-			// exit(2);
 		}
 
 	}
