@@ -325,6 +325,10 @@ typedef struct sectionDataNode{
    struct sectionDataNode *next;
 }* SectionDataNode;
 
+enum DataEntryValueType{
+	STR = 1, NUM
+};
+
 union DataEntryValue{
 	char *strVal;
 	int numVal;	
@@ -333,6 +337,7 @@ union DataEntryValue{
 // TODO 这种结构设计得合理吗？可以使用。
 typedef struct dataEntryValueNode{
 	union DataEntryValue val;
+	enum DataEntryValueType type;
 	struct dataEntryValueNode *next;
 } *DataEntryValueNode;
 
@@ -345,6 +350,8 @@ typedef struct dataEntry{
 	int isRel;		// 是否需要重定位
 	int align;		// 对齐
 	DataEntryValueNode valPtr;
+	// 在各自的section中的偏移量，例如，在.data中的偏移量，在.rodata中的偏移量。
+	int offset;	
 } *DataEntry;
 
 typedef struct strtabEntry{
@@ -361,6 +368,9 @@ static int dataEntryArrayIndex = 0;
 StrtabEntry strtabEntryArray[100];
 static int strtabEntryArrayIndex = 0;
 static int strtabEntryOffset = 0;
+
+static int dataEntryOffset = 0;
+static int rodataEntryOffset = 0;
 
 #define SHSTRTAB_ENTRY_ARRAY_SIZE	9
 char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
@@ -436,12 +446,14 @@ void AssmblSourceFile();
 
 void SaveVariable();
 void BuildXE();
+void CalculateDataEntryOffset();
 void LoadFile(char *filename);
 // void *MALLOC(int size);
 int HeapAllocate(Heap heap, int size);
 
 
 // 新增
+int FindDataEntry(char *name);
 int FindStrtabEntry(char *name);
 int FindShstrtabEntry(char *name);
 char IsData(int token);

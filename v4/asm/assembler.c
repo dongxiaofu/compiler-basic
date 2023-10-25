@@ -1678,6 +1678,23 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
+int FindDataEntry(char *name)
+{
+	int	targetIndex = -1;
+	int index = 0;
+
+	while(1){
+		if(dataEntryArray[index] == NULL)	break;
+		if(strcmp(name, dataEntryArray[index]->name) == 0){
+			targetIndex = index;
+			break;
+		}
+		index++;
+	}
+
+	return targetIndex;
+}
+
 int FindStrtabEntry(char *name)
 {
 	int index = -1;
@@ -1847,9 +1864,14 @@ void ParseData()
 							entry->isRel = 1;
 						}
 						char *name = GetCurrentTokenLexeme();
+						node->type = STR;
 						node->val.strVal = name;
+						// 就在这里把name换算成偏移量。
+						// 不行。在这里无法实现。执行CalculateDataEntryOffset后，才知道偏移量。
+						// 那么，把name存储起来，在BuildELF中根据name查询entry，然后读取offset。
 					}else{
 						char *name = GetCurrentTokenLexeme();
+						node->type = NUM;
 						node->val.numVal = atoi(name);
 					}
 				}
@@ -1955,6 +1977,31 @@ void ParseData()
 	printf("处理数据结束\n");
 }
 
+void CalculateDataEntryOffset()
+{
+	int index = 0;
+	while(1){
+		DataEntry entry = dataEntryArray[index++];
+		if(entry == NULL)	break;
+		if(entry->section == SECTION_DATA){
+			entry->offset = dataEntryOffset;
+			dataEntryOffset += entry->size;
+		}else if(entry->section == SECTION_RODATA){
+			// TODO 这样做正确吗？
+			if(entry->size == 0){
+				// todo 如果不是这种情况，应该怎么处理？
+				if(entry->dataType == DATA_TYPE_STRING){
+					entry->size = strlen(entry->valPtr->val.strVal);
+				}
+			}
+			entry->offset = rodataEntryOffset;
+			rodataEntryOffset += entry->size;
+		}else{
+			printf("%d in calculateDataEntryOffset", __LINE__);
+		}
+	}
+}
+
 void BuildELF()
 {
 	// ELF文件头
@@ -2026,6 +2073,11 @@ void BuildELF()
 	// 遍历dataEntryArray
 	for(int i = 0; i < 100; i++){
 		DataEntry entry = dataEntryArray[i];
+		// 这段代码是我运行程序出现错误后加上的。凭空琢磨这段代码的必要性，不容易想出原因。
+		if(entry == NULL){
+			break;
+		}
+
 		if(entry->section == SECTION_TEXT){
 
 		}else if(entry->section == SECTION_DATA){
@@ -2040,11 +2092,25 @@ void BuildELF()
 			DataEntryValueNode valPtr = entry->valPtr;
 			while(valPtr != NULL){
 				// TODO 处理string似乎是多此一举。在.data中不存在字符串。
-				if(entry->dataType == DATA_TYPE_STRING){
-					dataDataNode->val.strVal = valPtr->val.strVal;
+				int val;
+				if(valPtr->type == STR){
+					dataDataNode->val.strVal;
+					char *str = valPtr->val.strVal;
+					// 根据str查找对应的entry，然后读取offset。
+					int entryIndex = FindDataEntry(str);
+					if(entryIndex == -1){
+						// todo 出现这种情况，该怎么办？
+						// 先终止程序。
+						printf("%s, error in %s, %d\n",str,  __FILE__, __LINE__);
+						exit(-2);
+					}
+					DataEntry entry = dataEntryArray[entryIndex];
 				}else{
-					dataDataNode->val.numVal = valPtr->val.numVal;
+					// dataDataNode->val.numVal = valPtr->val.numVal;
+					val = valPtr->val.numVal;
 				}
+
+				dataDataNode->val.numVal = val;
 
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 				preDataDataNode->next = dataDataNode;
@@ -2074,7 +2140,7 @@ void BuildELF()
 		}else{
 
 			printf("error section %d\n", __LINE__);
-			break;
+	//		break;
 			// exit(2);
 		}
 
@@ -2116,6 +2182,8 @@ int main(int argc, char *argv[])
 		// if(lexer->currentLine > MAX_LINE) break;
 		if(lexer->currentLine == lexer->lineNum) break;
 	}
+
+	CalculateDataEntryOffset();
 
 	// 生成可重定位文件。
 	BuildELF();
