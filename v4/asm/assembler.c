@@ -700,6 +700,15 @@ int GetNextToken()
 		lexer->token_type = TYPE_TOKEN_COMM;
 	}
 
+	if(strcmp(lexer->lexeme, "@function") == 0){
+		// TODO 应该使用 TYPE_TOKEN_FUNCTION 还是 TYPE_TOKEN_AT_FUNCTION ？
+		lexer->token_type = TYPE_TOKEN_FUNCTION;
+	}
+
+	if(strcmp(lexer->lexeme, "call") == 0){
+		lexer->token_type = TYPE_TOKEN_CALL;
+	}
+
 	// 检查是否要换行。
 	// if(lexer->index0 == length - 1){
 	if(lexer->index0 + 1 >= length){
@@ -1826,6 +1835,8 @@ void ParseData()
 			int symbolType = -1;
 			if(token == TYPE_TOKEN_OBJECT){
 				symbolType = SYMBOL_TYPE_OBJECT;
+			}else if(token == TYPE_TOKEN_FUNCTION){
+				symbolType = SYMBOL_TYPE_FUNC;
 			}
 
 			entry->symbolType = symbolType; 
@@ -1917,15 +1928,19 @@ void ParseData()
 				GetNextToken();
 
 				// 检查变量名的首字符是不是点号。
-			//	if(strncmp(entry->name, ".", 1) != 0){
 				if(entry->symbolType == SYMBOL_TYPE_OBJECT){
-					StrtabEntry strtabEntry = (StrtabEntry)MALLOC(sizeof(struct strtabEntry));
-					memset(strtabEntry->name,0,200);
-					strcpy(strtabEntry->name, entry->name);
-					strtabEntry->length = strlen(strtabEntry->name);
-					strtabEntry->offset = strtabEntryOffset;
-					strtabEntryOffset += strtabEntry->length;
-					strtabEntryArray[strtabEntryArrayIndex++] = strtabEntry;
+					AddStrtabEntry(entry);
+					entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+					dataEntryArray[dataEntryArrayIndex++] = entry;
+				// TODO 不知道两种情况有没有差异，先这样做。
+				}else if(entry->symbolType == SYMBOL_TYPE_FUNC){
+					AddStrtabEntry(entry);
+					entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+					dataEntryArray[dataEntryArrayIndex++] = entry;
+				}else{
+					// ch1:
+					// 在汇编代码中出现上面这样的字符串，只有三种情况：变量名，函数名，函数中的标签。
+					// 不是前面两种情况，只能是第三种情况（函数中的标签）。像这种情况，直接跳过。
 				}
 			}
 		}else if(token == TYPE_TOKEN_LOCAL){
@@ -1992,8 +2007,21 @@ void ParseData()
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
-		}
+	}else if(token == TYPE_TOKEN_CALL){
 		
+		// 处理 call sum
+		entry->section = SECTION_TEXT;
+		entry->symbolType = SYMBOL_TYPE_NOTYPE;
+		// 跳过call
+		GetNextToken();
+		memset(entry->name,0,200);
+		strcpy(entry->name, GetCurrentTokenLexeme());
+
+		AddStrtabEntry(entry);
+
+		entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
+		dataEntryArray[dataEntryArrayIndex++] = entry;
+	}
 	}
 
 	printf("处理数据结束\n");

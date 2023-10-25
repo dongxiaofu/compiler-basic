@@ -63,10 +63,11 @@ typedef struct heap
 #define TYPE_TOKEN_OBJECT					25	// @object
 #define TYPE_TOKEN_SECTION					26	// .section
 #define TYPE_TOKEN_RODATA					27	// .rodata
-#define TYPE_TOKEN_TYPE					28	// .type
+#define TYPE_TOKEN_TYPE						28	// .type
 #define TYPE_TOKEN_SIZE						29	// .size
 #define TYPE_TOKEN_DOT_INDENT			    30	// 例如，.LC0
 #define TYPE_TOKEN_LOCAL					31	// .local
+#define TYPE_TOKEN_CALL						32	// call
 
 #define DATA_TYPE_INVALID					-1
 #define DATA_TYPE_INT						0
@@ -305,6 +306,8 @@ ScriptHeader gScriptHeader;
 
 // 例如@object。还有哪些值？不清楚。
 #define SYMBOL_TYPE_OBJECT	1
+#define SYMBOL_TYPE_FUNC	2
+#define SYMBOL_TYPE_NOTYPE	3
 
 // 数据类型，例如byte
 #define DATA_TYPE_BYTE		1
