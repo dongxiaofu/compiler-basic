@@ -2090,6 +2090,12 @@ void ParseData()
 
 	printf("处理数据结束\n");
 
+	// 最后一个元素是空的。
+	printf("dataEntryArrayIndex = %d\n", dataEntryArrayIndex);
+	// todo 我想清理最后一个空元素，琢磨了一会儿，没找到正确的方法。搁置。
+//	dataEntryArrayIndex > 1 ? dataEntryArrayIndex = dataEntryArrayIndex - 1 : NULL;:
+//	dataEntryArray[dataEntryArrayIndex] = NULL;
+
 	TestDataEntryArray();
 
 	TestStrtabEntryArray();
