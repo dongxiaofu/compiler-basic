@@ -13,19 +13,19 @@ token = 23
 ParseData name = .comm
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = str
-name2 = str
+name = str, node->name = ch4
 token = 26
 ParseData name = .section
 token = 19
 ParseData name = .LC0
 name2 = .LC0
+name5 = .LC0
 token = 17
 ParseData name = .string
 token = 19
 ParseData name = .LC1
 name2 = .LC1
+name5 = .LC1
 token = 17
 ParseData name = .string
 token = 14
@@ -41,17 +41,24 @@ ParseData name = .size
 token = 19
 ParseData name = str
 name2 = str
+name3 = str
 token = 12
 ParseData name = .long
 token = 23
 ParseData name = .comm
+name = num33, node->name = ch4
+name = num33, node->name = str
 token = 23
 ParseData name = .comm
+name = num34, node->name = ch4
+name = num34, node->name = str
+name = num34, node->name = num33
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = num13
-name2 = num13
+name = num13, node->name = ch4
+name = num13, node->name = str
+name = num13, node->name = num33
+name = num13, node->name = num34
 token = 24
 ParseData name = .align
 token = 1
@@ -63,13 +70,16 @@ ParseData name = .size
 token = 19
 ParseData name = num13
 name2 = num13
+name3 = num13
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = num11
-name2 = num11
+name = num11, node->name = ch4
+name = num11, node->name = str
+name = num11, node->name = num33
+name = num11, node->name = num34
+name = num11, node->name = num13
 token = 24
 ParseData name = .align
 token = 1
@@ -81,13 +91,17 @@ ParseData name = .size
 token = 19
 ParseData name = num11
 name2 = num11
+name3 = num11
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = num12
-name2 = num12
+name = num12, node->name = ch4
+name = num12, node->name = str
+name = num12, node->name = num33
+name = num12, node->name = num34
+name = num12, node->name = num13
+name = num12, node->name = num11
 token = 24
 ParseData name = .align
 token = 1
@@ -99,13 +113,18 @@ ParseData name = .size
 token = 19
 ParseData name = num12
 name2 = num12
+name3 = num12
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = ch1
-name2 = ch1
+name = ch1, node->name = ch4
+name = ch1, node->name = str
+name = ch1, node->name = num33
+name = ch1, node->name = num34
+name = ch1, node->name = num13
+name = ch1, node->name = num11
+name = ch1, node->name = num12
 token = 28
 ParseData name = .type
 token = 29
@@ -113,13 +132,19 @@ ParseData name = .size
 token = 19
 ParseData name = ch1
 name2 = ch1
+name3 = ch1
 token = 13
 ParseData name = .byte
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = ch2
-name2 = ch2
+name = ch2, node->name = ch4
+name = ch2, node->name = str
+name = ch2, node->name = num33
+name = ch2, node->name = num34
+name = ch2, node->name = num13
+name = ch2, node->name = num11
+name = ch2, node->name = num12
+name = ch2, node->name = ch1
 token = 26
 ParseData name = .section
 token = 28
@@ -129,13 +154,20 @@ ParseData name = .size
 token = 19
 ParseData name = ch2
 name2 = ch2
+name3 = ch2
 token = 13
 ParseData name = .byte
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = num1
-name2 = num1
+name = num1, node->name = ch4
+name = num1, node->name = str
+name = num1, node->name = num33
+name = num1, node->name = num34
+name = num1, node->name = num13
+name = num1, node->name = num11
+name = num1, node->name = num12
+name = num1, node->name = ch1
+name = num1, node->name = ch2
 token = 14
 ParseData name = .data
 token = 24
@@ -149,18 +181,27 @@ ParseData name = .size
 token = 19
 ParseData name = num1
 name2 = num1
+name3 = num1
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = my_str_ak
-name2 = my_str_ak
+name = my_str_ak, node->name = ch4
+name = my_str_ak, node->name = str
+name = my_str_ak, node->name = num33
+name = my_str_ak, node->name = num34
+name = my_str_ak, node->name = num13
+name = my_str_ak, node->name = num11
+name = my_str_ak, node->name = num12
+name = my_str_ak, node->name = ch1
+name = my_str_ak, node->name = ch2
+name = my_str_ak, node->name = num1
 token = 26
 ParseData name = .section
 token = 19
 ParseData name = .LC2
 name2 = .LC2
+name5 = .LC2
 token = 17
 ParseData name = .string
 token = 14
@@ -176,13 +217,22 @@ ParseData name = .size
 token = 19
 ParseData name = my_str_ak
 name2 = my_str_ak
+name3 = my_str_ak
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = num2
-name2 = num2
+name = num2, node->name = ch4
+name = num2, node->name = str
+name = num2, node->name = num33
+name = num2, node->name = num34
+name = num2, node->name = num13
+name = num2, node->name = num11
+name = num2, node->name = num12
+name = num2, node->name = ch1
+name = num2, node->name = ch2
+name = num2, node->name = num1
+name = num2, node->name = my_str_ak
 token = 24
 ParseData name = .align
 token = 1
@@ -194,18 +244,29 @@ ParseData name = .size
 token = 19
 ParseData name = num2
 name2 = num2
+name3 = num2
 token = 12
 ParseData name = .long
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = my_str_cg
-name2 = my_str_cg
+name = my_str_cg, node->name = ch4
+name = my_str_cg, node->name = str
+name = my_str_cg, node->name = num33
+name = my_str_cg, node->name = num34
+name = my_str_cg, node->name = num13
+name = my_str_cg, node->name = num11
+name = my_str_cg, node->name = num12
+name = my_str_cg, node->name = ch1
+name = my_str_cg, node->name = ch2
+name = my_str_cg, node->name = num1
+name = my_str_cg, node->name = my_str_ak
+name = my_str_cg, node->name = num2
 token = 26
 ParseData name = .section
 token = 19
 ParseData name = .LC3
 name2 = .LC3
+name5 = .LC3
 token = 17
 ParseData name = .string
 token = 14
@@ -221,6 +282,7 @@ ParseData name = .size
 token = 19
 ParseData name = my_str_cg
 name2 = my_str_cg
+name3 = my_str_cg
 token = 12
 ParseData name = .long
 token = 26
@@ -228,49 +290,64 @@ ParseData name = .section
 token = 19
 ParseData name = .LC4
 name2 = .LC4
+name5 = .LC4
 token = 17
 ParseData name = .string
 token = 19
 ParseData name = .LC5
 name2 = .LC5
+name5 = .LC5
 token = 17
 ParseData name = .string
 token = 19
 ParseData name = .LC6
 name2 = .LC6
+name5 = .LC6
 token = 17
 ParseData name = .string
 token = 19
 ParseData name = .LC7
 name2 = .LC7
+name5 = .LC7
 token = 17
 ParseData name = .string
 token = 19
 ParseData name = .LC8
 name2 = .LC8
+name5 = .LC8
 token = 17
 ParseData name = .string
 token = 16
 ParseData name = .text
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = main
-name2 = main
+name = main, node->name = ch4
+name = main, node->name = str
+name = main, node->name = num33
+name = main, node->name = num34
+name = main, node->name = num13
+name = main, node->name = num11
+name = main, node->name = num12
+name = main, node->name = ch1
+name = main, node->name = ch2
+name = main, node->name = num1
+name = main, node->name = my_str_ak
+name = main, node->name = num2
+name = main, node->name = my_str_cg
 token = 28
 ParseData name = .type
 token = 19
 ParseData name = main
 name2 = main
+name4 = main
 token = 19
 ParseData name = .LFB0
 name2 = .LFB0
+name5 = .LFB0
 token = 19
 ParseData name = .cfi_startproc
-name2 = .cfi_startproc
 token = 19
 ParseData name = leal
-name2 = leal
 token = 1
 ParseData name = 4
 token = 9
@@ -285,7 +362,6 @@ token = 20
 ParseData name = %ecx
 token = 19
 ParseData name = .cfi_def_cfa
-name2 = .cfi_def_cfa
 token = 1
 ParseData name = 1
 token = 7
@@ -294,7 +370,6 @@ token = 1
 ParseData name = 0
 token = 19
 ParseData name = andl
-name2 = andl
 token = 21
 ParseData name = $-16
 token = 7
@@ -303,7 +378,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 1
 ParseData name = -4
 token = 9
@@ -314,12 +388,10 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %esp
 token = 7
@@ -328,94 +400,74 @@ token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = .cfi_escape
-name2 = .cfi_escape
 token = 19
 ParseData name = 0x10
-name2 = 0x10
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x5
-name2 = 0x5
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x2
-name2 = 0x2
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x75
-name2 = 0x75
 token = 7
 ParseData name = ,
 token = 1
 ParseData name = 0
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %edi
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %ecx
 token = 19
 ParseData name = .cfi_escape
-name2 = .cfi_escape
 token = 19
 ParseData name = 0xf
-name2 = 0xf
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x3
-name2 = 0x3
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x75
-name2 = 0x75
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x78
-name2 = 0x78
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x6
-name2 = 0x6
 token = 19
 ParseData name = .cfi_escape
-name2 = .cfi_escape
 token = 19
 ParseData name = 0x10
-name2 = 0x10
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x7
-name2 = 0x7
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x2
-name2 = 0x2
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x75
-name2 = 0x75
 token = 7
 ParseData name = ,
 token = 19
 ParseData name = 0x7c
-name2 = 0x7c
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $1072
 token = 7
@@ -424,7 +476,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $8
 token = 7
@@ -433,19 +484,30 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 21
 ParseData name = $9
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 21
 ParseData name = $5
 token = 32
 ParseData name = call
+name = sum, node->name = ch4
+name = sum, node->name = str
+name = sum, node->name = num33
+name = sum, node->name = num34
+name = sum, node->name = num13
+name = sum, node->name = num11
+name = sum, node->name = num12
+name = sum, node->name = ch1
+name = sum, node->name = ch2
+name = sum, node->name = num1
+name = sum, node->name = my_str_ak
+name = sum, node->name = num2
+name = sum, node->name = my_str_cg
+name = sum, node->name = main
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -454,7 +516,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %eax
 token = 7
@@ -469,7 +530,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movb
-name2 = movb
 token = 21
 ParseData name = $68
 token = 7
@@ -484,17 +544,14 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = num1
-name2 = num1
 token = 7
 ParseData name = ,
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $8
 token = 7
@@ -503,20 +560,31 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 19
 ParseData name = $.LC4
-name2 = $.LC4
 token = 32
 ParseData name = call
+name = printf, node->name = ch4
+name = printf, node->name = str
+name = printf, node->name = num33
+name = printf, node->name = num34
+name = printf, node->name = num13
+name = printf, node->name = num11
+name = printf, node->name = num12
+name = printf, node->name = ch1
+name = printf, node->name = ch2
+name = printf, node->name = num1
+name = printf, node->name = my_str_ak
+name = printf, node->name = num2
+name = printf, node->name = my_str_cg
+name = printf, node->name = main
+name = printf, node->name = sum
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -525,17 +593,14 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = my_str_cg
-name2 = my_str_cg
 token = 7
 ParseData name = ,
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $12
 token = 7
@@ -544,14 +609,12 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 32
 ParseData name = call
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -560,17 +623,14 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = my_str_ak
-name2 = my_str_ak
 token = 7
 ParseData name = ,
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $12
 token = 7
@@ -579,14 +639,12 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 32
 ParseData name = call
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -595,10 +653,8 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = $.LC5
-name2 = $.LC5
 token = 7
 ParseData name = ,
 token = 1
@@ -611,7 +667,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $12
 token = 7
@@ -620,7 +675,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 1
 ParseData name = -28
 token = 9
@@ -631,9 +685,24 @@ token = 10
 ParseData name = )
 token = 32
 ParseData name = call
+name = strlen, node->name = ch4
+name = strlen, node->name = str
+name = strlen, node->name = num33
+name = strlen, node->name = num34
+name = strlen, node->name = num13
+name = strlen, node->name = num11
+name = strlen, node->name = num12
+name = strlen, node->name = ch1
+name = strlen, node->name = ch2
+name = strlen, node->name = num1
+name = strlen, node->name = my_str_ak
+name = strlen, node->name = num2
+name = strlen, node->name = my_str_cg
+name = strlen, node->name = main
+name = strlen, node->name = sum
+name = strlen, node->name = printf
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -642,7 +711,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %eax
 token = 7
@@ -657,17 +725,14 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = my_str_cg
-name2 = my_str_cg
 token = 7
 ParseData name = ,
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $12
 token = 7
@@ -676,14 +741,12 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 32
 ParseData name = call
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -692,7 +755,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %eax
 token = 7
@@ -707,17 +769,14 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movl
-name2 = movl
 token = 19
 ParseData name = my_str_cg
-name2 = my_str_cg
 token = 7
 ParseData name = ,
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %eax
 token = 7
@@ -732,7 +791,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $0
 token = 7
@@ -747,16 +805,14 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = jmp
-name2 = jmp
 token = 19
 ParseData name = .L2
-name2 = .L2
 token = 19
 ParseData name = .L3
 name2 = .L3
+name5 = .L3
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -12
 token = 9
@@ -771,7 +827,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -28
 token = 9
@@ -786,7 +841,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = addl
-name2 = addl
 token = 20
 ParseData name = %edx
 token = 7
@@ -795,7 +849,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movzbl
-name2 = movzbl
 token = 9
 ParseData name = (
 token = 20
@@ -808,7 +861,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movb
-name2 = movb
 token = 20
 ParseData name = %al
 token = 7
@@ -823,7 +875,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movsbl
-name2 = movsbl
 token = 1
 ParseData name = -41
 token = 9
@@ -838,7 +889,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $8
 token = 7
@@ -847,20 +897,16 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 19
 ParseData name = $.LC6
-name2 = $.LC6
 token = 32
 ParseData name = call
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -869,7 +915,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $1
 token = 7
@@ -885,9 +930,9 @@ ParseData name = )
 token = 19
 ParseData name = .L2
 name2 = .L2
+name5 = .L2
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -12
 token = 9
@@ -902,7 +947,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = cmpl
-name2 = cmpl
 token = 1
 ParseData name = -32
 token = 9
@@ -917,13 +961,10 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = jl
-name2 = jl
 token = 19
 ParseData name = .L3
-name2 = .L3
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $12
 token = 7
@@ -932,15 +973,29 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 19
 ParseData name = $.LC7
-name2 = $.LC7
 token = 32
 ParseData name = call
+name = puts, node->name = ch4
+name = puts, node->name = str
+name = puts, node->name = num33
+name = puts, node->name = num34
+name = puts, node->name = num13
+name = puts, node->name = num11
+name = puts, node->name = num12
+name = puts, node->name = ch1
+name = puts, node->name = ch2
+name = puts, node->name = num1
+name = puts, node->name = my_str_ak
+name = puts, node->name = num2
+name = puts, node->name = my_str_cg
+name = puts, node->name = main
+name = puts, node->name = sum
+name = puts, node->name = printf
+name = puts, node->name = strlen
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -949,7 +1004,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $0
 token = 7
@@ -964,7 +1018,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = leal
-name2 = leal
 token = 1
 ParseData name = -1068
 token = 9
@@ -979,7 +1032,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $0
 token = 7
@@ -988,7 +1040,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $255
 token = 7
@@ -997,7 +1048,6 @@ token = 20
 ParseData name = %ecx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1006,13 +1056,10 @@ token = 20
 ParseData name = %edi
 token = 19
 ParseData name = rep
-name2 = rep
 token = 19
 ParseData name = stosl
-name2 = stosl
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $0
 token = 7
@@ -1028,9 +1075,9 @@ ParseData name = )
 token = 19
 ParseData name = .L6
 name2 = .L6
+name5 = .L6
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -16
 token = 9
@@ -1045,7 +1092,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -28
 token = 9
@@ -1060,7 +1106,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = addl
-name2 = addl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1069,7 +1114,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movzbl
-name2 = movzbl
 token = 9
 ParseData name = (
 token = 20
@@ -1082,7 +1126,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = testb
-name2 = testb
 token = 20
 ParseData name = %al
 token = 7
@@ -1091,13 +1134,10 @@ token = 20
 ParseData name = %al
 token = 19
 ParseData name = je
-name2 = je
 token = 19
 ParseData name = .L9
-name2 = .L9
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -16
 token = 9
@@ -1112,7 +1152,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -28
 token = 9
@@ -1127,7 +1166,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = addl
-name2 = addl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1136,7 +1174,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movzbl
-name2 = movzbl
 token = 9
 ParseData name = (
 token = 20
@@ -1149,7 +1186,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movsbl
-name2 = movsbl
 token = 20
 ParseData name = %al
 token = 7
@@ -1158,7 +1194,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -16
 token = 9
@@ -1173,7 +1208,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1196,7 +1230,6 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -16
 token = 9
@@ -1211,7 +1244,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = -28
 token = 9
@@ -1226,7 +1258,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = addl
-name2 = addl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1235,7 +1266,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movzbl
-name2 = movzbl
 token = 9
 ParseData name = (
 token = 20
@@ -1248,7 +1278,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = movsbl
-name2 = movsbl
 token = 20
 ParseData name = %al
 token = 7
@@ -1257,7 +1286,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = subl
-name2 = subl
 token = 21
 ParseData name = $4
 token = 7
@@ -1266,12 +1294,10 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %eax
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 1
 ParseData name = -16
 token = 9
@@ -1282,15 +1308,12 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 19
 ParseData name = $.LC8
-name2 = $.LC8
 token = 32
 ParseData name = call
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $16
 token = 7
@@ -1299,7 +1322,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = addl
-name2 = addl
 token = 21
 ParseData name = $1
 token = 7
@@ -1314,19 +1336,16 @@ token = 10
 ParseData name = )
 token = 19
 ParseData name = jmp
-name2 = jmp
 token = 19
 ParseData name = .L6
-name2 = .L6
 token = 19
 ParseData name = .L9
 name2 = .L9
+name5 = .L9
 token = 19
 ParseData name = nop
-name2 = nop
 token = 19
 ParseData name = movl
-name2 = movl
 token = 21
 ParseData name = $0
 token = 7
@@ -1335,7 +1354,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = leal
-name2 = leal
 token = 1
 ParseData name = -8
 token = 9
@@ -1350,17 +1368,14 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = popl
-name2 = popl
 token = 20
 ParseData name = %ecx
 token = 19
 ParseData name = .cfi_restore
-name2 = .cfi_restore
 token = 1
 ParseData name = 1
 token = 19
 ParseData name = .cfi_def_cfa
-name2 = .cfi_def_cfa
 token = 1
 ParseData name = 1
 token = 7
@@ -1369,27 +1384,22 @@ token = 1
 ParseData name = 0
 token = 19
 ParseData name = popl
-name2 = popl
 token = 20
 ParseData name = %edi
 token = 19
 ParseData name = .cfi_restore
-name2 = .cfi_restore
 token = 1
 ParseData name = 7
 token = 19
 ParseData name = popl
-name2 = popl
 token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = .cfi_restore
-name2 = .cfi_restore
 token = 1
 ParseData name = 5
 token = 19
 ParseData name = leal
-name2 = leal
 token = 1
 ParseData name = -4
 token = 9
@@ -1404,7 +1414,6 @@ token = 20
 ParseData name = %esp
 token = 19
 ParseData name = .cfi_def_cfa
-name2 = .cfi_def_cfa
 token = 1
 ParseData name = 4
 token = 7
@@ -1413,44 +1422,53 @@ token = 1
 ParseData name = 4
 token = 19
 ParseData name = ret
-name2 = ret
 token = 19
 ParseData name = .cfi_endproc
-name2 = .cfi_endproc
 token = 19
 ParseData name = .LFE0
 name2 = .LFE0
+name5 = .LFE0
 token = 29
 ParseData name = .size
 token = 15
 ParseData name = .globl
-token = 19
-ParseData name = sum
-name2 = sum
+name = sum, node->name = ch4
+name = sum, node->name = str
+name = sum, node->name = num33
+name = sum, node->name = num34
+name = sum, node->name = num13
+name = sum, node->name = num11
+name = sum, node->name = num12
+name = sum, node->name = ch1
+name = sum, node->name = ch2
+name = sum, node->name = num1
+name = sum, node->name = my_str_ak
+name = sum, node->name = num2
+name = sum, node->name = my_str_cg
+name = sum, node->name = main
+name = sum, node->name = sum
 token = 28
 ParseData name = .type
 token = 19
 ParseData name = sum
 name2 = sum
+name4 = sum
 token = 19
 ParseData name = .LFB1
 name2 = .LFB1
+name5 = .LFB1
 token = 19
 ParseData name = .cfi_startproc
-name2 = .cfi_startproc
 token = 19
 ParseData name = pushl
-name2 = pushl
 token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = .cfi_def_cfa_offset
-name2 = .cfi_def_cfa_offset
 token = 1
 ParseData name = 8
 token = 19
 ParseData name = .cfi_offset
-name2 = .cfi_offset
 token = 1
 ParseData name = 5
 token = 7
@@ -1459,7 +1477,6 @@ token = 1
 ParseData name = -8
 token = 19
 ParseData name = movl
-name2 = movl
 token = 20
 ParseData name = %esp
 token = 7
@@ -1468,12 +1485,10 @@ token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = .cfi_def_cfa_register
-name2 = .cfi_def_cfa_register
 token = 1
 ParseData name = 5
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = 8
 token = 9
@@ -1488,7 +1503,6 @@ token = 20
 ParseData name = %edx
 token = 19
 ParseData name = movl
-name2 = movl
 token = 1
 ParseData name = 12
 token = 9
@@ -1503,7 +1517,6 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = addl
-name2 = addl
 token = 20
 ParseData name = %edx
 token = 7
@@ -1512,17 +1525,14 @@ token = 20
 ParseData name = %eax
 token = 19
 ParseData name = popl
-name2 = popl
 token = 20
 ParseData name = %ebp
 token = 19
 ParseData name = .cfi_restore
-name2 = .cfi_restore
 token = 1
 ParseData name = 5
 token = 19
 ParseData name = .cfi_def_cfa
-name2 = .cfi_def_cfa
 token = 1
 ParseData name = 4
 token = 7
@@ -1531,13 +1541,12 @@ token = 1
 ParseData name = 4
 token = 19
 ParseData name = ret
-name2 = ret
 token = 19
 ParseData name = .cfi_endproc
-name2 = .cfi_endproc
 token = 19
 ParseData name = .LFE1
 name2 = .LFE1
+name5 = .LFE1
 token = 29
 ParseData name = .size
 token = 31
@@ -1553,11 +1562,11 @@ ParseData name = .size
 token = 19
 ParseData name = ch44.2502
 name2 = ch44.2502
+name3 = ch44.2502
 token = 13
 ParseData name = .byte
 token = 19
 ParseData name = .ident
-name2 = .ident
 token = 6
 ParseData name = "
 token = 3
@@ -1578,69 +1587,769 @@ token = 24
 ParseData name = @progbits
 token = -1
 处理数据结束
+dataEntryArrayIndex = 32
+name = ch7, node->name = ch4
+name = ch7, node->name = str
+name = ch7, node->name = num33
+name = ch7, node->name = num34
+name = ch7, node->name = num13
+name = ch7, node->name = num11
+name = ch7, node->name = num12
+name = ch7, node->name = ch1
+name = ch7, node->name = ch2
+name = ch7, node->name = num1
+name = ch7, node->name = my_str_ak
+name = ch7, node->name = num2
+name = ch7, node->name = my_str_cg
+name = ch7, node->name = main
+name = ch7, node->name = sum
+name = ch7, node->name = printf
+name = ch7, node->name = strlen
+name = ch7, node->name = puts
+2241 in calculateDataEntryOffsetname = ch4, node->name = ch4
+2241 in calculateDataEntryOffsetname = .LC0, node->name = ch4
+name = .LC0, node->name = str
+name = .LC0, node->name = num33
+name = .LC0, node->name = num34
+name = .LC0, node->name = num13
+name = .LC0, node->name = num11
+name = .LC0, node->name = num12
+name = .LC0, node->name = ch1
+name = .LC0, node->name = ch2
+name = .LC0, node->name = num1
+name = .LC0, node->name = my_str_ak
+name = .LC0, node->name = num2
+name = .LC0, node->name = my_str_cg
+name = .LC0, node->name = main
+name = .LC0, node->name = sum
+name = .LC0, node->name = printf
+name = .LC0, node->name = strlen
+name = .LC0, node->name = puts
+name = .LC1, node->name = ch4
+name = .LC1, node->name = str
+name = .LC1, node->name = num33
+name = .LC1, node->name = num34
+name = .LC1, node->name = num13
+name = .LC1, node->name = num11
+name = .LC1, node->name = num12
+name = .LC1, node->name = ch1
+name = .LC1, node->name = ch2
+name = .LC1, node->name = num1
+name = .LC1, node->name = my_str_ak
+name = .LC1, node->name = num2
+name = .LC1, node->name = my_str_cg
+name = .LC1, node->name = main
+name = .LC1, node->name = sum
+name = .LC1, node->name = printf
+name = .LC1, node->name = strlen
+name = .LC1, node->name = puts
+name = str, node->name = ch4
+name = str, node->name = str
+name = num33, node->name = ch4
+name = num33, node->name = str
+name = num33, node->name = num33
+2241 in calculateDataEntryOffsetname = num34, node->name = ch4
+name = num34, node->name = str
+name = num34, node->name = num33
+name = num34, node->name = num34
+2241 in calculateDataEntryOffsetname = num13, node->name = ch4
+name = num13, node->name = str
+name = num13, node->name = num33
+name = num13, node->name = num34
+name = num13, node->name = num13
+name = num11, node->name = ch4
+name = num11, node->name = str
+name = num11, node->name = num33
+name = num11, node->name = num34
+name = num11, node->name = num13
+name = num11, node->name = num11
+name = num12, node->name = ch4
+name = num12, node->name = str
+name = num12, node->name = num33
+name = num12, node->name = num34
+name = num12, node->name = num13
+name = num12, node->name = num11
+name = num12, node->name = num12
+name = ch1, node->name = ch4
+name = ch1, node->name = str
+name = ch1, node->name = num33
+name = ch1, node->name = num34
+name = ch1, node->name = num13
+name = ch1, node->name = num11
+name = ch1, node->name = num12
+name = ch1, node->name = ch1
+name = ch2, node->name = ch4
+name = ch2, node->name = str
+name = ch2, node->name = num33
+name = ch2, node->name = num34
+name = ch2, node->name = num13
+name = ch2, node->name = num11
+name = ch2, node->name = num12
+name = ch2, node->name = ch1
+name = ch2, node->name = ch2
+name = num1, node->name = ch4
+name = num1, node->name = str
+name = num1, node->name = num33
+name = num1, node->name = num34
+name = num1, node->name = num13
+name = num1, node->name = num11
+name = num1, node->name = num12
+name = num1, node->name = ch1
+name = num1, node->name = ch2
+name = num1, node->name = num1
+name = .LC2, node->name = ch4
+name = .LC2, node->name = str
+name = .LC2, node->name = num33
+name = .LC2, node->name = num34
+name = .LC2, node->name = num13
+name = .LC2, node->name = num11
+name = .LC2, node->name = num12
+name = .LC2, node->name = ch1
+name = .LC2, node->name = ch2
+name = .LC2, node->name = num1
+name = .LC2, node->name = my_str_ak
+name = .LC2, node->name = num2
+name = .LC2, node->name = my_str_cg
+name = .LC2, node->name = main
+name = .LC2, node->name = sum
+name = .LC2, node->name = printf
+name = .LC2, node->name = strlen
+name = .LC2, node->name = puts
+name = my_str_ak, node->name = ch4
+name = my_str_ak, node->name = str
+name = my_str_ak, node->name = num33
+name = my_str_ak, node->name = num34
+name = my_str_ak, node->name = num13
+name = my_str_ak, node->name = num11
+name = my_str_ak, node->name = num12
+name = my_str_ak, node->name = ch1
+name = my_str_ak, node->name = ch2
+name = my_str_ak, node->name = num1
+name = my_str_ak, node->name = my_str_ak
+name = num2, node->name = ch4
+name = num2, node->name = str
+name = num2, node->name = num33
+name = num2, node->name = num34
+name = num2, node->name = num13
+name = num2, node->name = num11
+name = num2, node->name = num12
+name = num2, node->name = ch1
+name = num2, node->name = ch2
+name = num2, node->name = num1
+name = num2, node->name = my_str_ak
+name = num2, node->name = num2
+name = .LC3, node->name = ch4
+name = .LC3, node->name = str
+name = .LC3, node->name = num33
+name = .LC3, node->name = num34
+name = .LC3, node->name = num13
+name = .LC3, node->name = num11
+name = .LC3, node->name = num12
+name = .LC3, node->name = ch1
+name = .LC3, node->name = ch2
+name = .LC3, node->name = num1
+name = .LC3, node->name = my_str_ak
+name = .LC3, node->name = num2
+name = .LC3, node->name = my_str_cg
+name = .LC3, node->name = main
+name = .LC3, node->name = sum
+name = .LC3, node->name = printf
+name = .LC3, node->name = strlen
+name = .LC3, node->name = puts
+name = my_str_cg, node->name = ch4
+name = my_str_cg, node->name = str
+name = my_str_cg, node->name = num33
+name = my_str_cg, node->name = num34
+name = my_str_cg, node->name = num13
+name = my_str_cg, node->name = num11
+name = my_str_cg, node->name = num12
+name = my_str_cg, node->name = ch1
+name = my_str_cg, node->name = ch2
+name = my_str_cg, node->name = num1
+name = my_str_cg, node->name = my_str_ak
+name = my_str_cg, node->name = num2
+name = my_str_cg, node->name = my_str_cg
+name = .LC4, node->name = ch4
+name = .LC4, node->name = str
+name = .LC4, node->name = num33
+name = .LC4, node->name = num34
+name = .LC4, node->name = num13
+name = .LC4, node->name = num11
+name = .LC4, node->name = num12
+name = .LC4, node->name = ch1
+name = .LC4, node->name = ch2
+name = .LC4, node->name = num1
+name = .LC4, node->name = my_str_ak
+name = .LC4, node->name = num2
+name = .LC4, node->name = my_str_cg
+name = .LC4, node->name = main
+name = .LC4, node->name = sum
+name = .LC4, node->name = printf
+name = .LC4, node->name = strlen
+name = .LC4, node->name = puts
+name = .LC5, node->name = ch4
+name = .LC5, node->name = str
+name = .LC5, node->name = num33
+name = .LC5, node->name = num34
+name = .LC5, node->name = num13
+name = .LC5, node->name = num11
+name = .LC5, node->name = num12
+name = .LC5, node->name = ch1
+name = .LC5, node->name = ch2
+name = .LC5, node->name = num1
+name = .LC5, node->name = my_str_ak
+name = .LC5, node->name = num2
+name = .LC5, node->name = my_str_cg
+name = .LC5, node->name = main
+name = .LC5, node->name = sum
+name = .LC5, node->name = printf
+name = .LC5, node->name = strlen
+name = .LC5, node->name = puts
+name = .LC6, node->name = ch4
+name = .LC6, node->name = str
+name = .LC6, node->name = num33
+name = .LC6, node->name = num34
+name = .LC6, node->name = num13
+name = .LC6, node->name = num11
+name = .LC6, node->name = num12
+name = .LC6, node->name = ch1
+name = .LC6, node->name = ch2
+name = .LC6, node->name = num1
+name = .LC6, node->name = my_str_ak
+name = .LC6, node->name = num2
+name = .LC6, node->name = my_str_cg
+name = .LC6, node->name = main
+name = .LC6, node->name = sum
+name = .LC6, node->name = printf
+name = .LC6, node->name = strlen
+name = .LC6, node->name = puts
+name = .LC7, node->name = ch4
+name = .LC7, node->name = str
+name = .LC7, node->name = num33
+name = .LC7, node->name = num34
+name = .LC7, node->name = num13
+name = .LC7, node->name = num11
+name = .LC7, node->name = num12
+name = .LC7, node->name = ch1
+name = .LC7, node->name = ch2
+name = .LC7, node->name = num1
+name = .LC7, node->name = my_str_ak
+name = .LC7, node->name = num2
+name = .LC7, node->name = my_str_cg
+name = .LC7, node->name = main
+name = .LC7, node->name = sum
+name = .LC7, node->name = printf
+name = .LC7, node->name = strlen
+name = .LC7, node->name = puts
+name = .LC8, node->name = ch4
+name = .LC8, node->name = str
+name = .LC8, node->name = num33
+name = .LC8, node->name = num34
+name = .LC8, node->name = num13
+name = .LC8, node->name = num11
+name = .LC8, node->name = num12
+name = .LC8, node->name = ch1
+name = .LC8, node->name = ch2
+name = .LC8, node->name = num1
+name = .LC8, node->name = my_str_ak
+name = .LC8, node->name = num2
+name = .LC8, node->name = my_str_cg
+name = .LC8, node->name = main
+name = .LC8, node->name = sum
+name = .LC8, node->name = printf
+name = .LC8, node->name = strlen
+name = .LC8, node->name = puts
+name = main, node->name = ch4
+name = main, node->name = str
+name = main, node->name = num33
+name = main, node->name = num34
+name = main, node->name = num13
+name = main, node->name = num11
+name = main, node->name = num12
+name = main, node->name = ch1
+name = main, node->name = ch2
+name = main, node->name = num1
+name = main, node->name = my_str_ak
+name = main, node->name = num2
+name = main, node->name = my_str_cg
+name = main, node->name = main
+2241 in calculateDataEntryOffsetname = sum, node->name = ch4
+name = sum, node->name = str
+name = sum, node->name = num33
+name = sum, node->name = num34
+name = sum, node->name = num13
+name = sum, node->name = num11
+name = sum, node->name = num12
+name = sum, node->name = ch1
+name = sum, node->name = ch2
+name = sum, node->name = num1
+name = sum, node->name = my_str_ak
+name = sum, node->name = num2
+name = sum, node->name = my_str_cg
+name = sum, node->name = main
+name = sum, node->name = sum
+2241 in calculateDataEntryOffsetname = printf, node->name = ch4
+name = printf, node->name = str
+name = printf, node->name = num33
+name = printf, node->name = num34
+name = printf, node->name = num13
+name = printf, node->name = num11
+name = printf, node->name = num12
+name = printf, node->name = ch1
+name = printf, node->name = ch2
+name = printf, node->name = num1
+name = printf, node->name = my_str_ak
+name = printf, node->name = num2
+name = printf, node->name = my_str_cg
+name = printf, node->name = main
+name = printf, node->name = sum
+name = printf, node->name = printf
+2241 in calculateDataEntryOffsetname = strlen, node->name = ch4
+name = strlen, node->name = str
+name = strlen, node->name = num33
+name = strlen, node->name = num34
+name = strlen, node->name = num13
+name = strlen, node->name = num11
+name = strlen, node->name = num12
+name = strlen, node->name = ch1
+name = strlen, node->name = ch2
+name = strlen, node->name = num1
+name = strlen, node->name = my_str_ak
+name = strlen, node->name = num2
+name = strlen, node->name = my_str_cg
+name = strlen, node->name = main
+name = strlen, node->name = sum
+name = strlen, node->name = printf
+name = strlen, node->name = strlen
+2241 in calculateDataEntryOffsetname = puts, node->name = ch4
+name = puts, node->name = str
+name = puts, node->name = num33
+name = puts, node->name = num34
+name = puts, node->name = num13
+name = puts, node->name = num11
+name = puts, node->name = num12
+name = puts, node->name = ch1
+name = puts, node->name = ch2
+name = puts, node->name = num1
+name = puts, node->name = my_str_ak
+name = puts, node->name = num2
+name = puts, node->name = my_str_cg
+name = puts, node->name = main
+name = puts, node->name = sum
+name = puts, node->name = printf
+name = puts, node->name = strlen
+name = puts, node->name = puts
+2241 in calculateDataEntryOffsetname = num66.2504, node->name = ch4
+name = num66.2504, node->name = str
+name = num66.2504, node->name = num33
+name = num66.2504, node->name = num34
+name = num66.2504, node->name = num13
+name = num66.2504, node->name = num11
+name = num66.2504, node->name = num12
+name = num66.2504, node->name = ch1
+name = num66.2504, node->name = ch2
+name = num66.2504, node->name = num1
+name = num66.2504, node->name = my_str_ak
+name = num66.2504, node->name = num2
+name = num66.2504, node->name = my_str_cg
+name = num66.2504, node->name = main
+name = num66.2504, node->name = sum
+name = num66.2504, node->name = printf
+name = num66.2504, node->name = strlen
+name = num66.2504, node->name = puts
+2241 in calculateDataEntryOffsetname = ch55.2503, node->name = ch4
+name = ch55.2503, node->name = str
+name = ch55.2503, node->name = num33
+name = ch55.2503, node->name = num34
+name = ch55.2503, node->name = num13
+name = ch55.2503, node->name = num11
+name = ch55.2503, node->name = num12
+name = ch55.2503, node->name = ch1
+name = ch55.2503, node->name = ch2
+name = ch55.2503, node->name = num1
+name = ch55.2503, node->name = my_str_ak
+name = ch55.2503, node->name = num2
+name = ch55.2503, node->name = my_str_cg
+name = ch55.2503, node->name = main
+name = ch55.2503, node->name = sum
+name = ch55.2503, node->name = printf
+name = ch55.2503, node->name = strlen
+name = ch55.2503, node->name = puts
+2241 in calculateDataEntryOffsetname = ch44.2502, node->name = ch4
+name = ch44.2502, node->name = str
+name = ch44.2502, node->name = num33
+name = ch44.2502, node->name = num34
+name = ch44.2502, node->name = num13
+name = ch44.2502, node->name = num11
+name = ch44.2502, node->name = num12
+name = ch44.2502, node->name = ch1
+name = ch44.2502, node->name = ch2
+name = ch44.2502, node->name = num1
+name = ch44.2502, node->name = my_str_ak
+name = ch44.2502, node->name = num2
+name = ch44.2502, node->name = my_str_cg
+name = ch44.2502, node->name = main
+name = ch44.2502, node->name = sum
+name = ch44.2502, node->name = printf
+name = ch44.2502, node->name = strlen
+name = ch44.2502, node->name = puts
+name = , node->name = ch4
+name = , node->name = str
+name = , node->name = num33
+name = , node->name = num34
+name = , node->name = num13
+name = , node->name = num11
+name = , node->name = num12
+name = , node->name = ch1
+name = , node->name = ch2
+name = , node->name = num1
+name = , node->name = my_str_ak
+name = , node->name = num2
+name = , node->name = my_str_cg
+name = , node->name = main
+name = , node->name = sum
+name = , node->name = printf
+name = , node->name = strlen
+name = , node->name = puts
+2241 in calculateDataEntryOffsetname = ch7, node->name = ch4
+name = ch7, node->name = str
+name = ch7, node->name = num33
+name = ch7, node->name = num34
+name = ch7, node->name = num13
+name = ch7, node->name = num11
+name = ch7, node->name = num12
+name = ch7, node->name = ch1
+name = ch7, node->name = ch2
+name = ch7, node->name = num1
+name = ch7, node->name = my_str_ak
+name = ch7, node->name = num2
+name = ch7, node->name = my_str_cg
+name = ch7, node->name = main
+name = ch7, node->name = sum
+name = ch7, node->name = printf
+name = ch7, node->name = strlen
+name = ch7, node->name = puts
+name = ch4, node->name = ch4
+name = str, node->name = ch4
+name = str, node->name = str
+name = num33, node->name = ch4
+name = num33, node->name = str
+name = num33, node->name = num33
+name = num34, node->name = ch4
+name = num34, node->name = str
+name = num34, node->name = num33
+name = num34, node->name = num34
+name = num13, node->name = ch4
+name = num13, node->name = str
+name = num13, node->name = num33
+name = num13, node->name = num34
+name = num13, node->name = num13
+name = num11, node->name = ch4
+name = num11, node->name = str
+name = num11, node->name = num33
+name = num11, node->name = num34
+name = num11, node->name = num13
+name = num11, node->name = num11
+name = num12, node->name = ch4
+name = num12, node->name = str
+name = num12, node->name = num33
+name = num12, node->name = num34
+name = num12, node->name = num13
+name = num12, node->name = num11
+name = num12, node->name = num12
+name = ch1, node->name = ch4
+name = ch1, node->name = str
+name = ch1, node->name = num33
+name = ch1, node->name = num34
+name = ch1, node->name = num13
+name = ch1, node->name = num11
+name = ch1, node->name = num12
+name = ch1, node->name = ch1
+name = ch2, node->name = ch4
+name = ch2, node->name = str
+name = ch2, node->name = num33
+name = ch2, node->name = num34
+name = ch2, node->name = num13
+name = ch2, node->name = num11
+name = ch2, node->name = num12
+name = ch2, node->name = ch1
+name = ch2, node->name = ch2
+name = num1, node->name = ch4
+name = num1, node->name = str
+name = num1, node->name = num33
+name = num1, node->name = num34
+name = num1, node->name = num13
+name = num1, node->name = num11
+name = num1, node->name = num12
+name = num1, node->name = ch1
+name = num1, node->name = ch2
+name = num1, node->name = num1
+name = my_str_ak, node->name = ch4
+name = my_str_ak, node->name = str
+name = my_str_ak, node->name = num33
+name = my_str_ak, node->name = num34
+name = my_str_ak, node->name = num13
+name = my_str_ak, node->name = num11
+name = my_str_ak, node->name = num12
+name = my_str_ak, node->name = ch1
+name = my_str_ak, node->name = ch2
+name = my_str_ak, node->name = num1
+name = my_str_ak, node->name = my_str_ak
+name = num2, node->name = ch4
+name = num2, node->name = str
+name = num2, node->name = num33
+name = num2, node->name = num34
+name = num2, node->name = num13
+name = num2, node->name = num11
+name = num2, node->name = num12
+name = num2, node->name = ch1
+name = num2, node->name = ch2
+name = num2, node->name = num1
+name = num2, node->name = my_str_ak
+name = num2, node->name = num2
+name = my_str_cg, node->name = ch4
+name = my_str_cg, node->name = str
+name = my_str_cg, node->name = num33
+name = my_str_cg, node->name = num34
+name = my_str_cg, node->name = num13
+name = my_str_cg, node->name = num11
+name = my_str_cg, node->name = num12
+name = my_str_cg, node->name = ch1
+name = my_str_cg, node->name = ch2
+name = my_str_cg, node->name = num1
+name = my_str_cg, node->name = my_str_ak
+name = my_str_cg, node->name = num2
+name = my_str_cg, node->name = my_str_cg
+name = main, node->name = ch4
+name = main, node->name = str
+name = main, node->name = num33
+name = main, node->name = num34
+name = main, node->name = num13
+name = main, node->name = num11
+name = main, node->name = num12
+name = main, node->name = ch1
+name = main, node->name = ch2
+name = main, node->name = num1
+name = main, node->name = my_str_ak
+name = main, node->name = num2
+name = main, node->name = my_str_cg
+name = main, node->name = main
+name = sum, node->name = ch4
+name = sum, node->name = str
+name = sum, node->name = num33
+name = sum, node->name = num34
+name = sum, node->name = num13
+name = sum, node->name = num11
+name = sum, node->name = num12
+name = sum, node->name = ch1
+name = sum, node->name = ch2
+name = sum, node->name = num1
+name = sum, node->name = my_str_ak
+name = sum, node->name = num2
+name = sum, node->name = my_str_cg
+name = sum, node->name = main
+name = sum, node->name = sum
+name = printf, node->name = ch4
+name = printf, node->name = str
+name = printf, node->name = num33
+name = printf, node->name = num34
+name = printf, node->name = num13
+name = printf, node->name = num11
+name = printf, node->name = num12
+name = printf, node->name = ch1
+name = printf, node->name = ch2
+name = printf, node->name = num1
+name = printf, node->name = my_str_ak
+name = printf, node->name = num2
+name = printf, node->name = my_str_cg
+name = printf, node->name = main
+name = printf, node->name = sum
+name = printf, node->name = printf
+name = strlen, node->name = ch4
+name = strlen, node->name = str
+name = strlen, node->name = num33
+name = strlen, node->name = num34
+name = strlen, node->name = num13
+name = strlen, node->name = num11
+name = strlen, node->name = num12
+name = strlen, node->name = ch1
+name = strlen, node->name = ch2
+name = strlen, node->name = num1
+name = strlen, node->name = my_str_ak
+name = strlen, node->name = num2
+name = strlen, node->name = my_str_cg
+name = strlen, node->name = main
+name = strlen, node->name = sum
+name = strlen, node->name = printf
+name = strlen, node->name = strlen
+name = puts, node->name = ch4
+name = puts, node->name = str
+name = puts, node->name = num33
+name = puts, node->name = num34
+name = puts, node->name = num13
+name = puts, node->name = num11
+name = puts, node->name = num12
+name = puts, node->name = ch1
+name = puts, node->name = ch2
+name = puts, node->name = num1
+name = puts, node->name = my_str_ak
+name = puts, node->name = num2
+name = puts, node->name = my_str_cg
+name = puts, node->name = main
+name = puts, node->name = sum
+name = puts, node->name = printf
+name = puts, node->name = strlen
+name = puts, node->name = puts
+name = num66.2504, node->name = ch4
+name = num66.2504, node->name = str
+name = num66.2504, node->name = num33
+name = num66.2504, node->name = num34
+name = num66.2504, node->name = num13
+name = num66.2504, node->name = num11
+name = num66.2504, node->name = num12
+name = num66.2504, node->name = ch1
+name = num66.2504, node->name = ch2
+name = num66.2504, node->name = num1
+name = num66.2504, node->name = my_str_ak
+name = num66.2504, node->name = num2
+name = num66.2504, node->name = my_str_cg
+name = num66.2504, node->name = main
+name = num66.2504, node->name = sum
+name = num66.2504, node->name = printf
+name = num66.2504, node->name = strlen
+name = num66.2504, node->name = puts
+name = ch55.2503, node->name = ch4
+name = ch55.2503, node->name = str
+name = ch55.2503, node->name = num33
+name = ch55.2503, node->name = num34
+name = ch55.2503, node->name = num13
+name = ch55.2503, node->name = num11
+name = ch55.2503, node->name = num12
+name = ch55.2503, node->name = ch1
+name = ch55.2503, node->name = ch2
+name = ch55.2503, node->name = num1
+name = ch55.2503, node->name = my_str_ak
+name = ch55.2503, node->name = num2
+name = ch55.2503, node->name = my_str_cg
+name = ch55.2503, node->name = main
+name = ch55.2503, node->name = sum
+name = ch55.2503, node->name = printf
+name = ch55.2503, node->name = strlen
+name = ch55.2503, node->name = puts
+name = ch44.2502, node->name = ch4
+name = ch44.2502, node->name = str
+name = ch44.2502, node->name = num33
+name = ch44.2502, node->name = num34
+name = ch44.2502, node->name = num13
+name = ch44.2502, node->name = num11
+name = ch44.2502, node->name = num12
+name = ch44.2502, node->name = ch1
+name = ch44.2502, node->name = ch2
+name = ch44.2502, node->name = num1
+name = ch44.2502, node->name = my_str_ak
+name = ch44.2502, node->name = num2
+name = ch44.2502, node->name = my_str_cg
+name = ch44.2502, node->name = main
+name = ch44.2502, node->name = sum
+name = ch44.2502, node->name = printf
+name = ch44.2502, node->name = strlen
+name = ch44.2502, node->name = puts
+
+string in dataEntryArray start
+0---ch7
+1---ch4
+2---.LC0
+3---.LC1
+4---str
+5---num33
+6---num34
+7---num13
+8---num11
+9---num12
+10---ch1
+11---ch2
+12---num1
+13---.LC2
+14---my_str_ak
+15---num2
+16---.LC3
+17---my_str_cg
+18---.LC4
+19---.LC5
+20---.LC6
+21---.LC7
+22---.LC8
+23---main
+24---sum
+25---printf
+26---strlen
+27---puts
+28---num66.2504
+29---ch55.2503
+30---ch44.2502
+31---
+
+string in dataEntryArray end
 
 string in strtab start
-ch7
-ch4
+0---ch7
+1---ch4
+2---str
+3---num33
+4---num34
+5---num13
+6---num11
+7---num12
+8---ch1
+9---ch2
+10---num1
+11---my_str_ak
+12---num2
+13---my_str_cg
+14---main
+15---sum
+16---printf
+17---strlen
+18---puts
+19---num66.2504
+20---ch55.2503
+21---ch44.2502
 
-num33
-num34
+string in strtab end
 
+string in strtabList start
+0--ch7
+1--num66.2504
+2--ch55.2503
+3--ch44.2502
+4--ch4
+5--str
+6--num33
+7--num34
+8--num13
+9--num11
+10--num12
+11--ch1
+12--ch2
+13--num1
+14--my_str_ak
+15--num2
+16--my_str_cg
+17--main
+18--sum
+19--printf
+20--strlen
+21--puts
 
-
-
-
-
-
-
-
-main
-sum
-printf
-strlen
-puts
-sum
-num66.2504
-ch55.2503
-
-
-string in strtab start
-2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffset2094 in calculateDataEntryOffseterror section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
-error section 2235
+string in strtabList end
+error section 2457
+error section 2457
+error section 2457
+error section 2457
+error section 2457
+error section 2457
+error section 2457
+error section 2457
+error section 2457
 BuildELF is over
 Game over

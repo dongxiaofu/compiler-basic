@@ -344,6 +344,10 @@ typedef struct dataEntryValueNode{
 	struct dataEntryValueNode *next;
 } *DataEntryValueNode;
 
+enum BindType{
+	LOCAL = 1, GLOBAL
+};
+
 typedef struct dataEntry{
 	int symbolType;
 	int size;
@@ -355,13 +359,30 @@ typedef struct dataEntry{
 	DataEntryValueNode valPtr;
 	// 在各自的section中的偏移量，例如，在.data中的偏移量，在.rodata中的偏移量。
 	int offset;	
+	// todo bind应该设计成其他数据类型吗？
+	// 想把bind的值设计成enum，又嫌麻烦。直接用1和2多简单。
+	enum BindType bind;		// LOCAL,GLOBAL
 } *DataEntry;
 
 typedef struct strtabEntry{
 	char name[100];
 	int offset;
 	int length;
+	struct strtabEntry *next;
 } *StrtabEntry;
+
+// Bind为globl的变量。
+typedef struct globlVariableNode{
+	char name[100];
+	struct globlVariableNode *next;
+} *GloblVariableNode;
+
+// 存储Bind为globl的变量的单链表。
+// todo 是否需要用static修饰？
+// globlVariableList是链表的头结点，preGloblVariablenNode是在构造链表的过程中使用的变量。
+// 才过了十天左右，我已经看不懂自己设计的两个变量了，所以，增加一些注释。
+static GloblVariableNode globlVariableList;
+GloblVariableNode preGloblVariablenNode;
 
 DataEntry dataEntryArray[100];
 // error: increment of read-only variable 'dataEntryArrayIndex'
@@ -371,6 +392,9 @@ static int dataEntryArrayIndex = 0;
 StrtabEntry strtabEntryArray[100];
 static int strtabEntryArrayIndex = 0;
 static int strtabEntryOffset = 0;
+
+static StrtabEntry strtabEntryList;
+StrtabEntry preStrtabEntryNode;
 
 static int dataEntryOffset = 0;
 static int rodataEntryOffset = 0;
@@ -456,10 +480,17 @@ int HeapAllocate(Heap heap, int size);
 
 
 // 新增
-int FindDataEntry(char *name);
-int FindStrtabEntry(char *name);
+int FindDataEntryIndex(char *name);
+DataEntry FindDataEntry(char *name);
+int FindStrtabEntryIndex(char *name);
+StrtabEntry FindStrtabEntry(char *name);
 int FindShstrtabEntry(char *name);
+GloblVariableNode FindGloblVariableNode(char *name);
+void AddGloblVariableNode(char *name);
+unsigned char isGloblVariable(char *name);
 char IsData(int token);
 void AddStrtabEntry(DataEntry entry);
+void AddStrtabEntryListNode(StrtabEntry node);
 void ParseData();
+void ReSortStrtab();
 void BuildELF();

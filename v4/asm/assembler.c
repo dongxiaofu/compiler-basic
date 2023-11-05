@@ -1687,7 +1687,7 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
-int FindDataEntry(char *name)
+int FindDataEntryIndex(char *name)
 {
 	int	targetIndex = -1;
 	int index = 0;
@@ -1704,7 +1704,17 @@ int FindDataEntry(char *name)
 	return targetIndex;
 }
 
-int FindStrtabEntry(char *name)
+DataEntry FindDataEntry(char *name)
+{
+	int targetIndex = FindDataEntryIndex(name);
+	if(targetIndex == -1){
+		return NULL;
+	}else{
+		return dataEntryArray[targetIndex];
+	}
+}
+
+int FindStrtabEntryIndex(char *name)
 {
 	int index = -1;
 
@@ -1716,6 +1726,17 @@ int FindStrtabEntry(char *name)
 	}
 
 	return index;
+}
+
+StrtabEntry FindStrtabEntry(char *name)
+{
+	int index = FindStrtabEntryIndex(name);
+	
+	if(index == -1){
+		return NULL;
+	}else{
+		return strtabEntryArray[index];
+	}
 }
 
 int FindShstrtabEntry(char *name)
@@ -1730,6 +1751,51 @@ int FindShstrtabEntry(char *name)
 	}
 
 	return index;
+}
+
+GloblVariableNode FindGloblVariableNode(char *name)
+{
+	GloblVariableNode node = globlVariableList;
+
+	while(1){
+		if(node == NULL)	break;
+
+		printf("name = %s, node->name = %s\n", name, node->name);
+		if(strcmp(name, node->name) == 0){
+			return node;
+		}
+
+		node = node->next;
+	}
+
+	return NULL;
+}
+
+void AddGloblVariableNode(char *name)
+{
+	GloblVariableNode node = FindGloblVariableNode(name);
+	if(node != NULL){
+		return;
+	}
+	node = (GloblVariableNode)MALLOC(sizeof(struct globlVariableNode));
+	strcpy(node->name, name);
+	if(globlVariableList == NULL){
+		globlVariableList = node;
+	}else{
+		preGloblVariablenNode->next = node;
+	}
+	preGloblVariablenNode = node;
+}
+
+unsigned char isGloblVariable(char *name)
+{
+	GloblVariableNode node = FindGloblVariableNode(name);
+
+	if(node == NULL){
+		return 0;
+	}else{
+		return 1;
+	}
 }
 
 char IsData(int token)
@@ -1783,7 +1849,23 @@ void TestStrtabEntryArray()
 		index++;
 	}
 
-	printf("\nstring in strtab start\n");
+	printf("\nstring in strtab end\n");
+}
+
+void TestStrtabEntryList()
+{
+	printf("\nstring in strtabList start\n");
+
+	StrtabEntry node = strtabEntryList;
+	int index = 0;
+
+	while(1){
+		if(node == NULL)	break;
+		printf("%d--%s\n", index++, node->name);
+		node = node->next;
+	}
+
+	printf("\nstring in strtabList end\n");
 }
 
 void AddStrtabEntry(DataEntry entry)
@@ -1797,6 +1879,18 @@ void AddStrtabEntry(DataEntry entry)
 	strtabEntryArray[strtabEntryArrayIndex++] = strtabEntry;
 }
 
+void AddStrtabEntryListNode(StrtabEntry node)
+{
+//	node->next = NULL;
+
+	if(strtabEntryList == NULL){
+		strtabEntryList = node;
+	}else{
+		preStrtabEntryNode->next = node;
+	}
+	preStrtabEntryNode = node;
+}
+
 void ParseData()
 {
 	printf("开始处理数据\n");
@@ -1805,6 +1899,10 @@ void ParseData()
 	int token;
 	char *name;
 	int currentSection = SECTION_TEXT;
+
+	globlVariableList = NULL;
+
+	
 
 	DataEntry entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 	dataEntryArray[dataEntryArrayIndex++] = entry;
@@ -1972,7 +2070,7 @@ void ParseData()
 				// TODO 不知道两种情况有没有差异，先这样做。
 				}else if(entry->symbolType == SYMBOL_TYPE_FUNC){
 					printf("name4 = %s\n", name);
-					int targetIndex = FindDataEntry(name);
+					int targetIndex = FindDataEntryIndex(name);
 					strcpy(entry->name, name); 
 					if(targetIndex == -1){
 						AddStrtabEntry(entry);
@@ -2008,6 +2106,7 @@ void ParseData()
 
 			bssDataEntry->section = SECTION_BSS;
 			bssDataEntry->symbolType = SYMBOL_TYPE_OBJECT;
+			bssDataEntry->bind = LOCAL;
 
 			GetNextToken();
 			memset(bssDataEntry->name,0,200);
@@ -2041,6 +2140,7 @@ void ParseData()
 		}else if(token == TYPE_TOKEN_COMM){
 			// 处理 .comm   ch4,1,1
 			entry->section = SECTION_COM;
+			entry->symbolType = SYMBOL_TYPE_OBJECT;
 			// 跳过 .ch4
 			GetNextToken();
 			memset(entry->name,0,200);
@@ -2061,6 +2161,8 @@ void ParseData()
 			entry->align = alignment;
 
 			AddStrtabEntry(entry);
+			// 收集Bind为GLOBAL的字符串。
+			AddGloblVariableNode(entry->name);
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
@@ -2070,13 +2172,17 @@ void ParseData()
 			GetNextToken();
 			// 获取call，存储到name。
 			char *name = GetCurrentTokenLexeme();
-			if(FindDataEntry(name) != -1){
+			if(FindDataEntryIndex(name) != -1){
 			//	memset(entry, 0, sizeof(struct dataEntry));
 				continue;
 			}
+
+			// 收集Bind为GLOBAL的字符串。
+			AddGloblVariableNode(name);
 		
 			entry->section = SECTION_TEXT;
 			entry->symbolType = SYMBOL_TYPE_NOTYPE;
+			entry->bind = GLOBAL;
 		
 			memset(entry->name,0,200);
 			strcpy(entry->name, name);
@@ -2085,6 +2191,13 @@ void ParseData()
 		
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
+		}else if(token == TYPE_TOKEN_GLOBL){
+			// 处理.globl  str
+			// 跳过 str
+			GetNextToken();
+			char *name = GetCurrentTokenLexeme();
+			// 收集Bind为GLOBAL的字符串。
+			AddGloblVariableNode(name);
 		}
 	}
 
@@ -2095,10 +2208,6 @@ void ParseData()
 	// todo 我想清理最后一个空元素，琢磨了一会儿，没找到正确的方法。搁置。
 //	dataEntryArrayIndex > 1 ? dataEntryArrayIndex = dataEntryArrayIndex - 1 : NULL;:
 //	dataEntryArray[dataEntryArrayIndex] = NULL;
-
-	TestDataEntryArray();
-
-	TestStrtabEntryArray();
 }
 
 void CalculateDataEntryOffset()
@@ -2107,6 +2216,14 @@ void CalculateDataEntryOffset()
 	while(1){
 		DataEntry entry = dataEntryArray[index++];
 		if(entry == NULL)	break;
+		// 修正Bind
+		unsigned char isGlobl = isGloblVariable(entry->name);
+		if(isGlobl == 1){
+			entry->bind = GLOBAL;
+		}else{
+			entry->bind = LOCAL;
+		}
+
 		if(entry->section == SECTION_DATA){
 			entry->offset = dataEntryOffset;
 			dataEntryOffset += entry->size;
@@ -2124,6 +2241,81 @@ void CalculateDataEntryOffset()
 			printf("%d in calculateDataEntryOffset", __LINE__);
 		}
 	}
+}
+
+void ReSortStrtab()
+{
+	preStrtabEntryNode = NULL;
+	strtabEntryList = NULL;
+	// 遍历`.strtab`，找到`Bind`为`local`的字符串，放入链表`.strtabList`。
+	// 建立单链表的操作，还是有点不熟，想了一会儿才写出来。
+	for(int i = 0; i < strtabEntryArrayIndex; i++){
+		// StrtabEntry node = strtabEntryArray[i];
+		StrtabEntry entry = strtabEntryArray[i];
+		char *name = entry->name;
+		unsigned char isGlobl = isGloblVariable(name);
+		// printf("name = %s, isGlobl = %d\n", name, isGlobl);
+		if(isGlobl == 1)	continue;
+		int size = sizeof(struct strtabEntry);
+		StrtabEntry node = (StrtabEntry)MALLOC(size);
+		memcpy(node, entry, size);
+		AddStrtabEntryListNode(node);
+	}
+	
+	// 遍历`.strtab`，找到`Bind`为`globl`而且`Type`是`OBJECT`的字符串，放入链表`.strtabList`。
+	for(int i = 0; i < strtabEntryArrayIndex; i++){
+		// continue;
+		StrtabEntry entry = strtabEntryArray[i];
+		int size = sizeof(struct strtabEntry);
+		StrtabEntry node = (StrtabEntry)MALLOC(size);
+		memcpy(node, entry, size);
+		char *name = entry->name;
+		DataEntry dataEntryNode = FindDataEntry(name);
+		if(dataEntryNode == NULL || dataEntryNode->bind == LOCAL){
+			continue;
+		}
+
+		if(dataEntryNode->symbolType == SYMBOL_TYPE_OBJECT){
+			AddStrtabEntryListNode(node);
+		}
+	}
+
+	// 遍历`.strtab`，找到`Bind`为`globl`而且`Type`是`FUNC`的字符串，放入链表`.strtabList`。
+	for(int i = 0; i < strtabEntryArrayIndex; i++){
+		// StrtabEntry node = strtabEntryArray[i];
+		StrtabEntry entry = strtabEntryArray[i];
+		char *name = entry->name;
+		int size = sizeof(struct strtabEntry);
+		StrtabEntry node = (StrtabEntry)MALLOC(size);
+		memcpy(node, entry, size);
+		DataEntry dataEntryNode = FindDataEntry(name);
+		if(dataEntryNode == NULL || dataEntryNode->bind == LOCAL){
+			continue;
+		}
+
+		if(dataEntryNode->symbolType == SYMBOL_TYPE_FUNC){
+			AddStrtabEntryListNode(node);
+		}
+	}
+
+	// 遍历`.strtab`，找到`Bind`为`globl`而且`Type`是`NOTYPE`的字符串，放入链表`.strtabList`。
+	for(int i = 0; i < strtabEntryArrayIndex; i++){
+		// StrtabEntry node = strtabEntryArray[i];
+		StrtabEntry entry = strtabEntryArray[i];
+		char *name = entry->name;
+		int size = sizeof(struct strtabEntry);
+		StrtabEntry node = (StrtabEntry)MALLOC(size);
+		memcpy(node, entry, size);
+		DataEntry dataEntryNode = FindDataEntry(name);
+		if(dataEntryNode == NULL || dataEntryNode->bind == LOCAL){
+			continue;
+		}
+
+		if(dataEntryNode->symbolType == SYMBOL_TYPE_NOTYPE){
+			AddStrtabEntryListNode(node);
+		}
+	}
+	
 }
 
 void BuildELF()
@@ -2221,7 +2413,7 @@ void BuildELF()
 					dataDataNode->val.strVal;
 					char *str = valPtr->val.strVal;
 					// 根据str查找对应的entry，然后读取offset。
-					int entryIndex = FindDataEntry(str);
+					int entryIndex = FindDataEntryIndex(str);
 					if(entryIndex == -1){
 						// todo 出现这种情况，该怎么办？
 						// 先终止程序。
@@ -2289,9 +2481,7 @@ int main(int argc, char *argv[])
 
 	while(True){
 		int nextToken = GetLookAheadToken();
-//		int token = GetNextToken();
 		if(IsData(nextToken)){
-//		if(IsData(token)){
 			ParseData();
 		}else{
 			GetNextToken();
@@ -2299,36 +2489,22 @@ int main(int argc, char *argv[])
 			printf("0 ParseData name = %s\n", name);
 		}
 
-		// if(lexer->currentLine > 130)	break;
-		// if(lexer->currentLine > MAX_LINE) break;
 		if(lexer->currentLine == lexer->lineNum) break;
 	}
 
+	//ReSortStrtab();
+
 	CalculateDataEntryOffset();
+	ReSortStrtab();
+
+	TestDataEntryArray();
+	TestStrtabEntryArray();
+	TestStrtabEntryList();
 
 	// 生成可重定位文件。
 	BuildELF();
 
 	printf("Game over\n");
 	
-	return 0;
-
-	AssmblSourceFile();
-
-	printf("instr count = %d\n", instrStreamIndex);
-
-//	BuildXE();
-
-	int i = 0;
-	while(False){
-		GetNextToken();
-		printf("type = %d, val = %s\n", lexer->token_type, lexer->lexeme);
-		i++;
-
-		ParseData();
-
-		if(lexer->currentLine > 130)	break;
-	}
-
 	return 0;
 }
