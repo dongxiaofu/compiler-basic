@@ -1739,6 +1739,31 @@ StrtabEntry FindStrtabEntry(char *name)
 	}
 }
 
+StrtabEntry FindEntryInStrtabEntryList(char *name)
+{
+	StrtabEntry node = strtabEntryList;
+
+	while(node != NULL){
+		if(strcmp(node->name, name) == 0){
+			return node;
+		}
+		node = node->next;
+	}
+
+	return node;
+}
+
+int FindIndexInStrtabEntryList(char *name)
+{
+	StrtabEntry node = FindEntryInStrtabEntryList(name);
+
+	if(node == NULL){
+		return -1;
+	}else{
+		return node->index;
+	}
+}
+
 int FindShstrtabEntry(char *name)
 {
 	int index = -1;
@@ -2243,6 +2268,22 @@ void CalculateDataEntryOffset()
 	}
 }
 
+void CalculateStrtabEntryOffset()
+{
+	StrtabEntry node = strtabEntryList;
+	int offset = 0;
+	int index = 0;
+
+	while(node != NULL){
+		node->offset = offset;
+		node->index = index;
+
+		offset += strlen(node->name);
+		index++;
+		node = node->next;
+	}
+}
+
 void ReSortStrtab()
 {
 	preStrtabEntryNode = NULL;
@@ -2460,6 +2501,42 @@ void BuildELF()
 	}
 	
 	// 段表
+	StrtabEntry strtabEntryNode = strtabEntryList;
+	while(1){
+		if(strtabEntryNode == NULL){
+			break;
+		}
+		char *name = strtabEntryNode->name;
+		DataEntry entry = FindDataEntry(name);
+		// todo 需要设置sym的成员的值。
+		Elf32_Sym *sym = (Elf32_Sym *)MALLOC(sizeof(Elf32_Sym));
+		
+		Elf32_Word nameIndex = (Elf32_Word)FindIndexInStrtabEntryList(name);	
+		sym->st_name = nameIndex;
+		sym->st_value = 0;
+		sym->st_size = 0;
+		sym->st_info = 0;
+		sym->st_other = 0;
+		sym->st_shndx = entry->section;
+
+		int sectionDataNodeSize = sizeof(struct sectionDataNode);
+		if(symtabDataNode == NULL){
+			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			symtabDataNode->val.Elf32_Sym_Val = sym;
+			symtabDataHead->next = symtabDataNode;
+	//		preSymtabDataNode = symtabDataNode;
+		}else{
+			// symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			symtabDataNode->val.Elf32_Sym_Val = sym;
+			preSymtabDataNode->next = symtabDataNode;
+	//		preSymtabDataNode = symtabDataNode;
+		}
+		preSymtabDataNode = symtabDataNode;
+		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		
+		
+		strtabEntryNode = strtabEntryNode->next;
+	}
 	
 
 	printf("BuildELF is over\n");

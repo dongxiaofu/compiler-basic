@@ -368,6 +368,7 @@ typedef struct strtabEntry{
 	char name[100];
 	int offset;
 	int length;
+	int index;
 	struct strtabEntry *next;
 } *StrtabEntry;
 
@@ -484,6 +485,8 @@ int FindDataEntryIndex(char *name);
 DataEntry FindDataEntry(char *name);
 int FindStrtabEntryIndex(char *name);
 StrtabEntry FindStrtabEntry(char *name);
+StrtabEntry FindEntryInStrtabEntryList(char *name);
+int FindIndexInStrtabEntryList(char *name);
 int FindShstrtabEntry(char *name);
 GloblVariableNode FindGloblVariableNode(char *name);
 void AddGloblVariableNode(char *name);
@@ -492,5 +495,6 @@ char IsData(int token);
 void AddStrtabEntry(DataEntry entry);
 void AddStrtabEntryListNode(StrtabEntry node);
 void ParseData();
+void CalculateStrtabEntryOffset();
 void ReSortStrtab();
 void BuildELF();
