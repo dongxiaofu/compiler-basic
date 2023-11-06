@@ -2573,6 +2573,7 @@ int main(int argc, char *argv[])
 
 	CalculateDataEntryOffset();
 	ReSortStrtab();
+	CalculateStrtabEntryOffset();
 
 	TestDataEntryArray();
 	TestStrtabEntryArray();
