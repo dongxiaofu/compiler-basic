@@ -305,9 +305,12 @@ ScriptHeader gScriptHeader;
 
 
 // 例如@object。还有哪些值？不清楚。
+// todo 找机会修改成enum。我不想马上修改，因为需要修改很多地方。
+#define SYMBOL_TYPE_NOTYPE	0
 #define SYMBOL_TYPE_OBJECT	1
 #define SYMBOL_TYPE_FUNC	2
-#define SYMBOL_TYPE_NOTYPE	3
+#define SYMBOL_TYPE_SECTION	3
+#define SYMBOL_TYPE_FILE	4
 
 // 数据类型，例如byte
 #define DATA_TYPE_BYTE		1
@@ -324,7 +327,10 @@ union SectionDataVal{
 };
 
 typedef struct sectionDataNode{
+   // 这是新增的。需要根据name来查找对应的元素。最开始，我哪会想到这些呢？
+   char name[100];
    union SectionDataVal val;
+   int index;
    struct sectionDataNode *next;
 }* SectionDataNode;
 
@@ -345,8 +351,18 @@ typedef struct dataEntryValueNode{
 } *DataEntryValueNode;
 
 enum BindType{
-	LOCAL = 1, GLOBAL
+	LOCAL = 0, GLOBAL, WEAK
 };
+
+// enum RelocationType{
+//	R_386_32 = 0, R_386_PC32
+// };
+
+// todo 数值应该上多少？没有看资料，我随意设置的。
+// 就两个数值，不设计成enum。enum似乎不能直接当成int等数据类型使用。
+// 发现我已经在elf.h中定义了这两个变量。
+// #define R_386_32 	0
+// #define R_386_PC32	1
 
 typedef struct dataEntry{
 	int symbolType;
@@ -400,8 +416,8 @@ StrtabEntry preStrtabEntryNode;
 static int dataEntryOffset = 0;
 static int rodataEntryOffset = 0;
 
-#define SHSTRTAB_ENTRY_ARRAY_SIZE	9
-char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+#define SHSTRTAB_ENTRY_ARRAY_SIZE	10
+char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {"null",".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
 
 #define BSS_DATA_ENTRY_ARRAY_SIZE 100
 DataEntry bssDataEntryArray[BSS_DATA_ENTRY_ARRAY_SIZE];
@@ -485,6 +501,8 @@ int FindDataEntryIndex(char *name);
 DataEntry FindDataEntry(char *name);
 int FindStrtabEntryIndex(char *name);
 StrtabEntry FindStrtabEntry(char *name);
+SectionDataNode FindSectionDataNode(char *name, SectionDataNode head);
+SectionDataNode FindSymbolSectionDataNode(char *name, SectionDataNode head);
 StrtabEntry FindEntryInStrtabEntryList(char *name);
 int FindIndexInStrtabEntryList(char *name);
 int FindShstrtabEntry(char *name);

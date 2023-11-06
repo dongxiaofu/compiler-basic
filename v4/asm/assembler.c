@@ -1739,6 +1739,28 @@ StrtabEntry FindStrtabEntry(char *name)
 	}
 }
 
+SectionDataNode FindSectionDataNode(char *name, SectionDataNode head)
+{
+	SectionDataNode node = head->next;
+
+	while(node != NULL){
+		if(strcmp(node->name, name) == 0){
+			return node;
+		}
+		node = node->next;
+	}
+
+	return node;
+}
+
+// todo 以后再优化。
+SectionDataNode FindSymbolSectionDataNode(char *name, SectionDataNode head)
+{
+	SectionDataNode node = FindSectionDataNode(name, head);
+
+	return node;
+}
+
 StrtabEntry FindEntryInStrtabEntryList(char *name)
 {
 	StrtabEntry node = strtabEntryList;
@@ -2502,6 +2524,51 @@ void BuildELF()
 	
 	// 段表
 	StrtabEntry strtabEntryNode = strtabEntryList;
+	int symtabDataNodeIndex = 0;
+
+	// 在.symtab中加入一些常量节点。
+	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
+	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,1,3,5,6};
+	int nodeSymbolTypeArray[6] = {
+// todo 找机会去掉这些自定义常量，因为我已经定义过了。
+//		SYMBOL_TYPE_NOTYPE, SYMBOL_TYPE_FILE, SYMBOL_TYPE_SECTION,
+//		SYMBOL_TYPE_SECTION,SYMBOL_TYPE_SECTION,SYMBOL_TYPE_SECTION
+		STT_NOTYPE, STT_FILE, STT_SECTION,
+		STT_SECTION, STT_SECTION, STT_SECTION
+	};
+	for(int i = 0; i < 6; i++){
+		char *name = nodeNameArray[i];
+		Elf32_Sym *sym = (Elf32_Sym *)MALLOC(sizeof(Elf32_Sym));
+
+		int symbolType = nodeSymbolTypeArray[i] ;
+		int bind = (int)LOCAL;
+
+		sym->st_name = 0;
+		sym->st_value = 0;
+		sym->st_size = 0;
+		sym->st_info = (bind << 4) | (symbolType & 0xf);
+		// 不必理会st_other。
+		sym->st_other = 0;
+		sym->st_shndx = nodeIndexArray[i];
+
+		int sectionDataNodeSize = sizeof(struct sectionDataNode);
+		if(symtabDataNode == NULL){
+			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			strcpy(symtabDataNode->name, name);
+			symtabDataNode->index = symtabDataNodeIndex++;
+			symtabDataNode->val.Elf32_Sym_Val = sym;
+			symtabDataHead->next = symtabDataNode;
+		}else{
+			strcpy(symtabDataNode->name, name);
+			symtabDataNode->val.Elf32_Sym_Val = sym;
+			preSymtabDataNode->next = symtabDataNode;
+		}
+		preSymtabDataNode = symtabDataNode;
+		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		symtabDataNode->index = symtabDataNodeIndex++;
+	}
+
+
 	while(1){
 		if(strtabEntryNode == NULL){
 			break;
@@ -2512,29 +2579,84 @@ void BuildELF()
 		Elf32_Sym *sym = (Elf32_Sym *)MALLOC(sizeof(Elf32_Sym));
 		
 		Elf32_Word nameIndex = (Elf32_Word)FindIndexInStrtabEntryList(name);	
+		Elf32_Addr offset = (Elf32_Addr)entry->offset;
+		Elf32_Addr size = (Elf32_Word)entry->size;
+		int symbolType = entry->symbolType;
+		int bind = entry->bind;
+
 		sym->st_name = nameIndex;
-		sym->st_value = 0;
-		sym->st_size = 0;
-		sym->st_info = 0;
+		sym->st_value = offset;
+		sym->st_size = size;
+		sym->st_info = (bind << 4) | (symbolType & 0xf);
+		// 不必理会st_other。
 		sym->st_other = 0;
 		sym->st_shndx = entry->section;
 
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 		if(symtabDataNode == NULL){
 			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			strcpy(symtabDataNode->name, name);
+			symtabDataNode->index = symtabDataNodeIndex++;
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			symtabDataHead->next = symtabDataNode;
 	//		preSymtabDataNode = symtabDataNode;
 		}else{
 			// symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			strcpy(symtabDataNode->name, name);
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			preSymtabDataNode->next = symtabDataNode;
 	//		preSymtabDataNode = symtabDataNode;
 		}
 		preSymtabDataNode = symtabDataNode;
 		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		symtabDataNode->index = symtabDataNodeIndex++;
 		
 		
+		strtabEntryNode = strtabEntryNode->next;
+	}
+
+	// .rel.data
+	strtabEntryNode = strtabEntryList;
+	int relDataDataNodeIndex = 0;
+	while(strtabEntryNode != NULL){
+		char *name = strtabEntryNode->name;
+		DataEntry entry = FindDataEntry(name);
+
+		int sectionDataNodeSize = sizeof(struct sectionDataNode);
+
+		if(entry->isRel == 1){
+			Elf32_Rel *relEntry = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
+			Elf32_Addr offset = (Elf32_Addr)entry->offset;
+			int relocationType = R_386_32;
+			// SectionDataNode dataNode = FindSymbolSectionDataNode(name, symtabDataHead);
+			SectionDataNode dataNode = FindSymbolSectionDataNode(".rodata", symtabDataHead);
+			if(dataNode == NULL){
+				printf("error in .rel.data.name = %s, line = %d", name, __LINE__);
+				exit(-1);
+			}
+			int symbolIndex = dataNode->index;
+			Elf32_Word info = (Elf32_Word)((symbolIndex << 8) | relocationType);
+			relEntry->r_offset = offset;
+			relEntry->r_info = info;
+
+			if(relDataDataNode == NULL){
+				relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+				relDataDataHead = relDataDataNode;
+				// 暂时不需要name。
+				// strcpy(relDataDataNode->name, name);
+				relDataDataNode->index = relDataDataNodeIndex++;
+				relDataDataNode->val.Elf32_Rel_Val = relEntry;
+			}else{
+				relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+				// strcpy(relDataDataNode->name, name);
+				relDataDataNode->index = relDataDataNodeIndex++;
+				relDataDataNode->val.Elf32_Rel_Val = relEntry;
+				preRelDataDataNode->next = relDataDataNode;
+			}
+
+			preRelDataDataNode = relDataDataNode;
+		}
+
 		strtabEntryNode = strtabEntryNode->next;
 	}
 	
