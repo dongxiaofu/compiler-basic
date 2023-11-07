@@ -366,13 +366,18 @@ enum BindType{
 
 typedef struct dataEntry{
 	int symbolType;
+	// 所有数据的长度。
 	int size;
+	// 数据类型的大小。
+	int dataTypeSize;
 	char name[200];
 	int dataType;
 	int section;
 	int isRel;		// 是否需要重定位
 	int align;		// 对齐
 	DataEntryValueNode valPtr;
+	// valPtr链表中的节点的数量。
+	int dataEntryValueNodeNum;
 	// 在各自的section中的偏移量，例如，在.data中的偏移量，在.rodata中的偏移量。
 	int offset;	
 	// todo bind应该设计成其他数据类型吗？
@@ -490,6 +495,7 @@ void AssmblSourceFile();
 
 void SaveVariable();
 void BuildXE();
+int RoundUpNum(int num, int alignment);
 void CalculateDataEntryOffset();
 void LoadFile(char *filename);
 // void *MALLOC(int size);

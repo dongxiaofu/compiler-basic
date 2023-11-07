@@ -10,7 +10,7 @@ int sum(int a, int b);
 // int num2 = sum(4,5);
 static char ch7;
 char ch4;
-char *str[2] = {"hello", "world"};
+char *str[3] = {"hello", "world", "Jim"};
 int num33,num34;
 double num13[3] = {4.9,5.2,3.7};
 float num11 = 4.1;
@@ -20,6 +20,8 @@ const char ch2 = 'B';
 int num1 = 14;
 char *my_str_ak = "How are you Jim";
 int num2 = 140;
+int num3 = 50;
+char ch25 = 'K';
 char *my_str_cg = "How are you";
 /***
  * ch.c:17:17: error: initializer element is not constant

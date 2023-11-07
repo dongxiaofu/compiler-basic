@@ -2029,13 +2029,19 @@ void ParseData()
 			do{
 				if(token == TYPE_TOKEN_BYTE){
 					entry->dataType = DATA_TYPE_BYTE;
+					// todo 最好把这些数值换成常量。
+					entry->dataTypeSize = 1;
 				}else if(token == TYPE_TOKEN_LONG){
 					entry->dataType = DATA_TYPE_LONG;
+					entry->dataTypeSize = 4;
 				}else if(token == TYPE_TOKEN_KEYWORD_STRING){
 					entry->dataType = DATA_TYPE_STRING;
+					// todo 可能有问题。
+					entry->dataTypeSize = 4;
 				}
 
 				if(node == NULL){
+					entry->dataEntryValueNodeNum++;
 					node = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode)); 
 					head->next = node;
 				//	preNode = node;
@@ -2075,6 +2081,7 @@ void ParseData()
 
 				node = (DataEntryValueNode)MALLOC(sizeof(struct dataEntryValueNode));
 				preNode->next = node;
+				entry->dataEntryValueNodeNum++;
 
 			// while后面有没有分号？看了资料，有。若被人知道我连这都忘记了，会被认为基础很差。呵呵。
 			// 谁没有提笔忘字的时候？
@@ -2088,6 +2095,7 @@ void ParseData()
 
 			entry->valPtr = head->next;
 			entry->section = currentSection;
+			entry->dataEntryValueNodeNum--;
 
 			// 处理完数据的值，这就意味着处理完一条数据。
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
@@ -2245,6 +2253,13 @@ void ParseData()
 			char *name = GetCurrentTokenLexeme();
 			// 收集Bind为GLOBAL的字符串。
 			AddGloblVariableNode(name);
+		}else if(token == TYPE_TOKEN_ALIGN){
+			// 处理 .align 4
+			// 跳过 4
+			GetNextToken();
+			char *alignmentStr = GetCurrentTokenLexeme();
+			int alignment = atoi(alignmentStr);
+			entry->align = alignment;
 		}
 	}
 
@@ -2255,6 +2270,40 @@ void ParseData()
 	// todo 我想清理最后一个空元素，琢磨了一会儿，没找到正确的方法。搁置。
 //	dataEntryArrayIndex > 1 ? dataEntryArrayIndex = dataEntryArrayIndex - 1 : NULL;:
 //	dataEntryArray[dataEntryArrayIndex] = NULL;
+}
+
+int RoundUpNumDeprecated(int num)
+{
+	int newNum = num;
+	
+//	if(num % 4 == 0 || num % 8 == 0){
+//		return newNum;
+//	}
+
+//	if(num % 4 != 0){
+//		newNum = (num / 4 + 1) * 4;
+//	}else if(num % 8 != 0){
+//		newNum = (num / 8 + 1) * 8;
+//	}
+
+	if(num > 8 && num % 8 != 0){
+		newNum = (num / 8 + 1) * 8;
+	}else if(num % 4 != 0){
+		newNum = (num / 4 + 1) * 4;
+	}
+
+	return newNum;
+}
+
+int RoundUpNum(int num, int alignment)
+{
+	if(alignment == 0)	return num;
+
+	if(num % alignment != 0){
+		return (((num / alignment) + 1) * alignment);
+	}else{
+		return num;
+	}
 }
 
 void CalculateDataEntryOffset()
@@ -2272,8 +2321,11 @@ void CalculateDataEntryOffset()
 		}
 
 		if(entry->section == SECTION_DATA){
+			dataEntryOffset = RoundUpNum(dataEntryOffset, entry->align);
 			entry->offset = dataEntryOffset;
 			dataEntryOffset += entry->size;
+			printf("name = %s, size = %d, dataEntryOffset = %d\n", \
+				entry->name, entry->size, dataEntryOffset);
 		}else if(entry->section == SECTION_RODATA){
 			// TODO 这样做正确吗？
 			if(entry->size == 0){
@@ -2282,6 +2334,7 @@ void CalculateDataEntryOffset()
 					entry->size = strlen(entry->valPtr->val.strVal);
 				}
 			}
+			rodataEntryOffset = RoundUpNum(rodataEntryOffset, entry->align);
 			entry->offset = rodataEntryOffset;
 			rodataEntryOffset += entry->size;
 		}else{
@@ -2625,7 +2678,6 @@ void BuildELF()
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 
 		if(entry->isRel == 1){
-			Elf32_Rel *relEntry = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
 			Elf32_Addr offset = (Elf32_Addr)entry->offset;
 			int relocationType = R_386_32;
 			// SectionDataNode dataNode = FindSymbolSectionDataNode(name, symtabDataHead);
@@ -2636,25 +2688,33 @@ void BuildELF()
 			}
 			int symbolIndex = dataNode->index;
 			Elf32_Word info = (Elf32_Word)((symbolIndex << 8) | relocationType);
-			relEntry->r_offset = offset;
-			relEntry->r_info = info;
 
-			if(relDataDataNode == NULL){
-				relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-				relDataDataHead = relDataDataNode;
-				// 暂时不需要name。
-				// strcpy(relDataDataNode->name, name);
-				relDataDataNode->index = relDataDataNodeIndex++;
-				relDataDataNode->val.Elf32_Rel_Val = relEntry;
-			}else{
-				relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-				// strcpy(relDataDataNode->name, name);
-				relDataDataNode->index = relDataDataNodeIndex++;
-				relDataDataNode->val.Elf32_Rel_Val = relEntry;
-				preRelDataDataNode->next = relDataDataNode;
+			int dataEntryValueNodeNum = entry->dataEntryValueNodeNum;
+			int dataEntryValueNodeSize = entry->dataTypeSize;
+			for(int i = 0; i < dataEntryValueNodeNum; i++){
+
+				Elf32_Rel *relEntry = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
+				relEntry->r_offset = offset + dataEntryValueNodeSize * i;
+				relEntry->r_info = info;
+	
+				if(relDataDataNode == NULL){
+					relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+					relDataDataHead = relDataDataNode;
+					// 暂时不需要name。
+					// strcpy(relDataDataNode->name, name);
+					relDataDataNode->index = relDataDataNodeIndex++;
+					relDataDataNode->val.Elf32_Rel_Val = relEntry;
+				}else{
+					relDataDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+					// strcpy(relDataDataNode->name, name);
+					relDataDataNode->index = relDataDataNodeIndex++;
+					relDataDataNode->val.Elf32_Rel_Val = relEntry;
+					preRelDataDataNode->next = relDataDataNode;
+				}
+	
+				preRelDataDataNode = relDataDataNode;
+
 			}
-
-			preRelDataDataNode = relDataDataNode;
 		}
 
 		strtabEntryNode = strtabEntryNode->next;
