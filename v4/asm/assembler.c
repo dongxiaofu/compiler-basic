@@ -1687,6 +1687,21 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
+int FindShStrTabOffset(char *name)
+{
+	char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
+	int length = strlen(shStrTabStr);
+	int nameLength = strlen(name);
+
+	for(int i = 0; i < length; i++){
+		if(strncmp(shStrTabStr, name, nameLength) == 0){
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
 int FindDataEntryIndex(char *name)
 {
 	int	targetIndex = -1;
@@ -2575,7 +2590,7 @@ void BuildELF()
 
 	}
 	
-	// 段表
+	// 符号表
 	StrtabEntry strtabEntryNode = strtabEntryList;
 	int symtabDataNodeIndex = 0;
 
@@ -2719,6 +2734,8 @@ void BuildELF()
 
 		strtabEntryNode = strtabEntryNode->next;
 	}
+
+	// 段表
 	
 
 	printf("BuildELF is over\n");

@@ -503,6 +503,7 @@ int HeapAllocate(Heap heap, int size);
 
 
 // 新增
+int FindShStrTabOffset(char *name);
 int FindDataEntryIndex(char *name);
 DataEntry FindDataEntry(char *name);
 int FindStrtabEntryIndex(char *name);
