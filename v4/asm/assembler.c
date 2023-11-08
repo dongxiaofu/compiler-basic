@@ -2736,6 +2736,111 @@ void BuildELF()
 	}
 
 	// 段表
+	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+		
+		int sectionDataNodeSize = sizeof(struct sectionDataNode);
+
+		// 创建链表。
+		shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		if(shstrtabDataNode == NULL){
+			shstrtabDataHead->next = shstrtabDataNode;
+		}else{
+			preShstrtabDataNode->next = shstrtabDataNode;
+		}
+		preShstrtabDataNode = shstrtabDataNode;
+
+		// 把填充好的Elf32_Shdr存储到当前shstrtabDataNode。这样做没有任何问题。
+		Elf32_Shdr *shdr = (Elf32_Shdr *)MALLOC(sizeof(Elf32_Shdr));
+		char *name = shstrtabEntryArray[i];
+		if(strcmp(name, "null") == 0){
+			shstrtabDataNode->val.Elf32_Shdr_Val = shdr;
+			return;
+		}
+
+		// todo 当sh_name是-1时需要处理，我暂时懒得写这种代码。
+		Elf32_Word sh_name=(Elf32_Word)FindShStrTabOffset(name);  
+		Elf32_Word sh_type=(Elf32_Word)0;  
+		Elf32_Word sh_flags=(Elf32_Word)0;    
+		Elf32_Addr sh_addr=(Elf32_Word)0;  
+		Elf32_Off 	  sh_offset=(Elf32_Word)0;   
+		Elf32_Word sh_size=(Elf32_Word)0;  
+		Elf32_Word sh_link=(Elf32_Word)0;  
+		Elf32_Word sh_info=(Elf32_Word)0;  
+		Elf32_Word sh_addralign=(Elf32_Word)0;    
+		Elf32_Word sh_entsize=(Elf32_Word)0;  
+
+		// bss\data\rodata\shstrtab\strtab\symtab\text
+		if(strcmp(name, ".bss") == 0){
+		    sh_type=(Elf32_Word)SHT_NOBITS;
+		    sh_flags=(Elf32_Word)SHF_ALLOC + SHF_WRITE;
+
+			sh_addralign=(Elf32_Word)4;
+		}else if(strcmp(name, ".data") == 0){
+		    sh_type=(Elf32_Word)SHT_PROGBITS;
+		    sh_flags=(Elf32_Word)SHF_ALLOC + SHF_WRITE;
+
+			sh_addralign=(Elf32_Word)8;
+		}else if(strcmp(name, ".rodata") == 0){
+		    sh_type=(Elf32_Word)SHT_PROGBITS;
+		    sh_flags=(Elf32_Word)SHF_ALLOC;
+
+			sh_addralign=(Elf32_Word)1;
+		}else if(strcmp(name, ".shstrtab") == 0){
+		    sh_type=(Elf32_Word)SHT_STRTAB;
+		    sh_flags=(Elf32_Word)0;      // none
+
+			sh_addralign=(Elf32_Word)1;
+		}else if(strcmp(name, ".strtab") == 0){
+		    sh_type=(Elf32_Word)SHT_STRTAB;
+		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
+		    sh_flags=(Elf32_Word)0;
+
+			sh_addralign=(Elf32_Word)1;
+		}else if(strcmp(name, ".symtab") == 0){
+		    sh_type=(Elf32_Word)SHT_STRTAB;
+		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
+		    sh_flags=(Elf32_Word)0;
+
+			sh_addralign=(Elf32_Word)4;
+			sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
+		}else if(strcmp(name, ".text") == 0){
+		    sh_type=(Elf32_Word)SHT_PROGBITS;
+		    sh_flags=(Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
+
+			sh_addralign=(Elf32_Word)1;
+		}else{
+		    if(strcmp(name, ".rel.data") == 0 || strcmp(name, ".rel.text") == 0){
+		        sh_type = SHT_REL;
+				sh_addralign=(Elf32_Word)4;
+				sh_entsize=(Elf32_Word)sizeof(Elf32_Rel);  
+		    }
+		}
+
+		// todo 能用switch吗？
+//		switch(name){
+//
+//		}	
+
+
+		// todo 需要计算。
+		sh_offset=(Elf32_Off)0;   
+		// 需要分情况处理。
+		sh_size=(Elf32_Word)0;  
+		
+		// todo 还没有设置好值。我不知道怎么设置。在《程序员的自我修养》的3.4.2的表3-11有相关资料。
+		if(sh_type == SHT_REL){
+			sh_link=(Elf32_Word)0;
+			sh_info=(Elf32_Word)0;  
+		}else if(sh_type == SHT_STRTAB){
+			sh_link=(Elf32_Word)0;
+			sh_info=(Elf32_Word)0;  
+		}else{
+			sh_link=(Elf32_Word)SHN_UNDEF;
+			sh_info=(Elf32_Word)0;  
+		}
+
+		shstrtabDataNode->val.Elf32_Shdr_Val = shdr;
+	}
 	
 
 	printf("BuildELF is over\n");

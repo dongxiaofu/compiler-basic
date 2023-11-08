@@ -323,6 +323,7 @@ union SectionDataVal{
    // 和系统的命名风格一致，所以，这两个变量名比较怪异。
    Elf32_Sym *Elf32_Sym_Val;
    Elf32_Rel *Elf32_Rel_Val;
+   Elf32_Shdr *Elf32_Shdr_Val;
    // TODO 不知道怎么存储机器指令。
 };
 
