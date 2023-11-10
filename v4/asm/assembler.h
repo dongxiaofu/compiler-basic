@@ -400,6 +400,12 @@ typedef struct globlVariableNode{
 	struct globlVariableNode *next;
 } *GloblVariableNode;
 
+typedef struct segmentInfo{
+	char name[100];
+	int size;
+	struct segmentInfo *next;
+} *SegmentInfo;
+
 // 存储Bind为globl的变量的单链表。
 // todo 是否需要用static修饰？
 // globlVariableList是链表的头结点，preGloblVariablenNode是在构造链表的过程中使用的变量。
@@ -428,6 +434,11 @@ char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {"null",".text",".rel.text
 #define BSS_DATA_ENTRY_ARRAY_SIZE 100
 DataEntry bssDataEntryArray[BSS_DATA_ENTRY_ARRAY_SIZE];
 static int bssDataEntryArrayIndex = 0;
+
+// 链表的第一个节点。
+// static SegmentInfo segmentInfoNode = NULL;
+static SegmentInfo segmentInfoNode;
+static SegmentInfo preSegmentInfoNode;
 
 void *MALLOC(int size);
 
@@ -514,6 +525,7 @@ SectionDataNode FindSymbolSectionDataNode(char *name, SectionDataNode head);
 StrtabEntry FindEntryInStrtabEntryList(char *name);
 int FindIndexInStrtabEntryList(char *name);
 int FindShstrtabEntry(char *name);
+SegmentInfo FindSegmentInfoNode(char *name);
 GloblVariableNode FindGloblVariableNode(char *name);
 void AddGloblVariableNode(char *name);
 unsigned char isGloblVariable(char *name);

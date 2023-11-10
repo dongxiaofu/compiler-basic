@@ -574,7 +574,83 @@ int GetNextToken()
 	memset(lexer->lexeme, 0, sizeof(char) * MAX_SIZE);
 	for(int i = lexer->index0; i < end; i++){
 		// printf("line:%s\n", sourceCode[lexer->currentLine]);
-		lexer->lexeme[count++] = sourceCode[lexer->currentLine][i];
+		char currentChar = sourceCode[lexer->currentLine][i];
+
+//		if(sourceCode[lexer->currentLine][i] == '\\'){
+		if(currentChar == '\\'){
+			// todo 暂时没有使用这个变量。
+			// 是不是转义字符。
+			char isEscapeCharacter = 1;
+			int currentLineStrIndex = i;
+//			while(sourceCode[lexer->currentLine][currentLineStrIndex] == '\\'){
+			while(currentChar == '\\'){
+					currentLineStrIndex++;
+					char nextChar = sourceCode[lexer->currentLine][currentLineStrIndex];
+					currentLineStrIndex++;
+					char newChar;
+					switch(nextChar){
+						case 'a':
+							newChar = '\a';
+							break;
+						case 'b':
+							newChar = '\b';
+							break;
+						case 'f':
+							newChar = '\f';
+							break;
+						case 'n':
+							newChar = '\n';
+							break;
+						case 'r':
+							newChar = '\r';
+							break;
+						case 't':
+							newChar = '\t';
+							break;
+						case 'v':
+							newChar = '\v';
+							break;
+						case '\'':
+							newChar = '\'';
+							break;
+						case '\"':
+							newChar = '\"';
+							break;
+						case '\\':
+							newChar = '\\';
+							break;
+						default:
+							{
+								// if(nextChar == 2 || nextChar == 3){
+								if(nextChar == '2' || nextChar == '3'){
+									newChar = (nextChar - 48) << 6;
+									for(int j = 0; j < 2; j++){
+										currentChar = \
+											sourceCode[lexer->currentLine][currentLineStrIndex];
+										if(currentChar == 2 || currentChar == 3)	break;
+										// if(currentChar == '2' || currentChar == '3')	break;
+										newChar += ((currentChar - 48) << ((1-j) * 3));
+										currentLineStrIndex++;
+									}
+								}else{
+									lexer->lexeme[count++] = '\\';
+									newChar = nextChar;
+									isEscapeCharacter = 0;
+								}
+//								currentLineStrIndex++;
+							}
+					}
+				lexer->lexeme[count++] = newChar;
+				currentChar = sourceCode[lexer->currentLine][currentLineStrIndex];
+			}
+
+			if(currentLineStrIndex > end)	break;
+			if(currentLineStrIndex != i){
+				i = currentLineStrIndex - 1;
+			}
+		}else{
+			lexer->lexeme[count++] = sourceCode[lexer->currentLine][i];
+		}
 	}
 	lexer->lexeme[count] = 0;
 	lexer->index0 = lexer->index1;	
@@ -1815,6 +1891,22 @@ int FindShstrtabEntry(char *name)
 	return index;
 }
 
+SegmentInfo FindSegmentInfoNode(char *name)
+{ 
+	// 声明segmentInfoNode时，初始值时NULL。
+	SegmentInfo node = segmentInfoNode->next;
+
+	while(node != NULL){
+		if(strcmp(name, node->name) == 0){
+			return node;
+		}
+
+		node = node->next;
+	}
+
+	return node;
+}
+
 GloblVariableNode FindGloblVariableNode(char *name)
 {
 	GloblVariableNode node = globlVariableList;
@@ -1822,7 +1914,7 @@ GloblVariableNode FindGloblVariableNode(char *name)
 	while(1){
 		if(node == NULL)	break;
 
-		printf("name = %s, node->name = %s\n", name, node->name);
+//		printf("name = %s, node->name = %s\n", name, node->name);
 		if(strcmp(name, node->name) == 0){
 			return node;
 		}
@@ -2323,6 +2415,23 @@ int RoundUpNum(int num, int alignment)
 
 void CalculateDataEntryOffset()
 {
+	SegmentInfo dataSegmentInfoNode = FindSegmentInfoNode(".data");
+	if(dataSegmentInfoNode == NULL){
+		dataSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(dataSegmentInfoNode->name, ".data");
+		preSegmentInfoNode->next = dataSegmentInfoNode;
+		preSegmentInfoNode = dataSegmentInfoNode;
+	}
+	
+	SegmentInfo rodataSegmentInfoNode = FindSegmentInfoNode(".rodata");
+	if(rodataSegmentInfoNode == NULL){
+		rodataSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(rodataSegmentInfoNode->name, ".rodata");
+		preSegmentInfoNode->next = rodataSegmentInfoNode;
+		preSegmentInfoNode = rodataSegmentInfoNode;
+	}
+		
+
 	int index = 0;
 	while(1){
 		DataEntry entry = dataEntryArray[index++];
@@ -2339,23 +2448,29 @@ void CalculateDataEntryOffset()
 			dataEntryOffset = RoundUpNum(dataEntryOffset, entry->align);
 			entry->offset = dataEntryOffset;
 			dataEntryOffset += entry->size;
-			printf("name = %s, size = %d, dataEntryOffset = %d\n", \
+//			printf("name = %s, size = %d, dataEntryOffset = %d\n", \
 				entry->name, entry->size, dataEntryOffset);
 		}else if(entry->section == SECTION_RODATA){
 			// TODO 这样做正确吗？
 			if(entry->size == 0){
 				// todo 如果不是这种情况，应该怎么处理？
 				if(entry->dataType == DATA_TYPE_STRING){
-					entry->size = strlen(entry->valPtr->val.strVal);
+					entry->size = strlen(entry->valPtr->val.strVal) + 1;
+					printf("Ro str = %s, len = %d\n", entry->valPtr->val.strVal, entry->size);
+				}else{
+					printf("Ro str = %d\n", entry->valPtr->val.numVal);
 				}
 			}
 			rodataEntryOffset = RoundUpNum(rodataEntryOffset, entry->align);
 			entry->offset = rodataEntryOffset;
 			rodataEntryOffset += entry->size;
 		}else{
-			printf("%d in calculateDataEntryOffset", __LINE__);
+			printf("%d in calculateDataEntryOffset\n", __LINE__);
 		}
 	}
+
+	dataSegmentInfoNode->size = dataEntryOffset;
+	rodataSegmentInfoNode->size = rodataEntryOffset;
 }
 
 void CalculateStrtabEntryOffset()
@@ -2364,12 +2479,26 @@ void CalculateStrtabEntryOffset()
 	int offset = 0;
 	int index = 0;
 
+	SegmentInfo strtabSegmentInfoNode = FindSegmentInfoNode(".strtab");
+	if(strtabSegmentInfoNode == NULL){
+		strtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(strtabSegmentInfoNode->name, ".strtab");
+		preSegmentInfoNode->next = strtabSegmentInfoNode;
+		preSegmentInfoNode = strtabSegmentInfoNode;
+	}
+
 	while(node != NULL){
 		node->offset = offset;
 		node->index = index;
 
-		offset += strlen(node->name);
+		int length = strlen(node->name);
+		printf("Cal name = %s, len = %d\n", node->name, length);
+		offset += length;
 		index++;
+
+		// 字符串的结束符是一个空字符，占用一个字节。
+		strtabSegmentInfoNode->size += length + 1;
+
 		node = node->next;
 	}
 }
@@ -2516,6 +2645,15 @@ void BuildELF()
 
 	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
 		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
+
+	int textSize = 0;
+	int relTextEntryNum = 0;
+	int dataSize = 0;
+	int relDataEntryNum = 0;
+	int rodataSize = 0;
+	int symtabSize = 0;
+	int strtabSize = 0;
+	int shstrtabSize = 0;
 
 	// 遍历dataEntryArray
 	for(int i = 0; i < 100; i++){
@@ -2741,10 +2879,11 @@ void BuildELF()
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 
 		// 创建链表。
-		shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 		if(shstrtabDataNode == NULL){
+			shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			shstrtabDataHead->next = shstrtabDataNode;
 		}else{
+			shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			preShstrtabDataNode->next = shstrtabDataNode;
 		}
 		preShstrtabDataNode = shstrtabDataNode;
@@ -2849,6 +2988,9 @@ void BuildELF()
 int main(int argc, char *argv[])
 {
 	CurrentHeap = &ProgramHeap;
+
+	segmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+	preSegmentInfoNode = segmentInfoNode;
 
 	char *filename = argv[1];
 

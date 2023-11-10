@@ -42,7 +42,9 @@ int main(int argc, char *argv[])
 	printf(my_str_cg);
 	printf(my_str_ak);
 	// char *str = "自己创建文件";
-	char *str = "输入盘子个数：";
+	char *str = "^输\32入盘子个数：";
+
+//	char *str = "please input a number: ";
 	int len = strlen(str);
 	int len2 = strlen(my_str_cg);
 	char *str2 = my_str_cg;
