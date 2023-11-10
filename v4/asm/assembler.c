@@ -2509,16 +2509,18 @@ void CalculateStrtabEntryOffset()
 		node->offset = offset;
 		node->index = index;
 
-		int length = strlen(node->name);
+		int length = strlen(node->name) + 1;
 		printf("Cal name = %s, len = %d\n", node->name, length);
 		offset += length;
 		index++;
 
 		// 字符串的结束符是一个空字符，占用一个字节。
-		strtabSegmentInfoNode->size += length + 1;
+		strtabSegmentInfoNode->size += length;
 
 		node = node->next;
 	}
+
+	printf("strtabSegmentInfoNode->size = %d\n", strtabSegmentInfoNode->size);
 }
 
 void ReSortStrtab()
@@ -2750,6 +2752,14 @@ void BuildELF()
 	StrtabEntry strtabEntryNode = strtabEntryList;
 	int symtabDataNodeIndex = 0;
 
+	SegmentInfo shStrtabSegmentInfoNode = FindSegmentInfoNode(".shstrtab");
+	if(shStrtabSegmentInfoNode == NULL){
+		shStrtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(shStrtabSegmentInfoNode->name, ".shstrtab");
+		preSegmentInfoNode->next = shStrtabSegmentInfoNode; 
+		preSegmentInfoNode = shStrtabSegmentInfoNode; 
+	}
+
 	// 在.symtab中加入一些常量节点。
 	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
 	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,1,3,5,6};
@@ -2762,6 +2772,15 @@ void BuildELF()
 	};
 	for(int i = 0; i < 6; i++){
 		char *name = nodeNameArray[i];
+		int nameLen = 0;
+		if(i == 0){
+			nameLen = 1;
+		}else{
+			nameLen = strlen(name) + 1;
+		}	
+		shStrtabSegmentInfoNode->size += nameLen;	
+
+
 		Elf32_Sym *sym = (Elf32_Sym *)MALLOC(sizeof(Elf32_Sym));
 
 		int symbolType = nodeSymbolTypeArray[i] ;

@@ -1460,30 +1460,31 @@ Ro str = str[%d] = %c
 2486 in calculateDataEntryOffset
 2486 in calculateDataEntryOffset
 2486 in calculateDataEntryOffset
-Cal name = ch7, len = 3
-Cal name = num66.2506, len = 10
-Cal name = ch55.2505, len = 9
-Cal name = ch44.2504, len = 9
-Cal name = ch4, len = 3
-Cal name = str, len = 3
-Cal name = num33, len = 5
-Cal name = num34, len = 5
-Cal name = num13, len = 5
-Cal name = num11, len = 5
-Cal name = num12, len = 5
-Cal name = ch1, len = 3
-Cal name = ch2, len = 3
-Cal name = num1, len = 4
-Cal name = my_str_ak, len = 9
-Cal name = num2, len = 4
-Cal name = num3, len = 4
-Cal name = ch25, len = 4
-Cal name = my_str_cg, len = 9
-Cal name = main, len = 4
-Cal name = sum, len = 3
-Cal name = printf, len = 6
-Cal name = strlen, len = 6
-Cal name = puts, len = 4
+Cal name = ch7, len = 4
+Cal name = num66.2506, len = 11
+Cal name = ch55.2505, len = 10
+Cal name = ch44.2504, len = 10
+Cal name = ch4, len = 4
+Cal name = str, len = 4
+Cal name = num33, len = 6
+Cal name = num34, len = 6
+Cal name = num13, len = 6
+Cal name = num11, len = 6
+Cal name = num12, len = 6
+Cal name = ch1, len = 4
+Cal name = ch2, len = 4
+Cal name = num1, len = 5
+Cal name = my_str_ak, len = 10
+Cal name = num2, len = 5
+Cal name = num3, len = 5
+Cal name = ch25, len = 5
+Cal name = my_str_cg, len = 10
+Cal name = main, len = 5
+Cal name = sum, len = 4
+Cal name = printf, len = 7
+Cal name = strlen, len = 7
+Cal name = puts, len = 5
+strtabSegmentInfoNode->size = 149
 
 string in dataEntryArray start
 0---ch7
@@ -1579,13 +1580,13 @@ string in strtabList start
 23--puts
 
 string in strtabList end
-error section 2744
-error section 2744
-error section 2744
-error section 2744
-error section 2744
-error section 2744
-error section 2744
-error section 2744
-error section 2744
+error section 2746
+error section 2746
+error section 2746
+error section 2746
+error section 2746
+error section 2746
+error section 2746
+error section 2746
+error section 2746
 Game over
