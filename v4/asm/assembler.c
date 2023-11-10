@@ -1763,6 +1763,23 @@ int HeapAllocate(Heap heap, int size)
 	return (int)(blk->avail - size);
 }
 
+int myStrlen(char *name)
+{
+	int len = strlen(name);
+	return len;
+	int newLen = 0;
+	for(int i = 0; i < len; i++){
+		char currentChar = name[i];
+		// 处理汉字。一个汉字用三个字节表示。
+		if(currentChar < 0){
+			i += 2;
+		}
+		newLen++;
+	}
+
+	return newLen;
+}
+
 int FindShStrTabOffset(char *name)
 {
 	char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
@@ -2455,7 +2472,8 @@ void CalculateDataEntryOffset()
 			if(entry->size == 0){
 				// todo 如果不是这种情况，应该怎么处理？
 				if(entry->dataType == DATA_TYPE_STRING){
-					entry->size = strlen(entry->valPtr->val.strVal) + 1;
+					int len = myStrlen(entry->valPtr->val.strVal);
+					entry->size = len + 1; 
 					printf("Ro str = %s, len = %d\n", entry->valPtr->val.strVal, entry->size);
 				}else{
 					printf("Ro str = %d\n", entry->valPtr->val.numVal);
@@ -2987,6 +3005,7 @@ void BuildELF()
 
 int main(int argc, char *argv[])
 {
+//	int len = myStrlen("你好");
 	CurrentHeap = &ProgramHeap;
 
 	segmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));

@@ -515,6 +515,8 @@ int HeapAllocate(Heap heap, int size);
 
 
 // 新增
+// todo 自定义统计字符串的长度的函数。我想不到更好的名字。
+int myStrlen(char *name);
 int FindShStrTabOffset(char *name);
 int FindDataEntryIndex(char *name);
 DataEntry FindDataEntry(char *name);

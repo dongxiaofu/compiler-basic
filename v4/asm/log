@@ -1436,30 +1436,30 @@ ParseData name = @progbits
 token = -1
 处理数据结束
 dataEntryArrayIndex = 35
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
 Ro str = hello, len = 6
 Ro str = world, len = 6
 Ro str = Jim, len = 4
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
 Ro str = How are you Jim, len = 16
 Ro str = How are you, len = 12
 Ro str = %d, len = 3
-Ro str = ^输\032入盘子个数：, len = 27
+Ro str = 输入, len = 7
 Ro str = cx = %d
 , len = 9
 Ro str = @---------next--------, len = 23
 Ro str = str[%d] = %c
 , len = 14
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
-2468 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
+2486 in calculateDataEntryOffset
 Cal name = ch7, len = 3
 Cal name = num66.2506, len = 10
 Cal name = ch55.2505, len = 9
@@ -1579,13 +1579,13 @@ string in strtabList start
 23--puts
 
 string in strtabList end
-error section 2726
-error section 2726
-error section 2726
-error section 2726
-error section 2726
-error section 2726
-error section 2726
-error section 2726
-error section 2726
+error section 2744
+error section 2744
+error section 2744
+error section 2744
+error section 2744
+error section 2744
+error section 2744
+error section 2744
+error section 2744
 Game over
