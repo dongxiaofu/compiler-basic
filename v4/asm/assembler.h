@@ -440,15 +440,45 @@ static int bssDataEntryArrayIndex = 0;
 static SegmentInfo segmentInfoNode;
 static SegmentInfo preSegmentInfoNode;
 
-// 定义了两个枚举类型。
 #define FPU_INSTR_CODE	1000
-enum FPUInstructionSet{
-	#include "../include/fpu_instruction_set.txt"
+// enum FPUInstructionSet{
+// 	#include "../include/fpu_instruction_set.txt"
+// };
+// 
+// enum InstructionSet{
+// 	#include "../include/instruction_set.txt"
+// };
+
+// enum InstructionSet{
+// 	#include "../include/fpu_instruction_set.txt"
+// 	#include "../include/instruction_set.txt"
+// };
+//
+typedef enum{
+//	#define ARRAY_ELEMENT(code, name)	code,
+	#define INSTR_ELEMENT(code, name)   code,
+	// #include "../include/all_instruction_set.txt"
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
+//	#undef ARRAY_ELEMENT
+}InstructionSet;
+
+#define INSTRUCTION_SETS_SIZE 77
+// char instructionSets[76][10] = {
+// char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+	// #define ARRAY_ELEMENT(str)	"##str##"
+	// #define ARRAY_ELEMENT(str)	str,
+	// #define ARRAY_ELEMENT(code, name)	name,
+	#define INSTR_ELEMENT(code, name)   name,
+	// #include "../include/all_instruction_set.txt"
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
+//	#undef ARRAY_ELEMENT
 };
 
-enum InstructionSet{
-	#include "../include/instruction_set.txt"
-};
+void StrToUpper(char *str, char *upperStr);
+void StrToLower(char *str, char *lowerStr);
 
 void *MALLOC(int size);
 
@@ -545,6 +575,9 @@ char IsData(int token);
 void AddStrtabEntry(DataEntry entry);
 void AddStrtabEntryListNode(StrtabEntry node);
 void ParseData();
+InstructionSet FindInstrCode(char *instr);
+void DealWithInstr(InstructionSet instrCode);
+void ParseInstr();
 void CalculateStrtabEntryOffset();
 void ReSortStrtab();
 void BuildELF();

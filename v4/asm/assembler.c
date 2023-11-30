@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "elf.h"
 #include "assembler.h"
@@ -1730,6 +1731,30 @@ void LoadFile(char *filename)
 	fclose(fp);
 }
 
+void StrToUpper(char *str, char *upperStr)
+{
+	int len = strlen(str);
+	for(int i = 0; i < len; i++){
+		if(islower(str[i])){
+			upperStr[i] = toupper(str[i]);
+		}else{
+			upperStr[i] = str[i];
+		}
+	}
+}
+
+void StrToLower(char *str, char *lowerStr)
+{
+	int len = strlen(str);
+	for(int i = 0; i < len; i++){
+		if(isupper(str[i])){
+			lowerStr[i] = tolower(str[i]);
+		}else{
+			lowerStr[i] = str[i];
+		}
+	}
+}
+
 void *MALLOC(int size)
 {
 	void *p = (void *)HeapAllocate(CurrentHeap, size);
@@ -2396,6 +2421,71 @@ void ParseData()
 //	dataEntryArray[dataEntryArrayIndex] = NULL;
 }
 
+InstructionSet FindInstrCode(char *instr)
+{
+	int index = -1;
+	int count = INSTRUCTION_SETS_SIZE;
+	char *instrUpper = (char *)MALLOC(strlen(instr));
+	StrToUpper(instr, instrUpper);
+
+	for(int i = 0; i < count; i++){
+		if(strcmp(instructionSets[i], instrUpper) == 0){
+			index = i;
+			break;
+		}
+	}
+
+	InstructionSet instrCode = (index == -1) ? I_INSTR_INVALID:(InstructionSet)index;
+
+	return instrCode;
+}
+
+// todo 想不到更好的函数名，只能用这个名字。
+void DealWithInstr(InstructionSet instrCode)
+{
+	// FPU指令
+	if(I_FCHS <= instrCode && instrCode <= I_FMULL){
+
+	}else{
+		// FPU指令
+		if(I_CDQ <= instrCode && instrCode <= I_RET){
+			// 无操作数指令
+
+
+		}else if(I_MULL <= instrCode && instrCode <= I_CALL){
+			// 单操作数指令
+
+
+		}else{
+			// 双操作数指令
+
+		}
+	}
+}
+
+void ParseInstr()
+{
+	printf("开始处理指令\n");
+	int token;
+	
+	while(1){
+		token = GetNextToken();
+		printf("token = %d\n", token);
+		if(token == TYPE_TOKEN_INVALID)	break; 
+
+		if(token == TYPE_TOKEN_INDENT){
+			char *name = GetCurrentTokenLexeme();
+			InstructionSet instrCode = FindInstrCode(name);
+			if(instrCode == I_INSTR_INVALID){
+				printf("%s is not a valid instr\n", name);
+			}else{
+				printf("%s is a valid instr\n", name);
+				DealWithInstr(instrCode);
+			}
+		}
+	}
+}
+
 int RoundUpNumDeprecated(int num)
 {
 	int newNum = num;
@@ -3052,6 +3142,21 @@ int main(int argc, char *argv[])
 
 		if(lexer->currentLine == lexer->lineNum) break;
 	}
+
+
+	// todo 我不知道怎么重置扫描器。像这样做碰碰运气。
+	lexer = (Lexer)MALLOC(sizeof(struct _lexer));
+	LoadFile(filename);
+
+	while(True){
+		int nextToken = GetLookAheadToken();
+		if(!IsData(nextToken)){
+			ParseInstr();
+		}
+
+		if(lexer->currentLine == lexer->lineNum) break;
+	}
+
 
 	//ReSortStrtab();
 
