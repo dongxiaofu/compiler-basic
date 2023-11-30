@@ -440,6 +440,16 @@ static int bssDataEntryArrayIndex = 0;
 static SegmentInfo segmentInfoNode;
 static SegmentInfo preSegmentInfoNode;
 
+// 定义了两个枚举类型。
+#define FPU_INSTR_CODE	1000
+enum FPUInstructionSet{
+	#include "../include/fpu_instruction_set.txt"
+};
+
+enum InstructionSet{
+	#include "../include/instruction_set.txt"
+};
+
 void *MALLOC(int size);
 
 int GetDataTypeSize(int dataType);

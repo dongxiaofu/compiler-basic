@@ -1,4 +1,4 @@
-fchs,fldz,fucompp,fld1,
+fchs = FPU_INSTR_CODE,fldz,fucompp,fld1,
 fadds,faddl,
 fsubs,fsubl,
 fdivs,fdivl,

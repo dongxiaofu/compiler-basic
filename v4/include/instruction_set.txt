@@ -10,8 +10,8 @@ je,jnp,jne,jp,jg,ja,jl,jb,jge,jae,jle,jbe,
 jmp,
 pushl,
 popl,
-incb,incw,incl
-decb,decw,decl
+incb,incw,incl,
+decb,decw,decl,
 rep,
 call,
 
@@ -28,6 +28,6 @@ movl,movb,movw,
 cmpl,
 test,
 movsbl,movswl,
-movzbl,,movzwl,
+movzbl,movzwl,
 movzx,
 leal,
