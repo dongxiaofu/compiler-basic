@@ -184,9 +184,11 @@ return;
 
 void ParseRetInstr(InstructionSet instrCode)
 {
+	int opcode = 0xC3;
 
+//	InstructionSet instr = (InstructionSet)MALLOC();
 
-return;
+	return;
 }
 
 void ParseMullInstr(InstructionSet instrCode)

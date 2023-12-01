@@ -2452,6 +2452,8 @@ InstructionSet FindInstrCode(char *instr)
 // todo 想不到更好的函数名，只能用这个名字。
 void DealWithInstr(InstructionSet instrCode)
 {
+	// todo 先这样做吧。下面的分类，暂时没有作用。
+	parseInstructionFunctions[(int)instrCode](instrCode);
 	// FPU指令
 	if(I_FCHS <= instrCode && instrCode <= I_FMULL){
 
@@ -2459,7 +2461,7 @@ void DealWithInstr(InstructionSet instrCode)
 		// FPU指令
 		if(I_CDQ <= instrCode && instrCode <= I_RET){
 			// 无操作数指令
-
+			// parseInstructionFunctions[(int)instrCode](instrCode);
 
 		}else if(I_MULL <= instrCode && instrCode <= I_CALL){
 			// 单操作数指令
