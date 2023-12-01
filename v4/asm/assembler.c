@@ -1,15 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <ctype.h>
 
+#include "common.h"
 #include "elf.h"
 #include "assembler.h"
 #include "instr.h"
 
-Heap CurrentHeap;
-struct heap ProgramHeap;
-HEAP(ProgramHeap);
+//Heap CurrentHeap;
+//struct heap ProgramHeap;
+//HEAP(ProgramHeap);
 
 char **sourceCode;
 Lexer lexer;
@@ -1764,39 +1765,6 @@ void UcFirst(char *str)
 	str[0] = toupper(str[0]);
 }
 
-void *MALLOC(int size)
-{
-	void *p = (void *)HeapAllocate(CurrentHeap, size);
-	memset(p, 0, size);
-	return p;
-}
-
-int HeapAllocate(Heap heap, int size)
-{
-	struct mblock *blk = heap->last;
-
-	while(size > blk->end - blk->avail){
-		int m = 4096 + sizeof(struct mblock) + size; 
-		blk->next = (struct mblock *)malloc(m);
-		blk = blk->next;
-		if(blk == NULL){
-			printf("分配内存失败\n");
-			exit(-4);
-		}
-		blk->begin = blk->avail = (char *)(blk + 1);
-//		blk->begin = blk->avail = (char *)(blk);
-		blk->next = NULL;
-		heap->last = blk;	
-		// blk->end = (char *)(blk + m);
-		blk->end = (char *)blk + m - 1;
-	}
-
-	blk->avail += size;
-
-	// return blk->avail - size;
-	return (int)(blk->avail - size);
-}
-
 int myStrlen(char *name)
 {
 	int len = strlen(name);
@@ -3126,7 +3094,7 @@ void BuildELF()
 int main(int argc, char *argv[])
 {
 //	int len = myStrlen("你好");
-	CurrentHeap = &ProgramHeap;
+//	CurrentHeap = &ProgramHeap;
 
 	segmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
 	preSegmentInfoNode = segmentInfoNode;

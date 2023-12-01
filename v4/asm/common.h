@@ -1,6 +1,29 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+struct mblock
+{
+    struct mblock *next;
+    char *begin;
+    char *avail;
+    char *end;
+};
+
+typedef struct heap
+{
+    struct mblock *last;
+    struct mblock head;
+} *Heap;
+
+#define HEAP(hp)    static struct heap  hp = { &hp.head }
+//#define HEAP(hp)    hp = { &hp.head }
+
+
 typedef enum{
 	#define INSTR_ELEMENT(code, name)   code,
 	#include "all_instruction_set.txt"
@@ -19,7 +42,7 @@ typedef struct modRM{
 	int rm:3;
 	int regOrOpcode:3;
 	int mod:2;
-} ModRM; 
+} *ModRM; 
 
 typedef struct sib{
 	int base:3;
@@ -31,7 +54,7 @@ typedef struct instruction{
 	// 前缀。
 	char prefix;
 	// 操作码。
-	char opcode;
+	unsigned char opcode;
 	// ModR/M。
 	ModRM modRM;
 	// SIB。
@@ -42,5 +65,14 @@ typedef struct instruction{
 	int immediate;
 } *Instruction;
 
+
+//static Heap CurrentHeap;
+//static struct heap ProgramHeap;
+HEAP(ProgramHeap);
+// CurrentHeap = &ProgramHeap;
+static Heap CurrentHeap = &ProgramHeap;
+
+void *MALLOC(int size);
+int HeapAllocate(Heap heap, int size);
 
 #endif

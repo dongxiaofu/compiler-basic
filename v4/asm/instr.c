@@ -186,7 +186,14 @@ void ParseRetInstr(InstructionSet instrCode)
 {
 	int opcode = 0xC3;
 
-//	InstructionSet instr = (InstructionSet)MALLOC();
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
 	return;
 }

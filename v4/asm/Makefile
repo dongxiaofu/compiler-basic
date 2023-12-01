@@ -11,7 +11,7 @@ LDFLAGS		= -m elf_i386
 
 SCANNER = cg_assembler
 # 包含main函数的.o文件必须放在前面。
-OBJS	= assembler.o instr.o
+OBJS	= assembler.o instr.o common.o
 
 all:clean everything
 
@@ -27,4 +27,7 @@ assembler.o:assembler.c
 	${CC} ${CFLAGS} -c -o $@ $<
 	# ${CC} ${CFLAGS} $^ -o $@
 instr.o:instr.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
+common.o:common.c
 	${CC} ${CFLAGS} -c -o $@ $<

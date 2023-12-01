@@ -3,21 +3,6 @@
 
 #include "common.h"
 
-struct mblock
-{
-    struct mblock *next;
-    char *begin;
-    char *avail;
-    char *end;
-};
-
-typedef struct heap
-{
-    struct mblock *last;
-    struct mblock head;
-} *Heap;
-
-#define HEAP(hp)    struct heap  hp = { &hp.head }
 #define True 1
 #define False 0
 #define END_OF_FILE -1
@@ -492,8 +477,6 @@ void StrToUpper(char *str, char *upperStr);
 void StrToLower(char *str, char *lowerStr);
 void UcFirst(char *str);
 
-void *MALLOC(int size);
-
 int GetDataTypeSize(int dataType);
 
 void GetInstrByMnemonic(char *mnemonic, InstrLookup *instrPtr);
@@ -562,8 +545,6 @@ void BuildXE();
 int RoundUpNum(int num, int alignment);
 void CalculateDataEntryOffset();
 void LoadFile(char *filename);
-// void *MALLOC(int size);
-int HeapAllocate(Heap heap, int size);
 
 
 // 新增
