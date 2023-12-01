@@ -1,6 +1,8 @@
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
+#include "common.h"
+
 struct mblock
 {
     struct mblock *next;
@@ -443,7 +445,6 @@ static int bssDataEntryArrayIndex = 0;
 static SegmentInfo segmentInfoNode;
 static SegmentInfo preSegmentInfoNode;
 
-#define FPU_INSTR_CODE	1000
 // enum FPUInstructionSet{
 // 	#include "../include/fpu_instruction_set.txt"
 // };
@@ -457,28 +458,28 @@ static SegmentInfo preSegmentInfoNode;
 // 	#include "../include/instruction_set.txt"
 // };
 //
-typedef enum{
-//	#define ARRAY_ELEMENT(code, name)	code,
-	#define INSTR_ELEMENT(code, name)   code,
-	// #include "../include/all_instruction_set.txt"
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-//	#undef ARRAY_ELEMENT
-}InstructionSet;
-
-#define INSTRUCTION_SETS_SIZE 77
-// char instructionSets[76][10] = {
-// char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
-static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
-	// #define ARRAY_ELEMENT(str)	"##str##"
-	// #define ARRAY_ELEMENT(str)	str,
-	// #define ARRAY_ELEMENT(code, name)	name,
-	#define INSTR_ELEMENT(code, name)   name,
-	// #include "../include/all_instruction_set.txt"
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-//	#undef ARRAY_ELEMENT
-};
+// typedef enum{
+// //	#define ARRAY_ELEMENT(code, name)	code,
+// 	#define INSTR_ELEMENT(code, name)   code,
+// 	// #include "../include/all_instruction_set.txt"
+// 	#include "all_instruction_set.txt"
+// 	#undef INSTR_ELEMENT
+// //	#undef ARRAY_ELEMENT
+// }InstructionSet;
+// 
+// #define INSTRUCTION_SETS_SIZE 77
+// // char instructionSets[76][10] = {
+// // char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+// static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+// 	// #define ARRAY_ELEMENT(str)	"##str##"
+// 	// #define ARRAY_ELEMENT(str)	str,
+// 	// #define ARRAY_ELEMENT(code, name)	name,
+// 	#define INSTR_ELEMENT(code, name)   name,
+// 	// #include "../include/all_instruction_set.txt"
+// 	#include "all_instruction_set.txt"
+// 	#undef INSTR_ELEMENT
+// //	#undef ARRAY_ELEMENT
+// };
 
 // static void (*parseInstructionFunctions[INSTRUCTION_SETS_SIZE])(InstructionSet *instrCode) = {
 // 	// #define GENERAGE_FUNCTION(name)		void Parse##name##Instr(InstructionSet *instrCode),
