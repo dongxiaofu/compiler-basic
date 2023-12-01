@@ -5,6 +5,7 @@
 
 #include "elf.h"
 #include "assembler.h"
+#include "instr.h"
 
 Heap CurrentHeap;
 struct heap ProgramHeap;
@@ -1753,6 +1754,14 @@ void StrToLower(char *str, char *lowerStr)
 			lowerStr[i] = str[i];
 		}
 	}
+}
+
+// 模仿PHP函数命名。
+void UcFirst(char *str)
+{
+	int len = strlen(str);
+	if(len == 0)	return;
+	str[0] = toupper(str[0]);
 }
 
 void *MALLOC(int size)

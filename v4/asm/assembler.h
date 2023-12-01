@@ -1,3 +1,6 @@
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
+
 struct mblock
 {
     struct mblock *next;
@@ -477,8 +480,16 @@ static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
 //	#undef ARRAY_ELEMENT
 };
 
+// static void (*parseInstructionFunctions[INSTRUCTION_SETS_SIZE])(InstructionSet *instrCode) = {
+// 	// #define GENERAGE_FUNCTION(name)		void Parse##name##Instr(InstructionSet *instrCode),
+// 	#define GENERAGE_FUNCTION(name)		Parse##name##Instr,
+// 	#include "function_name.txt"
+// 	#undef GENERAGE_FUNCTION
+// };
+
 void StrToUpper(char *str, char *upperStr);
 void StrToLower(char *str, char *lowerStr);
+void UcFirst(char *str);
 
 void *MALLOC(int size);
 
@@ -581,3 +592,6 @@ void ParseInstr();
 void CalculateStrtabEntryOffset();
 void ReSortStrtab();
 void BuildELF();
+
+
+#endif
