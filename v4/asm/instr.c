@@ -111,16 +111,44 @@ return NULL;
 
 Instruction ParseFnstswInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xDF, 0xE0};
 
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
-return NULL;
+	return instr;
 }
 
 Instruction ParseFldsInstr(InstructionSet instrCode)
 {
+	// 0:	d9 05 45 23 01 00    	flds   0x12345
+	
+	Opcode opcode = {0xD9, -1};
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 0;
+	// vim没有高亮0b101，但这种写法是正确的。
+	modRM->rm = 0b101;
 
+	// 只有一个操作数需要处理。
+//	GetNextToken();
 
-return NULL;
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFldlInstr(InstructionSet instrCode)

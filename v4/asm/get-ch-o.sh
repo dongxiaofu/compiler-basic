@@ -1,5 +1,11 @@
 echo $1
 
+if [ $2 == o ]
+then
+	gcc -c $1.s -o $1.o -m32
+	exit 1
+fi
+
 gcc -S $1.c -o $1.s  -m32
 gcc -c $1.s -o $1.o -m32
 
