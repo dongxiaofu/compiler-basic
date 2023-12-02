@@ -1,188 +1,188 @@
 #include "instr.h"
 
-void ParseFchsInstr(InstructionSet instrCode)
+Instruction ParseFchsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFldzInstr(InstructionSet instrCode)
+Instruction ParseFldzInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFucomppInstr(InstructionSet instrCode)
+Instruction ParseFucomppInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFld1Instr(InstructionSet instrCode)
+Instruction ParseFld1Instr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFaddsInstr(InstructionSet instrCode)
+Instruction ParseFaddsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFaddlInstr(InstructionSet instrCode)
+Instruction ParseFaddlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFsubsInstr(InstructionSet instrCode)
+Instruction ParseFsubsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFsublInstr(InstructionSet instrCode)
+Instruction ParseFsublInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFdivsInstr(InstructionSet instrCode)
+Instruction ParseFdivsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFdivlInstr(InstructionSet instrCode)
+Instruction ParseFdivlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFnstswInstr(InstructionSet instrCode)
+Instruction ParseFnstswInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFldsInstr(InstructionSet instrCode)
+Instruction ParseFldsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFldlInstr(InstructionSet instrCode)
+Instruction ParseFldlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFildlInstr(InstructionSet instrCode)
+Instruction ParseFildlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFildqInstr(InstructionSet instrCode)
+Instruction ParseFildqInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFstpsInstr(InstructionSet instrCode)
+Instruction ParseFstpsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFstplInstr(InstructionSet instrCode)
+Instruction ParseFstplInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFldcwInstr(InstructionSet instrCode)
+Instruction ParseFldcwInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFistplInstr(InstructionSet instrCode)
+Instruction ParseFistplInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFistpllInstr(InstructionSet instrCode)
+Instruction ParseFistpllInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFstsInstr(InstructionSet instrCode)
+Instruction ParseFstsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFstlInstr(InstructionSet instrCode)
+Instruction ParseFstlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFstpInstr(InstructionSet instrCode)
+Instruction ParseFstpInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFmulsInstr(InstructionSet instrCode)
+Instruction ParseFmulsInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseFmullInstr(InstructionSet instrCode)
+Instruction ParseFmullInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseCdqInstr(InstructionSet instrCode)
+Instruction ParseCdqInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseRetInstr(InstructionSet instrCode)
+Instruction ParseRetInstr(InstructionSet instrCode)
 {
 	int opcode = 0xC3;
 
@@ -195,348 +195,348 @@ void ParseRetInstr(InstructionSet instrCode)
 	instr->offset = -1;
 	instr->immediate = -1;
 
-	return;
+	return NULL;
 }
 
-void ParseMullInstr(InstructionSet instrCode)
+Instruction ParseMullInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseIdivlInstr(InstructionSet instrCode)
+Instruction ParseIdivlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseDivlInstr(InstructionSet instrCode)
+Instruction ParseDivlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseNeglInstr(InstructionSet instrCode)
+Instruction ParseNeglInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseNotlInstr(InstructionSet instrCode)
+Instruction ParseNotlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJeInstr(InstructionSet instrCode)
+Instruction ParseJeInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJnpInstr(InstructionSet instrCode)
+Instruction ParseJnpInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJneInstr(InstructionSet instrCode)
+Instruction ParseJneInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJpInstr(InstructionSet instrCode)
+Instruction ParseJpInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJgInstr(InstructionSet instrCode)
+Instruction ParseJgInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJaInstr(InstructionSet instrCode)
+Instruction ParseJaInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJlInstr(InstructionSet instrCode)
+Instruction ParseJlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJbInstr(InstructionSet instrCode)
+Instruction ParseJbInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJgeInstr(InstructionSet instrCode)
+Instruction ParseJgeInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJaeInstr(InstructionSet instrCode)
+Instruction ParseJaeInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJleInstr(InstructionSet instrCode)
+Instruction ParseJleInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJbeInstr(InstructionSet instrCode)
+Instruction ParseJbeInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseJmpInstr(InstructionSet instrCode)
+Instruction ParseJmpInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParsePushlInstr(InstructionSet instrCode)
+Instruction ParsePushlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParsePoplInstr(InstructionSet instrCode)
+Instruction ParsePoplInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseIncbInstr(InstructionSet instrCode)
+Instruction ParseIncbInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseIncwInstr(InstructionSet instrCode)
+Instruction ParseIncwInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseInclInstr(InstructionSet instrCode)
+Instruction ParseInclInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseDecbInstr(InstructionSet instrCode)
+Instruction ParseDecbInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseDecwInstr(InstructionSet instrCode)
+Instruction ParseDecwInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseDeclInstr(InstructionSet instrCode)
+Instruction ParseDeclInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseRepInstr(InstructionSet instrCode)
+Instruction ParseRepInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseCallInstr(InstructionSet instrCode)
+Instruction ParseCallInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseOrlInstr(InstructionSet instrCode)
+Instruction ParseOrlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseXorlInstr(InstructionSet instrCode)
+Instruction ParseXorlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseAndlInstr(InstructionSet instrCode)
+Instruction ParseAndlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseShllInstr(InstructionSet instrCode)
+Instruction ParseShllInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseSHLDInstr(InstructionSet instrCode)
+Instruction ParseSHLDInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseSarlInstr(InstructionSet instrCode)
+Instruction ParseSarlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseShrlInstr(InstructionSet instrCode)
+Instruction ParseShrlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseAddlInstr(InstructionSet instrCode)
+Instruction ParseAddlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseSublInstr(InstructionSet instrCode)
+Instruction ParseSublInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseImullInstr(InstructionSet instrCode)
+Instruction ParseImullInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovlInstr(InstructionSet instrCode)
+Instruction ParseMovlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovbInstr(InstructionSet instrCode)
+Instruction ParseMovbInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovwInstr(InstructionSet instrCode)
+Instruction ParseMovwInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseCmplInstr(InstructionSet instrCode)
+Instruction ParseCmplInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseTestInstr(InstructionSet instrCode)
+Instruction ParseTestInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovsblInstr(InstructionSet instrCode)
+Instruction ParseMovsblInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovswlInstr(InstructionSet instrCode)
+Instruction ParseMovswlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovzblInstr(InstructionSet instrCode)
+Instruction ParseMovzblInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovzwlInstr(InstructionSet instrCode)
+Instruction ParseMovzwlInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseMovzxInstr(InstructionSet instrCode)
+Instruction ParseMovzxInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }
 
-void ParseLealInstr(InstructionSet instrCode)
+Instruction ParseLealInstr(InstructionSet instrCode)
 {
 
 
-return;
+return NULL;
 }

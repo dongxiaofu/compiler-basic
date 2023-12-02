@@ -63,6 +63,8 @@ typedef struct instruction{
 	int offset; 
 	// 立即数。
 	int immediate;
+
+	struct instruction *next;
 } *Instruction;
 
 
