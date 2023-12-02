@@ -2467,7 +2467,12 @@ void ParseInstr()
 				// 创建这个链表，我不能立刻心算出思路，用口算刻意梳理思路才想出了方案。
 				// 创建这个链表和其他链表可能稍微有点不同。节点是函数的返回值，而不是临时新建的。
 				instrDataNode = DealWithInstr(instrCode);
-				if(preInstrDataNode == NULL){
+				if(instrDataNode == NULL){
+					printf("instr should not be NULL\n");
+					exit(instrCode);
+				}
+				// if(preInstrDataNode == NULL){
+				if(instrHead->next == NULL){
 					instrHead->next = instrDataNode;
 					preInstrDataNode = instrDataNode;
 				}else{

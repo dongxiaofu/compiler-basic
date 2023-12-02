@@ -2,27 +2,66 @@
 
 Instruction ParseFchsInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xD9, 0xE0};
 
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
-return NULL;
+	return instr;
 }
 
 Instruction ParseFldzInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xD9, 0xEE};
 
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
-return NULL;
+	return instr;
 }
 
 Instruction ParseFucomppInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xDA, 0xE9};
 
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
-return NULL;
+	return instr;
 }
 
 Instruction ParseFld1Instr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xD9, 0xE8};
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
+
+	return instr;
 
 
 return NULL;
@@ -177,14 +216,24 @@ return NULL;
 
 Instruction ParseCdqInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0x99, -1};
 
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = NULL;
+	instr->sib = NULL;
+	instr->offset = -1;
+	instr->immediate = -1;
 
-return NULL;
+	return instr;
 }
 
 Instruction ParseRetInstr(InstructionSet instrCode)
 {
-	int opcode = 0xC3;
+	// unsigned char opcode = 0xC3;
+	Opcode opcode = {0xC3, -1};
 
 	int size = sizeof(struct instruction);
 	Instruction instr = (Instruction)MALLOC(size);

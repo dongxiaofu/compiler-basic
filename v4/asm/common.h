@@ -50,11 +50,17 @@ typedef struct sib{
 	int scale:2;	
 } *SIB;
 
+typedef struct {
+	unsigned char primaryOpcode;
+	char secondaryOpcode;
+}Opcode;
+
 typedef struct instruction{
 	// 前缀。
 	char prefix;
 	// 操作码。
-	unsigned char opcode;
+//	unsigned char opcode;
+	Opcode opcode;
 	// ModR/M。
 	ModRM modRM;
 	// SIB。
