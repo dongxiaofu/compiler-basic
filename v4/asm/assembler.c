@@ -2418,10 +2418,10 @@ InstructionSet FindInstrCode(char *instr)
 }
 
 // todo 想不到更好的函数名，只能用这个名字。
-void DealWithInstr(InstructionSet instrCode)
+Instruction DealWithInstr(InstructionSet instrCode)
 {
 	// todo 先这样做吧。下面的分类，暂时没有作用。
-	parseInstructionFunctions[(int)instrCode](instrCode);
+	return parseInstructionFunctions[(int)instrCode](instrCode);
 	// FPU指令
 	if(I_FCHS <= instrCode && instrCode <= I_FMULL){
 
@@ -2446,6 +2446,11 @@ void ParseInstr()
 {
 	printf("开始处理指令\n");
 	int token;
+
+	Instruction instrHead = (Instruction)MALLOC(sizeof(struct instruction));
+	Instruction instrDataNode, preInstrDataNode;
+	instrDataNode = preInstrDataNode = NULL;
+	
 	
 	while(1){
 		token = GetNextToken();
@@ -2459,7 +2464,16 @@ void ParseInstr()
 				printf("%s is not a valid instr\n", name);
 			}else{
 				printf("%s is a valid instr\n", name);
-				DealWithInstr(instrCode);
+				// 创建这个链表，我不能立刻心算出思路，用口算刻意梳理思路才想出了方案。
+				// 创建这个链表和其他链表可能稍微有点不同。节点是函数的返回值，而不是临时新建的。
+				instrDataNode = DealWithInstr(instrCode);
+				if(preInstrDataNode == NULL){
+					instrHead->next = instrDataNode;
+					preInstrDataNode = instrDataNode;
+				}else{
+					preInstrDataNode->next = instrDataNode;	
+					preInstrDataNode = instrDataNode;
+				}
 			}
 		}
 	}

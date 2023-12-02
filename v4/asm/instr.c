@@ -195,7 +195,7 @@ Instruction ParseRetInstr(InstructionSet instrCode)
 	instr->offset = -1;
 	instr->immediate = -1;
 
-	return NULL;
+	return instr;
 }
 
 Instruction ParseMullInstr(InstructionSet instrCode)

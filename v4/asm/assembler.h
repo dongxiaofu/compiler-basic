@@ -569,7 +569,7 @@ void AddStrtabEntry(DataEntry entry);
 void AddStrtabEntryListNode(StrtabEntry node);
 void ParseData();
 InstructionSet FindInstrCode(char *instr);
-void DealWithInstr(InstructionSet instrCode);
+Instruction DealWithInstr(InstructionSet instrCode);
 void ParseInstr();
 void CalculateStrtabEntryOffset();
 void ReSortStrtab();
