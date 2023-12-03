@@ -62,51 +62,194 @@ Instruction ParseFld1Instr(InstructionSet instrCode)
 	instr->immediate = -1;
 
 	return instr;
-
-
-return NULL;
 }
 
 Instruction ParseFaddsInstr(InstructionSet instrCode)
 {
+	// d8 05 45 23 01 00    	fadds  0x12345
+	
+	Opcode opcode = {0xD8, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 0;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFaddlInstr(InstructionSet instrCode)
 {
+	// dc 05 45 23 01 00    	fadds  0x12345
+	
+	Opcode opcode = {0xDC, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 0;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFsubsInstr(InstructionSet instrCode)
 {
+	// d8 25 45 23 01 00    	fsubs  0x12345
 
+	Opcode opcode = {0xD8, -1};
 
-return NULL;
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 4;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
+
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFsublInstr(InstructionSet instrCode)
 {
+	// dc 25 45 23 01 00    	fsubl  0x12345
+	
+	Opcode opcode = {0xDC, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 4;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFdivsInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xD8, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 6;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFdivlInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xDC, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 6;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFnstswInstr(InstructionSet instrCode)
@@ -147,7 +290,7 @@ Instruction ParseFldsInstr(InstructionSet instrCode)
 	Instruction instr = (Instruction)MALLOC(size);
 	instr->prefix = -1;
 	instr->opcode = opcode;
-	instr->modRM = NULL;
+	instr->modRM = modRM;
 	instr->sib = NULL;
 	instr->offset = offset;
 	instr->immediate = -1;
@@ -155,11 +298,36 @@ Instruction ParseFldsInstr(InstructionSet instrCode)
 	return instr;
 }
 
+// todo 这个函数和ParseFldsInstr太相似了。找机会优化它。
 Instruction ParseFldlInstr(InstructionSet instrCode)
 {
+	// dd 05 45 23 01 00    	fldl   0x12345
+	
+	Opcode opcode = {0xDD, -1};
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 0;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
 
-return NULL;
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFildlInstr(InstructionSet instrCode)
@@ -234,13 +402,62 @@ return NULL;
 
 Instruction ParseFmulsInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xD8, -1};
 
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 6;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
 
-return NULL;
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 }
 
 Instruction ParseFmullInstr(InstructionSet instrCode)
 {
+	Opcode opcode = {0xDC, -1};
+
+	ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0;
+	modRM->regOrOpcode = 1;
+	// vim没有高亮0b101，但这种写法是正确的。
+	// 为什么是101？有空时写上注释。
+	modRM->rm = 0b101;
+
+	// 只有一个操作数需要处理。
+	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
+
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = -1;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = NULL;
+	instr->offset = offset;
+	instr->immediate = -1;
+
+	return instr;
 
 
 return NULL;
