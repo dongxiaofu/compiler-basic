@@ -561,4 +561,70 @@ char *GetCurrentTokenLexeme()
 	return name;
 }
 
+int StrToNumber(char *str)
+{
+	if(!IsStringInt(str))	return 0;
 
+	// todo 这是一段重复代码，从IsStringInt中复制而来。
+	// 我不能立刻想到优化这段代码的方法，干脆直接复制过来用。找时间再优化吧。
+	int startIndex = 0;
+	// 1--十进制，2--二进制，3--八进制，4--十六进制。
+	char type = 1;
+	// 漏掉了 0x123,0b123, 0123
+	if(str[0] == '0'){
+		type = 3;
+		startIndex++;
+		if(str[1] == 'b'){
+			type = 2;	
+			startIndex++;
+		}else if(str[1] == 'x'){
+			type = 4;	
+			startIndex++;
+		}
+	}else if(str[0] == '-'){
+		startIndex++;
+	}
+
+	int len = strlen(str);
+	int num = 0;
+	
+	for(int i = startIndex; i < len; i++){
+		char ch = toupper(str[i]);
+		int m = (len - 1) - i;
+		if(ch >= 'A'){
+			ch = 10 + (ch - 'A');
+		}else{
+			ch = ch - '0';
+		}
+
+		int n = 1;
+		switch(type){
+			case 1:			// 十进制
+				for(int k = 0; k < m; k++){
+					n *= 10;
+				}
+				break;
+			case 2:			// 二进制
+				n = m;
+				break;
+			case 3:			// 八进制
+				n = 3*m;
+				break;
+			case 4:			// 十六进制
+				n = 4*m;
+				break;
+			default:
+				printf("there is an error in line %d\n", __LINE__);
+				exit(__LINE__);
+				break;
+		}
+
+		if(type == 1){
+			num += ch * n;
+		}else{
+			num += ch << n;
+		}
+	}
+
+	return num;
+}

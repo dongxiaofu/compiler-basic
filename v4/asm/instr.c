@@ -138,6 +138,10 @@ Instruction ParseFldsInstr(InstructionSet instrCode)
 
 	// 只有一个操作数需要处理。
 	int token = GetNextToken();
+	// 这个操作数是一个内存地址，应该存储到偏移字段。
+	// 这个操作数是不是合法的字符串数值，不是本函数甚至本程序的职责，不理会。
+	char *name = GetCurrentTokenLexeme();
+	int offset = StrToNumber(name);
 
 	int size = sizeof(struct instruction);
 	Instruction instr = (Instruction)MALLOC(size);
@@ -145,7 +149,7 @@ Instruction ParseFldsInstr(InstructionSet instrCode)
 	instr->opcode = opcode;
 	instr->modRM = NULL;
 	instr->sib = NULL;
-	instr->offset = -1;
+	instr->offset = offset;
 	instr->immediate = -1;
 
 	return instr;

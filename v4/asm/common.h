@@ -193,5 +193,8 @@ int GetNextToken();
 int GetNextTokenExceptNewLine();
 char *GetCurrentTokenLexeme();
 
+// todo 放在这里并不合适。
+int StrToNumber(char *str);
+
 
 #endif
