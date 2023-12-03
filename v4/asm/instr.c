@@ -137,7 +137,7 @@ Instruction ParseFldsInstr(InstructionSet instrCode)
 	modRM->rm = 0b101;
 
 	// 只有一个操作数需要处理。
-//	GetNextToken();
+	int token = GetNextToken();
 
 	int size = sizeof(struct instruction);
 	Instruction instr = (Instruction)MALLOC(size);
@@ -260,6 +260,7 @@ Instruction ParseCdqInstr(InstructionSet instrCode)
 
 Instruction ParseRetInstr(InstructionSet instrCode)
 {
+	GetNextToken();
 	// unsigned char opcode = 0xC3;
 	Opcode opcode = {0xC3, -1};
 

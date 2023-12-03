@@ -86,15 +86,40 @@ int IsCharNumeric(char ch)
 
 int IsStringInt(char *str)
 {
-	int len = strlen(str);
-	for(int i = 0; i < len; i++){
-		if(!(IsCharNumeric(str[i]) == True || str[i] == '-')){
-			return False;
+	int startIndex = 0;
+	// 1--十进制，2--二进制，3--八进制，4--十六进制。
+	char type = 1;
+	// 漏掉了 0x123,0b123, 0123
+	if(str[0] == '0'){
+		type = 3;
+		startIndex++;
+		if(str[1] == 'b'){
+			type = 2;	
+			startIndex++;
+		}else if(str[1] == 'x'){
+			type = 4;	
+			startIndex++;
 		}
+	}else if(str[0] == '-'){
+		startIndex++;
 	}
-
-	for(int i = 1; i < len; i++){
-		if(str[i] == '-')	return False;
+	
+	int len = strlen(str);
+	if(type == 4){
+		// todo 能不能和下面的逻辑合并？我不知道能不能修改IsCharNumeric，不敢随便合并。
+		for(int i = startIndex; i < len; i++){
+			// 对非字母使用toupper会有问题吗？我验证过，没有问题。
+			int upperChar = toupper(str[i]);
+			if(!(IsCharNumeric(str[i]) == True) || ('A' <= upperChar && upperChar <= 'F')){
+				return False;
+			}
+		}
+	}else{
+		for(int i = startIndex; i < len; i++){
+			if(IsCharNumeric(str[i]) == False){
+				return False;
+			}
+		}
 	}
 
 	return True;
