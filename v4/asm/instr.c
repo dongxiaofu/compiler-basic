@@ -102,9 +102,10 @@ SIB ParseSIB()
 	if(offset != -1){
 		GetNextToken();
 	}
-	// 不处理小括号。
+	// 要处理小括号。
 	// 一个SIB实例，(%ebx,%eax,2)
 	SIB sib = (SIB)MALLOC(sizeof(struct sib));
+	GetNextToken();		// 获取(
 	GetNextToken();		// 获取%ebx
 	char *baseRegName = GetCurrentTokenLexeme();
 	GetNextToken();		// 获取,
@@ -113,6 +114,7 @@ SIB ParseSIB()
 	GetNextToken();		// 获取,
 	GetNextToken();		// 获取2
 	char *scaleName = GetCurrentTokenLexeme();
+	GetNextToken();		// 获取)
 
 	sib->base = FindRegIndex(++baseRegName);
 	sib->index = FindRegIndex(++indexRegName);
@@ -136,17 +138,8 @@ Oprand ParseOprand()
 		opr->value.immediate = StrToNumber(name);
 		opr->type = IMM;
 	}else if(type == T_SIB){
-		int token = GetNextToken();
-		int offset = -1;
-		char *name;
-		if(token == TYPE_TOKEN_INT){
-			name = GetCurrentTokenLexeme();
-			offset = StrToNumber(name);
-		}
-
 		SIB sib = ParseSIB();
 		opr->value.sib = *sib;
-
 	}else if(type == REG_BASE_MEM){
 		StartPeekToken();
 		int token = GetNextToken();
@@ -182,12 +175,14 @@ Oprand ParseOprand()
 		opr->type = REG_BASE_MEM;
 
 	}else if(type == IMM_BASE_MEM){
+		int token = GetNextToken();
 		char *name = GetCurrentTokenLexeme();
 		opr->value.immBaseMem = StrToNumber(name);
 		opr->type = IMM_BASE_MEM;
 	}else if(type == REG){
 		// 计算寄存器的编号。
 		// 前面获取的name是寄存器，%eax。
+		int token = GetNextToken();
 		char *name = GetCurrentTokenLexeme();
 		name++;
 		int regIndex = FindRegIndex(name);

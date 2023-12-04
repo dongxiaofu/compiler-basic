@@ -125,9 +125,12 @@ typedef struct modRM{
 } *ModRM; 
 
 typedef struct sib{
-	int base:3;
-	int index:3;
-	int scale:2;	
+//	int base:3;
+//	int index:3;
+//	int scale:2;	
+	unsigned int base:3;
+	unsigned int index:3;
+	unsigned int scale:2;	
 	// TODO 新增一个offset成员，没有问题吧？
 	int offset;
 } *SIB;

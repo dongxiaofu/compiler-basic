@@ -594,8 +594,11 @@ char *GetCurrentTokenLexeme()
 
 void StartPeekToken()
 {
-	// snapshotLexer = (Lexer)MALLOC(sizeof(struct _lexer));
-	snapshotLexer = lexer;
+	int size = sizeof(struct _lexer);
+	snapshotLexer = (Lexer)MALLOC(size);
+	// 不能这样做。有问题。
+	// snapshotLexer = lexer;
+	memcpy(snapshotLexer, lexer, size);
 }
 
 void EndPeekToken()
