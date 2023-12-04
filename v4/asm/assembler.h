@@ -393,10 +393,6 @@ static SegmentInfo preSegmentInfoNode;
 // 	#undef GENERAGE_FUNCTION
 // };
 
-void StrToUpper(char *str, char *upperStr);
-void StrToLower(char *str, char *lowerStr);
-void UcFirst(char *str);
-
 int GetDataTypeSize(int dataType);
 
 void GetInstrByMnemonic(char *mnemonic, InstrLookup *instrPtr);
@@ -474,7 +470,6 @@ char IsData(int token);
 void AddStrtabEntry(DataEntry entry);
 void AddStrtabEntryListNode(StrtabEntry node);
 void ParseData();
-InstructionSet FindInstrCode(char *instr);
 Instruction DealWithInstr(InstructionSet instrCode);
 void ParseInstr();
 void CalculateStrtabEntryOffset();

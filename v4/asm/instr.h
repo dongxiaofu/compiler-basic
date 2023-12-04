@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+OprandType GetOprandType();
+SIB ParseSIB();
+Oprand ParseOprand();
 Instruction ParseFchsInstr(InstructionSet instrCode);
 Instruction ParseFldzInstr(InstructionSet instrCode);
 Instruction ParseFucomppInstr(InstructionSet instrCode);

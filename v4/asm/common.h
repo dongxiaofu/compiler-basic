@@ -128,6 +128,8 @@ typedef struct sib{
 	int base:3;
 	int index:3;
 	int scale:2;	
+	// TODO 新增一个offset成员，没有问题吧？
+	int offset;
 } *SIB;
 
 typedef struct {
@@ -153,6 +155,50 @@ typedef struct instruction{
 	struct instruction *next;
 } *Instruction;
 
+typedef enum {
+	FPU, NOT_FPU
+} INSTR_TYPE_FPU;
+
+typedef enum {
+	Zero, One, Two
+} INSTR_TYPE_OPRAND_COUNT;
+
+typedef struct instructionType{
+	INSTR_TYPE_FPU fpuType;
+	INSTR_TYPE_OPRAND_COUNT	oprandCount;
+} *InstructionType;
+
+// todo 想不到更好的名字了。
+// 内存地址有几种形式？0x1234，-4(%ebp)，num11。
+struct memoryAddress{
+	// 寄存器基址。
+	char reg;
+	// -4(%ebp)中的-4。
+	int offset;
+};
+
+typedef union{
+	// TODO 有更好的变量名吗？
+	struct sib sib;	
+	struct memoryAddress regBaseMem;
+	int immediate;
+	// TODO mem用来存储0x1234这种内存地址。我认为，(0x1234)等价于0x1234。
+	// num11不会出现在指令中。链接时会不会出现？没法思考那个时候的问题，不熟悉。
+	int immBaseMem;
+	int reg;
+} OprandValue;
+
+// TODO 不知道关于内存的猜想是否正确。
+// 分别是立即数、SIB、内存地址(寄存器基址、32位基址)、寄存器。
+typedef enum{
+	IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
+} OprandType;
+
+// 操作数。
+typedef struct oprand{
+	OprandValue value;
+	OprandType type;
+} *Oprand;
 
 //static Heap CurrentHeap;
 //static struct heap ProgramHeap;
@@ -169,9 +215,41 @@ static Heap CurrentHeap = &ProgramHeap;
 // todo 不知道为什么，在这些变量的前面加了static后，在instr.c中，这些变量的值变为0。
 char **sourceCode;
 Lexer lexer;
+// lexer的快照。
+Lexer snapshotLexer;
 unsigned int instrStreamIndex;
 Label currentLabel;
 FILE *fp;
+
+typedef struct {
+  	char reg8[3];
+  	char reg16[3];
+  	char reg32[4];
+}Register;
+
+/**
+ *instr.o:/home/cg/compiler-basic/v4/asm/common.h:226: multiple definition of `registers'
+assembler.o:/home/cg/compiler-basic/v4/asm/common.h:226: first defined here
+common.o:/home/cg/compiler-basic/v4/asm/common.h:226: multiple definition of `registers'
+assembler.o:/home/cg/compiler-basic/v4/asm/common.h:226: first defined here
+collect2: error: ld returned 1 exit status
+加上static后能消除上面的错误。我只是碰运气试试，结果修复了这个错误。我并不知道这样做的原理。
+我并不知道这种错误出现的原因。其他变量例如前面的fp为什么没有出现这种问题？
+ */
+static Register registers[8] = {
+  {"al", "ax", "eax"},
+  {"cl", "cx", "ecx"},
+  {"dl",  "dx",	"edx"},
+  {"bl",  "bx",	"ebx"},
+  {"ah",  "sp",	"esp"},
+  {"ch",   "bp",	"ebp"},
+  {"dh",   "si",	"esi"},
+  {"bh",   "di",	"edi"},
+};
+
+void StrToUpper(char *str, char *upperStr);
+void StrToLower(char *str, char *lowerStr);
+void UcFirst(char *str);
 
 void *MALLOC(int size);
 int HeapAllocate(Heap heap, int size);
@@ -192,9 +270,15 @@ int GetLookAheadToken();
 int GetNextToken();
 int GetNextTokenExceptNewLine();
 char *GetCurrentTokenLexeme();
-
+void StartPeekToken();
+void EndPeekToken();
 // todo 放在这里并不合适。
 int StrToNumber(char *str);
-
+InstructionSet FindInstrCode(char *instr);
+char HaveParenthesis(char *str);
+char IsMemoryAddress(int token, char *str);
+char IsSibOrOtherMemory(int token, char *str);
+InstructionType GetInstructionType(InstructionSet instrCode);
+char FindRegIndex(char *regName);
 
 #endif

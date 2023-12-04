@@ -1212,38 +1212,6 @@ void LoadFile(char *filename)
 	fclose(fp);
 }
 
-void StrToUpper(char *str, char *upperStr)
-{
-	int len = strlen(str);
-	for(int i = 0; i < len; i++){
-		if(islower(str[i])){
-			upperStr[i] = toupper(str[i]);
-		}else{
-			upperStr[i] = str[i];
-		}
-	}
-}
-
-void StrToLower(char *str, char *lowerStr)
-{
-	int len = strlen(str);
-	for(int i = 0; i < len; i++){
-		if(isupper(str[i])){
-			lowerStr[i] = tolower(str[i]);
-		}else{
-			lowerStr[i] = str[i];
-		}
-	}
-}
-
-// 模仿PHP函数命名。
-void UcFirst(char *str)
-{
-	int len = strlen(str);
-	if(len == 0)	return;
-	str[0] = toupper(str[0]);
-}
-
 int myStrlen(char *name)
 {
 	int len = strlen(name);
@@ -1875,25 +1843,6 @@ void ParseData()
 	// todo 我想清理最后一个空元素，琢磨了一会儿，没找到正确的方法。搁置。
 //	dataEntryArrayIndex > 1 ? dataEntryArrayIndex = dataEntryArrayIndex - 1 : NULL;:
 //	dataEntryArray[dataEntryArrayIndex] = NULL;
-}
-
-InstructionSet FindInstrCode(char *instr)
-{
-	int index = -1;
-	int count = INSTRUCTION_SETS_SIZE;
-	char *instrUpper = (char *)MALLOC(strlen(instr));
-	StrToUpper(instr, instrUpper);
-
-	for(int i = 0; i < count; i++){
-		if(strcmp(instructionSets[i], instrUpper) == 0){
-			index = i;
-			break;
-		}
-	}
-
-	InstructionSet instrCode = (index == -1) ? I_INSTR_INVALID:(InstructionSet)index;
-
-	return instrCode;
 }
 
 // todo 想不到更好的函数名，只能用这个名字。

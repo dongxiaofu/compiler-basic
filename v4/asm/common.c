@@ -3,6 +3,37 @@
 //Heap CurrentHeap;
 //struct heap ProgramHeap;
 //HEAP(ProgramHeap);
+void StrToUpper(char *str, char *upperStr)
+{
+	int len = strlen(str);
+	for(int i = 0; i < len; i++){
+		if(islower(str[i])){
+			upperStr[i] = toupper(str[i]);
+		}else{
+			upperStr[i] = str[i];
+		}
+	}
+}
+
+void StrToLower(char *str, char *lowerStr)
+{
+	int len = strlen(str);
+	for(int i = 0; i < len; i++){
+		if(isupper(str[i])){
+			lowerStr[i] = tolower(str[i]);
+		}else{
+			lowerStr[i] = str[i];
+		}
+	}
+}
+
+// 模仿PHP函数命名。
+void UcFirst(char *str)
+{
+	int len = strlen(str);
+	if(len == 0)	return;
+	str[0] = toupper(str[0]);
+}
 
 void *MALLOC(int size)
 {
@@ -561,6 +592,17 @@ char *GetCurrentTokenLexeme()
 	return name;
 }
 
+void StartPeekToken()
+{
+	// snapshotLexer = (Lexer)MALLOC(sizeof(struct _lexer));
+	snapshotLexer = lexer;
+}
+
+void EndPeekToken()
+{
+	lexer = snapshotLexer;
+}
+
 int StrToNumber(char *str)
 {
 	if(!IsStringInt(str))	return 0;
@@ -627,4 +669,124 @@ int StrToNumber(char *str)
 	}
 
 	return num;
+}
+
+InstructionSet FindInstrCode(char *instr)
+{
+	int index = -1;
+	int count = INSTRUCTION_SETS_SIZE;
+	char *instrUpper = (char *)MALLOC(strlen(instr));
+	StrToUpper(instr, instrUpper);
+
+	for(int i = 0; i < count; i++){
+		if(strcmp(instructionSets[i], instrUpper) == 0){
+			index = i;
+			break;
+		}
+	}
+
+	InstructionSet instrCode = (index == -1) ? I_INSTR_INVALID:(InstructionSet)index;
+
+	return instrCode;
+}
+
+char HaveParenthesis(char *str){
+	unsigned char leftParenthesis = 0;
+	unsigned char rightParenthesis = 0;
+
+	int len = strlen(str);
+
+	for(int i = 0; i < len; i++){
+		if(str[i] == '('){
+			leftParenthesis = 1; 
+		}else if(str[i] == ')'){
+			rightParenthesis = 1;
+		}
+	}
+
+	return (leftParenthesis & rightParenthesis);
+}
+
+char IsMemoryAddress(int token, char *str)
+{
+	if(token == TYPE_TOKEN_INT){
+		return True;
+	}
+
+	if(token == TYPE_TOKEN_INDENT){
+		return True;
+	}
+
+	return HaveParenthesis(str);
+}
+
+char IsSibOrOtherMemory(int token, char *str)
+{
+	if(!HaveParenthesis(str)){
+		return False;
+	}
+
+	// 根据括号中的逗号来识别是不是SIB。	
+	unsigned char commaCount = 0;
+
+	int len = strlen(str);
+
+	for(int i = 0; i < len; i++){
+		if(str[i] == ','){
+			commaCount++;
+		}
+	}
+
+	// 一定不能使用2和1这种值。对这种值，有个术语，叫啥？我想不起来了。
+	// 这种判断成立的条件是SIB一定是 0x7234(%ebx,%eax,2) 这种格式。
+	if(commaCount == 2)	return 2;
+
+	if(commaCount == 0)	return 1;
+}
+
+InstructionType GetInstructionType(InstructionSet instrCode)
+{
+	InstructionType type = (InstructionType)MALLOC(sizeof(struct instructionType));
+	// FPU指令
+	if(I_FCHS <= instrCode && instrCode <= I_FMULL){
+		type->fpuType = FPU;
+	}else{
+		type->fpuType = NOT_FPU;
+		// FPU指令
+		if(I_CDQ <= instrCode && instrCode <= I_RET){
+			// 无操作数指令
+			type->oprandCount = Zero;
+		}else if(I_MULL <= instrCode && instrCode <= I_CALL){
+			// 单操作数指令
+			type->oprandCount = One;
+		}else{
+			// 双操作数指令
+			type->oprandCount = Two;
+		}
+	}
+
+	return type;
+}
+
+char FindRegIndex(char *regName)
+{
+	for(int i = 0; i < 8; i++){
+		char *reg8 = registers[i].reg8; 
+		char *reg16 = registers[i].reg16; 
+		char *reg32 = registers[i].reg32; 
+		// 分成三个if语句是因为我不想写一个条件判断太长的语句。
+		if(strcmp(regName, reg8) == 0){
+			return i;
+		}
+
+		if(strcmp(regName, reg16) == 0){
+			return i;
+		}
+
+		if(strcmp(regName, reg32) == 0){
+			return i;
+		}
+	}
+
+	return -1;
 }
