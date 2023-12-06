@@ -9,6 +9,7 @@ SIB ParseSIB();
 Oprand ParseOprand();
 Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	SIB sib, int offset, int immediate);
+MemoryInfo GetMemoryInfo(Oprand opr);
 Instruction ParseFchsInstr(InstructionSet instrCode);
 Instruction ParseFldzInstr(InstructionSet instrCode);
 Instruction ParseFucomppInstr(InstructionSet instrCode);

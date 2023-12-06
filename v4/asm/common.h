@@ -212,6 +212,13 @@ typedef struct oprand{
 	OprandType type;
 } *Oprand;
 
+typedef struct memoryInfo{
+	int offset;
+	SIB sib;
+	int mod;
+	int rm;
+} *MemoryInfo;
+
 //static Heap CurrentHeap;
 //static struct heap ProgramHeap;
 HEAP(ProgramHeap);

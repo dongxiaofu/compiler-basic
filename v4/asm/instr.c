@@ -221,6 +221,60 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	return instr;
 }
 
+MemoryInfo GetMemoryInfo(Oprand opr)
+{
+	MemoryInfo mem = (MemoryInfo)MALLOC(sizeof(struct memoryInfo));
+
+	SIB sib = NULL;
+	int offset = 0;
+	int mod = 0;
+	int rm = 0;
+
+	OprandType type = opr->type;
+
+	if(type == T_SIB){
+		sib = &(opr->value.sib);
+		offset = sib->offset;
+		if(offset == 0){
+			mod = 0b00;
+		}else{
+			OFFSET_TYPE offsetType = GetOffsetType(offset);
+			if(offsetType == EIGHT){
+				mod = 0b01;
+			}else{
+				mod = 0b10;
+			}
+		}
+		rm = 0b100;
+	}else if(type == REG_BASE_MEM){
+		struct memoryAddress regBaseMem = opr->value.regBaseMem;
+		offset = regBaseMem.offset; 
+		if(offset == 0){
+			mod = 0b00;
+		}else{
+			OFFSET_TYPE offsetType = GetOffsetType(offset);
+			if(offsetType == EIGHT){
+				mod = 0b01;
+			}else{
+				mod = 0b10;
+			}
+		}
+
+		rm = regBaseMem.reg;
+	}else if(type == IMM_BASE_MEM){
+		mod = 0b00;
+		rm = 0b101;
+		offset = opr->value.immBaseMem;
+	}
+
+	mem->sib = sib;
+	mem->mod = mod;
+	mem->rm = rm;
+	mem->offset = offset;
+
+	return mem;
+}
+
 Instruction ParseFchsInstr(InstructionSet instrCode)
 {
 	Opcode opcode = {0xD9, 0xE0};
@@ -606,40 +660,12 @@ Instruction ParseMullInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -673,40 +699,12 @@ Instruction ParseIdivlInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -740,40 +738,12 @@ Instruction ParseDivlInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -807,40 +777,12 @@ Instruction ParseNeglInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -874,40 +816,12 @@ Instruction ParseNotlInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1026,50 +940,13 @@ Instruction ParsePushlInstr(InstructionSet instrCode)
 		modRM = (ModRM)MALLOC(sizeof(struct modRM));
 		modRM->regOrOpcode = 6;
 
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;	
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
-
-	int size = sizeof(struct instruction);
-	Instruction instr = (Instruction)MALLOC(size);
-	instr->prefix = prefix;
-	instr->opcode = opcode;
-	instr->modRM = modRM;
-	instr->sib = sib;
-	instr->offset = offset;
-	instr->immediate = immediate;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
 	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
@@ -1133,50 +1010,12 @@ fe c3                	inc    %bl
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			// 机器码：fe 84 99 00 02 00 00 	incb   0x200(%ecx,%ebx,4)
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;	
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-
-			modRM->rm = regBaseMem.reg;
-			
-		}else if(type == IMM_BASE_MEM){
-			// TODO 搁置。
-			// 机器码：fe 05 08 00 00 00    	incb   0x8
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1208,52 +1047,13 @@ Instruction ParseIncwInstr(InstructionSet instrCode)
 		}
 	}else{
 		modRM = (ModRM)MALLOC(sizeof(struct modRM));
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			// 66 ff 43 08          	incw   0x8(%ebx)
-			// 43--->01-000-011-->mod=01,reg/opcode=000,rm=011
-			// ff 83 fe ff 00 00    	incl   0xfffe(%ebx)
-			
-			opcode.primaryOpcode = 0xFF;
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
 
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			modRM->rm = regBaseMem.reg; 
-		}else if(type == IMM_BASE_MEM){
-			// TODO 搁置。
-			// 机器码：66 ff 05 00 02 00 00 	incw   0x200
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1285,57 +1085,13 @@ Instruction ParseInclInstr(InstructionSet instrCode)
 		}
 	}else{
 		modRM = (ModRM)MALLOC(sizeof(struct modRM));
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			// 机器码：66 ff 84 99 00 02 00 00	incw   0x200(%ecx,%ebx,4)
-			// 84--->10-000-100-->mod=10,reg/opcode=000,rm=100
-			opcode.primaryOpcode = 0xFF;
+		
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){
-			// 机器码：ff 43 08             	incl   0x8(%ebx)
-			// 43-->01-000-011
-			// 机器码：ff 83 48 23 01 00    	incl   0x12348(%ebx)
-			// 83-->10-000-011
-			
-			opcode.primaryOpcode = 0xFF;
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;	
-
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			// TODO 搁置。
-			// 机器码：66 ff 05 00 02 00 00 	incw   0x200
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1366,50 +1122,12 @@ Instruction ParseDecbInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 		}
 	}else{
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			modRM->regOrOpcode = 1;
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100; 
-		}else if(type == REG_BASE_MEM){
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-
-			modRM->regOrOpcode = 1;
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			// TODO 搁置。
-			// 机器码：fe 05 08 00 00 00    	incb   0x8
-			modRM->mod = 0b00;
-			modRM->regOrOpcode = 1;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1443,47 +1161,13 @@ Instruction ParseDecwInstr(InstructionSet instrCode)
 	}else{
 		modRM = (ModRM)MALLOC(sizeof(struct modRM));
 		modRM->regOrOpcode = 1;
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			opcode.primaryOpcode = 0xFF;
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){			
-			opcode.primaryOpcode = 0xFF;
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
+		
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1516,47 +1200,13 @@ Instruction ParseDeclInstr(InstructionSet instrCode)
 	}else{
 		modRM = (ModRM)MALLOC(sizeof(struct modRM));
 		modRM->regOrOpcode = 1;
-		// 内存地址很麻烦。
-		// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-		// 不知道怎么处理标识符。
-		// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-		if(type == T_SIB){
-			opcode.primaryOpcode = 0xFF;
-			sib = &(opr->value.sib);
-			offset = sib->offset;
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-			modRM->rm = 0b100;
-		}else if(type == REG_BASE_MEM){			
-			opcode.primaryOpcode = 0xFF;
-			struct memoryAddress regBaseMem = opr->value.regBaseMem;
+		
+		MemoryInfo mem = GetMemoryInfo(opr);
 
-			offset = regBaseMem.offset; 
-			if(offset == 0){
-				modRM->mod = 0b00;
-			}else{
-				OFFSET_TYPE offsetType = GetOffsetType(offset);
-				if(offsetType == EIGHT){
-					modRM->mod = 0b01;
-				}else{
-					modRM->mod = 0b10;
-				}
-			}
-
-			modRM->rm = regBaseMem.reg;
-		}else if(type == IMM_BASE_MEM){
-			modRM->mod = 0b00;
-			modRM->rm = 0b101;
-			offset = opr->value.immBaseMem;
-		}
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		offset = mem->offset;
+		sib = mem->sib;
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1684,46 +1334,12 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 			// TODO 不会出现这种情况。
 			}
 		}else{
-			// 内存地址很麻烦。
-			// 内存地址的类型：45, 4(%ebp)，-4(%eax, %ebx, 2), my_str。
-			// 不知道怎么处理标识符。
-			// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
-			if(type == T_SIB){
-				sib = &(opr2->value.sib);
-				offset = sib->offset;
-				if(offset == 0){
-					modRM->mod = 0b00;
-				}else{
-					OFFSET_TYPE offsetType = GetOffsetType(offset);
-					if(offsetType == EIGHT){
-						modRM->mod = 0b01;
-					}else{
-						modRM->mod = 0b10;
-					}
-				}
-				modRM->rm = 0b100;
-			}else if(type == REG_BASE_MEM){			
-				opcode.primaryOpcode = 0xFF;
-				struct memoryAddress regBaseMem = opr2->value.regBaseMem;
+			MemoryInfo mem = GetMemoryInfo(opr2);
 
-				offset = regBaseMem.offset; 
-				if(offset == 0){
-					modRM->mod = 0b00;
-				}else{
-					OFFSET_TYPE offsetType = GetOffsetType(offset);
-					if(offsetType == EIGHT){
-						modRM->mod = 0b01;
-					}else{
-						modRM->mod = 0b10;
-					}
-				}
-
-				modRM->rm = regBaseMem.reg;
-			}else if(type == IMM_BASE_MEM){
-				modRM->mod = 0b00;
-				modRM->rm = 0b101;
-				offset = opr2->value.immBaseMem;
-			}
+			modRM->mod = mem->mod;
+			modRM->rm = mem->rm;
+			offset = mem->offset;
+			sib = mem->sib;
 		}
 	}else{
 		opcode.primaryOpcode = 0x0F;
@@ -1858,42 +1474,11 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 
 	opcode.primaryOpcode = 0x8D;
 
-	if(type1 == T_SIB){
-		sib = &(opr1->value.sib);
-		offset = sib->offset;
-		if(offset == 0){
-			modRM->mod = 0b00;
-		}else{
-			OFFSET_TYPE offsetType = GetOffsetType(offset);
-			if(offsetType == EIGHT){
-				modRM->mod = 0b01;
-			}else{
-				modRM->mod = 0b10;
-			}
-		}
-		modRM->rm = 0b100;
-
-	}else if(type1 == REG_BASE_MEM){			
-		struct memoryAddress regBaseMem = opr1->value.regBaseMem;	
-
-		offset = regBaseMem.offset; 
-		if(offset == 0){
-			modRM->mod = 0b00;
-		}else{
-			OFFSET_TYPE offsetType = GetOffsetType(offset);
-			if(offsetType == EIGHT){
-				modRM->mod = 0b01;
-			}else{
-				modRM->mod = 0b10;
-			}
-		}
-		
-		modRM->rm = regBaseMem.reg;
-	}else if(type1 == IMM_BASE_MEM){
-		modRM->mod = 0b00;
-		modRM->rm = 0b101;
-		offset = opr1->value.immBaseMem;
-	}
+	MemoryInfo mem = GetMemoryInfo(opr1);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+	sib = mem->sib;
 
 	// 跳过操作数中间的逗号。
 	GetNextToken();
