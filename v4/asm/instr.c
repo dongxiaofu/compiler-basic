@@ -1240,9 +1240,109 @@ return NULL;
 
 Instruction ParseXorlInstr(InstructionSet instrCode)
 {
+    /*****************************
+    * 
+    *   35 id           XOR EAX, imm32
+    *   81  /6  id  XOR r/m32,imm32
+    *   83  /6  ib  XOR r/m32,imm8
+    *   31  /r  XOR r/m32,r32
+    *   33  /r  XOR r32,r/m32
+    * 
+    * 
+    * ************************/
 
+    int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
-return NULL;
+    Oprand src = ParseOprand();
+    // 跳过逗号。
+    Oprand dst = ParseOprand();
+
+    OprandType srcType = src->type;
+    OprandType dstType = dst->type;
+
+    modRM = (ModRM)MALLOC(sizeof(struct modRM));
+
+    // 35 id           XOR EAX, imm32
+    if(srcType == IMM && dstType == REG){
+        immediate = src->value.immediate;
+        OFFSET_TYPE immType = GetOffsetType(immediate);
+        RegInfo reg = dst->value.reg;
+        char *regName = reg->name;
+
+        if(immType == THIRTY_TWO && strcmp("eax", regName) == 0){
+            opcode.primaryOpcode = 0x35;
+            //GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+			return GenerateSimpleInstr(0, opcode, NULL, NULL, 0, immediate);
+        }
+    }
+
+    if(srcType == IMM){
+    	// 立即数。
+    	modRM->regOrOpcode = 6;
+    	immediate = src->value.immediate;
+        OFFSET_TYPE immType = GetOffsetType(immediate);
+        if(immType == EIGHT){
+        	opcode.primaryOpcode = 0x83;
+        }else if(immType == THIRTY_TWO){
+        	opcode.primaryOpcode = 0x81;
+        }
+
+        // 处理dst
+        if(dstType == REG){
+        	RegInfo reg = dst->value.reg;
+        	modRM->mod = 0b11;
+        	modRM->rm = reg->index;
+        }else{
+        	MemoryInfo mem = GetMemoryInfo(dst);
+        	modRM->mod = mem->mod;
+        	modRM->rm = mem->rm;
+        	offset = mem->offset;
+        	sib = mem->sib;
+        }
+    }else if(srcType == REG){
+    	// 寄存器。
+    	// 指令与机器码：31  /r  XOR r/m32,r32。
+    	opcode.primaryOpcode = 0x31;
+    	RegInfo reg = src->value.reg;
+    	modRM->regOrOpcode = reg->index;
+    	// TODO 思路不顺畅。
+    	// 处理完src，接着处理dst啊。dst的类型是r/m32。和上面是一致，可以复用代码。
+    	// 处理dst
+        if(dstType == REG){
+        	RegInfo reg = dst->value.reg;
+        	modRM->mod = 0b11;
+        	modRM->rm = reg->index;
+        }else{
+        	MemoryInfo mem = GetMemoryInfo(dst);
+        	modRM->mod = mem->mod;
+        	modRM->rm = mem->rm;
+        	offset = mem->offset;
+        	sib = mem->sib;
+        }
+    }else{
+    	// 内存地址。
+    	// 机器码与指令：33  /r  XOR r32,r/m32。
+    	opcode.primaryOpcode = 0x33;
+    	if(dstType == REG){
+    		RegInfo dstReg = dst->value.reg;
+    		modRM->regOrOpcode = dstReg->index;
+    		// 处理src。虽然上面的指令中显示内存地址是r/m32，但实际上它只能是m32，因为src是寄存器
+    		// 的情况在其他分支中处理了。
+    		MemoryInfo mem = GetMemoryInfo(src);
+        	modRM->mod = mem->mod;
+        	modRM->rm = mem->rm;
+        	offset = mem->offset;
+        	sib = mem->sib;
+    	}
+    }
+
+    //GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseAndlInstr(InstructionSet instrCode)
