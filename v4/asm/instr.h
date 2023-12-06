@@ -7,6 +7,8 @@ OFFSET_TYPE GetOffsetType(int offset);
 OprandType GetOprandType();
 SIB ParseSIB();
 Oprand ParseOprand();
+Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
+	SIB sib, int offset, int immediate);
 Instruction ParseFchsInstr(InstructionSet instrCode);
 Instruction ParseFldzInstr(InstructionSet instrCode);
 Instruction ParseFucomppInstr(InstructionSet instrCode);
