@@ -771,25 +771,36 @@ InstructionType GetInstructionType(InstructionSet instrCode)
 	return type;
 }
 
-char FindRegIndex(char *regName)
+RegInfo FindRegIndex(char *regName)
 {
+	RegInfo reg = (RegInfo)MALLOC(sizeof(struct regInfo));
+
 	for(int i = 0; i < 8; i++){
 		char *reg8 = registers[i].reg8; 
 		char *reg16 = registers[i].reg16; 
 		char *reg32 = registers[i].reg32; 
 		// 分成三个if语句是因为我不想写一个条件判断太长的语句。
 		if(strcmp(regName, reg8) == 0){
-			return i;
+			reg->index = i;
+			reg->size = 8;
+			reg->name = regName;
+			return reg;
 		}
 
 		if(strcmp(regName, reg16) == 0){
-			return i;
+			reg->index = i;
+			reg->size = 16;
+			reg->name = regName;
+			return reg;
 		}
 
 		if(strcmp(regName, reg32) == 0){
-			return i;
+			reg->index = i;
+			reg->size = 32;
+			reg->name = regName;
+			return reg;
 		}
 	}
 
-	return -1;
+	return NULL;
 }

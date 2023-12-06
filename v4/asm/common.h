@@ -119,9 +119,9 @@ static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
 };
 
 typedef struct modRM{
-	int rm:3;
-	int regOrOpcode:3;
-	int mod:2;
+	unsigned int rm:3;
+	unsigned int regOrOpcode:3;
+	unsigned int mod:2;
 } *ModRM; 
 
 typedef struct sib{
@@ -171,6 +171,15 @@ typedef struct instructionType{
 	INSTR_TYPE_OPRAND_COUNT	oprandCount;
 } *InstructionType;
 
+
+// 加上后缀Info纯属无奈，避免重名。
+typedef struct regInfo{
+	unsigned char index;
+	unsigned char size;
+	char *name;
+//	unsigned char [4];
+} *RegInfo;
+
 // todo 想不到更好的名字了。
 // 内存地址有几种形式？0x1234，-4(%ebp)，num11。
 struct memoryAddress{
@@ -188,7 +197,7 @@ typedef union{
 	// TODO mem用来存储0x1234这种内存地址。我认为，(0x1234)等价于0x1234。
 	// num11不会出现在指令中。链接时会不会出现？没法思考那个时候的问题，不熟悉。
 	int immBaseMem;
-	int reg;
+	RegInfo reg;
 } OprandValue;
 
 // TODO 不知道关于内存的猜想是否正确。
@@ -229,6 +238,10 @@ typedef struct {
   	char reg16[3];
   	char reg32[4];
 }Register;
+
+typedef enum{
+	EIGHT, SIXTEEN, THIRTY_TWO
+}OFFSET_TYPE;
 
 /**
  *instr.o:/home/cg/compiler-basic/v4/asm/common.h:226: multiple definition of `registers'
@@ -282,6 +295,6 @@ char HaveParenthesis(char *str);
 char IsMemoryAddress(int token, char *str);
 char IsSibOrOtherMemory(int token, char *str);
 InstructionType GetInstructionType(InstructionSet instrCode);
-char FindRegIndex(char *regName);
+RegInfo FindRegIndex(char *regName);
 
 #endif
