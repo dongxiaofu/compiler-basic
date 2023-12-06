@@ -1231,32 +1231,22 @@ Instruction ParseCallInstr(InstructionSet instrCode)
 	return GenerateSimpleInstr(0, opcode, NULL, NULL, 0xFFFFFFFC, 0);
 }
 
-Instruction ParseOrlInstr(InstructionSet instrCode)
+// 处理xorl、andl、orl。
+Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opcodeParam, \
+		char regOrOpcode)
 {
-
-
-return NULL;
-}
-
-Instruction ParseXorlInstr(InstructionSet instrCode)
-{
-    /*****************************
-    * 
-    *   35 id           XOR EAX, imm32
-    *   81  /6  id  XOR r/m32,imm32
-    *   83  /6  ib  XOR r/m32,imm8
-    *   31  /r  XOR r/m32,r32
-    *   33  /r  XOR r32,r/m32
-    * 
-    * 
-    * ************************/
-
-    int prefix = 0;
+	int prefix = 0;
 	Opcode opcode = {-1, -1};
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	int offset = 0;
 	int immediate = 0;
+
+	int dstEax = opcodeParam.dstEax;
+	int srcImm32 = opcodeParam.srcImm32;
+	int srcImm8 = opcodeParam.srcImm8;
+	int srcReg = opcodeParam.srcReg;
+	int dstReg = opcodeParam.dstReg;
 
     Oprand src = ParseOprand();
     // 跳过逗号。
@@ -1275,7 +1265,7 @@ Instruction ParseXorlInstr(InstructionSet instrCode)
         char *regName = reg->name;
 
         if(immType == THIRTY_TWO && strcmp("eax", regName) == 0){
-            opcode.primaryOpcode = 0x35;
+            opcode.primaryOpcode = dstEax;
             //GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
 			return GenerateSimpleInstr(0, opcode, NULL, NULL, 0, immediate);
         }
@@ -1283,13 +1273,13 @@ Instruction ParseXorlInstr(InstructionSet instrCode)
 
     if(srcType == IMM){
     	// 立即数。
-    	modRM->regOrOpcode = 6;
+    	modRM->regOrOpcode = regOrOpcode;
     	immediate = src->value.immediate;
         OFFSET_TYPE immType = GetOffsetType(immediate);
         if(immType == EIGHT){
-        	opcode.primaryOpcode = 0x83;
+        	opcode.primaryOpcode = srcImm8;
         }else if(immType == THIRTY_TWO){
-        	opcode.primaryOpcode = 0x81;
+        	opcode.primaryOpcode = srcImm32;
         }
 
         // 处理dst
@@ -1307,7 +1297,7 @@ Instruction ParseXorlInstr(InstructionSet instrCode)
     }else if(srcType == REG){
     	// 寄存器。
     	// 指令与机器码：31  /r  XOR r/m32,r32。
-    	opcode.primaryOpcode = 0x31;
+    	opcode.primaryOpcode = srcReg;
     	RegInfo reg = src->value.reg;
     	modRM->regOrOpcode = reg->index;
     	// TODO 思路不顺畅。
@@ -1327,7 +1317,7 @@ Instruction ParseXorlInstr(InstructionSet instrCode)
     }else{
     	// 内存地址。
     	// 机器码与指令：33  /r  XOR r32,r/m32。
-    	opcode.primaryOpcode = 0x33;
+    	opcode.primaryOpcode = dstReg;
     	if(dstType == REG){
     		RegInfo dstReg = dst->value.reg;
     		modRM->regOrOpcode = dstReg->index;
@@ -1345,11 +1335,36 @@ Instruction ParseXorlInstr(InstructionSet instrCode)
 	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
+Instruction ParseOrlInstr(InstructionSet instrCode)
+{
+	LogicalInstrOpcodes opcodeParam = {0x0D, 0x81, 0x83, 0x09, 0x0B};
+	int regOrOpcode = 1;
+	return ParseLogicalInstr(instrCode, opcodeParam, regOrOpcode);
+}
+
+Instruction ParseXorlInstr(InstructionSet instrCode)
+{
+    /*****************************
+    * 
+    *   35 id           XOR EAX, imm32
+    *   81  /6  id  XOR r/m32,imm32
+    *   83  /6  ib  XOR r/m32,imm8
+    *   31  /r  XOR r/m32,r32
+    *   33  /r  XOR r32,r/m32
+    * 
+    * 
+    * ************************/
+
+    LogicalInstrOpcodes opcodeParam = {0x35, 0x81, 0x83, 0x31, 0x33};
+	int regOrOpcode = 6;
+	return ParseLogicalInstr(instrCode, opcodeParam, regOrOpcode);
+}
+
 Instruction ParseAndlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	LogicalInstrOpcodes opcodeParam = {0x25, 0x81, 0x83, 0x21, 0x23};
+	int regOrOpcode = 4;
+	return ParseLogicalInstr(instrCode, opcodeParam, regOrOpcode);
 }
 
 Instruction ParseShllInstr(InstructionSet instrCode)

@@ -65,6 +65,7 @@ Instruction ParseDecwInstr(InstructionSet instrCode);
 Instruction ParseDeclInstr(InstructionSet instrCode);
 Instruction ParseRepInstr(InstructionSet instrCode);
 Instruction ParseCallInstr(InstructionSet instrCode);
+Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opcodeParam, char regOrOpcode);
 Instruction ParseOrlInstr(InstructionSet instrCode);
 Instruction ParseXorlInstr(InstructionSet instrCode);
 Instruction ParseAndlInstr(InstructionSet instrCode);

@@ -219,6 +219,14 @@ typedef struct memoryInfo{
 	int rm;
 } *MemoryInfo;
 
+typedef struct {
+	int dstEax;
+	int srcImm32;
+	int srcImm8;
+	int srcReg;
+	int dstReg;
+} LogicalInstrOpcodes;
+
 //static Heap CurrentHeap;
 //static struct heap ProgramHeap;
 HEAP(ProgramHeap);
