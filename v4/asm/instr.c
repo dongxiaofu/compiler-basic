@@ -39,6 +39,7 @@ OprandType GetOprandType()
 			|| token == TYPE_TOKEN_INT			\
 			|| token == TYPE_TOKEN_IMMEDIATE			\
 			|| token == TYPE_TOKEN_INDENT			\
+			|| token == TYPE_TOKEN_STAR			\
 			|| token == TYPE_TOKEN_CLOSE_PARENTHESES)){
 
 			break;
@@ -101,6 +102,16 @@ OprandType GetOprandType()
 
 SIB ParseSIB()
 {
+	char hasStar = 0;
+	char ch = GetLookAheadChar();
+	if(ch == '*'){
+		hasStar = 1;
+		// 跳过星号*。
+		// 例如，jmpl    *512(,%eax, 8) 。
+		// TODO 不知道会不会连512一起跳过了。
+		GetNextToken();
+	}
+
 	StartPeekToken();
 	int token = GetNextToken();
 	int offset = -1;
@@ -116,11 +127,19 @@ SIB ParseSIB()
 		GetNextToken();
 	}
 	// 要处理小括号。
-	// 一个SIB实例，(%ebx,%eax,2)
+	// 一个SIB实例，(%ebx,%eax,2)。
 	SIB sib = (SIB)MALLOC(sizeof(struct sib));
 	GetNextToken();		// 获取(
-	GetNextToken();		// 获取%ebx
-	char *baseRegName = GetCurrentTokenLexeme();
+	// SIB实例，*512(,%eax, 8)。
+	char *baseRegName = "%ebp";
+	if(hasStar == 1){
+		// SIB实例，*512(,%eax, 8)。
+		// char *baseRegName = "%ebp";
+	}else{
+		GetNextToken();		// 获取%ebx
+		baseRegName = GetCurrentTokenLexeme();
+	}
+	
 	GetNextToken();		// 获取,
 	GetNextToken();		// 获取%eax
 	char *indexRegName = GetCurrentTokenLexeme();
@@ -830,93 +849,255 @@ Instruction ParseNotlInstr(InstructionSet instrCode)
 
 Instruction ParseJeInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x84;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJnpInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x8B;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJneInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
+	opcode.primaryOpcode = 0x85;
+	offset = 0xFFFFFFFC;
 
-return NULL;
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJpInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x8A;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJgInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x7F;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJaInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x77;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJlInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x7C;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJbInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x72;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJgeInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x8D;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJaeInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x83;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJleInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x8E;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJbeInstr(InstructionSet instrCode)
 {
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
 
-return NULL;
+	opcode.primaryOpcode = 0x86;
+	offset = 0xFFFFFFFC;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParseJmpInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
+	Oprand opr = ParseOprand();
+	OprandType type = opr->type;
 
-return NULL;
+	if(type == T_SIB){
+		// 0:	ff 24 c5 00 02 00 00 	jmp    *0x200(,%eax,8)
+		// c5-->11-000-101-->scal=3,index=000,base=0b101=5(是ebp的编号)
+		// 24-->00-100-100-->mod = 00, reg/opcode = 100, rm = 100
+		opcode.primaryOpcode = 0xFF;
+
+		modRM = (ModRM)MALLOC(sizeof(struct modRM));
+
+		offset = sib->offset;
+		OFFSET_TYPE offsetType = GetOffsetType(offset);
+		if(offset == 0){
+			modRM->mod = 0b00;
+		}else{
+			if(offsetType == EIGHT){
+				modRM->mod = 0b01;
+			}else if(offsetType == SIXTEEN){
+				// TODO 为什么引导SIB没有16位偏移？
+			}else if(offsetType == THIRTY_TWO){
+				modRM->mod = 0b10;
+			}
+		}
+		
+		modRM->regOrOpcode = 0b100;
+		modRM->rm = 0b100;
+
+		sib = ParseSIB();
+	}else if(type == IDENT){
+		// TODO 把所有的标识符一律识别为相对重定位。
+		// 机器码：e9 fc ff ff ff       	jmp    13 <main+0x13>
+		// TODO 没有理会操作数是8位还是32位。统一当作32位处理。
+		opcode.primaryOpcode = 0xE9;
+		offset = 0xFFFFFFFC;
+	}
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 Instruction ParsePushlInstr(InstructionSet instrCode)

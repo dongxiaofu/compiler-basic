@@ -203,7 +203,7 @@ typedef union{
 // TODO 不知道关于内存的猜想是否正确。
 // 分别是立即数、SIB、内存地址(寄存器基址、32位基址)、寄存器。
 typedef enum{
-	IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
+	IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG, IDENT
 } OprandType;
 
 // 操作数。
