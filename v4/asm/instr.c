@@ -1849,9 +1849,41 @@ return NULL;
 
 Instruction ParseTestInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
 
+	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
 
-return NULL;
+	Oprand src = ParseOprand();
+	// 跳过逗号。
+	GetNextToken();
+	Oprand dst = ParseOprand();
+
+	OprandType srcType = src->type;
+	OprandType dstType = dst->type;
+
+	immediate = src->value.immediate;
+
+	RegInfo dstReg = dst->value.reg;
+
+	// 0f be cb             	movsbl %bl,%ecx
+	// cb-->11-001-011-->mod=11,reg/opcode=001,rm=011
+	// f6 c4 44             	test   $0x44,%ah
+	// c4-->11-000-100-->mod=11,reg/opcode=000,rm=010
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->mod = 0b11;
+	// mod->regOrOpcode = dstReg->index;
+	modRM->regOrOpcode = 0;		// 这是由这个指令的机器码规定的。
+	// 由于这个指令的机器码规定reg/opcode是0，dst只能存储在rm。
+	modRM->rm = dstReg->index;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
 
