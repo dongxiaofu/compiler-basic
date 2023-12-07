@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+char IsMem(OprandType type);
 OFFSET_TYPE GetOffsetType(int offset);
 OprandType GetOprandType();
 SIB ParseSIB();

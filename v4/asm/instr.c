@@ -1,5 +1,32 @@
 #include "instr.h"
 
+// 这是一个中途新建的函数。在写代码前，要考虑到这种细节，恐怕比较烦。
+char IsMem(OprandType type)
+{
+	// TODO 我当然知道可以用一个`||`来实现通用的效果，
+	// 可我嫌那样写出来的代码只有一行，太长了。
+	char isMem = 0;
+
+	switch(type){
+	case IMM_BASE_MEM:
+		isMem = 1;
+		break;
+	case REG_BASE_MEM:
+		isMem = 1;
+		break;
+	case T_SIB:
+		isMem = 1;
+		break;
+	case IDENT:
+		isMem = 1;
+		break;
+	default:
+		isMem = 0;
+	}
+
+	return isMem;
+}
+
 OFFSET_TYPE GetOffsetType(int offset)
 {
 	if(-128 <= offset && offset <= 127){
@@ -1680,25 +1707,134 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
+// 使用Generate是为了和ParseMovbInstr这些函数区分开。
+Instruction GenerateMovInstr(InstructionSet instrCode)
+{
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
+
+	Oprand src = ParseOprand();
+	// 跳过逗号。
+	Oprand dst = ParseOprand();
+
+	OprandType srcType = src->type;
+	OprandType dstType = dst->type;
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+
+	// MOV r/m32,r32
+	if(srcType == REG && IsMem(dstType) == 1 ){
+		RegInfo srcReg = src->value.reg;
+		int regSize = srcReg->size;
+		if(regSize == 8){
+			opcode.primaryOpcode = 0x88;
+		}else if(regSize == 16){
+			prefix = 0x66;
+			opcode.primaryOpcode = 0x89;
+		}else if(regSize == 32){
+			// 89 d9                	mov    %ebx,%ecx
+			// d9-->11-011-001-->mod=11,reg/opcode=011,rm=001
+			opcode.primaryOpcode = 0x89;
+		}
+
+		MemoryInfo mem = GetMemoryInfo(dst);
+		sib = mem->sib;
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		modRM->regOrOpcode = srcReg->index;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
+
+	// TODO 和上面的代码极其相似，我不能立刻想出优化的方法，先赶进度吧。
+	// MOV r32,r/m32
+	if(dstType == REG && IsMem(srcType) == 1){
+		RegInfo dstReg = dst->value.reg;
+		int regSize = dstReg->size;
+		if(regSize == 8){
+			opcode.primaryOpcode = 0x8A;
+		}else if(regSize == 16){
+			prefix = 0x66;
+			opcode.primaryOpcode = 0x8B;
+		}else if(regSize == 32){
+			opcode.primaryOpcode = 0x8B;
+		}
+
+		MemoryInfo mem = GetMemoryInfo(src);
+		sib = mem->sib;
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+		modRM->regOrOpcode = dstReg->index;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
+
+	// MOV r32,imm32
+	// 非常好处理，虽然我还没有头绪。
+	if(srcType == IMM && dstType == REG){
+		immediate = src->value.immediate;
+		RegInfo dstReg = dst->value.reg;
+		int regSize = dstReg->size;
+		if(regSize == 8){
+			opcode.primaryOpcode = 0xB0 + dstReg->index;
+		}else if(regSize == 16){
+			prefix = 0x66;
+			opcode.primaryOpcode = 0xB8 + dstReg->index;
+		}else if(regSize == 32){
+			opcode.primaryOpcode = 0xB8 + dstReg->index;
+		}
+
+		immediate = src->value.immediate;
+
+		modRM = NULL;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
+
+	// MOV r/m32,imm32
+	if(srcType == IMM && IsMem(dstType) == 1){
+		immediate = src->value.immediate;
+		OFFSET_TYPE immediateType = GetOffsetType(immediate);
+
+		if(immediateType == 8){
+			opcode.primaryOpcode = 0xC6;
+		}else if(immediateType == 16){
+			prefix = 0x66;
+			opcode.primaryOpcode = 0xC7;
+		}else if(immediateType == 32){
+			opcode.primaryOpcode = 0xC7;
+		}
+
+		MemoryInfo mem = GetMemoryInfo(dst);
+		sib = mem->sib;
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
+}
+
 Instruction ParseMovlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	return GenerateMovInstr(instrCode);
 }
 
 Instruction ParseMovbInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	return GenerateMovInstr(instrCode);
 }
 
 Instruction ParseMovwInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	return GenerateMovInstr(instrCode);
 }
 
 Instruction ParseCmplInstr(InstructionSet instrCode)
