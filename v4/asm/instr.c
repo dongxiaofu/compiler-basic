@@ -1842,9 +1842,108 @@ Instruction ParseMovwInstr(InstructionSet instrCode)
 
 Instruction ParseCmplInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
+
+	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
+
+	Oprand src = ParseOprand();
+	// 跳过逗号。
+	GetNextToken();
+	Oprand dst = ParseOprand();
+
+	OprandType srcType = src->type;
+	OprandType dstType = dst->type;
+
+	// CMP EAX, imm32------3D id
+	if(srcType == IMM && dstType == REG){
+		RegInfo dstReg = dst->value.reg;
+		char *regName = dstReg->name;
+		if(strcmp(regName, "eax") == 0){
+			opcode.primaryOpcode = 0x3D;
+			immediate = src->value.immediate;
+			//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+			return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+		}
+	}
+
+	// CMP r/m32,imm32------81 /7 id
+	// CMP r/m32,imm8------83 /7 ib
+	// 需要区分是哪条机器码。根据imm的长度区分。
+	if(srcType == IMM){
+		immediate = src->value.immediate;
+		OFFSET_TYPE immediateType = GetOffsetType(immediate);
+		if(immediateType == EIGHT){
+			opcode.primaryOpcode = 0x83;
+		}else if(immediateType == THIRTY_TWO){
+			opcode.primaryOpcode = 0x81;
+		}else{
+			// TODO 不会出现这种情况。暂时不做错误检查。
+		}
+
+		ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+		modRM->regOrOpcode = 7;
+
+		if(dstType == REG){
+			modRM->mod = 0b11;
+			RegInfo dstReg = dst->value.reg;
+			modRM->rm = dstReg->index;
+		}else{
+			MemoryInfo mem = GetMemoryInfo(dst);
+			sib = mem->sib;
+			offset = mem->offset;
+			modRM->mod = mem->mod;
+			modRM->rm = mem->rm;
+		}
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
 
 
-return NULL;
+	// CMP r/m32,r32------39 /r
+	// 这种情况，实际上只能是 CMP m32,r32------39 /r
+	if(srcType == REG){
+		opcode.primaryOpcode = 0x39;
+
+		MemoryInfo mem = GetMemoryInfo(dst);
+		sib = mem->sib;
+		offset = mem->offset;
+
+		ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+
+		RegInfo srcReg = src->value.reg;
+		modRM->regOrOpcode = srcReg->index;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
+
+	// CMP r32,r/m32------3B /r
+	// 这种情况，实际上只能是 CMP r32,m32------3B /r
+	if(dstType == REG){
+		opcode.primaryOpcode = 0x3B;
+
+		MemoryInfo mem = GetMemoryInfo(src);
+		sib = mem->sib;
+		offset = mem->offset;
+
+		ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+
+		RegInfo dstReg = dst->value.reg;
+		modRM->regOrOpcode = dstReg->index;
+
+		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+	}
 }
 
 Instruction ParseTestInstr(InstructionSet instrCode)
