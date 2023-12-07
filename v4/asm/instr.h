@@ -82,11 +82,11 @@ Instruction ParseMovbInstr(InstructionSet instrCode);
 Instruction ParseMovwInstr(InstructionSet instrCode);
 Instruction ParseCmplInstr(InstructionSet instrCode);
 Instruction ParseTestInstr(InstructionSet instrCode);
+Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize);
 Instruction ParseMovsblInstr(InstructionSet instrCode);
 Instruction ParseMovswlInstr(InstructionSet instrCode);
 Instruction ParseMovzblInstr(InstructionSet instrCode);
 Instruction ParseMovzwlInstr(InstructionSet instrCode);
-Instruction ParseMovzxInstr(InstructionSet instrCode);
 Instruction ParseLealInstr(InstructionSet instrCode);
 
 

@@ -1,32 +1,5 @@
 #include "instr.h"
 
-// 这是一个中途新建的函数。在写代码前，要考虑到这种细节，恐怕比较烦。
-char IsMem(OprandType type)
-{
-	// TODO 我当然知道可以用一个`||`来实现通用的效果，
-	// 可我嫌那样写出来的代码只有一行，太长了。
-	char isMem = 0;
-
-	switch(type){
-	case IMM_BASE_MEM:
-		isMem = 1;
-		break;
-	case REG_BASE_MEM:
-		isMem = 1;
-		break;
-	case T_SIB:
-		isMem = 1;
-		break;
-	case IDENT:
-		isMem = 1;
-		break;
-	default:
-		isMem = 0;
-	}
-
-	return isMem;
-}
-
 OFFSET_TYPE GetOffsetType(int offset)
 {
 	if(-128 <= offset && offset <= 127){
@@ -1458,6 +1431,7 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
 
     Oprand src = ParseOprand();
     // 跳过逗号。
+    GetNextToken();
     Oprand dst = ParseOprand();
 
     OprandType srcType = src->type;
@@ -1707,6 +1681,34 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 }
 
+// 这是一个中途新建的函数。在写代码前，要考虑到这种细节，恐怕比较烦。
+char IsMem(OprandType type)
+{
+	// TODO 我当然知道可以用一个`||`来实现通用的效果，
+	// 可我嫌那样写出来的代码只有一行，太长了。
+	char isMem = 0;
+
+	switch(type){
+	case IMM_BASE_MEM:
+		isMem = 1;
+		break;
+	case REG_BASE_MEM:
+		isMem = 1;
+		break;
+	case T_SIB:
+		isMem = 1;
+		break;
+	case IDENT:
+		isMem = 1;
+		break;
+	default:
+		isMem = 0;
+
+	}
+
+	return isMem;
+}
+
 // 使用Generate是为了和ParseMovbInstr这些函数区分开。
 Instruction GenerateMovInstr(InstructionSet instrCode)
 {
@@ -1719,6 +1721,7 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 
 	Oprand src = ParseOprand();
 	// 跳过逗号。
+	GetNextToken();
 	Oprand dst = ParseOprand();
 
 	OprandType srcType = src->type;
@@ -1851,39 +1854,88 @@ Instruction ParseTestInstr(InstructionSet instrCode)
 return NULL;
 }
 
+
+Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize)
+{
+	int prefix = 0x0F;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
+
+	Oprand src = ParseOprand();
+	// 跳过逗号。
+	GetNextToken();
+	Oprand dst = ParseOprand();
+
+	OprandType srcType = src->type;
+	OprandType dstType = dst->type;
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+
+	// MOVZX r32,r/m8
+
+	// 有符号。
+	if(signType == 1){
+		if(srcSize == EIGHT){
+			opcode.primaryOpcode = 0xBE;
+		}else if(srcSize == SIXTEEN){
+			opcode.primaryOpcode = 0xBF;
+		}else{
+			// TODO 不会出现其他情况。
+		}
+	}else if(signType == 0){
+		// 无符号。
+		if(srcSize == EIGHT){
+			opcode.primaryOpcode = 0xB6;
+		}else if(srcSize == SIXTEEN){
+			opcode.primaryOpcode = 0xB7;
+		}else{
+			// TODO 不会出现其他情况。
+		}
+	}
+
+	RegInfo dstReg = dst->value.reg;
+	modRM->regOrOpcode = dstReg->index;
+
+	if(srcType == REG){
+		modRM->mod = 0b11;
+		RegInfo srcReg = src->value.reg;
+		modRM->rm = srcReg->index;
+	}else{
+		MemoryInfo mem = GetMemoryInfo(src);
+		sib = mem->sib;
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+	}
+	
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+}
+
 Instruction ParseMovsblInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize)
+	return ParseMovzxInstr(instrCode, 1, EIGHT);
 }
 
 Instruction ParseMovswlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize)
+	return ParseMovzxInstr(instrCode, 1, SIXTEEN);
 }
 
 Instruction ParseMovzblInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize)
+	return ParseMovzxInstr(instrCode, 0, EIGHT);
 }
 
 Instruction ParseMovzwlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
-}
-
-Instruction ParseMovzxInstr(InstructionSet instrCode)
-{
-
-
-return NULL;
+	// ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize)
+	return ParseMovzxInstr(instrCode, 0, SIXTEEN);
 }
 
 Instruction ParseLealInstr(InstructionSet instrCode)
