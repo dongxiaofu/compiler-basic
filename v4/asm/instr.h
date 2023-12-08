@@ -31,6 +31,7 @@ Instruction ParseFstpsInstr(InstructionSet instrCode);
 Instruction ParseFstplInstr(InstructionSet instrCode);
 Instruction ParseFstpInstr(InstructionSet instrCode);
 Instruction ParseFldcwInstr(InstructionSet instrCode);
+Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int regOrOpcode);
 Instruction ParseFistplInstr(InstructionSet instrCode);
 Instruction ParseFistpllInstr(InstructionSet instrCode);
 Instruction ParseFstsInstr(InstructionSet instrCode);

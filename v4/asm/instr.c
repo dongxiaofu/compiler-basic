@@ -545,16 +545,46 @@ Instruction ParseFldlInstr(InstructionSet instrCode)
 
 Instruction ParseFildlInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {0xDB, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 0;
 
-return NULL;
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction ParseFildqInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {0xDF, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 5;
 
-return NULL;
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
@@ -610,37 +640,102 @@ Instruction ParseFstpInstr(InstructionSet instrCode)
 
 Instruction ParseFldcwInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {0xD9, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 5;
 
-return NULL;
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
+}
+
+Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int regOrOpcode)
+{
+	int prefix = 0;
+	Opcode opcode = {primaryOpcode, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = regOrOpcode;
+
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction ParseFistplInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int regOrOpcode)
+	return GenerateFistpInstr(instrCode, 0xDB, 3);
 }
 
 Instruction ParseFistpllInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int regOrOpcode)
+	return GenerateFistpInstr(instrCode, 0xDF, 7);
 }
 
 Instruction ParseFstsInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {0xD9, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 2;
 
-return NULL;
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction ParseFstlInstr(InstructionSet instrCode)
 {
+	int prefix = 0;
+	Opcode opcode = {0xDD, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 2;
 
-return NULL;
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction ParseFmulsInstr(InstructionSet instrCode)
