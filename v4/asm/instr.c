@@ -1577,20 +1577,6 @@ Instruction ParseShrlInstr(InstructionSet instrCode)
 return NULL;
 }
 
-Instruction ParseAddlInstr(InstructionSet instrCode)
-{
-
-
-return NULL;
-}
-
-Instruction ParseSublInstr(InstructionSet instrCode)
-{
-
-
-return NULL;
-}
-
 Instruction ParseImullInstr(InstructionSet instrCode)
 {
 	int prefix = -1;
@@ -1840,7 +1826,8 @@ Instruction ParseMovwInstr(InstructionSet instrCode)
 	return GenerateMovInstr(instrCode);
 }
 
-Instruction ParseCmplInstr(InstructionSet instrCode)
+Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes, \
+	int regOrOpcode)
 {
 	int prefix = 0;
 	Opcode opcode = {-1, -1};
@@ -1864,7 +1851,7 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 		RegInfo dstReg = dst->value.reg;
 		char *regName = dstReg->name;
 		if(strcmp(regName, "eax") == 0){
-			opcode.primaryOpcode = 0x3D;
+			opcode.primaryOpcode = cmplEtcOpcodes.dstEax;
 			immediate = src->value.immediate;
 			//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
 			return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
@@ -1878,15 +1865,14 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 		immediate = src->value.immediate;
 		OFFSET_TYPE immediateType = GetOffsetType(immediate);
 		if(immediateType == EIGHT){
-			opcode.primaryOpcode = 0x83;
+			opcode.primaryOpcode = cmplEtcOpcodes.srcImm8;
 		}else if(immediateType == THIRTY_TWO){
-			opcode.primaryOpcode = 0x81;
+			opcode.primaryOpcode = cmplEtcOpcodes.srcImm32;
 		}else{
 			// TODO 不会出现这种情况。暂时不做错误检查。
 		}
 
 		ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
-		modRM->regOrOpcode = 7;
 
 		if(dstType == REG){
 			modRM->mod = 0b11;
@@ -1908,7 +1894,7 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 	// CMP r/m32,r32------39 /r
 	// 这种情况，实际上只能是 CMP m32,r32------39 /r
 	if(srcType == REG){
-		opcode.primaryOpcode = 0x39;
+		opcode.primaryOpcode = cmplEtcOpcodes.srcReg;
 
 		MemoryInfo mem = GetMemoryInfo(dst);
 		sib = mem->sib;
@@ -1928,7 +1914,7 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 	// CMP r32,r/m32------3B /r
 	// 这种情况，实际上只能是 CMP r32,m32------3B /r
 	if(dstType == REG){
-		opcode.primaryOpcode = 0x3B;
+		opcode.primaryOpcode = cmplEtcOpcodes.dstReg;
 
 		MemoryInfo mem = GetMemoryInfo(src);
 		sib = mem->sib;
@@ -1944,6 +1930,28 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
 		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
 	}
+}
+
+Instruction ParseCmplInstr(InstructionSet instrCode)
+{
+	CmplEtcOpcodes cmplEtcOpcodes = {0x3D, 0x83, 0x81, 0x39, 0x3B};
+	// GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes)
+	return GenerateCmplEtcInstr(instrCode, cmplEtcOpcodes, 7);
+}
+
+
+Instruction ParseAddlInstr(InstructionSet instrCode)
+{
+	CmplEtcOpcodes cmplEtcOpcodes = {0x05, 0x81, 0x83, 0x01, 0x03};
+	// GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes)
+	return GenerateCmplEtcInstr(instrCode, cmplEtcOpcodes, 0);
+}
+
+Instruction ParseSublInstr(InstructionSet instrCode)
+{
+	CmplEtcOpcodes cmplEtcOpcodes = {0x2D, 0x81, 0x83, 0x29, 0x2B};
+	// GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes)
+	return GenerateCmplEtcInstr(instrCode, cmplEtcOpcodes, 5);
 }
 
 Instruction ParseTestInstr(InstructionSet instrCode)

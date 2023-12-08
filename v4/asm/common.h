@@ -227,6 +227,14 @@ typedef struct {
 	int dstReg;
 } LogicalInstrOpcodes;
 
+typedef struct{
+	int dstEax;
+	int srcImm8;
+	int srcImm32;
+	int srcReg;
+	int dstReg;
+}CmplEtcOpcodes;
+
 //static Heap CurrentHeap;
 //static struct heap ProgramHeap;
 HEAP(ProgramHeap);

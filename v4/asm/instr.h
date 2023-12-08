@@ -74,13 +74,15 @@ Instruction ParseShllInstr(InstructionSet instrCode);
 Instruction ParseSHLDInstr(InstructionSet instrCode);
 Instruction ParseSarlInstr(InstructionSet instrCode);
 Instruction ParseShrlInstr(InstructionSet instrCode);
-Instruction ParseAddlInstr(InstructionSet instrCode);
-Instruction ParseSublInstr(InstructionSet instrCode);
 Instruction ParseImullInstr(InstructionSet instrCode);
 Instruction ParseMovlInstr(InstructionSet instrCode);
 Instruction ParseMovbInstr(InstructionSet instrCode);
 Instruction ParseMovwInstr(InstructionSet instrCode);
+Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes,\
+	int regOrOpcode);
 Instruction ParseCmplInstr(InstructionSet instrCode);
+Instruction ParseAddlInstr(InstructionSet instrCode);
+Instruction ParseSublInstr(InstructionSet instrCode);
 Instruction ParseTestInstr(InstructionSet instrCode);
 Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE srcSize);
 Instruction ParseMovsblInstr(InstructionSet instrCode);
