@@ -198,12 +198,13 @@ typedef union{
 	// num11不会出现在指令中。链接时会不会出现？没法思考那个时候的问题，不熟悉。
 	int immBaseMem;
 	RegInfo reg;
+	int stIndex;
 } OprandValue;
 
 // TODO 不知道关于内存的猜想是否正确。
 // 分别是立即数、SIB、内存地址(寄存器基址、32位基址)、寄存器。
 typedef enum{
-	IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG, IDENT
+	IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG, IDENT, T_ST
 } OprandType;
 
 // 操作数。

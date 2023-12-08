@@ -54,6 +54,20 @@ OprandType GetOprandType()
 			if(instrCode != I_INSTR_INVALID){
 				break;
 			}
+
+			if(strcmp(name, "st") == 0){
+				token = GetNextToken();			// (
+				if(token == TYPE_TOKEN_OPEN_PARENTHESES){
+					token = GetNextToken();		// 0
+					if(token == IMM){
+						token = GetNextToken();	// )
+						if(token == TYPE_TOKEN_CLOSE_PARENTHESES){
+							// TODO 如果不能满足所有条件，怎么办？
+							return T_ST;
+						}
+					}
+				}
+			}
 		}
 
 		if(token == TYPE_TOKEN_OPEN_PARENTHESES){
@@ -220,7 +234,16 @@ Oprand ParseOprand()
 		name++;
 		opr->value.reg = FindRegIndex(name);
 		opr->type = REG;
-	} 
+	}else if(type == T_ST){
+		// st(0)
+		GetNextToken();				//	跳过st
+		GetNextToken();				//	跳过(
+		GetNextToken();				//	获取 0
+		char *name = GetCurrentTokenLexeme();
+		GetNextToken();				//	跳过)
+		opr->type = T_ST;
+		opr->value.stIndex = StrToNumber(name);
+	}
 
 	return opr;
 }
@@ -534,18 +557,55 @@ Instruction ParseFildqInstr(InstructionSet instrCode)
 return NULL;
 }
 
+Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
+{
+	int prefix = 0;
+	Opcode opcode = {primaryOpcode, -1};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = 3;
+
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	modRM->mod = mem->mod;
+	modRM->rm = mem->rm;
+	offset = mem->offset;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
+}
+
 Instruction ParseFstpsInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
+	return GenerateFstpEtcInstr(instrCode, 0xD9);
 }
 
 Instruction ParseFstplInstr(InstructionSet instrCode)
 {
+	// GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
+	return GenerateFstpEtcInstr(instrCode, 0xDD);
+}
 
+Instruction ParseFstpInstr(InstructionSet instrCode)
+{
+	int prefix = 0;
+	Opcode opcode = {0xDD, 0xD8};
+	int offset = 0;
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int immediate = 0;
 
-return NULL;
+	// dd d9                	fstp   %st(1)
+	Oprand oprand = ParseOprand();
+	opcode.secondaryOpcode += oprand->value.stIndex;
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offset, immediate);
 }
 
 Instruction ParseFldcwInstr(InstructionSet instrCode)
@@ -577,13 +637,6 @@ return NULL;
 }
 
 Instruction ParseFstlInstr(InstructionSet instrCode)
-{
-
-
-return NULL;
-}
-
-Instruction ParseFstpInstr(InstructionSet instrCode)
 {
 
 
