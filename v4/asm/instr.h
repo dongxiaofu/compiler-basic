@@ -70,8 +70,8 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
 Instruction ParseOrlInstr(InstructionSet instrCode);
 Instruction ParseXorlInstr(InstructionSet instrCode);
 Instruction ParseAndlInstr(InstructionSet instrCode);
+Instruction GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode);
 Instruction ParseShllInstr(InstructionSet instrCode);
-Instruction ParseSHLDInstr(InstructionSet instrCode);
 Instruction ParseSarlInstr(InstructionSet instrCode);
 Instruction ParseShrlInstr(InstructionSet instrCode);
 Instruction ParseImullInstr(InstructionSet instrCode);

@@ -1549,32 +1549,68 @@ Instruction ParseAndlInstr(InstructionSet instrCode)
 	return ParseLogicalInstr(instrCode, opcodeParam, regOrOpcode);
 }
 
+Instruction GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
+{
+	int prefix = 0;
+	Opcode opcode = {-1, -1};
+	ModRM modRM = NULL;
+	SIB sib = NULL;
+	int offset = 0;
+	int immediate = 0;
+
+	Oprand src = ParseOprand();
+	// 跳过逗号。
+	GetNextToken();
+	Oprand dst = ParseOprand();
+
+	OprandType srcType = src->type;
+	OprandType dstType = dst->type;
+
+	modRM = (ModRM)MALLOC(sizeof(struct modRM));
+	modRM->regOrOpcode = regOrOpcode;
+
+	if(srcType == IMM){
+		opcode.primaryOpcode = 0xC1;
+	}else if(srcType == REG){
+		opcode.primaryOpcode = 0xD3;
+	}else{
+		// TODO 不会出现这种状况。按本项目的习惯，对这种意外一律不处理。
+	}
+
+	if(dstType == REG){
+		modRM->mod = 0b11;
+		RegInfo dstReg = dst->value.reg;
+		modRM->rm = dstReg->index;
+	}else{
+		MemoryInfo mem = GetMemoryInfo(dst);
+		modRM->mod = mem->mod;
+		modRM->rm = mem->rm;
+
+		offset = mem->offset;
+		sib = mem->sib;
+	}
+
+	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate);
+}
+
 Instruction ParseShllInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
+	return GenerateShiftInstr(instrCode, 4);
 }
 
-Instruction ParseSHLDInstr(InstructionSet instrCode)
-{
-
-
-return NULL;
-}
 
 Instruction ParseSarlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
+	return GenerateShiftInstr(instrCode, 7);
 }
 
 Instruction ParseShrlInstr(InstructionSet instrCode)
 {
-
-
-return NULL;
+	// GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
+	return GenerateShiftInstr(instrCode, 5);
 }
 
 Instruction ParseImullInstr(InstructionSet instrCode)
