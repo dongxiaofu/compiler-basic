@@ -2,11 +2,11 @@
 
 OFFSET_TYPE GetOffsetType(int offset)
 {
-	if(-128 <= offset && offset <= 127){
+	if(0 <= offset && offset <= 255){
 		return EIGHT;
 	}
 
-	if(-65536 <= offset && offset <= 65535){
+	if(0 <= offset && offset <= 65535){
 		return SIXTEEN;
 	}
 
@@ -101,7 +101,9 @@ OprandType GetOprandType()
 			type = IMM;
 		}else if(preToken == TYPE_TOKEN_REGISTER){
 			type = REG;
-		}	
+		}else if(preToken == TYPE_TOKEN_INDENT){
+			type = IDENT;
+		}
 	}
 
 	EndPeekToken();
@@ -243,6 +245,11 @@ Oprand ParseOprand()
 		GetNextToken();				//	跳过)
 		opr->type = T_ST;
 		opr->value.stIndex = StrToNumber(name);
+	}else{
+		// 跳过Mov num, %eax中的num。
+		GetNextToken();
+		opr->value.immBaseMem = 0;
+		opr->type = IDENT;
 	}
 
 	return opr;
@@ -259,6 +266,47 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	instr->sib = sib;
 	instr->offset = offset;
 	instr->immediate = immediate;
+
+	offsetInInstr += prefix != 0 ? 1 : 0;
+
+	offsetInInstr += opcode.primaryOpcode != -1 ? 1 : 0;
+	offsetInInstr += opcode.secondaryOpcode != -1 ? 1 : 0;
+
+	offsetInInstr += modRM != NULL ? 1 : 0;
+	offsetInInstr += sib != NULL ? 1 : 0;
+
+	// r/m的寻址模式是32位直接寻址。
+	if(modRM != NULL && modRM->mod == 0b00 && modRM->rm == 0b101){
+		offsetInInstr += 4;
+	}
+
+	if(offset != 0 && modRM != NULL){
+		if(modRM->mod == 0b01){
+			offsetInInstr += 1;
+		}else if(modRM->mod == 0b10){
+			offsetInInstr += 4;
+		}else{
+			// TODO 不需要做任何处理。
+		}
+	}
+
+	// TODO 也许不完全正确，但我暂时没有精力去检查那七十多个指令了。
+	// 最好根据指令的后缀是不是w来识别立即数是不是16位比较合适。
+	if(immediate != 0){
+		OFFSET_TYPE immediateType = GetOffsetType(immediate);
+		int size = 0;
+		if(immediateType == EIGHT){
+			size = 1;
+		}else if(immediateType == SIXTEEN){
+			size = 2;
+		}else if (immediateType == THIRTY_TWO){
+			size = 4;
+		}else{
+			// TODO 并不存在这种情况。
+		}
+
+		offsetInInstr += size;
+	}
 
 	return instr;
 }
@@ -303,7 +351,7 @@ MemoryInfo GetMemoryInfo(Oprand opr)
 		}
 
 		rm = regBaseMem.reg;
-	}else if(type == IMM_BASE_MEM){
+	}else if(type == IMM_BASE_MEM || type == IDENT){
 		mod = 0b00;
 		rm = 0b101;
 		offset = opr->value.immBaseMem;
