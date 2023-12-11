@@ -271,7 +271,11 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	instr->opcode = opcode;
 	instr->modRM = modRM;
 	instr->sib = sib;
-	instr->offset = {EMPTY, 0};
+	// instr.c:274:18: error: expected expression before '{' token
+	// instr->offset = {EMPTY, 0};
+	instr->offset.type = EMPTY;
+	instr->offset.value = 0;
+
 	instr->relTextEntry = NULL;
 	instr->immediate = immediate;
 
@@ -285,18 +289,20 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 
 	// TODO 这里，就是搜集指令中的重定位的地方。
 	int offset = 0;
+	RelTextEntry entry = NULL;
 	if(offsetInfo != NULL){
-		RelTextEntry entry = NULL;
 		if(offsetInfo->name != NULL){
 			entry = (RelTextEntry)MALLOC(sizeof(struct relTextEntry));
 			entry->offset = offsetInInstr;
 			entry->name = offsetInfo->name;
 
-			instr->relTextEntry = entry;
+			// instr->relTextEntry = entry;
 		}else{
 			instr->offset.value = offsetInfo->offset;
 		}
 	}
+
+	instr->relTextEntry = entry;
 
 	// r/m的寻址模式是32位直接寻址。
 	if(modRM != NULL && modRM->mod == 0b00 && modRM->rm == 0b101){
@@ -2243,7 +2249,8 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 	OprandType dstType = dst->type;
 
 	// CMP EAX, imm32------3D id
-	if(srcType == IMM && dstType == REG){
+	OFFSET_TYPE immediateType = GetOffsetType(immediate.value);
+	if(immediateType == THIRTY_TWO && srcType == IMM && dstType == REG){
 		RegInfo dstReg = dst->value.reg;
 		char *regName = dstReg->name;
 		if(strcmp(regName, "eax") == 0){

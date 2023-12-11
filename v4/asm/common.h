@@ -282,7 +282,8 @@ Label currentLabel;
 FILE *fp;
 
 // 计算指令偏移量。
-static int offsetInInstr = 0;
+// static int offsetInInstr = 0;
+static int offsetInInstr = -1;
 
 typedef struct {
   	char reg8[3];
