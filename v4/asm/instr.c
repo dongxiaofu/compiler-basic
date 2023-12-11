@@ -667,7 +667,7 @@ Instruction ParseFildlInstr(InstructionSet instrCode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 0;
@@ -689,7 +689,7 @@ Instruction ParseFildqInstr(InstructionSet instrCode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 5;
@@ -711,7 +711,7 @@ Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 3;
@@ -745,7 +745,7 @@ Instruction ParseFstpInstr(InstructionSet instrCode)
 	int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	// dd d9                	fstp   %st(1)
 	Oprand oprand = ParseOprand();
@@ -765,7 +765,7 @@ Instruction ParseFldcwInstr(InstructionSet instrCode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 5;
@@ -787,7 +787,7 @@ Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int 
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = regOrOpcode;
@@ -821,7 +821,7 @@ Instruction ParseFstsInstr(InstructionSet instrCode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 2;
@@ -843,7 +843,7 @@ Instruction ParseFstlInstr(InstructionSet instrCode)
 	// int offset = 0;
 	ModRM modRM = NULL;
 	SIB sib = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
 	modRM->regOrOpcode = 2;
@@ -932,7 +932,7 @@ Instruction ParseMullInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0xF7;
 
@@ -971,7 +971,7 @@ Instruction ParseIdivlInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0xF7;
 
@@ -1010,7 +1010,7 @@ Instruction ParseDivlInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0xF7;
 
@@ -1049,7 +1049,7 @@ Instruction ParseNeglInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0xF7;
 
@@ -1088,7 +1088,7 @@ Instruction ParseNotlInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0xF7;
 
@@ -1127,7 +1127,7 @@ Instruction ParseJeInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x84;
@@ -1146,7 +1146,7 @@ Instruction ParseJnpInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x8B;
@@ -1165,7 +1165,7 @@ Instruction ParseJneInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0x85;
 
@@ -1183,7 +1183,7 @@ Instruction ParseJpInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0x8A;
 
@@ -1201,7 +1201,7 @@ Instruction ParseJgInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x7F;
@@ -1220,7 +1220,7 @@ Instruction ParseJaInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x77;
@@ -1239,7 +1239,7 @@ Instruction ParseJlInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x7C;
@@ -1258,7 +1258,7 @@ Instruction ParseJbInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = 0;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x72;
@@ -1277,7 +1277,7 @@ Instruction ParseJgeInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x8D;
@@ -1294,7 +1294,7 @@ Instruction ParseJaeInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x83;
@@ -1311,7 +1311,7 @@ Instruction ParseJleInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x8E;
@@ -1328,7 +1328,7 @@ Instruction ParseJbeInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 
 	opcode.primaryOpcode = 0x86;
@@ -1345,7 +1345,7 @@ Instruction ParseJmpInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	int offset = 0;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1398,7 +1398,7 @@ Instruction ParsePushlInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1432,7 +1432,7 @@ Instruction ParsePoplInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	int offset = 0;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	opcode.primaryOpcode = 0x58;
 
@@ -1504,7 +1504,7 @@ Instruction ParseIncwInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1543,7 +1543,7 @@ Instruction ParseInclInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1619,7 +1619,7 @@ Instruction ParseDecwInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1663,7 +1663,7 @@ Instruction ParseDeclInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
 	OprandType type = opr->type;
@@ -1726,7 +1726,7 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	int dstEax = opcodeParam.dstEax;
 	int srcImm32 = opcodeParam.srcImm32;
@@ -1863,7 +1863,7 @@ Instruction GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
 	// 跳过逗号。
@@ -1928,7 +1928,7 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	// 这一次，先读取两个操作数。
 	Oprand opr1 = ParseOprand();
@@ -2048,7 +2048,7 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
 	// 跳过逗号。
@@ -2182,7 +2182,7 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
 
@@ -2312,7 +2312,7 @@ Instruction ParseTestInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
 
@@ -2352,7 +2352,7 @@ Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
 	// 跳过逗号。
@@ -2438,7 +2438,7 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 	ModRM modRM = NULL;
 	SIB sib = NULL;
 	OffsetInfo offsetInfo = NULL;
-	int immediate = 0;
+	NumericData immediate = {EMPTY, 0};
 
 	// Leal的两条模板是：leal %0, %%edi 和 leal %0, %1。
 
@@ -2457,6 +2457,7 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 
 	offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
 	offsetInfo = mem->offsetInfo;
+	offsetInfo->type = THIRTY_TWO;
 
 	sib = mem->sib;
 

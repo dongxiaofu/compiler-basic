@@ -118,6 +118,15 @@ static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
 	#undef INSTR_ELEMENT
 };
 
+typedef enum{
+	EMPTY, EIGHT, SIXTEEN, THIRTY_TWO
+}OFFSET_TYPE;
+
+typedef struct{
+	int value;
+	OFFSET_TYPE type;
+} NumericData;
+
 typedef struct modRM{
 	unsigned int rm:3;
 	unsigned int regOrOpcode:3;
@@ -144,6 +153,7 @@ typedef struct {
 typedef struct offsetInfo{
 	unsigned int offset;
 	char *name;
+	OFFSET_TYPE type;
 } *OffsetInfo;
 
 typedef struct relTextEntry{
@@ -162,9 +172,9 @@ typedef struct instruction{
 	// SIB。
 	SIB sib;
 	// 偏移。
-	int offset;
+	NumericData offset;
 	// 立即数。
-	int immediate;
+	NumericData immediate;
 
 	RelTextEntry relTextEntry;
 
@@ -279,10 +289,6 @@ typedef struct {
   	char reg16[3];
   	char reg32[4];
 }Register;
-
-typedef enum{
-	EIGHT, SIXTEEN, THIRTY_TWO
-}OFFSET_TYPE;
 
 /**
  *instr.o:/home/cg/compiler-basic/v4/asm/common.h:226: multiple definition of `registers'
