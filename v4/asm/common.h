@@ -140,6 +140,17 @@ typedef struct {
 	char secondaryOpcode;
 }Opcode;
 
+// TODO 加后缀Info没有特殊含义，只是觉得直接使用Offset容易和其他名称重名。
+typedef struct offsetInfo{
+	unsigned int offset;
+	char *name;
+} *OffsetInfo;
+
+typedef struct relTextEntry{
+	unsigned int offset;
+	char *name;
+} *RelTextEntry;
+
 typedef struct instruction{
 	// 前缀。
 	char prefix;
@@ -151,9 +162,11 @@ typedef struct instruction{
 	// SIB。
 	SIB sib;
 	// 偏移。
-	int offset; 
+	int offset;
 	// 立即数。
 	int immediate;
+
+	RelTextEntry relTextEntry;
 
 	struct instruction *next;
 } *Instruction;
@@ -197,6 +210,7 @@ typedef union{
 	// TODO mem用来存储0x1234这种内存地址。我认为，(0x1234)等价于0x1234。
 	// num11不会出现在指令中。链接时会不会出现？没法思考那个时候的问题，不熟悉。
 	int immBaseMem;
+	char *immIndent;
 	RegInfo reg;
 	int stIndex;
 } OprandValue;
@@ -214,7 +228,7 @@ typedef struct oprand{
 } *Oprand;
 
 typedef struct memoryInfo{
-	int offset;
+	OffsetInfo offsetInfo;
 	SIB sib;
 	int mod;
 	int rm;

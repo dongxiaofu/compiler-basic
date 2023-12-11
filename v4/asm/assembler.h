@@ -350,6 +350,10 @@ static int bssDataEntryArrayIndex = 0;
 static SegmentInfo segmentInfoNode;
 static SegmentInfo preSegmentInfoNode;
 
+static SectionDataNode preRelTextDataNode;
+// TODO 可能无用。
+// static SectionDataNode relTextDataNode;
+
 // enum FPUInstructionSet{
 // 	#include "../include/fpu_instruction_set.txt"
 // };
