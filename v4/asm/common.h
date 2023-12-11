@@ -151,7 +151,7 @@ typedef struct {
 
 // TODO 加后缀Info没有特殊含义，只是觉得直接使用Offset容易和其他名称重名。
 typedef struct offsetInfo{
-	unsigned int offset;
+	int offset;
 	char *name;
 	OFFSET_TYPE type;
 } *OffsetInfo;

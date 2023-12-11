@@ -271,7 +271,7 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	instr->opcode = opcode;
 	instr->modRM = modRM;
 	instr->sib = sib;
-	instr->offset = 0;
+	instr->offset = {EMPTY, 0};
 	instr->relTextEntry = NULL;
 	instr->immediate = immediate;
 
@@ -294,7 +294,7 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 
 			instr->relTextEntry = entry;
 		}else{
-			instr->offset = offsetInfo->offset;
+			instr->offset.value = offsetInfo->offset;
 		}
 	}
 
@@ -488,7 +488,7 @@ Instruction ParseFaddsInstr(InstructionSet instrCode)
 	offsetInfo->offset = offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(0, opcode, modRM, NULL, offsetInfo, {EMPTY,0});
+	return GenerateSimpleInstr(0, opcode, modRM, NULL, offsetInfo, immediate);
 }
 
 Instruction ParseFaddlInstr(InstructionSet instrCode)
@@ -594,7 +594,7 @@ Instruction ParseFdivsInstr(InstructionSet instrCode)
 	offsetInfo->offset = offset;	
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(0, opcode, modRM, NULL, offsetInfo, {EMPTY,0});
+	return GenerateSimpleInstr(0, opcode, modRM, NULL, offsetInfo, immediate);
 }
 
 Instruction ParseFdivlInstr(InstructionSet instrCode)
@@ -949,7 +949,7 @@ Instruction ParseRetInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(0, opcode, NULL, NULL, NULL, 0);
+	return GenerateSimpleInstr(0, opcode, NULL, NULL, NULL, immediate);
 }
 
 Instruction ParseMullInstr(InstructionSet instrCode)
@@ -1780,7 +1780,7 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
     // 35 id           XOR EAX, imm32
     if(srcType == IMM && dstType == REG){
         immediate.value = src->value.immediate;
-        OFFSET_TYPE immType = GetOffsetType(immediate.src);
+        OFFSET_TYPE immType = GetOffsetType(immediate.value);
         RegInfo reg = dst->value.reg;
         char *regName = reg->name;
 
@@ -1796,7 +1796,7 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
     	// 立即数。
     	modRM->regOrOpcode = regOrOpcode;
     	immediate.value = src->value.immediate;
-        OFFSET_TYPE immType = GetOffsetType(immediate.src);
+        OFFSET_TYPE immType = GetOffsetType(immediate.value);
         if(immType == EIGHT){
         	opcode.primaryOpcode = srcImm8;
 			immediate.type = EIGHT;
@@ -2183,7 +2183,7 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 	// MOV r/m32,imm32
 	if(srcType == IMM && IsMem(dstType) == 1){
 		immediate.value = src->value.immediate;
-		OFFSET_TYPE immediateType = GetOffsetType(immediate.src);
+		OFFSET_TYPE immediateType = GetOffsetType(immediate.value);
 
 		if(immediateType == 8){
 			immediate.type = EIGHT;
@@ -2260,7 +2260,7 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 	// 需要区分是哪条机器码。根据imm的长度区分。
 	if(srcType == IMM){
 		immediate.value = src->value.immediate;
-		OFFSET_TYPE immediateType = GetOffsetType(immediate.src);
+		OFFSET_TYPE immediateType = GetOffsetType(immediate.value);
 		if(immediateType == EIGHT){
 			immediate.type = EIGHT;
 			opcode.primaryOpcode = cmplEtcOpcodes.srcImm8;
