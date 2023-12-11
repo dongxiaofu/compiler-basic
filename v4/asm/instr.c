@@ -2,11 +2,11 @@
 
 OFFSET_TYPE GetOffsetType(int offset)
 {
-	if(0 <= offset && offset <= 255){
+	if(0 <= offset && offset <= 256){
 		return EIGHT;
 	}
 
-	if(0 <= offset && offset <= 65535){
+	if(257 <= offset && offset <= 65535){
 		return SIXTEEN;
 	}
 
@@ -20,6 +20,8 @@ OprandType GetOprandType()
 	unsigned char leftParenthesis = 0;
 	unsigned char rightParenthesis = 0;
 	unsigned char commaCount = 0;
+
+	unsigned char isFirstInstr = 1;
 	
 	int token, preToken;
 	preToken = -1;
@@ -45,12 +47,17 @@ OprandType GetOprandType()
 			break;
 		}
 
+		if(leftParenthesis == 0 && token == TYPE_TOKEN_COMMA){
+			break;
+		}
+
 		if(token == TYPE_TOKEN_INDENT){
 			// 如果是指令，需要断开。
 			// TODO 最好的方法是在GetNextToken识别token是不是指令，把指令和普通的indent区分开。
 			// 我不愿意现在花精力做这件事，因此像这样打补丁。
 			char *name = GetCurrentTokenLexeme();
 			InstructionSet instrCode = FindInstrCode(name);
+			// if(isFirstInstr != 1 && instrCode != I_INSTR_INVALID){
 			if(instrCode != I_INSTR_INVALID){
 				break;
 			}
@@ -276,11 +283,6 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	offsetInInstr += modRM != NULL ? 1 : 0;
 	offsetInInstr += sib != NULL ? 1 : 0;
 
-	// r/m的寻址模式是32位直接寻址。
-	if(modRM != NULL && modRM->mod == 0b00 && modRM->rm == 0b101){
-		offsetInInstr += 4;
-	}
-
 	// TODO 这里，就是搜集指令中的重定位的地方。
 	int offset = 0;
 	if(offsetInfo != NULL){
@@ -296,6 +298,26 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 		}
 	}
 
+	// r/m的寻址模式是32位直接寻址。
+	if(modRM != NULL && modRM->mod == 0b00 && modRM->rm == 0b101){
+		offsetInInstr += 4;
+	}
+
+//	// TODO 这里，就是搜集指令中的重定位的地方。
+//	int offset = 0;
+//	if(offsetInfo != NULL){
+//		RelTextEntry entry = NULL;
+//		if(offsetInfo->name != NULL){
+//			entry = (RelTextEntry)MALLOC(sizeof(struct relTextEntry));
+//			entry->offset = offsetInInstr;
+//			entry->name = offsetInfo->name;
+//
+//			instr->relTextEntry = entry;
+//		}else{
+//			instr->offset = offsetInfo->offset;
+//		}
+//	}
+
 	if(offset != 0 && modRM != NULL){
 		if(modRM->mod == 0b01){
 			offsetInInstr += 1;
@@ -303,6 +325,12 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 			offsetInInstr += 4;
 		}else{
 			// TODO 不需要做任何处理。
+		}
+	}
+
+	if(modRM == NULL){
+		if(immediate != 0){
+			offsetInInstr += 4;
 		}
 	}
 
