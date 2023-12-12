@@ -1,3 +1,500 @@
+#include "instr.h"
+
+OFFSET_TYPE GetOffsetType(int offset)
+{
+//	if(0 <= offset && offset <= 256){
+//		return EIGHT;
+//	}
+//
+//	if(257 <= offset && offset <= 65535){
+//		return SIXTEEN;
+//	}
+
+	if(0 <= offset && offset <= 127){
+		return EIGHT;
+	}
+
+	if(128 <= offset && offset <= 32768){
+		return SIXTEEN;
+	}
+
+	return THIRTY_TWO;
+}
+
+OprandType GetOprandType()
+{
+	StartPeekToken();	
+
+	unsigned char leftParenthesis = 0;
+	unsigned char rightParenthesis = 0;
+	unsigned char commaCount = 0;
+
+	unsigned char isFirstInstr = 1;
+	
+	int token, preToken;
+	preToken = -1;
+
+	while(1){
+		token = GetNextToken();
+		// 在所有的token中都没有换行符。原因是什么？我不知道。一时半会儿我理解不了去年写的GetNextToken。
+//		if(token == TYPE_TOKEN_NEWLINE){
+//			break;
+//		}
+//		我认为SIB只能有逗号、寄存器、括号、数字组成。
+//		我修改了这个函数。我认为操作数的构成要素只能是逗号、寄存器、括号、标识符、立即数、数字。
+//		TODO token == TYPE_TOKEN_INDENT 可能有问题。我有没有把指令从标识符中分离出来？
+		if(!(token == TYPE_TOKEN_REGISTER || token == TYPE_TOKEN_INT \
+			|| token == TYPE_TOKEN_OPEN_PARENTHESES	\
+			|| token == TYPE_TOKEN_COMMA			\
+			|| token == TYPE_TOKEN_INT			\
+			|| token == TYPE_TOKEN_IMMEDIATE			\
+			|| token == TYPE_TOKEN_INDENT			\
+			|| token == TYPE_TOKEN_STAR			\
+			|| token == TYPE_TOKEN_CLOSE_PARENTHESES)){
+
+			break;
+		}
+
+		if(leftParenthesis == 0 && token == TYPE_TOKEN_COMMA){
+			break;
+		}
+
+		if(token == TYPE_TOKEN_INDENT){
+			// 如果是指令，需要断开。
+			// TODO 最好的方法是在GetNextToken识别token是不是指令，把指令和普通的indent区分开。
+			// 我不愿意现在花精力做这件事，因此像这样打补丁。
+			char *name = GetCurrentTokenLexeme();
+			InstructionSet instrCode = FindInstrCode(name);
+			// if(isFirstInstr != 1 && instrCode != I_INSTR_INVALID){
+			if(instrCode != I_INSTR_INVALID){
+				break;
+			}
+
+			if(strcmp(name, "st") == 0){
+				token = GetNextToken();			// (
+				if(token == TYPE_TOKEN_OPEN_PARENTHESES){
+					token = GetNextToken();		// 0
+					if(token == IMM){
+						token = GetNextToken();	// )
+						if(token == TYPE_TOKEN_CLOSE_PARENTHESES){
+							// TODO 如果不能满足所有条件，怎么办？
+							return T_ST;
+						}
+					}
+				}
+			}
+		}
+
+		if(token == TYPE_TOKEN_OPEN_PARENTHESES){
+			leftParenthesis = 1;
+		}
+		
+		if(token == TYPE_TOKEN_CLOSE_PARENTHESES){
+			rightParenthesis = 1;
+			break;
+		}
+
+		if(token == TYPE_TOKEN_COMMA){
+			commaCount++;
+		}
+
+		preToken = token;
+	}
+
+	OprandType type;
+	if(leftParenthesis & rightParenthesis){
+		type = REG_BASE_MEM;	
+		if(commaCount == 2){
+			type = T_SIB;
+		}
+	}else{
+		// 合法的操作数，如果不包含小括号，必定只有一个标识符。
+		// 这个if..else if语句群可以改成多个if语句。
+		if(preToken == TYPE_TOKEN_INT){
+			type = IMM_BASE_MEM;
+		}else if(preToken == TYPE_TOKEN_IMMEDIATE){
+			type = IMM;
+		}else if(preToken == TYPE_TOKEN_REGISTER){
+			type = REG;
+		}else if(preToken == TYPE_TOKEN_INDENT){
+			type = IDENT;
+		}
+	}
+
+	EndPeekToken();
+
+	if(preToken == -1){
+		printf("there is a invalid oprand in line %d in file %s\n", __LINE__, __FILE__);
+		exit(-1);
+	}
+
+	return type;
+}
+
+SIB ParseSIB()
+{
+	char hasStar = 0;
+	char ch = GetLookAheadChar();
+	if(ch == '*'){
+		hasStar = 1;
+		// 跳过星号*。
+		// 例如，jmpl    *512(,%eax, 8) 。
+		// TODO 不知道会不会连512一起跳过了。
+		GetNextToken();
+	}
+
+	StartPeekToken();
+	int token = GetNextToken();
+	int offset = -1;
+	char *name;
+	if(token == TYPE_TOKEN_INT){
+		name = GetCurrentTokenLexeme();
+		offset = StrToNumber(name);
+	}
+	EndPeekToken();
+
+	// offset不是-1，表示第一个token是-4(%ebp)中的-4。应该跳过它。
+	if(offset != -1){
+		GetNextToken();
+	}
+	// 要处理小括号。
+	// 一个SIB实例，(%ebx,%eax,2)。
+	SIB sib = (SIB)MALLOC(sizeof(struct sib));
+	GetNextToken();		// 获取(
+	// SIB实例，*512(,%eax, 8)。
+	char *baseRegName = "%ebp";
+	if(hasStar == 1){
+		// SIB实例，*512(,%eax, 8)。
+		// char *baseRegName = "%ebp";
+	}else{
+		GetNextToken();		// 获取%ebx
+		baseRegName = GetCurrentTokenLexeme();
+	}
+	
+	GetNextToken();		// 获取,
+	GetNextToken();		// 获取%eax
+	char *indexRegName = GetCurrentTokenLexeme();
+	GetNextToken();		// 获取,
+	GetNextToken();		// 获取2
+	char *scaleName = GetCurrentTokenLexeme();
+	GetNextToken();		// 获取)
+
+	sib->base = FindRegIndex(++baseRegName)->index;
+	sib->index = FindRegIndex(++indexRegName)->index;
+	sib->scale = StrToNumber(scaleName);
+	sib->offset = offset;
+	
+	return sib;
+}
+
+Oprand ParseOprand()
+{
+	OprandType type = GetOprandType();
+
+	Oprand opr = (Oprand)MALLOC(sizeof(struct oprand));	
+
+	// IMM, T_SIB, REG_BASE_MEM, IMM_BASE_MEM, REG
+	if(type == IMM){
+		int token = GetNextToken();
+		char *name = GetCurrentTokenLexeme();
+		name++;
+		opr->value.immediate = StrToNumber(name);
+		opr->type = IMM;
+	}else if(type == T_SIB){
+		SIB sib = ParseSIB();
+		opr->value.sib = *sib;
+	}else if(type == REG_BASE_MEM){
+		StartPeekToken();
+		int token = GetNextToken();
+		int offset = -1;
+		char *name;
+		if(token == TYPE_TOKEN_INT){
+			name = GetCurrentTokenLexeme();
+			offset = StrToNumber(name);
+		}
+		EndPeekToken();
+		
+		// offset不是-1，表示第一个token是-4(%ebp)中的-4。应该跳过它。
+		if(offset != -1){
+			GetNextToken();
+		}
+
+		// 跳过(。
+		GetNextToken();
+		// 只能是寄存器，否则就不是合法的汇编代码。本项目只负责处理正确的汇编代码。
+		int currentToken = GetNextToken();
+		if(currentToken != TYPE_TOKEN_REGISTER){
+			printf("%s is not a register in line %d\n", GetCurrentTokenLexeme(), __LINE__);
+			exit(__LINE__);
+		}
+		// 计算寄存器的编号。
+		// 前面获取的name是寄存器，%eax。
+		name = GetCurrentTokenLexeme();
+		name++;
+		// TODO 这里应该判断regInfo是不是NULL，我懒得马上写。
+		RegInfo regInfo = FindRegIndex(name);
+		opr->value.regBaseMem.reg = regInfo->index;
+		opr->value.regBaseMem.offset = offset;
+		
+		opr->type = REG_BASE_MEM;
+
+	}else if(type == IMM_BASE_MEM){
+		int token = GetNextToken();
+		char *name = GetCurrentTokenLexeme();
+		opr->value.immBaseMem = StrToNumber(name);
+		opr->type = IMM_BASE_MEM;
+	}else if(type == REG){
+		// 计算寄存器的编号。
+		// 前面获取的name是寄存器，%eax。
+		int token = GetNextToken();
+		char *name = GetCurrentTokenLexeme();
+		name++;
+		opr->value.reg = FindRegIndex(name);
+		opr->type = REG;
+	}else if(type == T_ST){
+		// st(0)
+		GetNextToken();				//	跳过st
+		GetNextToken();				//	跳过(
+		GetNextToken();				//	获取 0
+		char *name = GetCurrentTokenLexeme();
+		GetNextToken();				//	跳过)
+		opr->type = T_ST;
+		opr->value.stIndex = StrToNumber(name);
+	}else{
+		// 跳过Mov num, %eax中的num。
+		GetNextToken();
+		opr->value.immIndent = GetCurrentTokenLexeme();
+		opr->type = IDENT;
+	}
+
+	// 下面的代码生成调试用的数据。
+	// TODO 为immStr等分配空间时设置的33等值需优化：1. 不应该用硬编码；2. 这些值可能不正确。
+	if(type == IMM){
+		int imm = opr->value.immediate;
+		char *immStr = (char *)MALLOC(33);
+		sprintf(immStr, "%d", imm); 
+		opr->oprandStr = immStr;
+	}else if(type == T_SIB){
+		char *fmt = "%d(%s, %s, %d)";
+		char *str = (char *)MALLOC(20);
+		SIB sib = &(opr->value.sib);
+		
+		sprintf(str, fmt, sib->offset, sib->base, sib->index, sib->scale); 
+		opr->oprandStr = str;
+	}else if(type == REG_BASE_MEM){
+		// char *fmt = "%d(%s)";
+		char *fmt = "%d(%d)";
+		char *str = (char *)MALLOC(20);
+		RegInfo reg = opr->value.reg;
+		MemoryAddress regBaseMem = &(opr->value.regBaseMem);
+		
+		// TODO 有时间时把寄存器编号换成寄存器名称。
+		sprintf(str, fmt, regBaseMem->offset, regBaseMem->reg);
+		opr->oprandStr = str;
+	}else if(type == IMM_BASE_MEM){
+		char *fmt = "%d";
+		char *str = (char *)MALLOC(32);
+		int imm = opr->value.immediate;
+		
+		sprintf(str, fmt, imm);
+		opr->oprandStr = str;
+	}else if(type == REG){
+		char *fmt = "%s";
+		char *str = (char *)MALLOC(20);
+		RegInfo reg = opr->value.reg;
+		
+		sprintf(str, fmt, reg->name);
+		opr->oprandStr = str;
+	}else if(type == T_ST){
+		char *fmt = "ST(%d)";
+		char *str = (char *)MALLOC(20);
+		int stIndex = opr->value.stIndex;
+		
+		sprintf(str, fmt, stIndex);
+		opr->oprandStr = str;
+	}else{
+		opr->oprandStr = opr->value.immIndent;
+	}
+
+	return opr;
+}
+
+Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
+	 SIB sib, OffsetInfo offsetInfo, NumericData immediate)
+{
+	int size = sizeof(struct instruction);
+	Instruction instr = (Instruction)MALLOC(size);
+	instr->prefix = prefix;
+	instr->opcode = opcode;
+	instr->modRM = modRM;
+	instr->sib = sib;
+	// instr.c:274:18: error: expected expression before '{' token
+	// instr->offset = {EMPTY, 0};
+	instr->offset.type = EMPTY;
+	instr->offset.value = 0;
+
+	instr->relTextEntry = NULL;
+	instr->immediate = immediate;
+
+	offsetInInstr += prefix != 0 ? 1 : 0;
+
+	offsetInInstr += opcode.primaryOpcode != -1 ? 1 : 0;
+	offsetInInstr += opcode.secondaryOpcode != -1 ? 1 : 0;
+
+	offsetInInstr += modRM != NULL ? 1 : 0;
+	offsetInInstr += sib != NULL ? 1 : 0;
+
+	// TODO 这里，就是搜集指令中的重定位的地方。
+	int offset = 0;
+	RelTextEntry entry = NULL;
+	if(offsetInfo != NULL){
+		if(offsetInfo->name != NULL){
+			entry = (RelTextEntry)MALLOC(sizeof(struct relTextEntry));
+			entry->offset = offsetInInstr;
+			entry->name = offsetInfo->name;
+
+			// instr->relTextEntry = entry;
+		}else{
+			instr->offset.value = offsetInfo->offset;
+		}
+	}
+
+	instr->relTextEntry = entry;
+
+	// r/m的寻址模式是32位直接寻址。
+	if(modRM != NULL && modRM->mod == 0b00 && modRM->rm == 0b101){
+		offsetInInstr += 4;
+	}
+
+//	// TODO 这里，就是搜集指令中的重定位的地方。
+//	int offset = 0;
+//	if(offsetInfo != NULL){
+//		RelTextEntry entry = NULL;
+//		if(offsetInfo->name != NULL){
+//			entry = (RelTextEntry)MALLOC(sizeof(struct relTextEntry));
+//			entry->offset = offsetInInstr;
+//			entry->name = offsetInfo->name;
+//
+//			instr->relTextEntry = entry;
+//		}else{
+//			instr->offset = offsetInfo->offset;
+//		}
+//	}
+
+	if(offset != 0 && modRM != NULL){
+		if(modRM->mod == 0b01){
+			offsetInInstr += 1;
+		}else if(modRM->mod == 0b10){
+			offsetInInstr += 4;
+		}else{
+			// TODO 不需要做任何处理。
+		}
+	}
+
+	if(modRM == NULL){
+		if(immediate.type != EMPTY){
+			int len = 0;
+			if(immediate.type == EIGHT){
+				len = 1;
+			}else if(immediate.type == SIXTEEN){
+				len = 2;
+			}else{
+				len = 4;
+			}
+			offsetInInstr += len;
+		}
+	}
+
+	if(immediate.type != EMPTY){
+		OFFSET_TYPE immediateType = immediate.type;
+		int size = 0;
+		if(immediateType == EIGHT){
+			size = 1;
+		}else if(immediateType == SIXTEEN){
+			size = 2;
+		}else if (immediateType == THIRTY_TWO){
+			size = 4;
+		}else{
+			// TODO 并不存在这种情况。
+		}
+
+		offsetInInstr += size;
+	}
+
+	return instr;
+}
+
+MemoryInfo GetMemoryInfo(Oprand opr)
+{
+	MemoryInfo mem = (MemoryInfo)MALLOC(sizeof(struct memoryInfo));
+
+	SIB sib = NULL;
+	OffsetInfo offsetInfo = NULL;
+	int mod = 0;
+	int rm = 0;
+
+	OprandType type = opr->type;
+
+	// 在SIB、寄存器基址中，如果偏移量是0，在指令中就无需包含偏移。
+	if(type == T_SIB){
+		sib = &(opr->value.sib);
+		int offset = sib->offset;
+		if(offset == 0){
+			mod = 0b00;
+		}else{
+			offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+			offsetInfo->type = THIRTY_TWO;
+			offsetInfo->offset = offset;
+			OFFSET_TYPE offsetType = GetOffsetType(offset);
+			if(offsetType == EIGHT){
+				mod = 0b01;
+			}else{
+				mod = 0b10;
+			}
+		}
+		rm = 0b100;
+	}else if(type == REG_BASE_MEM){
+		struct memoryAddress regBaseMem = opr->value.regBaseMem;
+		int offset = regBaseMem.offset; 
+		if(offset == 0){
+			mod = 0b00;
+		}else{
+			offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+			offsetInfo->type = THIRTY_TWO;
+			offsetInfo->offset = offset;
+			OFFSET_TYPE offsetType = GetOffsetType(offset);
+			if(offsetType == EIGHT){
+				mod = 0b01;
+			}else{
+				mod = 0b10;
+			}
+		}
+
+		rm = regBaseMem.reg;
+	}else if(type == IMM_BASE_MEM || type == IDENT){
+		mod = 0b00;
+		rm = 0b101;
+
+		offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+		offsetInfo->type = THIRTY_TWO;
+
+		if(type == IMM_BASE_MEM){
+			offsetInfo->offset = opr->value.immBaseMem;
+		}
+
+		if(type == IDENT){
+			offsetInfo->name = opr->value.immIndent;
+		}
+	}
+
+	mem->sib = sib;
+	mem->mod = mod;
+	mem->rm = rm;
+	mem->offsetInfo = offsetInfo;
+
+	return mem;
+}
+
 Instruction ParseFchsInstr(InstructionSet instrCode)
 {
 	Opcode opcode = {0xD9, 0xE0};
@@ -300,7 +797,7 @@ Instruction ParseFildlInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
@@ -328,7 +825,7 @@ Instruction ParseFildqInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
@@ -366,7 +863,7 @@ Instruction ParseFstpInstr(InstructionSet instrCode)
 	offsetInfo->offset = offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
@@ -394,7 +891,7 @@ Instruction ParseFldcwInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
@@ -434,7 +931,7 @@ Instruction ParseFstsInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
@@ -462,7 +959,7 @@ Instruction ParseFstlInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
 	instr->oprands[] = oprand;
 
 return instr;
