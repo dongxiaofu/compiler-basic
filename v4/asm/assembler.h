@@ -351,6 +351,7 @@ static SegmentInfo segmentInfoNode;
 static SegmentInfo preSegmentInfoNode;
 
 static SectionDataNode preRelTextDataNode;
+static Instruction instrHead;
 // TODO 可能无用。
 // static SectionDataNode relTextDataNode;
 

@@ -86,6 +86,8 @@ void InitInstrTable()
 
 void Init()
 {
+	instrHead = NULL;
+	// TODO 下面的代码都是写虚拟机时使用的代码，可能已经无用了。找机会删除。
 	instrStreamIndex = 0;
 	StringTable = (LinkedList)MALLOC(sizeof(struct _LinkedList));
 	SymbolTable = (LinkedList)MALLOC(sizeof(struct _LinkedList));
@@ -1875,7 +1877,12 @@ void ParseInstr()
 	printf("开始处理指令\n");
 	int token;
 
-	Instruction instrHead = (Instruction)MALLOC(sizeof(struct instruction));
+	// TODO 要检查一下这种设置头结点的方法有没有用。
+	if(instrHead == NULL){
+		instrHead = (Instruction)MALLOC(sizeof(struct instruction));
+	}
+
+	// Instruction instrHead = (Instruction)MALLOC(sizeof(struct instruction));
 	Instruction instrDataNode, preInstrDataNode;
 	instrDataNode = preInstrDataNode = NULL;
 	
