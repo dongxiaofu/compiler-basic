@@ -2,11 +2,19 @@
 
 OFFSET_TYPE GetOffsetType(int offset)
 {
-	if(0 <= offset && offset <= 256){
+//	if(0 <= offset && offset <= 256){
+//		return EIGHT;
+//	}
+//
+//	if(257 <= offset && offset <= 65535){
+//		return SIXTEEN;
+//	}
+
+	if(0 <= offset && offset <= 127){
 		return EIGHT;
 	}
 
-	if(257 <= offset && offset <= 65535){
+	if(128 <= offset && offset <= 32768){
 		return SIXTEEN;
 	}
 
@@ -259,6 +267,55 @@ Oprand ParseOprand()
 		opr->type = IDENT;
 	}
 
+	// 下面的代码生成调试用的数据。
+	// TODO 为immStr等分配空间时设置的33等值需优化：1. 不应该用硬编码；2. 这些值可能不正确。
+	if(type == IMM){
+		int imm = opr->value.immediate;
+		char *immStr = (char *)MALLOC(33);
+		sprintf(immStr, "%d", imm); 
+		opr->oprandStr = immStr;
+	}else if(type == T_SIB){
+		char *fmt = "%d(%s, %s, %d)";
+		char *str = (char *)MALLOC(20);
+		SIB sib = &(opr->value.sib);
+		
+		sprintf(str, fmt, sib->offset, sib->base, sib->index, sib->scale); 
+		opr->oprandStr = str;
+	}else if(type == REG_BASE_MEM){
+		// char *fmt = "%d(%s)";
+		char *fmt = "%d(%d)";
+		char *str = (char *)MALLOC(20);
+		RegInfo reg = opr->value.reg;
+		MemoryAddress regBaseMem = &(opr->value.regBaseMem);
+		
+		// TODO 有时间时把寄存器编号换成寄存器名称。
+		sprintf(str, fmt, regBaseMem->offset, regBaseMem->reg);
+		opr->oprandStr = str;
+	}else if(type == IMM_BASE_MEM){
+		char *fmt = "%d";
+		char *str = (char *)MALLOC(32);
+		int imm = opr->value.immediate;
+		
+		sprintf(str, fmt, imm);
+		opr->oprandStr = str;
+	}else if(type == REG){
+		char *fmt = "%s";
+		char *str = (char *)MALLOC(20);
+		RegInfo reg = opr->value.reg;
+		
+		sprintf(str, fmt, reg->name);
+		opr->oprandStr = str;
+	}else if(type == T_ST){
+		char *fmt = "ST(%d)";
+		char *str = (char *)MALLOC(20);
+		int stIndex = opr->value.stIndex;
+		
+		sprintf(str, fmt, stIndex);
+		opr->oprandStr = str;
+	}else{
+		opr->oprandStr = opr->value.immIndent;
+	}
+
 	return opr;
 }
 
@@ -378,13 +435,16 @@ MemoryInfo GetMemoryInfo(Oprand opr)
 
 	OprandType type = opr->type;
 
+	// 在SIB、寄存器基址中，如果偏移量是0，在指令中就无需包含偏移。
 	if(type == T_SIB){
 		sib = &(opr->value.sib);
 		int offset = sib->offset;
-		offsetInfo->offset = offset;
 		if(offset == 0){
 			mod = 0b00;
 		}else{
+			offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+			offsetInfo->type = THIRTY_TWO;
+			offsetInfo->offset = offset;
 			OFFSET_TYPE offsetType = GetOffsetType(offset);
 			if(offsetType == EIGHT){
 				mod = 0b01;
@@ -396,10 +456,12 @@ MemoryInfo GetMemoryInfo(Oprand opr)
 	}else if(type == REG_BASE_MEM){
 		struct memoryAddress regBaseMem = opr->value.regBaseMem;
 		int offset = regBaseMem.offset; 
-		offsetInfo->offset = offset;
 		if(offset == 0){
 			mod = 0b00;
 		}else{
+			offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+			offsetInfo->type = THIRTY_TWO;
+			offsetInfo->offset = offset;
 			OFFSET_TYPE offsetType = GetOffsetType(offset);
 			if(offsetType == EIGHT){
 				mod = 0b01;
@@ -2249,16 +2311,23 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 	OprandType dstType = dst->type;
 
 	// CMP EAX, imm32------3D id
-	OFFSET_TYPE immediateType = GetOffsetType(immediate.value);
-	if(immediateType == THIRTY_TWO && srcType == IMM && dstType == REG){
-		RegInfo dstReg = dst->value.reg;
-		char *regName = dstReg->name;
-		if(strcmp(regName, "eax") == 0){
-			opcode.primaryOpcode = cmplEtcOpcodes.dstEax;
-			immediate.value = src->value.immediate;
-			immediate.type = THIRTY_TWO;
-			//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-			return GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+	// OFFSET_TYPE immediateType = GetOffsetType(immediate.value);
+	if(srcType == IMM && dstType == REG){
+		// 测试后，发现数据不对，才修改这里。
+		// 错误是怎么产生的？实际情况和我认为的情况不一致。
+		// 此处的srcSize用srcType是最合适的，但在前面已经有一个srcType，所以，只能用srcSize。
+		OFFSET_TYPE srcSize = GetOffsetType(src->value.immediate);
+		// if(srcSize == THIRTY_TWO){
+		if(srcSize != EIGHT){
+			RegInfo dstReg = dst->value.reg;
+			char *regName = dstReg->name;
+			if(strcmp(regName, "eax") == 0){
+				opcode.primaryOpcode = cmplEtcOpcodes.dstEax;
+				immediate.value = src->value.immediate;
+				immediate.type = THIRTY_TWO;
+				//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
+				return GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+			}
 		}
 	}
 
@@ -2276,6 +2345,8 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 			opcode.primaryOpcode = cmplEtcOpcodes.srcImm32;
 		}else{
 			// TODO 不会出现这种情况。暂时不做错误检查。
+			printf("immediateType = %d\n", immediateType);
+			exit(-1);
 		}
 
 		ModRM modRM = (ModRM)MALLOC(sizeof(struct modRM));
@@ -2351,7 +2422,7 @@ Instruction ParseCmplInstr(InstructionSet instrCode)
 
 Instruction ParseAddlInstr(InstructionSet instrCode)
 {
-	CmplEtcOpcodes cmplEtcOpcodes = {0x05, 0x81, 0x83, 0x01, 0x03};
+	CmplEtcOpcodes cmplEtcOpcodes = {0x05, 0x83, 0x81, 0x01, 0x03};
 	// GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEtcOpcodes)
 	return GenerateCmplEtcInstr(instrCode, cmplEtcOpcodes, 0);
 }

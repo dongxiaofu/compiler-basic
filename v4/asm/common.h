@@ -178,6 +178,13 @@ typedef struct instruction{
 
 	RelTextEntry relTextEntry;
 
+	// 调试时使用。
+	// 指令中的操作码，例如movl。
+	char *name;
+	char *opr1;
+	char *opr2;
+	char *opr3;
+
 	struct instruction *next;
 } *Instruction;
 
@@ -205,12 +212,12 @@ typedef struct regInfo{
 
 // todo 想不到更好的名字了。
 // 内存地址有几种形式？0x1234，-4(%ebp)，num11。
-struct memoryAddress{
+typedef struct memoryAddress{
 	// 寄存器基址。
 	char reg;
 	// -4(%ebp)中的-4。
 	int offset;
-};
+} *MemoryAddress;
 
 typedef union{
 	// TODO 有更好的变量名吗？
@@ -235,6 +242,8 @@ typedef enum{
 typedef struct oprand{
 	OprandValue value;
 	OprandType type;
+	// 调试时使用。
+	char *oprandStr;
 } *Oprand;
 
 typedef struct memoryInfo{

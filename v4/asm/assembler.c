@@ -1899,6 +1899,9 @@ void ParseInstr()
 					printf("instr should not be NULL\n");
 					exit(instrCode);
 				}
+				
+				instrDataNode->name = name;
+
 				// if(preInstrDataNode == NULL){
 				if(instrHead->next == NULL){
 					instrHead->next = instrDataNode;
@@ -1910,6 +1913,8 @@ void ParseInstr()
 			}
 		}
 	}
+
+	printf("over\n");
 }
 
 int RoundUpNumDeprecated(int num)
