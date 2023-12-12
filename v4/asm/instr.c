@@ -2252,8 +2252,8 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 	Instruction instr =   GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
 
 	int operandIndex = 0;
-	instr->oprands[operandIndex++] = src;
-	instr->oprands[operandIndex++] = dst;
+	instr->oprands[operandIndex++] = opr1;
+	instr->oprands[operandIndex++] = opr2;
 
 	return instr;
 }
