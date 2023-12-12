@@ -770,7 +770,12 @@ Instruction ParseFildlInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFildqInstr(InstructionSet instrCode)
@@ -792,7 +797,12 @@ Instruction ParseFildqInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
@@ -814,7 +824,12 @@ Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFstpsInstr(InstructionSet instrCode)
@@ -846,7 +861,12 @@ Instruction ParseFstpInstr(InstructionSet instrCode)
 	offsetInfo->offset = offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFldcwInstr(InstructionSet instrCode)
@@ -868,7 +888,12 @@ Instruction ParseFldcwInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int regOrOpcode)
@@ -890,7 +915,12 @@ Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int 
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFistplInstr(InstructionSet instrCode)
@@ -924,7 +954,12 @@ Instruction ParseFstsInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr =  GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFstlInstr(InstructionSet instrCode)
@@ -946,7 +981,12 @@ Instruction ParseFstlInstr(InstructionSet instrCode)
 	// offset = mem->offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, 	modRM, sib, mem->offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = oprand;
+
+	return instr;
 }
 
 Instruction ParseFmulsInstr(InstructionSet instrCode)
@@ -1056,7 +1096,12 @@ Instruction ParseMullInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseIdivlInstr(InstructionSet instrCode)
@@ -1095,7 +1140,12 @@ Instruction ParseIdivlInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseDivlInstr(InstructionSet instrCode)
@@ -1134,7 +1184,12 @@ Instruction ParseDivlInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseNeglInstr(InstructionSet instrCode)
@@ -1173,7 +1228,12 @@ Instruction ParseNeglInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr =  GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseNotlInstr(InstructionSet instrCode)
@@ -1212,7 +1272,12 @@ Instruction ParseNotlInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr =  GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseJeInstr(InstructionSet instrCode)
@@ -1483,7 +1548,12 @@ Instruction ParseJmpInstr(InstructionSet instrCode)
 	offsetInfo->offset = offset;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParsePushlInstr(InstructionSet instrCode)
@@ -1517,7 +1587,12 @@ Instruction ParsePushlInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParsePoplInstr(InstructionSet instrCode)
@@ -1541,7 +1616,12 @@ Instruction ParsePoplInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = reg->index;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseIncbInstr(InstructionSet instrCode)
@@ -1591,7 +1671,12 @@ fe c3                	inc    %bl
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseIncwInstr(InstructionSet instrCode)
@@ -1629,7 +1714,12 @@ Instruction ParseIncwInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr =  GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseInclInstr(InstructionSet instrCode)
@@ -1667,7 +1757,12 @@ Instruction ParseInclInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseDecbInstr(InstructionSet instrCode)
@@ -1708,7 +1803,12 @@ Instruction ParseDecbInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseDecwInstr(InstructionSet instrCode)
@@ -1751,7 +1851,12 @@ Instruction ParseDecwInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseDeclInstr(InstructionSet instrCode)
@@ -1793,7 +1898,12 @@ Instruction ParseDeclInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr;
+
+	return instr;
 }
 
 Instruction ParseRepInstr(InstructionSet instrCode)
@@ -1856,7 +1966,13 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
 			immediate.type = THIRTY_TWO;
             opcode.primaryOpcode = dstEax;
             //GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-			return GenerateSimpleInstr(0, opcode, NULL, NULL, NULL, immediate);
+			Instruction instr = GenerateSimpleInstr(0, opcode, NULL, NULL, NULL, immediate);
+
+			int operandIndex = 0;
+			instr->oprands[operandIndex++] = src;
+			instr->oprands[operandIndex++] = dst;
+
+			return instr;
         }
     }
 
@@ -1929,7 +2045,13 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
     }
 
     //GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = src;
+	instr->oprands[operandIndex++] = dst;
+
+	return instr;
 }
 
 Instruction ParseOrlInstr(InstructionSet instrCode)
@@ -2010,7 +2132,13 @@ Instruction GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr =  GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = src;
+	instr->oprands[operandIndex++] = dst;
+
+	return instr;
 }
 
 Instruction ParseShllInstr(InstructionSet instrCode)
@@ -2121,7 +2249,13 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 	}
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr =   GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = src;
+	instr->oprands[operandIndex++] = dst;
+
+	return instr;
 }
 
 // 这是一个中途新建的函数。在写代码前，要考虑到这种细节，恐怕比较烦。
@@ -2197,7 +2331,13 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 		offsetInfo = mem->offsetInfo;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+		Instruction instr =    GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 
 	// TODO 和上面的代码极其相似，我不能立刻想出优化的方法，先赶进度吧。
@@ -2221,7 +2361,13 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 		modRM->regOrOpcode = dstReg->index;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
+		Instruction instr =   GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 
 	// MOV r32,imm32
@@ -2245,7 +2391,13 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 		modRM = NULL;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+		Instruction instr =  GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 
 	// MOV r/m32,imm32
@@ -2271,7 +2423,13 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 		modRM->rm = mem->rm;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
+		Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, mem->offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 }
 
@@ -2326,7 +2484,13 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 				immediate.value = src->value.immediate;
 				immediate.type = THIRTY_TWO;
 				//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-				return GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+				Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, NULL, immediate);
+
+				int operandIndex = 0;
+				instr->oprands[operandIndex++] = src;
+				instr->oprands[operandIndex++] = dst;
+
+				return instr;
 			}
 		}
 	}
@@ -2367,7 +2531,13 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 		}
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+		Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 
 
@@ -2388,7 +2558,13 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 		modRM->regOrOpcode = srcReg->index;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+		Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 
 	// CMP r32,r/m32------3B /r
@@ -2408,7 +2584,13 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 		modRM->regOrOpcode = dstReg->index;
 
 		//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-		return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+		Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+		int operandIndex = 0;
+		instr->oprands[operandIndex++] = src;
+		instr->oprands[operandIndex++] = dst;
+
+		return instr;
 	}
 }
 
@@ -2471,7 +2653,13 @@ Instruction ParseTestInstr(InstructionSet instrCode)
 	modRM->rm = dstReg->index;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = src;
+	instr->oprands[operandIndex++] = dst;
+
+	return instr;
 }
 
 
@@ -2534,7 +2722,13 @@ Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE
 	}
 	
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = src;
+	instr->oprands[operandIndex++] = dst;
+
+	return instr;
 }
 
 Instruction ParseMovsblInstr(InstructionSet instrCode)
@@ -2600,5 +2794,11 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
-	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+	Instruction instr = GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
+
+	int operandIndex = 0;
+	instr->oprands[operandIndex++] = opr1;
+	instr->oprands[operandIndex++] = opr2;
+
+	return instr;
 }

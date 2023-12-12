@@ -161,46 +161,6 @@ typedef struct relTextEntry{
 	char *name;
 } *RelTextEntry;
 
-typedef struct instruction{
-	// 前缀。
-	char prefix;
-	// 操作码。
-//	unsigned char opcode;
-	Opcode opcode;
-	// ModR/M。
-	ModRM modRM;
-	// SIB。
-	SIB sib;
-	// 偏移。
-	NumericData offset;
-	// 立即数。
-	NumericData immediate;
-
-	RelTextEntry relTextEntry;
-
-	// 调试时使用。
-	// 指令中的操作码，例如movl。
-	char *name;
-	char *opr1;
-	char *opr2;
-	char *opr3;
-
-	struct instruction *next;
-} *Instruction;
-
-typedef enum {
-	FPU, NOT_FPU
-} INSTR_TYPE_FPU;
-
-typedef enum {
-	Zero, One, Two
-} INSTR_TYPE_OPRAND_COUNT;
-
-typedef struct instructionType{
-	INSTR_TYPE_FPU fpuType;
-	INSTR_TYPE_OPRAND_COUNT	oprandCount;
-} *InstructionType;
-
 
 // 加上后缀Info纯属无奈，避免重名。
 typedef struct regInfo{
@@ -245,6 +205,44 @@ typedef struct oprand{
 	// 调试时使用。
 	char *oprandStr;
 } *Oprand;
+
+typedef struct instruction{
+	// 前缀。
+	char prefix;
+	// 操作码。
+//	unsigned char opcode;
+	Opcode opcode;
+	// ModR/M。
+	ModRM modRM;
+	// SIB。
+	SIB sib;
+	// 偏移。
+	NumericData offset;
+	// 立即数。
+	NumericData immediate;
+
+	RelTextEntry relTextEntry;
+
+	// 调试时使用。
+	// 指令中的操作码，例如movl。
+	char *name;
+	Oprand oprands[3];
+
+	struct instruction *next;
+} *Instruction;
+
+typedef enum {
+	FPU, NOT_FPU
+} INSTR_TYPE_FPU;
+
+typedef enum {
+	Zero, One, Two
+} INSTR_TYPE_OPRAND_COUNT;
+
+typedef struct instructionType{
+	INSTR_TYPE_FPU fpuType;
+	INSTR_TYPE_OPRAND_COUNT	oprandCount;
+} *InstructionType;
 
 typedef struct memoryInfo{
 	OffsetInfo offsetInfo;
