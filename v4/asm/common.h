@@ -105,20 +105,6 @@ typedef struct _Label
 } *Label;
 
 typedef enum{
-	#define INSTR_ELEMENT(code, name)   code,
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-}InstructionSet;
-
-#define INSTRUCTION_SETS_SIZE 77
-
-static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
-	#define INSTR_ELEMENT(code, name)   name,
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-};
-
-typedef enum{
 	EMPTY, EIGHT, SIXTEEN, THIRTY_TWO
 }OFFSET_TYPE;
 
@@ -161,6 +147,18 @@ typedef struct relTextEntry{
 	char *name;
 } *RelTextEntry;
 
+typedef enum {
+	FPU, NOT_FPU
+} INSTR_TYPE_FPU;
+
+typedef enum {
+	Zero, One, Two
+} INSTR_TYPE_OPRAND_COUNT;
+
+typedef struct instructionType{
+	INSTR_TYPE_FPU fpuType;
+	INSTR_TYPE_OPRAND_COUNT	oprandCount;
+} *InstructionType;
 
 // 加上后缀Info纯属无奈，避免重名。
 typedef struct regInfo{
@@ -251,6 +249,31 @@ typedef struct memoryInfo{
 	int rm;
 } *MemoryInfo;
 
+typedef struct instruction{
+	// 前缀。
+	char prefix;
+	// 操作码。
+//	unsigned char opcode;
+	Opcode opcode;
+	// ModR/M。
+	ModRM modRM;
+	// SIB。
+	SIB sib;
+	// 偏移。
+	NumericData offset;
+	// 立即数。
+	NumericData immediate;
+
+	RelTextEntry relTextEntry;
+
+	// 调试时使用。
+	// 指令中的操作码，例如movl。
+	char *name;
+	Oprand oprands[3];
+
+	struct instruction *next;
+} *Instruction;
+
 typedef struct {
 	int dstEax;
 	int srcImm32;
@@ -316,6 +339,21 @@ static Register registers[8] = {
   {"ch",   "bp",	"ebp"},
   {"dh",   "si",	"esi"},
   {"bh",   "di",	"edi"},
+};
+
+
+typedef enum{
+	#define INSTR_ELEMENT(code, name)   code,
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
+}InstructionSet;
+
+#define INSTRUCTION_SETS_SIZE 77
+
+static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+	#define INSTR_ELEMENT(code, name)   name,
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
 };
 
 void StrToUpper(char *str, char *upperStr);
