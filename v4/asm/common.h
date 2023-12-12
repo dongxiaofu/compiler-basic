@@ -105,20 +105,6 @@ typedef struct _Label
 } *Label;
 
 typedef enum{
-	#define INSTR_ELEMENT(code, name)   code,
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-}InstructionSet;
-
-#define INSTRUCTION_SETS_SIZE 77
-
-static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
-	#define INSTR_ELEMENT(code, name)   name,
-	#include "all_instruction_set.txt"
-	#undef INSTR_ELEMENT
-};
-
-typedef enum{
 	EMPTY, EIGHT, SIXTEEN, THIRTY_TWO
 }OFFSET_TYPE;
 
@@ -316,6 +302,21 @@ static Register registers[8] = {
   {"ch",   "bp",	"ebp"},
   {"dh",   "si",	"esi"},
   {"bh",   "di",	"edi"},
+};
+
+
+typedef enum{
+	#define INSTR_ELEMENT(code, name)   code,
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
+}InstructionSet;
+
+#define INSTRUCTION_SETS_SIZE 77
+
+static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
+	#define INSTR_ELEMENT(code, name)   name,
+	#include "all_instruction_set.txt"
+	#undef INSTR_ELEMENT
 };
 
 void StrToUpper(char *str, char *upperStr);
