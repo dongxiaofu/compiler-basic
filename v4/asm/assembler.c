@@ -2458,7 +2458,9 @@ void BuildELF()
 		char *name = shstrtabEntryArray[i];
 		if(strcmp(name, "null") == 0){
 			shstrtabDataNode->val.Elf32_Shdr_Val = shdr;
-			return;
+			// TODO 当初，我为什么使用return？
+			// return;
+			break;
 		}
 
 		// todo 当sh_name是-1时需要处理，我暂时懒得写这种代码。
@@ -2548,6 +2550,93 @@ void BuildELF()
 	
 
 	printf("BuildELF is over\n");
+
+	FILE *file;
+
+	file = fopen("my.o", "ab");
+	if(file == NULL){
+		printf("无法打开文件。\n");
+		exit(-1);
+	}
+
+	// 开始生成ELF文件。
+	// ELF文件头。
+	fwrite(ehdr, sizeof(Elf32_Ehdr), 1, file);	
+	// .text
+	// preRelTextDataNode
+	Instruction instrNode = instrHead->next;
+	while(instrNode){
+		if(instrNode->prefix != 0){
+			fwrite(&(instrNode->prefix), 1, 1, file);
+		}
+
+	//  error: invalid initializer
+	//	Opcode opcode = instrNode->opcode.primaryOpcode;
+
+		unsigned char primaryOpcode = instrNode->opcode.primaryOpcode;
+		fwrite(&primaryOpcode, 1, 1, file);
+
+		char secondaryOpcode = instrNode->opcode.secondaryOpcode; 
+		if(secondaryOpcode != -1){
+			fwrite(&secondaryOpcode, 1, 1, file);
+		}
+
+		if(instrNode->modRM != NULL){
+			fwrite(instrNode->modRM, sizeof(struct modRM), 1, file);
+			// fwrite(*instrNode->modRM, 1, 1, file);
+		}
+
+		if(instrNode->sib != NULL){
+			fwrite(instrNode->sib, sizeof(struct sib) / 2, 1, file);
+		}
+
+		// 偏移
+		NumericData offset = instrNode->offset;
+		OFFSET_TYPE type = offset.type;
+		if(type != EMPTY){
+			int value = offset.value;
+			int size = 0;
+			if(type == EIGHT){
+				size = 1;
+			}else if(type == SIXTEEN){
+				size = 2;
+			}else{
+				size = 4;
+			}
+			fwrite(&value, size, 1, file);
+		}
+		// 立即数
+		NumericData imm = instrNode->immediate;
+		type = imm.type;
+		if(type != EMPTY){
+			int value = imm.value;
+			int size = 0;
+			if(type == EIGHT){
+				size = 1;
+			}else if(type == SIXTEEN){
+				size = 2;
+			}else{
+				size = 4;
+			}
+			fwrite(&value, size, 1, file);
+		}
+
+		instrNode = instrNode->next;
+
+//		char str[20];
+//		memset(str, 0, 20);
+//		char *fmt = "%X ";
+//		sprintf(str, fmt, instrNode->opcode.primaryOpcode);
+//		if(instrNode->modRM != NULL){
+//			sprintf(str, fmt, instrNode->modRM);
+//		}
+//
+//		if(instrNode->sib != NULL){
+//			sprintf(str, fmt, instrNode->sib);
+//		}
+//
+//		instrNode = instrNode->next;
+	}
 }
 
 int main(int argc, char *argv[])
