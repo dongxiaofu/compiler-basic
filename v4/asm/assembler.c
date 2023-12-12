@@ -2130,15 +2130,24 @@ void BuildELF()
 {
 	// ELF文件头
 	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(sizeof(Elf32_Ehdr));
-	ehdr->e_ident[0] = 'E';
-	ehdr->e_ident[1] = 'L';
-	ehdr->e_ident[2] = 'F';
+//	ehdr->e_ident[0] = 'E';
+//	ehdr->e_ident[1] = 'L';
+//	ehdr->e_ident[2] = 'F';
+//
+//	ehdr->e_ident[3] = 1;
+//	ehdr->e_ident[4] = 1;
+//	ehdr->e_ident[5] = 1;
 
-	ehdr->e_ident[3] = 1;
+	ehdr->e_ident[0] = 0x7F;
+	ehdr->e_ident[1] = 0x45;
+	ehdr->e_ident[2] = 0x4C;
+
+	ehdr->e_ident[3] = 0x46;
 	ehdr->e_ident[4] = 1;
 	ehdr->e_ident[5] = 1;
+	ehdr->e_ident[6] = 1;
 
-	for(int i = 6; i < 16; i++){
+	for(int i = 7; i < 16; i++){
 		ehdr->e_ident[i] = 0;
 	}
 
@@ -2148,6 +2157,7 @@ void BuildELF()
 	ehdr->e_entry = 0;
 	ehdr->e_phoff = 0;
 	// TODO 需计算。
+	// 段表在文件中的偏移。
 	ehdr->e_shoff = 0;
 	// TODO 不知道设置成什么值。
 	ehdr->e_flags = 0;
