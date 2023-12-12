@@ -161,31 +161,6 @@ typedef struct relTextEntry{
 	char *name;
 } *RelTextEntry;
 
-typedef struct instruction{
-	// 前缀。
-	char prefix;
-	// 操作码。
-//	unsigned char opcode;
-	Opcode opcode;
-	// ModR/M。
-	ModRM modRM;
-	// SIB。
-	SIB sib;
-	// 偏移。
-	NumericData offset;
-	// 立即数。
-	NumericData immediate;
-
-	RelTextEntry relTextEntry;
-
-	// 调试时使用。
-	// 指令中的操作码，例如movl。
-	char *name;
-	Oprand oprands[3];
-
-	struct instruction *next;
-} *Instruction;
-
 typedef enum {
 	FPU, NOT_FPU
 } INSTR_TYPE_FPU;
@@ -250,6 +225,31 @@ typedef struct memoryInfo{
 	int mod;
 	int rm;
 } *MemoryInfo;
+
+typedef struct instruction{
+	// 前缀。
+	char prefix;
+	// 操作码。
+//	unsigned char opcode;
+	Opcode opcode;
+	// ModR/M。
+	ModRM modRM;
+	// SIB。
+	SIB sib;
+	// 偏移。
+	NumericData offset;
+	// 立即数。
+	NumericData immediate;
+
+	RelTextEntry relTextEntry;
+
+	// 调试时使用。
+	// 指令中的操作码，例如movl。
+	char *name;
+	Oprand oprands[3];
+
+	struct instruction *next;
+} *Instruction;
 
 typedef struct {
 	int dstEax;
