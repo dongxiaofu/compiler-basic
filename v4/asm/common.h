@@ -177,6 +177,13 @@ typedef struct memoryAddress{
 	int offset;
 } *MemoryAddress;
 
+typedef struct memoryInfo{
+	OffsetInfo offsetInfo;
+	SIB sib;
+	int mod;
+	int rm;
+} *MemoryInfo;
+
 typedef union{
 	// TODO 有更好的变量名吗？
 	struct sib sib;	
