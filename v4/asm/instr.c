@@ -764,6 +764,8 @@ Instruction ParseFildlInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 0;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -786,6 +788,8 @@ Instruction ParseFildqInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 5;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -808,6 +812,8 @@ Instruction GenerateFstpEtcInstr(InstructionSet instrCode, int primaryOpcode)
 	modRM->regOrOpcode = 3;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -840,6 +846,8 @@ Instruction ParseFstpInstr(InstructionSet instrCode)
 
 	// dd d9                	fstp   %st(1)
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	opcode.secondaryOpcode += oprand->value.stIndex;
 
 	OffsetInfo offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
@@ -862,6 +870,8 @@ Instruction ParseFldcwInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 5;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -884,6 +894,8 @@ Instruction GenerateFistpInstr(InstructionSet instrCode, int primaryOpcode, int 
 	modRM->regOrOpcode = regOrOpcode;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -918,6 +930,8 @@ Instruction ParseFstsInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 2;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -940,6 +954,8 @@ Instruction ParseFstlInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 2;
 
 	Oprand oprand = ParseOprand();
+	instr->oprands[] = oprand;
+
 	MemoryInfo mem = GetMemoryInfo(oprand);
 	modRM->mod = mem->mod;
 	modRM->rm = mem->rm;
@@ -1035,6 +1051,8 @@ Instruction ParseMullInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 4;
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1074,6 +1092,8 @@ Instruction ParseIdivlInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 7;
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1113,6 +1133,8 @@ Instruction ParseDivlInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 6;
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1152,6 +1174,8 @@ Instruction ParseNeglInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 3;
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1191,6 +1215,8 @@ Instruction ParseNotlInstr(InstructionSet instrCode)
 	modRM->regOrOpcode = 2;
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1443,6 +1469,8 @@ Instruction ParseJmpInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == T_SIB){
@@ -1496,6 +1524,8 @@ Instruction ParsePushlInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1535,6 +1565,8 @@ Instruction ParsePoplInstr(InstructionSet instrCode)
 	// TODO 如果操作数不是寄存器怎么办？在本项目，一律不处理这种意外。
 	// TODO 以后有时间，可以增加对意外的处理。
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	RegInfo reg = opr->value.reg;
 
 	modRM = (ModRM)MALLOC(sizeof(struct modRM));
@@ -1547,6 +1579,8 @@ Instruction ParsePoplInstr(InstructionSet instrCode)
 Instruction ParseIncbInstr(InstructionSet instrCode)
 {
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	NumericData immediate = {EMPTY, 0};
 
 	OprandType type = opr->type;
@@ -1604,6 +1638,8 @@ Instruction ParseIncwInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 	// 16位指令的前缀是0x66。
 	prefix = 0x66;
@@ -1643,6 +1679,8 @@ Instruction ParseInclInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1672,7 +1710,9 @@ Instruction ParseInclInstr(InstructionSet instrCode)
 
 Instruction ParseDecbInstr(InstructionSet instrCode)
 {
-	Oprand opr = ParseOprand();	
+	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+	
 	NumericData immediate = {EMPTY, 0};
 
 	OprandType type = opr->type;
@@ -1721,6 +1761,8 @@ Instruction ParseDecwInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	// 16位指令的前缀是0x66。
@@ -1765,6 +1807,8 @@ Instruction ParseDeclInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand opr = ParseOprand();
+	instr->oprands[] = opr;
+
 	OprandType type = opr->type;
 
 	if(type == REG){
@@ -1836,9 +1880,13 @@ Instruction ParseLogicalInstr(InstructionSet instrCode, LogicalInstrOpcodes opco
 	int dstReg = opcodeParam.dstReg;
 
     Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
     // 跳过逗号。
     GetNextToken();
     Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
     OprandType srcType = src->type;
     OprandType dstType = dst->type;
@@ -1974,9 +2022,13 @@ Instruction GenerateShiftInstr(InstructionSet instrCode, int regOrOpcode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
 	// 跳过逗号。
 	GetNextToken();
 	Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
 	OprandType srcType = src->type;
 	OprandType dstType = dst->type;
@@ -2043,6 +2095,8 @@ Instruction ParseImullInstr(InstructionSet instrCode)
 
 	// 这一次，先读取两个操作数。
 	Oprand opr1 = ParseOprand();
+	instr->oprands[] = opr1;
+
 	Oprand opr2 = NULL;
 	char ch = GetLookAheadChar();
 	if(ch == ','){
@@ -2163,9 +2217,13 @@ Instruction GenerateMovInstr(InstructionSet instrCode)
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
 	// 跳过逗号。
 	GetNextToken();
 	Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
 	OprandType srcType = src->type;
 	OprandType dstType = dst->type;
@@ -2303,9 +2361,13 @@ Instruction GenerateCmplEtcInstr(InstructionSet instrCode, CmplEtcOpcodes cmplEt
 	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
 
 	Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
 	// 跳过逗号。
 	GetNextToken();
 	Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
 	OprandType srcType = src->type;
 	OprandType dstType = dst->type;
@@ -2446,9 +2508,13 @@ Instruction ParseTestInstr(InstructionSet instrCode)
 	// src是立即数，dst是寄存器。这是由CGC使用的指令的模板决定的。
 
 	Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
 	// 跳过逗号。
 	GetNextToken();
 	Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
 	OprandType srcType = src->type;
 	OprandType dstType = dst->type;
@@ -2485,9 +2551,13 @@ Instruction ParseMovzxInstr(InstructionSet instrCode, char signType, OFFSET_TYPE
 	NumericData immediate = {EMPTY, 0};
 
 	Oprand src = ParseOprand();
+	instr->oprands[] = src;
+
 	// 跳过逗号。
 	GetNextToken();
 	Oprand dst = ParseOprand();
+	instr->oprands[] = dst;
+
 
 	OprandType srcType = src->type;
 	OprandType dstType = dst->type;
@@ -2576,6 +2646,8 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 
 	// 处理第一个操作数。src。根据src确定rm和mod的值。
 	Oprand opr1 = ParseOprand();
+	instr->oprands[] = opr1;
+
 	// 这个操作数是内存地址。内存地址的种类：-4(%ebp),SIB,0x1234。
 	OprandType type1 = opr1->type;
 
@@ -2595,6 +2667,8 @@ Instruction ParseLealInstr(InstructionSet instrCode)
 	// 处理第二个操作数。dest。根据dst确定reg/opcode的值。
 	// dst只能是寄存器。在本项目中不处理dst不是寄存器的情况。
 	Oprand opr2 = ParseOprand();
+	instr->oprands[] = opr2;
+
 	RegInfo reg = opr2->value.reg;
 	modRM->regOrOpcode = reg->index;
 

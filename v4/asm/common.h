@@ -181,9 +181,7 @@ typedef struct instruction{
 	// 调试时使用。
 	// 指令中的操作码，例如movl。
 	char *name;
-	char *opr1;
-	char *opr2;
-	char *opr3;
+	char *oprands[3];
 
 	struct instruction *next;
 } *Instruction;
