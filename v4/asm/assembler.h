@@ -240,18 +240,19 @@ union SectionDataVal{
    // TODO 不知道怎么存储机器指令。
 };
 
+enum DataEntryValueType{
+	STR = 1, NUM
+};
+
 typedef struct sectionDataNode{
    // 这是新增的。需要根据name来查找对应的元素。最开始，我哪会想到这些呢？
    char name[100];
    union SectionDataVal val;
+   enum DataEntryValueType valType;
    int index;
    char isLast;
    struct sectionDataNode *next;
 }* SectionDataNode;
-
-enum DataEntryValueType{
-	STR = 1, NUM
-};
 
 union DataEntryValue{
 	char *strVal;

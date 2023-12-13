@@ -2330,6 +2330,7 @@ SectionData GetSectionData()
 		if(sectionType == SECTION_RODATA){
 			if(rodataDataNode == NULL){
 				rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+				rodataDataNode->isLast = 1;
 				rodataDataHead->next = rodataDataNode;
 			}
 
@@ -2338,13 +2339,17 @@ SectionData GetSectionData()
 			DataEntryValueNode valPtr = entry->valPtr;
 			if(entry->dataType == DATA_TYPE_STRING){
 				rodataDataNode->val.strVal = valPtr->val.strVal;
+				rodataDataNode->valType = STR;
 			}else{
 				// 出乎我的意料。有一次，我遇到struct不能赋值给struct的代码。
 				// 这行代码能正常运行。
 				rodataDataNode->val.numVal = valPtr->val.numVal;
+				rodataDataNode->valType = NUM;
 			}
 
+			rodataDataNode->isLast = 0;
 			rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+			rodataDataNode->isLast = 1;
 			preRodataDataNode->next = rodataDataNode;
 
 			continue;
@@ -2708,7 +2713,37 @@ void WriteData(FILE *file, SectionDataNode dataDataHead)
 //	.rodata
 void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
 {
+	SectionDataNode rodataDataNode = roDataDataHead->next;
 
+	while(rodataDataNode != NULL && rodataDataNode->isLast == 0){
+		enum DataEntryValueType valType = rodataDataNode->valType;
+		if(valType == STR){
+			char *strVal = rodataDataNode->val.strVal; 
+			int len = strlen(strVal) + 1;
+			fwrite(strVal, len, 1, file);
+		}else{
+			NumericData num = rodataDataNode->val.numVal;
+			int size = 0;
+			switch(num.type){
+				case EIGHT:
+					size = 1;
+					break;
+				case SIXTEEN:
+					size = 2;
+					break;
+				case THIRTY_TWO:
+					size = 4;
+					break;
+				default:
+					printf("name = %s, type = %d\n", rodataDataNode->name, num.type);
+					printf("error in %d in %s\n", __LINE__, __FILE__);
+					exit(-1);
+			}
+
+			fwrite(&num.value, size, 1, file);
+		}
+		rodataDataNode = rodataDataNode->next;	
+	}
 }
 //	.symtab
 void WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
@@ -2822,6 +2857,8 @@ void WriteELF(Elf32_Ehdr *ehdr)
 	SectionDataNode dataDataHead = sectionData->data;
 	WriteData(file, dataDataHead);
 //	.rodata
+	SectionDataNode roDataDataHead = sectionData->rodata;
+	WriteRoData(file, roDataDataHead);
 //	.symtab
 //	.strtab
 //	.rel.text
