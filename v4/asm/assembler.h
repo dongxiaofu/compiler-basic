@@ -316,6 +316,18 @@ typedef struct segmentInfo{
 	struct segmentInfo *next;
 } *SegmentInfo;
 
+// TODO 想不到更好的名字。这完全是重构时产生的一个结构体。
+typedef struct sectionData{
+	SectionDataNode relText;
+	SectionDataNode data;
+	SectionDataNode relData;
+	SectionDataNode rodata;
+	SectionDataNode symtab;
+	SectionDataNode strtab;
+	SectionDataNode shstrtab;
+	SectionDataNode sectionHeader;
+}*SectionData;
+
 // 存储Bind为globl的变量的单链表。
 // todo 是否需要用static修饰？
 // globlVariableList是链表的头结点，preGloblVariablenNode是在构造链表的过程中使用的变量。
@@ -479,6 +491,12 @@ Instruction DealWithInstr(InstructionSet instrCode);
 void ParseInstr();
 void CalculateStrtabEntryOffset();
 void ReSortStrtab();
+Elf32_Ehdr *GenerateELFHeader();
+SectionData GetSectionData();
+void GenerateSymtab(SectionDataNode symtabDataNode);
+void GenerateRelData(SectionDataNode relDataDataHead);
+void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead);
+void WriteELF();
 void BuildELF();
 
 
