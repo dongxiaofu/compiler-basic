@@ -1602,17 +1602,21 @@ void ParseData()
 			DataEntryValueNode node = NULL;
 			DataEntryValueNode preNode = NULL;
 			do{
+				OFFSET_TYPE dataTypeSize = EMPTY;
 				if(token == TYPE_TOKEN_BYTE){
 					entry->dataType = DATA_TYPE_BYTE;
 					// todo 最好把这些数值换成常量。
 					entry->dataTypeSize = 1;
+					dataTypeSize = EIGHT;
 				}else if(token == TYPE_TOKEN_LONG){
 					entry->dataType = DATA_TYPE_LONG;
 					entry->dataTypeSize = 4;
+					dataTypeSize = THIRTY_TWO;
 				}else if(token == TYPE_TOKEN_KEYWORD_STRING){
 					entry->dataType = DATA_TYPE_STRING;
 					// todo 可能有问题。
 					entry->dataTypeSize = 4;
+					dataTypeSize = THIRTY_TWO;
 				}
 
 				if(node == NULL){
@@ -1650,7 +1654,8 @@ void ParseData()
 					}else{
 						char *name = GetCurrentTokenLexeme();
 						node->type = NUM;
-						node->val.numVal = atoi(name);
+						node->val.numVal.type = dataTypeSize; 
+						node->val.numVal.value = atoi(name);
 					}
 				}
 
@@ -2254,7 +2259,7 @@ SectionData GetSectionData()
 			Elf32_Word r_info = (RODATA_SYMTAB_INDEX << 8) | R_386_32;
 
 			while(valPtr != NULL){
-				int val = 0;
+				NumericData val = {EMPTY, 0};
 				if(valPtr->type == STR){
 					// 在这里搜集.rel.data。
 					// 需要.data中的偏移量。该偏移量存储到.rel.data的r_offset。
@@ -2289,13 +2294,15 @@ SectionData GetSectionData()
 						exit(-2);
 					}
 					DataEntry entry = dataEntryArray[entryIndex];
-					val = entry->offset;
+					val.value = entry->offset;
+					val.type = THIRTY_TWO;
+					
 				}else{
-					// dataDataNode->val.numVal = valPtr->val.numVal;
-					val = valPtr->val.numVal;
+					memcpy(&val, &valPtr->val.numVal, sizeof(NumericData));
 				}
 
-				dataDataNode->val.numVal = val;
+				// 复制来复制去，看这种代码不顺眼。
+				memcpy(&dataDataNode->val.numVal, &val, sizeof(NumericData));
 
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 				preDataDataNode->next = dataDataNode;

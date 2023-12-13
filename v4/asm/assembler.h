@@ -231,7 +231,7 @@ ScriptHeader gScriptHeader;
 #define RODATA_SYMTAB_INDEX 2
 
 union SectionDataVal{
-   int numVal;
+   NumericData numVal;
    char *strVal;
    // 和系统的命名风格一致，所以，这两个变量名比较怪异。
    Elf32_Sym *Elf32_Sym_Val;
@@ -254,7 +254,7 @@ enum DataEntryValueType{
 
 union DataEntryValue{
 	char *strVal;
-	int numVal;	
+	NumericData numVal;	
 };
 
 // TODO 这种结构设计得合理吗？可以使用。
