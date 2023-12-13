@@ -2130,13 +2130,6 @@ void BuildELF()
 {
 	// ELF文件头
 	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(sizeof(Elf32_Ehdr));
-//	ehdr->e_ident[0] = 'E';
-//	ehdr->e_ident[1] = 'L';
-//	ehdr->e_ident[2] = 'F';
-//
-//	ehdr->e_ident[3] = 1;
-//	ehdr->e_ident[4] = 1;
-//	ehdr->e_ident[5] = 1;
 
 	ehdr->e_ident[0] = 0x7F;
 	ehdr->e_ident[1] = 0x45;
@@ -2632,21 +2625,22 @@ void BuildELF()
 		}
 
 		instrNode = instrNode->next;
-
-//		char str[20];
-//		memset(str, 0, 20);
-//		char *fmt = "%X ";
-//		sprintf(str, fmt, instrNode->opcode.primaryOpcode);
-//		if(instrNode->modRM != NULL){
-//			sprintf(str, fmt, instrNode->modRM);
-//		}
-//
-//		if(instrNode->sib != NULL){
-//			sprintf(str, fmt, instrNode->sib);
-//		}
-//
-//		instrNode = instrNode->next;
 	}
+
+//	.data
+	dataDataNode = dataDataHead->next;
+	while(dataDataNode){
+
+	
+		dataDataNode = dataDataNode->next;
+	}
+//	.rodata
+//	.symtab
+//	.strtab
+//	.rel.text
+//	.rel.data
+//	.shstrtab
+
 }
 
 int main(int argc, char *argv[])
