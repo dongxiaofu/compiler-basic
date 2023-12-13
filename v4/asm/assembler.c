@@ -2431,7 +2431,7 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 	}
 }
 
-void GenerateRelData(SectionDataNode relDataDataHead)
+void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabDataHead)
 {
 	// 初始化节点。
     SectionDataNode relDataDataNode, preRelDataDataNode;
@@ -2729,7 +2729,7 @@ void BuildELF()
 	// .symtab
 	GenerateSymtab(symtabDataHead);
 	// .rel.data
-	GenerateRelData(relDataDataHead);
+	GenerateRelData(relDataDataHead, symtabDataHead);
 	// 段表
 	GenerateSectionHeaders(sectionHeaderDataHead);
 	

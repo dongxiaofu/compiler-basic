@@ -494,7 +494,7 @@ void ReSortStrtab();
 Elf32_Ehdr *GenerateELFHeader();
 SectionData GetSectionData();
 void GenerateSymtab(SectionDataNode symtabDataNode);
-void GenerateRelData(SectionDataNode relDataDataHead);
+void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabDataHead);
 void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead);
 void WriteELF(Elf32_Ehdr *ehdr);
 void BuildELF();
