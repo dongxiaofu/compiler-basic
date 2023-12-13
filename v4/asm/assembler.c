@@ -2246,11 +2246,39 @@ SectionData GetSectionData()
 			preDataDataNode = dataDataNode;
 			// 真可恶！我发现，在这里要进行一个遍历。
 			DataEntryValueNode valPtr = entry->valPtr;
+			int dataTypeSize = entry->dataTypeSize;
+			int offset = entry->offset;
+			int elementIndex = -1;
+
+			// `r_info`占用4个字节，高24位是`.symtab`的条目的索引，低8位是重定位类型。
+			Elf32_Word r_info = (RODATA_SYMTAB_INDEX << 8) | R_386_32;
+
 			while(valPtr != NULL){
-				// TODO 处理string似乎是多此一举。在.data中不存在字符串。
-				int val;
+				int val = 0;
 				if(valPtr->type == STR){
-					dataDataNode->val.strVal;
+					// 在这里搜集.rel.data。
+					// 需要.data中的偏移量。该偏移量存储到.rel.data的r_offset。
+					// 还需要.rodata中的偏移量。把这个偏移量存储到dataDataNode->val.numVal。
+					Elf32_Rel *relEntry = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
+					// 这句，我想了会才写出来。
+					// 为什么是4？因为我认为.data中的数据是以4字节为单位存储。例如，浮点数，数组。
+					// 不对。如果是字符型数组，就不是以4字节为单位。
+					// 应该以数据类型的大小为单位。
+					// relEntry->r_offset = entry->offset + 4*(++elementIndex);
+					relEntry->r_offset = offset + dataTypeSize * (++elementIndex);
+					relEntry->r_info = r_info;
+					// 把.rel.data存储在哪里？
+					if(relDataDataNode == NULL){
+						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+						relDataDataHead->next = relDataDataNode;
+					}else{
+						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+						preRelDataDataNode->next = relDataDataNode;
+					}
+
+					relDataDataNode->val.Elf32_Rel_Val = relEntry;
+					preRelDataDataNode = relDataDataNode;
+
 					char *str = valPtr->val.strVal;
 					// 根据str查找对应的entry，然后读取offset。
 					int entryIndex = FindDataEntryIndex(str);
@@ -2261,6 +2289,7 @@ SectionData GetSectionData()
 						exit(-2);
 					}
 					DataEntry entry = dataEntryArray[entryIndex];
+					val = entry->offset;
 				}else{
 					// dataDataNode->val.numVal = valPtr->val.numVal;
 					val = valPtr->val.numVal;
@@ -2274,6 +2303,7 @@ SectionData GetSectionData()
 				valPtr = valPtr->next;
 			}
 
+			continue;
 		}
 
 		if(sectionType == SECTION_RODATA){

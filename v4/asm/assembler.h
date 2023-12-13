@@ -227,6 +227,9 @@ ScriptHeader gScriptHeader;
 #define DATA_TYPE_LONG		2
 #define DATA_TYPE_STRING	3
 
+// .rodata在段表中的索引。
+#define RODATA_SYMTAB_INDEX 2
+
 union SectionDataVal{
    int numVal;
    char *strVal;
