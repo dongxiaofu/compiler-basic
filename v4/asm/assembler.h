@@ -496,7 +496,7 @@ SectionData GetSectionData();
 void GenerateSymtab(SectionDataNode symtabDataNode);
 void GenerateRelData(SectionDataNode relDataDataHead);
 void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead);
-void WriteELF();
+void WriteELF(Elf32_Ehdr *ehdr);
 void BuildELF();
 
 

@@ -2303,20 +2303,11 @@ SectionData GetSectionData()
 }
 
 // 究竟是用返回值呢还是用参数？都能达到目的。
-void GenerateSymtab(SectionDataNode symtabDataNode)
+void GenerateSymtab(SectionDataNode symtabDataHead)
 {
 	// 初始化节点。
-	SectionDataNode relTextDataNode , dataDataNode , relDataDataNode , rodataDataNode , \
-        strtabDataNode , shstrtabDataNode;
-
-    SectionDataNode preRelTextDataNode , preDataDataNode , preRelDataDataNode , preRodataDataNode , \
-        preSymtabDataNode , preStrtabDataNode , preShstrtabDataNode;
-
-	relTextDataNode = dataDataNode = relDataDataNode = rodataDataNode = \
-		symtabDataNode = strtabDataNode = shstrtabDataNode = NULL;	
-
-	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
-		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
+	SectionDataNode symtabDataNode,preSymtabDataNode;
+	preSymtabDataNode = symtabDataNode = NULL;
 
 
 	int textSize = 0;
@@ -2342,6 +2333,15 @@ void GenerateSymtab(SectionDataNode symtabDataNode)
 		STT_NOTYPE, STT_FILE, STT_SECTION,
 		STT_SECTION, STT_SECTION, STT_SECTION
 	};
+
+	SegmentInfo shStrtabSegmentInfoNode = FindSegmentInfoNode(".shstrtab");
+	if(shStrtabSegmentInfoNode == NULL){
+		shStrtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(shStrtabSegmentInfoNode->name, ".shstrtab");
+		preSegmentInfoNode->next = shStrtabSegmentInfoNode; 
+		preSegmentInfoNode = shStrtabSegmentInfoNode; 
+	}
+
 	for(int i = 0; i < 6; i++){
 		char *name = nodeNameArray[i];
 		int nameLen = 0;
@@ -2383,7 +2383,7 @@ void GenerateSymtab(SectionDataNode symtabDataNode)
 		symtabDataNode->index = symtabDataNodeIndex++;
 	}
 
-
+	StrtabEntry strtabEntryNode = strtabEntryList;
 	while(1){
 		if(strtabEntryNode == NULL){
 			break;
@@ -2434,18 +2434,10 @@ void GenerateSymtab(SectionDataNode symtabDataNode)
 void GenerateRelData(SectionDataNode relDataDataHead)
 {
 	// 初始化节点。
-	SectionDataNode relTextDataNode , dataDataNode , rodataDataNode , \
-        symtabDataNode , strtabDataNode , shstrtabDataNode;
+    SectionDataNode relDataDataNode, preRelDataDataNode;
 
-    SectionDataNode preRelTextDataNode , preDataDataNode , preRelDataDataNode , preRodataDataNode , \
-        preSymtabDataNode , preStrtabDataNode , preShstrtabDataNode;
-
-	relTextDataNode = dataDataNode = relDataDataNode = rodataDataNode = \
-		symtabDataNode = strtabDataNode = shstrtabDataNode = NULL;	
-
-	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
-		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
-
+	relDataDataNode = NULL;	
+	preRelDataDataNode = NULL;	
 
 	int textSize = 0;
 	int relTextEntryNum = 0;
@@ -2519,10 +2511,10 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 
 		// 创建链表。
 		if(sectionHeaderDataNode == NULL){
-			sectionHeaderDataNode = (SectionDataNode)MALLOC(SectionDataNode);
+			sectionHeaderDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			sectionHeaderDataHead->next = sectionHeaderDataNode;
 		}else{
-			sectionHeaderDataNode = (SectionDataNode)MALLOC(SectionDataNode);
+			sectionHeaderDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			preSectionHeaderData->next = sectionHeaderDataHead;
 		}
 		preSectionHeaderData = sectionHeaderDataNode;
@@ -2629,7 +2621,7 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 	}
 }
 
-void WriteELF()
+void WriteELF(Elf32_Ehdr *ehdr)
 {
 	FILE *file;
 
@@ -2705,12 +2697,6 @@ void WriteELF()
 	}
 
 //	.data
-	dataDataNode = dataDataHead->next;
-	while(dataDataNode){
-
-	
-		dataDataNode = dataDataNode->next;
-	}
 //	.rodata
 //	.symtab
 //	.strtab
@@ -2739,15 +2725,6 @@ void BuildELF()
 	SectionDataNode symtabDataHead = sectionData->symtab;
 	SectionDataNode relDataDataHead = sectionData->relData;
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
-	
-	// TODO 作用不明。
-	SegmentInfo shStrtabSegmentInfoNode = FindSegmentInfoNode(".shstrtab");
-	if(shStrtabSegmentInfoNode == NULL){
-		shStrtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
-		strcpy(shStrtabSegmentInfoNode->name, ".shstrtab");
-		preSegmentInfoNode->next = shStrtabSegmentInfoNode; 
-		preSegmentInfoNode = shStrtabSegmentInfoNode; 
-	}
 
 	// .symtab
 	GenerateSymtab(symtabDataHead);
@@ -2760,7 +2737,7 @@ void BuildELF()
 	printf("BuildELF is over\n");
 
 	// 把数据写入文件。这个文件就是生成的可重定位文件。
-	WriteELF();
+	WriteELF(ehdr);
 }
 
 int main(int argc, char *argv[])
