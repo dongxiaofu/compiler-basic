@@ -109,7 +109,9 @@ typedef enum{
 }OFFSET_TYPE;
 
 typedef struct{
-	int value;
+	// int value;
+	// unsigned int value;
+	long long int value;
 	OFFSET_TYPE type;
 } NumericData;
 

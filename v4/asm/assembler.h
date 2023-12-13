@@ -245,6 +245,7 @@ typedef struct sectionDataNode{
    char name[100];
    union SectionDataVal val;
    int index;
+   char isLast;
    struct sectionDataNode *next;
 }* SectionDataNode;
 

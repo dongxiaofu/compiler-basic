@@ -1655,7 +1655,10 @@ void ParseData()
 						char *name = GetCurrentTokenLexeme();
 						node->type = NUM;
 						node->val.numVal.type = dataTypeSize; 
-						node->val.numVal.value = atoi(name);
+						// 把2576980378转换为2147483647。
+						// node->val.numVal.value = atoi(name);
+						// node->val.numVal.value = atol(name);
+						node->val.numVal.value = atoll(name);
 					}
 				}
 
@@ -2246,6 +2249,10 @@ SectionData GetSectionData()
 			if(dataDataNode == NULL){
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 				dataDataHead->next = dataDataNode;
+
+				dataDataNode->isLast = 1;
+			}else{
+				dataDataNode->isLast = 0;
 			}
 
 			preDataDataNode = dataDataNode;
@@ -2253,13 +2260,14 @@ SectionData GetSectionData()
 			DataEntryValueNode valPtr = entry->valPtr;
 			int dataTypeSize = entry->dataTypeSize;
 			int offset = entry->offset;
+			char *variableName = entry->name;
 			int elementIndex = -1;
 
 			// `r_info`占用4个字节，高24位是`.symtab`的条目的索引，低8位是重定位类型。
 			Elf32_Word r_info = (RODATA_SYMTAB_INDEX << 8) | R_386_32;
 
 			while(valPtr != NULL){
-				NumericData val = {EMPTY, 0};
+				NumericData val = {0, EMPTY};
 				if(valPtr->type == STR){
 					// 在这里搜集.rel.data。
 					// 需要.data中的偏移量。该偏移量存储到.rel.data的r_offset。
@@ -2275,10 +2283,13 @@ SectionData GetSectionData()
 					// 把.rel.data存储在哪里？
 					if(relDataDataNode == NULL){
 						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+						relDataDataNode->isLast = 1;
 						relDataDataHead->next = relDataDataNode;
 					}else{
+						relDataDataNode->isLast = 0;
 						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 						preRelDataDataNode->next = relDataDataNode;
+						relDataDataNode->isLast = 1;
 					}
 
 					relDataDataNode->val.Elf32_Rel_Val = relEntry;
@@ -2296,16 +2307,19 @@ SectionData GetSectionData()
 					DataEntry entry = dataEntryArray[entryIndex];
 					val.value = entry->offset;
 					val.type = THIRTY_TWO;
-					
 				}else{
-					memcpy(&val, &valPtr->val.numVal, sizeof(NumericData));
+					val = valPtr->val.numVal;
 				}
 
-				// 复制来复制去，看这种代码不顺眼。
-				memcpy(&dataDataNode->val.numVal, &val, sizeof(NumericData));
+				memcpy(dataDataNode->name, variableName, strlen(variableName));  
+				dataDataNode->val.numVal = val;
+
+				dataDataNode->isLast = 0;
 
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+				dataDataNode->isLast = 1;
 				preDataDataNode->next = dataDataNode;
+				preDataDataNode = dataDataNode;
 				// 在这里，心算不明白链表的一些细节。
 				valPtr = valPtr->next;
 			}
@@ -2325,6 +2339,8 @@ SectionData GetSectionData()
 			if(entry->dataType == DATA_TYPE_STRING){
 				rodataDataNode->val.strVal = valPtr->val.strVal;
 			}else{
+				// 出乎我的意料。有一次，我遇到struct不能赋值给struct的代码。
+				// 这行代码能正常运行。
 				rodataDataNode->val.numVal = valPtr->val.numVal;
 			}
 
@@ -2658,6 +2674,73 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 	}
 }
 
+//	.data
+void WriteData(FILE *file, SectionDataNode dataDataHead)
+{
+	SectionDataNode dataDataNode = dataDataHead->next;
+
+	while(dataDataNode != NULL && dataDataNode->isLast == 0){
+		NumericData num = dataDataNode->val.numVal;
+		int size = 0;
+		switch(num.type){
+			case EIGHT:
+				size = 1;
+				break;
+			case SIXTEEN:
+				size = 2;
+				break;
+			case THIRTY_TWO:
+				size = 4;
+				break;
+			default:
+				printf("name = %s, type = %d\n", dataDataNode->name, num.type);
+				printf("error in %d in %s\n", __LINE__, __FILE__);
+				exit(-1);
+		}
+
+		printf("name = %s, value = %lld\n", dataDataNode->name, num.value);
+
+		fwrite(&num.value, size, 1, file);
+
+		dataDataNode = dataDataNode->next;
+	}
+}
+//	.rodata
+void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
+{
+
+}
+//	.symtab
+void WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
+{
+
+}
+//	.strtab
+void WriteStrtab(FILE *file, SectionDataNode strtabDataHead)
+{
+
+}
+//	.rel.text
+void WriteRelText(FILE *file, SectionDataNode relTextDataHead)
+{
+
+}
+//	.rel.data
+void WriteRelData(FILE *file, SectionDataNode relDataDataHead)
+{
+
+}
+//	.shstrtab
+void WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
+{
+
+}
+// 段表
+void WriteSectionHeaders(FILE *file, SectionDataNode dataDataHead)
+{
+
+}
+
 void WriteELF(Elf32_Ehdr *ehdr)
 {
 	FILE *file;
@@ -2733,7 +2816,11 @@ void WriteELF(Elf32_Ehdr *ehdr)
 		instrNode = instrNode->next;
 	}
 
+	// TODO 这是冗余的。我为了快点看效果才这样写。
+	SectionData sectionData = GetSectionData();
 //	.data
+	SectionDataNode dataDataHead = sectionData->data;
+	WriteData(file, dataDataHead);
 //	.rodata
 //	.symtab
 //	.strtab
