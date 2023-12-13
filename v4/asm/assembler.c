@@ -2126,17 +2126,10 @@ void ReSortStrtab()
 	
 }
 
-void BuildELF()
+Elf32_Ehdr *GenerateELFHeader()
 {
 	// ELF文件头
 	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(sizeof(Elf32_Ehdr));
-//	ehdr->e_ident[0] = 'E';
-//	ehdr->e_ident[1] = 'L';
-//	ehdr->e_ident[2] = 'F';
-//
-//	ehdr->e_ident[3] = 1;
-//	ehdr->e_ident[4] = 1;
-//	ehdr->e_ident[5] = 1;
 
 	ehdr->e_ident[0] = 0x7F;
 	ehdr->e_ident[1] = 0x45;
@@ -2171,18 +2164,14 @@ void BuildELF()
 	// TODO .shstrtab在段表中的索引。
 	ehdr->e_shstrndx = 0;
 
-	// 段的内容
-	// TODO .text和.rel.text太麻烦了，先不处理。
-	// .text
-	// .rel.text
-	// .data
-	// .rel.data
-	// .rodata
-	// .symtab
-	// .strtab
-	// .shstrtab
-	
-	// .text TODO
+	return ehdr;
+}
+
+SectionData GetSectionData()
+{
+	SectionData sectionData = (SectionData)MALLOC(sizeof(struct sectionData));
+
+// .text TODO
 	SectionDataNode relTextDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 	SectionDataNode dataDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 	SectionDataNode relDataDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
@@ -2190,6 +2179,19 @@ void BuildELF()
 	SectionDataNode symtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 	SectionDataNode strtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 	SectionDataNode shstrtabDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+
+	SectionDataNode sectionHeaderDataHead = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+
+	// 这段代码是我在Sublime Text3中使用正则表达式生成的。也许比复制粘贴快不了多少，但有趣一些，不枯燥。
+	sectionData->relText = relTextDataHead;
+	sectionData->data = dataDataHead;
+	sectionData->relData = relDataDataHead;
+	sectionData->rodata = rodataDataHead;
+	sectionData->symtab = symtabDataHead;
+	sectionData->strtab = strtabDataHead;
+	sectionData->shstrtab = shstrtabDataHead;
+
+	sectionData->sectionHeader = sectionHeaderDataHead;
 
 	// 初始化节点。
 	SectionDataNode relTextDataNode , dataDataNode , relDataDataNode , rodataDataNode , \
@@ -2221,9 +2223,20 @@ void BuildELF()
 			break;
 		}
 
-		if(entry->section == SECTION_TEXT){
+		int sectionType = entry->section;
+		char isValidSection = sectionType == SECTION_TEXT \
+			|| sectionType == SECTION_DATA \
+			|| sectionType == SECTION_RODATA;
 
-		}else if(entry->section == SECTION_DATA){
+		if(isValidSection == 0){
+			printf("error section %d\n", __LINE__);
+		}
+
+		if(sectionType == SECTION_TEXT){
+			continue;
+		}
+
+		if(sectionType == SECTION_DATA){
 			// TODO 这这部分代码中，还应该获取.rel.data的数据。但我现在不知道怎么做。
 			if(dataDataNode == NULL){
 				dataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
@@ -2261,8 +2274,9 @@ void BuildELF()
 				valPtr = valPtr->next;
 			}
 
+		}
 
-		}else if(entry->section == SECTION_RODATA){
+		if(sectionType == SECTION_RODATA){
 			if(rodataDataNode == NULL){
 				rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 				rodataDataHead->next = rodataDataNode;
@@ -2280,25 +2294,45 @@ void BuildELF()
 			rodataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 			preRodataDataNode->next = rodataDataNode;
 
-		}else{
-			printf("error section %d\n", __LINE__);
+			continue;
 		}
 
 	}
-	
-	// 符号表
-	StrtabEntry strtabEntryNode = strtabEntryList;
+
+	return sectionData;
+}
+
+// 究竟是用返回值呢还是用参数？都能达到目的。
+void GenerateSymtab(SectionDataNode symtabDataNode)
+{
+	// 初始化节点。
+	SectionDataNode relTextDataNode , dataDataNode , relDataDataNode , rodataDataNode , \
+        symtabDataNode , strtabDataNode , shstrtabDataNode;
+
+    SectionDataNode preRelTextDataNode , preDataDataNode , preRelDataDataNode , preRodataDataNode , \
+        preSymtabDataNode , preStrtabDataNode , preShstrtabDataNode;
+
+	relTextDataNode = dataDataNode = relDataDataNode = rodataDataNode = \
+		symtabDataNode = strtabDataNode = shstrtabDataNode = NULL;	
+
+	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
+		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
+
+
+	int textSize = 0;
+	int relTextEntryNum = 0;
+	int dataSize = 0;
+	int relDataEntryNum = 0;
+	int rodataSize = 0;
+	int symtabSize = 0;
+	int strtabSize = 0;
+	int shstrtabSize = 0;
+
+	// TODO 上面的变量是我复制过来的。懒得马上区分哪些还在被使用。有空再优化。
+
 	int symtabDataNodeIndex = 0;
 
-	SegmentInfo shStrtabSegmentInfoNode = FindSegmentInfoNode(".shstrtab");
-	if(shStrtabSegmentInfoNode == NULL){
-		shStrtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
-		strcpy(shStrtabSegmentInfoNode->name, ".shstrtab");
-		preSegmentInfoNode->next = shStrtabSegmentInfoNode; 
-		preSegmentInfoNode = shStrtabSegmentInfoNode; 
-	}
-
-	// 在.symtab中加入一些常量节点。
+		// 在.symtab中加入一些常量节点。
 	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
 	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,1,3,5,6};
 	int nodeSymbolTypeArray[6] = {
@@ -2395,8 +2429,36 @@ void BuildELF()
 		
 		strtabEntryNode = strtabEntryNode->next;
 	}
+}
 
-	// .rel.data
+void GenerateRelData(SectionDataNode relDataDataHead)
+{
+	// 初始化节点。
+	SectionDataNode relTextDataNode , dataDataNode , relDataDataNode , rodataDataNode , \
+        symtabDataNode , strtabDataNode , shstrtabDataNode;
+
+    SectionDataNode preRelTextDataNode , preDataDataNode , preRelDataDataNode , preRodataDataNode , \
+        preSymtabDataNode , preStrtabDataNode , preShstrtabDataNode;
+
+	relTextDataNode = dataDataNode = relDataDataNode = rodataDataNode = \
+		symtabDataNode = strtabDataNode = shstrtabDataNode = NULL;	
+
+	preRelTextDataNode = preDataDataNode = preRelDataDataNode = preRodataDataNode = \
+		preSymtabDataNode = preStrtabDataNode = preShstrtabDataNode = NULL;	
+
+
+	int textSize = 0;
+	int relTextEntryNum = 0;
+	int dataSize = 0;
+	int relDataEntryNum = 0;
+	int rodataSize = 0;
+	int symtabSize = 0;
+	int strtabSize = 0;
+	int shstrtabSize = 0;
+
+	// TODO 上面的变量是我复制过来的。懒得马上区分哪些还在被使用。有空再优化。
+
+	StrtabEntry strtabEntryNode = strtabEntryList;
 	strtabEntryNode = strtabEntryList;
 	int relDataDataNodeIndex = 0;
 	while(strtabEntryNode != NULL){
@@ -2439,35 +2501,37 @@ void BuildELF()
 					relDataDataNode->val.Elf32_Rel_Val = relEntry;
 					preRelDataDataNode->next = relDataDataNode;
 				}
-	
 				preRelDataDataNode = relDataDataNode;
-
 			}
 		}
-
 		strtabEntryNode = strtabEntryNode->next;
 	}
+}
 
-	// 段表
+void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
+{
+	SectionDataNode preSectionHeaderData,sectionHeaderDataNode;
+	preSectionHeaderData = sectionHeaderDataNode = NULL;
+
 	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
 		
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 
 		// 创建链表。
-		if(shstrtabDataNode == NULL){
-			shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-			shstrtabDataHead->next = shstrtabDataNode;
+		if(sectionHeaderDataNode == NULL){
+			sectionHeaderDataNode = (SectionDataNode)MALLOC(SectionDataNode);
+			sectionHeaderDataHead->next = sectionHeaderDataNode;
 		}else{
-			shstrtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-			preShstrtabDataNode->next = shstrtabDataNode;
+			sectionHeaderDataNode = (SectionDataNode)MALLOC(SectionDataNode);
+			preSectionHeaderData->next = sectionHeaderDataHead;
 		}
-		preShstrtabDataNode = shstrtabDataNode;
+		preSectionHeaderData = sectionHeaderDataNode;
 
-		// 把填充好的Elf32_Shdr存储到当前shstrtabDataNode。这样做没有任何问题。
+		// 把填充好的Elf32_Shdr存储到当前sectionHeaderDataHead。这样做没有任何问题。
 		Elf32_Shdr *shdr = (Elf32_Shdr *)MALLOC(sizeof(Elf32_Shdr));
 		char *name = shstrtabEntryArray[i];
 		if(strcmp(name, "null") == 0){
-			shstrtabDataNode->val.Elf32_Shdr_Val = shdr;
+			sectionHeaderDataHead->val.Elf32_Shdr_Val = shdr;
 			// TODO 当初，我为什么使用return？
 			// return;
 			break;
@@ -2532,12 +2596,6 @@ void BuildELF()
 		    }
 		}
 
-		// todo 能用switch吗？
-//		switch(name){
-//
-//		}	
-
-
 		// todo 需要计算。
 		sh_offset=(Elf32_Off)0;   
 		// 需要分情况处理。
@@ -2555,12 +2613,24 @@ void BuildELF()
 			sh_info=(Elf32_Word)0;  
 		}
 
-		shstrtabDataNode->val.Elf32_Shdr_Val = shdr;
+		// 赋值。我用正则表达式生成的。比较顺利。
+		shdr->sh_name = sh_name;
+		shdr->sh_type = sh_type;
+		shdr->sh_flags = sh_flags;
+		shdr->sh_addr = sh_addr;
+		shdr->sh_offset = sh_offset;
+		shdr->sh_size = sh_size;
+		shdr->sh_link = sh_link;
+		shdr->sh_info = sh_info;
+		shdr->sh_addralign = sh_addralign;
+		shdr->sh_entsize = sh_entsize;
+
+		sectionHeaderDataNode->val.Elf32_Shdr_Val = shdr;
 	}
-	
+}
 
-	printf("BuildELF is over\n");
-
+void WriteELF()
+{
 	FILE *file;
 
 	file = fopen("my.o", "ab");
@@ -2632,21 +2702,51 @@ void BuildELF()
 		}
 
 		instrNode = instrNode->next;
-
-//		char str[20];
-//		memset(str, 0, 20);
-//		char *fmt = "%X ";
-//		sprintf(str, fmt, instrNode->opcode.primaryOpcode);
-//		if(instrNode->modRM != NULL){
-//			sprintf(str, fmt, instrNode->modRM);
-//		}
-//
-//		if(instrNode->sib != NULL){
-//			sprintf(str, fmt, instrNode->sib);
-//		}
-//
-//		instrNode = instrNode->next;
 	}
+}
+
+void BuildELF()
+{
+	Elf32_Ehdr *ehdr = GenerateELFHeader();
+
+	// 段的内容
+	// TODO .text和.rel.text太麻烦了，先不处理。
+	// .text
+	// .rel.text
+	// .data
+	// .rel.data
+	// .rodata
+	// .symtab
+	// .strtab
+	// .shstrtab
+	
+	SectionData sectionData = GetSectionData();
+	
+	SectionDataNode symtabDataHead = sectionData->symtab;
+	SectionDataNode relDataDataHead = sectionData->relData;
+	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
+	
+	// TODO 作用不明。
+	SegmentInfo shStrtabSegmentInfoNode = FindSegmentInfoNode(".shstrtab");
+	if(shStrtabSegmentInfoNode == NULL){
+		shStrtabSegmentInfoNode = (SegmentInfo)MALLOC(sizeof(struct segmentInfo));
+		strcpy(shStrtabSegmentInfoNode->name, ".shstrtab");
+		preSegmentInfoNode->next = shStrtabSegmentInfoNode; 
+		preSegmentInfoNode = shStrtabSegmentInfoNode; 
+	}
+
+	// .symtab
+	GenerateSymtab(symtabDataHead);
+	// .rel.data
+	GenerateRelData(relDataDataHead);
+	// 段表
+	GenerateSectionHeaders(sectionHeaderDataHead);
+	
+
+	printf("BuildELF is over\n");
+
+	// 把数据写入文件。这个文件就是生成的可重定位文件。
+	WriteELF();
 }
 
 int main(int argc, char *argv[])
