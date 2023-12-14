@@ -3245,13 +3245,13 @@ unsigned int sectionHeaderOffset = 0;
 	return sectionOffset;
 }
 
-void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
+void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset)
 {
 	FILE *file;
 
 	int len = 0;
 
-	SectionOffset sectionOffset = GetSectionOffset(sectionData);
+	// SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	ehdr->e_shoff += 0x34;
 	ehdr->e_shoff += sectionOffset->text;
 	ehdr->e_shoff += sectionOffset->data;
@@ -3393,6 +3393,7 @@ void BuildELF()
 	// .shstrtab
 	
 	SectionData sectionData = GetSectionData();
+	SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	
 	SectionDataNode symtabDataHead = sectionData->symtab;
 	SectionDataNode relDataDataHead = sectionData->relData;
@@ -3403,7 +3404,7 @@ void BuildELF()
 	// .rel.data
 //	GenerateRelData(relDataDataHead, symtabDataHead);
 	// 段表
-	GenerateSectionHeaders(sectionHeaderDataHead, sectionData);
+	GenerateSectionHeaders(sectionHeaderDataHead, sectionOffset);
 	
 
 	printf("BuildELF is over\n");
