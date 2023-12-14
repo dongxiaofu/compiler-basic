@@ -513,8 +513,7 @@ SectionData GetSectionData();
 void GenerateSymtab(SectionDataNode symtabDataNode);
 void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabDataHead);
 void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset sectionOffset);
-
-void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset);
+void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData sectionData);
 void BuildELF();
 
 

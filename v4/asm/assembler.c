@@ -2639,7 +2639,7 @@ void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabData
 	}
 }
 
-Elf32_Off GetShOffset(char *segName, SectionOffset sectionOffset)
+Elf32_Off GetShOffset(char *name, SectionOffset sectionOffset)
 {
 	// .text
 	// .data
@@ -3245,7 +3245,7 @@ unsigned int sectionHeaderOffset = 0;
 	return sectionOffset;
 }
 
-void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset)
+void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData sectionData)
 {
 	FILE *file;
 
@@ -3410,7 +3410,7 @@ void BuildELF()
 	printf("BuildELF is over\n");
 
 	// 把数据写入文件。这个文件就是生成的可重定位文件。
-	WriteELF(ehdr, sectionData);
+	WriteELF(ehdr, sectionOffset, sectionData);
 }
 
 int main(int argc, char *argv[])
