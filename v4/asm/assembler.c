@@ -2919,6 +2919,23 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 {
 	SectionOffset sectionOffset = (SectionOffset)MALLOC(sizeof(struct sectionOffset));
 
+	//	.data
+	SectionDataNode dataDataHead = sectionData->data;
+	//	.rodata
+	SectionDataNode roDataDataHead = sectionData->rodata;
+	//	.symtab
+	SectionDataNode symtabDataHead = sectionData->symtab;
+	//	.strtab
+	SectionDataNode strtabDataHead = sectionData->strtab;
+	//	.rel.text
+	SectionDataNode relTextDataHead = sectionData->relText;
+	//	.rel.data
+	SectionDataNode relDataDataHead = sectionData->relData;
+	//	.shstrtab
+	SectionDataNode shstrtabDataHead = sectionData->shstrtab;
+	//	 段表
+	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
+
 	// .text
 	unsigned int textOffset = 0;
 	Instruction instrNode = instrHead->next;
@@ -3072,33 +3089,33 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 	unsigned int strtabOffset = symtabOffset;
-	StrtabEntry node = strtabEntryList;
-	while(node != NULL){
-		char *name = node->name;
-		unsigned int size = node->length + 1;
+	StrtabEntry strtabEntry = strtabEntryList;
+	while(strtabEntry != NULL){
+		char *name = strtabEntry->name;
+		unsigned int size = strtabEntry->length + 1;
 		strtabOffset += size;
-		node = node->next;
+		strtabEntry = strtabEntry->next;
 	}
 
 	unsigned int shstrtabOffset = strtabOffset;
-	SectionDataNode node = relTextDataHead->next;
+	SectionDataNode relTextNode = relTextDataHead->next;
 
-	while(node != NULL && node->isLast == 0){
-		char *name = node->name;
-		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
+	while(relTextNode != NULL && relTextNode->isLast == 0){
+		char *name = relTextNode->name;
+		Elf32_Rel *rel = relTextNode->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
 		shstrtabOffset += size;
-		node = node->next;
+		relTextNode = relTextNode->next;
 	}
 
 	unsigned int sectionHeaderOffset = shstrtabOffset;
-	SectionDataNode node = sectionHeaderDataHead->next;
+	SectionDataNode sectionHeaderNode = sectionHeaderDataHead->next;
 
-	while(node != NULL && node->isLast == 0){
-		Elf32_Shdr *shdr = node->val.Elf32_Shdr_Val;
+	while(sectionHeaderNode != NULL && sectionHeaderNode->isLast == 0){
+		Elf32_Shdr *shdr = sectionHeaderNode->val.Elf32_Shdr_Val;
 		unsigned int size = sizeof(Elf32_Shdr);
 		sectionHeaderOffset += size;
-		node = node->next;
+		sectionHeaderNode = sectionHeaderNode->next;
 	}
 
 	// 这是用正则表达式生成的代码。
