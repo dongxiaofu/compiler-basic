@@ -115,19 +115,33 @@ typedef struct{
 	OFFSET_TYPE type;
 } NumericData;
 
+//typedef struct modRM{
+//	unsigned int rm:3;
+//	unsigned int regOrOpcode:3;
+//	unsigned int mod:2;
+//} *ModRM; 
+
 typedef struct modRM{
-	unsigned int rm:3;
-	unsigned int regOrOpcode:3;
-	unsigned int mod:2;
+	unsigned char rm:3;
+	unsigned char regOrOpcode:3;
+	unsigned char mod:2;
 } *ModRM; 
 
+//typedef struct sib{
+////	int base:3;
+////	int index:3;
+////	int scale:2;	
+//	unsigned int base:3;
+//	unsigned int index:3;
+//	unsigned int scale:2;	
+//	// TODO 新增一个offset成员，没有问题吧？
+//	int offset;
+//} *SIB;
+
 typedef struct sib{
-//	int base:3;
-//	int index:3;
-//	int scale:2;	
-	unsigned int base:3;
-	unsigned int index:3;
-	unsigned int scale:2;	
+	unsigned char base:3;
+	unsigned char index:3;
+	unsigned char scale:2;	
 	// TODO 新增一个offset成员，没有问题吧？
 	int offset;
 } *SIB;

@@ -2769,8 +2769,9 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 }
 
 //	.data
-void WriteData(FILE *file, SectionDataNode dataDataHead)
+unsigned int  WriteData(FILE *file, SectionDataNode dataDataHead)
 {
+	unsigned int len = 0;
 	SectionDataNode dataDataNode = dataDataHead->next;
 
 	while(dataDataNode != NULL && dataDataNode->isLast == 0){
@@ -2794,22 +2795,28 @@ void WriteData(FILE *file, SectionDataNode dataDataHead)
 
 		printf("name = %s, value = %lld\n", dataDataNode->name, num.value);
 
-		fwrite(&num.value, size, 1, file);
+		int count = fwrite(&num.value, size, 1, file);
+		len += count * size;
 
 		dataDataNode = dataDataNode->next;
 	}
+
+	return len;
 }
 //	.rodata
-void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
+unsigned int WriteRoData(FILE *file, SectionDataNode roDataDataHead)
 {
+	unsigned int len = 0;
+
 	SectionDataNode rodataDataNode = roDataDataHead->next;
 
 	while(rodataDataNode != NULL && rodataDataNode->isLast == 0){
 		enum DataEntryValueType valType = rodataDataNode->valType;
 		if(valType == STR){
 			char *strVal = rodataDataNode->val.strVal; 
-			int len = strlen(strVal) + 1;
-			fwrite(strVal, len, 1, file);
+			int length = strlen(strVal) + 1;
+			int count = fwrite(strVal, length, 1, file);
+			len += count * length;
 		}else{
 			NumericData num = rodataDataNode->val.numVal;
 			int size = 0;
@@ -2828,84 +2835,111 @@ void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
 					printf("error in %d in %s\n", __LINE__, __FILE__);
 					exit(-1);
 			}
-			fwrite(&num.value, size, 1, file);
+			int count = fwrite(&num.value, size, 1, file);
+			len += count * size;
 		}
 		rodataDataNode = rodataDataNode->next;	
 	}
+
+	return len;
 }
 //	.symtab
-void WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
+unsigned int WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
 {
+	unsigned int len = 0;
 	SectionDataNode symtabDataNode = symtabDataHead->next;
 
 	while(symtabDataNode != NULL && symtabDataNode->isLast == 0){
 		Elf32_Sym *symtabEntry = symtabDataNode->val.Elf32_Sym_Val;
 		unsigned int size = sizeof(Elf32_Sym);
-		fwrite(symtabEntry, size, 1, file);
+		int count = fwrite(symtabEntry, size, 1, file);
+		len += count * size;
 		symtabDataNode = symtabDataNode->next;
 	}
+
+	return len;
 }
 //	.strtab
-void WriteStrtab(FILE *file, SectionDataNode strtabDataHead)
+unsigned int WriteStrtab(FILE *file, SectionDataNode strtabDataHead)
 {
+	unsigned int len = 0;
 	StrtabEntry node = strtabEntryList;
 
 	while(node != NULL){
 		char *name = node->name;
 		unsigned int size = node->length + 1;
-		fwrite(name, size, 1, file);	
+		int count = fwrite(name, size, 1, file);	
+		len += count * size;
 		node = node->next;
 	}
+
+	return len;
 }
 //	.rel.text
-void WriteRelText(FILE *file, SectionDataNode relTextDataHead)
+unsigned int WriteRelText(FILE *file, SectionDataNode relTextDataHead)
 {
+	unsigned int len = 0;
 	SectionDataNode node = relTextDataHead->next;
 
 	while(node != NULL && node->isLast == 0){
 		char *name = node->name;
 		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
-		fwrite(rel, size, 1, file);	
+		int count = fwrite(rel, size, 1, file);	
+		len += count * size;
 		node = node->next;
 	}
+
+	return len;
 }
 //	.rel.data
-void WriteRelData(FILE *file, SectionDataNode relDataDataHead)
+unsigned int WriteRelData(FILE *file, SectionDataNode relDataDataHead)
 {
+	unsigned int len = 0;
 	SectionDataNode node = relDataDataHead->next;
 
 	while(node != NULL && node->isLast == 0){
 		char *name = node->name;
 		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
-		fwrite(rel, size, 1, file);	
+		int count = fwrite(rel, size, 1, file);	
+		len += count * size;
 		node = node->next;
 	}
+
+	return len;
 }
 //	.shstrtab
-void WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
+unsigned int WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
 {
+	unsigned int len = 0;
 	// TODO 对于第一个元素, null，应该如何处理？
 	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
 		char *name = shstrtabEntryArray[i];
 		int size = strlen(name) + 1;
 
-		fwrite(name, size, 1, file);
+		int count = fwrite(name, size, 1, file);
+		len += count * size;
 	}
+
+	return len;
 }
 // 段表
-void WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHead)
+unsigned int WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHead)
 {
+	unsigned int len = 0;
 	// Elf32_Shdr *Elf32_Shdr_Val;
 	SectionDataNode node = sectionHeaderDataHead->next;
 
 	while(node != NULL && node->isLast == 0){
 		Elf32_Shdr *shdr = node->val.Elf32_Shdr_Val;
 		unsigned int size = sizeof(Elf32_Shdr);
-		fwrite(shdr, size, 1, file);
+		int count = fwrite(shdr, size, 1, file);
+		len += count * size;
 		node = node->next;
 	}
+
+	return len;
 }
 
 
@@ -2923,6 +2957,19 @@ typedef struct sectionOffset{
 
 SectionOffset GetSectionOffset(SectionData sectionData)
 {
+unsigned int textOffset = 0;
+unsigned int relTextOffset = 0;
+unsigned int dataOffset = 0;
+unsigned int relDataOffset = 0;
+unsigned int rodataOffset = 0;
+unsigned int symtabOffset = 0;
+unsigned int strtabOffset = 0;
+unsigned int shstrtabOffset = 0;
+unsigned int sectionHeaderOffset = 0;
+
+
+
+
 	SectionOffset sectionOffset = (SectionOffset)MALLOC(sizeof(struct sectionOffset));
 
 	//	.data
@@ -2943,7 +2990,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
 
 	// .text
-	unsigned int textOffset = 0x34;
+//	unsigned int textOffset = 0x34;
 	Instruction instrNode = instrHead->next;
 	while(instrNode){
 		if(instrNode->prefix != 0){
@@ -3003,7 +3050,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 		instrNode = instrNode->next;
 	}
 
-	unsigned int relTextOffset = textOffset;
+//	unsigned int relTextOffset = textOffset;
 	SectionDataNode relTextNode = relTextDataHead->next;
 	while(relTextNode != NULL && relTextNode->isLast == 0){
 		Elf32_Rel *rel = relTextNode->val.Elf32_Rel_Val;
@@ -3012,7 +3059,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 		relTextNode = relTextNode->next;
 	}
 
-	unsigned int dataOffset = relTextOffset;
+//	unsigned int dataOffset = relTextOffset;
 	SectionDataNode dataDataNode = dataDataHead->next;
 	while(dataDataNode != NULL && dataDataNode->isLast == 0){
 		NumericData num = dataDataNode->val.numVal;
@@ -3039,7 +3086,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 
-	unsigned int relDataOffset = dataOffset;
+//	unsigned int relDataOffset = dataOffset;
 	SectionDataNode node = relDataDataHead->next;
 
 	while(node != NULL && node->isLast == 0){
@@ -3051,7 +3098,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 
-	unsigned int rodataOffset = relDataOffset;
+//	unsigned int rodataOffset = relDataOffset;
 	SectionDataNode rodataDataNode = roDataDataHead->next;
 	while(rodataDataNode != NULL && rodataDataNode->isLast == 0){
 		enum DataEntryValueType valType = rodataDataNode->valType;
@@ -3083,7 +3130,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 
-	unsigned int symtabOffset = rodataOffset;
+//	unsigned int symtabOffset = rodataOffset;
 	SectionDataNode symtabDataNode = symtabDataHead->next;
 	while(symtabDataNode != NULL && symtabDataNode->isLast == 0){
 		Elf32_Sym *symtabEntry = symtabDataNode->val.Elf32_Sym_Val;
@@ -3092,7 +3139,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 		symtabDataNode = symtabDataNode->next;
 	}
 
-	unsigned int strtabOffset = symtabOffset;
+//	unsigned int strtabOffset = symtabOffset;
 	StrtabEntry strtabEntry = strtabEntryList;
 	while(strtabEntry != NULL){
 		char *name = strtabEntry->name;
@@ -3101,14 +3148,14 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 		strtabEntry = strtabEntry->next;
 	}
 
-	unsigned int shstrtabOffset = strtabOffset;
+//	unsigned int shstrtabOffset = strtabOffset;
 	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
 		char *name = shstrtabEntryArray[i];
 		int size = strlen(name) + 1;
 		shstrtabOffset += size;
 	}
 
-	unsigned int sectionHeaderOffset = shstrtabOffset;
+//	unsigned int sectionHeaderOffset = shstrtabOffset;
 	SectionDataNode sectionHeaderNode = sectionHeaderDataHead->next;
 
 	int i = 0;
@@ -3122,25 +3169,25 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	printf("i = %d\n", i);
 
 	// 这是用正则表达式生成的代码。
-//	sectionOffset->text = textOffset;
-//	sectionOffset->relText = relTextOffset;
-//	sectionOffset->data = dataOffset;
-//	sectionOffset->relData = relDataOffset;
-//	sectionOffset->rodata = rodataOffset;
-//	sectionOffset->symtab = symtabOffset;
-//	sectionOffset->strtab = strtabOffset;
-//	sectionOffset->shstrtab = shstrtabOffset;
+	sectionOffset->text = textOffset;
+	sectionOffset->relText = relTextOffset;
+	sectionOffset->data = dataOffset;
+	sectionOffset->relData = relDataOffset;
+	sectionOffset->rodata = rodataOffset;
+	sectionOffset->symtab = symtabOffset;
+	sectionOffset->strtab = strtabOffset;
+	sectionOffset->shstrtab = shstrtabOffset;
 //	sectionOffset->sectionHeader = sectionHeaderOffset;
 
-	sectionOffset->text = textOffset;
-	sectionOffset->relText = textOffset;
-	sectionOffset->data = relTextOffset;
-	sectionOffset->relData = dataOffset;
-	sectionOffset->rodata = relDataOffset;
-	sectionOffset->symtab = rodataOffset;
-	sectionOffset->strtab = symtabOffset;
-	sectionOffset->shstrtab = strtabOffset;
-	sectionOffset->sectionHeader = shstrtabOffset;
+//	sectionOffset->text = textOffset;
+//	sectionOffset->relText = textOffset;
+//	sectionOffset->data = relTextOffset;
+//	sectionOffset->relData = dataOffset;
+//	sectionOffset->rodata = relDataOffset;
+//	sectionOffset->symtab = rodataOffset;
+//	sectionOffset->strtab = symtabOffset;
+//	sectionOffset->shstrtab = strtabOffset;
+//	sectionOffset->sectionHeader = shstrtabOffset;
 
 	return sectionOffset;
 }
@@ -3149,8 +3196,21 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 {
 	FILE *file;
 
+	int len = 0;
+
 	SectionOffset sectionOffset = GetSectionOffset(sectionData);
-	ehdr->e_shoff = sectionOffset->sectionHeader;
+	ehdr->e_shoff += 0x34;
+	ehdr->e_shoff += sectionOffset->text;
+	ehdr->e_shoff += sectionOffset->data;
+	ehdr->e_shoff += sectionOffset->rodata;
+	ehdr->e_shoff += sectionOffset->symtab;
+	ehdr->e_shoff += sectionOffset->strtab;
+	
+	ehdr->e_shoff += sectionOffset->relText;
+	ehdr->e_shoff += sectionOffset->relData;
+	ehdr->e_shoff += sectionOffset->shstrtab;
+	ehdr->e_shoff += sectionOffset->sectionHeader;
+
 
 	file = fopen("my.o", "ab");
 	if(file == NULL){
@@ -3160,33 +3220,42 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 
 	// 开始生成ELF文件。
 	// ELF文件头。
-	fwrite(ehdr, sizeof(Elf32_Ehdr), 1, file);	
+	unsigned int count = 0;
+	count = fwrite(ehdr, sizeof(Elf32_Ehdr), 1, file);	
+//	len += count * sizeof(Elf32_Ehdr);
 	// .text
 	// preRelTextDataNode
 	Instruction instrNode = instrHead->next;
+//	instrNode = NULL;
 	while(instrNode){
 		if(instrNode->prefix != 0){
-			fwrite(&(instrNode->prefix), 1, 1, file);
+			count = fwrite(&(instrNode->prefix), 1, 1, file);
+			len += count * 1;
 		}
 
 	//  error: invalid initializer
 	//	Opcode opcode = instrNode->opcode.primaryOpcode;
 
 		unsigned char primaryOpcode = instrNode->opcode.primaryOpcode;
-		fwrite(&primaryOpcode, 1, 1, file);
+		count = fwrite(&primaryOpcode, 1, 1, file);
+		len += count * 1;
 
 		char secondaryOpcode = instrNode->opcode.secondaryOpcode; 
 		if(secondaryOpcode != -1){
-			fwrite(&secondaryOpcode, 1, 1, file);
+			count = fwrite(&secondaryOpcode, 1, 1, file);
+			len += count * 1;
 		}
 
 		if(instrNode->modRM != NULL){
-			fwrite(instrNode->modRM, sizeof(struct modRM), 1, file);
-			// fwrite(*instrNode->modRM, 1, 1, file);
+			// count = fwrite(instrNode->modRM, sizeof(struct modRM), 1, file);
+			count = fwrite(instrNode->modRM, 1, 1, file);
+			len += count * 1;
 		}
 
 		if(instrNode->sib != NULL){
-			fwrite(instrNode->sib, sizeof(struct sib) / 2, 1, file);
+			// count = fwrite(instrNode->sib, sizeof(struct sib) / 2, 1, file);
+			count = fwrite(instrNode->sib, 1, 1, file);
+			len += count * 1;
 		}
 
 		// 偏移
@@ -3202,7 +3271,8 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 			}else{
 				size = 4;
 			}
-			fwrite(&value, size, 1, file);
+			count = fwrite(&value, size, 1, file);
+			len += count * size;
 		}
 		// 立即数
 		NumericData imm = instrNode->immediate;
@@ -3217,38 +3287,41 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 			}else{
 				size = 4;
 			}
-			fwrite(&value, size, 1, file);
+			count = fwrite(&value, size, 1, file);
+			len += count * size;
 		}
 
 		instrNode = instrNode->next;
 	}
 
+//	unsigned int count = 0;
+
 	// TODO 这是冗余的。我为了快点看效果才这样写。
 //	SectionData sectionData = GetSectionData();
 //	.data
 	SectionDataNode dataDataHead = sectionData->data;
-	WriteData(file, dataDataHead);
+	count = WriteData(file, dataDataHead);
 //	.rodata
 	SectionDataNode roDataDataHead = sectionData->rodata;
-	WriteRoData(file, roDataDataHead);
+	count = WriteRoData(file, roDataDataHead);
 //	.symtab
 	SectionDataNode symtabDataHead = sectionData->symtab;
-	WriteSymtab(file, symtabDataHead);
+	count = WriteSymtab(file, symtabDataHead);
 //	.strtab
 	SectionDataNode strtabDataHead = sectionData->strtab;
-	WriteStrtab(file, strtabDataHead);
+	count = WriteStrtab(file, strtabDataHead);
 //	.rel.text
 	SectionDataNode relTextDataHead = sectionData->relText;
-	WriteRelText(file, relTextDataHead);
+	count = WriteRelText(file, relTextDataHead);
 //	.rel.data
 	SectionDataNode relDataDataHead = sectionData->relData;
-	WriteRelData(file, relDataDataHead);
+	count = WriteRelData(file, relDataDataHead);
 //	.shstrtab
 	SectionDataNode shstrtabDataHead = sectionData->shstrtab;
-	WriteShstrtab(file, shstrtabDataHead);
+	count = WriteShstrtab(file, shstrtabDataHead);
 //	 段表
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
-	WriteSectionHeaders(file, sectionHeaderDataHead);
+	count = WriteSectionHeaders(file, sectionHeaderDataHead);
 }
 
 void BuildELF()
