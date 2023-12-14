@@ -3005,6 +3005,36 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 	WriteSectionHeaders(file, sectionHeaderDataHead);
 }
 
+typedef struct sectionOffset{
+  unsigned int relText;
+  unsigned int data;
+  unsigned int relData;
+  unsigned int rodata;
+  unsigned int symtab;
+  unsigned int strtab;
+  unsigned int shstrtab;
+  unsigned int sectionHeader;
+}*SectionOffset;
+
+SectionOffset GetSectionOffset(SectionData sectionData)
+{
+	SectionOffset sectionOffset = (SectionOffset)MALLOC(sizeof(struct sectionOffset));
+
+	unsigned int relTextOffset = 0;
+	unsigned int dataOffset = 0;
+	unsigned int relDataOffset = 0;
+	unsigned int rodataOffset = 0;
+	unsigned int symtabOffset = 0;
+	unsigned int strtabOffset = 0;
+	unsigned int shstrtabOffset = 0;
+	unsigned int sectionHeaderOffset = 0;
+
+
+
+
+	return sectionOffset;
+}
+
 void BuildELF()
 {
 	Elf32_Ehdr *ehdr = GenerateELFHeader();
