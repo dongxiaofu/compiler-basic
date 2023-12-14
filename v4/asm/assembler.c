@@ -8,6 +8,9 @@
 #include "assembler.h"
 #include "instr.h"
 
+SectionDataNode symLinkList = NULL;;
+SectionDataNode preSym = NULL;;
+
 int GetDataTypeSize(int variableDataTypeToken)
 {
 	int length = 0;
@@ -1359,6 +1362,12 @@ int FindShstrtabEntry(char *name)
 	return index;
 }
 
+Elf32_Sym *FindSymbol(char *name)
+{
+	
+
+}
+
 SegmentInfo FindSegmentInfoNode(char *name)
 { 
 	// 声明segmentInfoNode时，初始值时NULL。
@@ -2363,6 +2372,7 @@ SectionData GetSectionData()
 // 究竟是用返回值呢还是用参数？都能达到目的。
 void GenerateSymtab(SectionDataNode symtabDataHead)
 {
+//	symtabLinkList = symtabDataHead->head;
 	// 初始化节点。
 	SectionDataNode symtabDataNode,preSymtabDataNode;
 	preSymtabDataNode = symtabDataNode = NULL;
@@ -2381,6 +2391,7 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 
 	int symtabDataNodeIndex = 0;
 
+		// TODO 为什么要这样做？我非常怀疑这样做是不是对的。
 		// 在.symtab中加入一些常量节点。
 	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
 	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,1,3,5,6};
@@ -2428,17 +2439,26 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 		if(symtabDataNode == NULL){
 			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			strcpy(symtabDataNode->name, name);
-			symtabDataNode->index = symtabDataNodeIndex++;
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			symtabDataHead->next = symtabDataNode;
+
+			symLinkList = symtabDataNode;	
+			preSym = symtabDataNode;
 		}else{
 			strcpy(symtabDataNode->name, name);
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			preSymtabDataNode->next = symtabDataNode;
+
+			preSym->next = symtabDataNode;
+			preSym = symtabDataNode;
 		}
+
+//		symtabDataNode->val.Elf32_Sym_Val = sym;
+		symtabDataNode->index = symtabDataNodeIndex++;
+		symtabDataNode->isLast = 0;
 		preSymtabDataNode = symtabDataNode;
 		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-		symtabDataNode->index = symtabDataNodeIndex++;
+		symtabDataNode->isLast = 1;
 	}
 
 	StrtabEntry strtabEntryNode = strtabEntryList;
@@ -2469,23 +2489,82 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 		if(symtabDataNode == NULL){
 			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			strcpy(symtabDataNode->name, name);
-			symtabDataNode->index = symtabDataNodeIndex++;
+			symtabDataNode->isLast = 1;
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			symtabDataHead->next = symtabDataNode;
-	//		preSymtabDataNode = symtabDataNode;
 		}else{
-			// symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			strcpy(symtabDataNode->name, name);
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			preSymtabDataNode->next = symtabDataNode;
-	//		preSymtabDataNode = symtabDataNode;
 		}
-		preSymtabDataNode = symtabDataNode;
-		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		
+//		symtabDataNode->val.Elf32_Sym_Val = sym;
 		symtabDataNode->index = symtabDataNodeIndex++;
+		preSymtabDataNode = symtabDataNode;
+		symtabDataNode->isLast = 0;
+		symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+		symtabDataNode->isLast = 1;
 		
 		
 		strtabEntryNode = strtabEntryNode->next;
+	}
+
+	printf("over\n");
+}
+
+void GenerateRelText(SectionDataNode relTextDataHead)
+{
+	// TODO 我没有做错误检测，为了赶进度。
+	Instruction instrDataNode = instrHead->next;
+	SectionDataNode relDataDataNode, preRelDataDataNode;
+	relDataDataNode = preRelDataDataNode = NULL;
+
+	while(instrDataNode != NULL){
+		RelTextEntry relTextEntry = instrDataNode->relTextEntry;
+		Elf32_Rel *rel = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
+		rel->r_offset = relTextEntry->offset;	
+		
+		// TODO 
+		SectionDataNode target = NULL;
+		char *name = relTextEntry->name;
+		SectionDataNode symtabDataNode = symLinkList;
+		while(symtabDataNode != NULL){
+			char *symName = symtabDataNode->name;
+			if(strcmp(name, symName) == 0){
+				target = symtabDataNode;
+				break;
+			}
+		}
+
+		if(target == NULL){
+			// movl num, %eax
+			// 如果num没有对应的符号，应该怎么设置它对应的rel.text？我还不知道。
+			printf("todo in %d in %s\n", __LINE__, __FILE__);
+			exit(-1);
+		}else{
+			// `r_info`占用4个字节，高24位是`.symtab`的条目的索引，低8位是重定位类型。
+			int symbolIndex = target->index;
+			rel->r_info = (symbolIndex << 8) | R_386_PC32;  
+		}
+
+		// 创建链表。
+		if(relTextDataHead == NULL){
+			relTextDataHead= (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+			SectionDataNode relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+			relDataDataNode->val.Elf32_Rel_Val = rel;
+			
+			relTextDataHead->next = relDataDataNode;
+		}else{
+			if(relTextDataHead->next == NULL){
+				relTextDataHead->next = relDataDataNode;
+			}
+			SectionDataNode relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+			relDataDataNode->val.Elf32_Rel_Val = rel;
+			
+			preRelDataDataNode->next = relDataDataNode;
+		} 
+
+		preRelDataDataNode = relDataDataNode;
 	}
 }
 
@@ -2573,6 +2652,9 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 			sectionHeaderDataHead->next = sectionHeaderDataNode;
 		}else{
 			sectionHeaderDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
+			if(sectionHeaderDataNode->next == NULL){
+				sectionHeaderDataHead->next = sectionHeaderDataNode;
+			}
 			preSectionHeaderData->next = sectionHeaderDataHead;
 		}
 		preSectionHeaderData = sectionHeaderDataNode;
@@ -2584,7 +2666,8 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 			sectionHeaderDataHead->val.Elf32_Shdr_Val = shdr;
 			// TODO 当初，我为什么使用return？
 			// return;
-			break;
+			// TODO 这里该怎么做？我暂时不知道。
+			// break;
 		}
 
 		// todo 当sh_name是-1时需要处理，我暂时懒得写这种代码。
@@ -2739,7 +2822,6 @@ void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
 					printf("error in %d in %s\n", __LINE__, __FILE__);
 					exit(-1);
 			}
-
 			fwrite(&num.value, size, 1, file);
 		}
 		rodataDataNode = rodataDataNode->next;	
@@ -2748,35 +2830,79 @@ void WriteRoData(FILE *file, SectionDataNode roDataDataHead)
 //	.symtab
 void WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
 {
+	SectionDataNode symtabDataNode = symtabDataHead->next;
 
+	while(symtabDataNode != NULL && symtabDataNode->isLast == 0){
+		Elf32_Sym *symtabEntry = symtabDataNode->val.Elf32_Sym_Val;
+		unsigned int size = sizeof(Elf32_Sym);
+		fwrite(symtabEntry, size, 1, file);
+		symtabDataNode = symtabDataNode->next;
+	}
 }
 //	.strtab
 void WriteStrtab(FILE *file, SectionDataNode strtabDataHead)
 {
+	StrtabEntry node = strtabEntryList;
 
+	while(node != NULL){
+		char *name = node->name;
+		unsigned int size = node->length + 1;
+		fwrite(name, size, 1, file);	
+		node = node->next;
+	}
 }
 //	.rel.text
 void WriteRelText(FILE *file, SectionDataNode relTextDataHead)
 {
+	SectionDataNode node = relTextDataHead->next;
 
+	while(node != NULL && node->isLast == 0){
+		char *name = node->name;
+		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
+		unsigned int size = sizeof(Elf32_Rel);
+		fwrite(rel, size, 1, file);	
+		node = node->next;
+	}
 }
 //	.rel.data
 void WriteRelData(FILE *file, SectionDataNode relDataDataHead)
 {
+	SectionDataNode node = relDataDataHead->next;
 
+	while(node != NULL && node->isLast == 0){
+		char *name = node->name;
+		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
+		unsigned int size = sizeof(Elf32_Rel);
+		fwrite(rel, size, 1, file);	
+		node = node->next;
+	}
 }
 //	.shstrtab
 void WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
 {
+	// TODO 对于第一个元素, null，应该如何处理？
+	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+		char *name = shstrtabEntryArray[i];
+		int size = strlen(name) + 1;
 
+		fwrite(name, size, 1, file);
+	}
 }
 // 段表
-void WriteSectionHeaders(FILE *file, SectionDataNode dataDataHead)
+void WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHead)
 {
+	// Elf32_Shdr *Elf32_Shdr_Val;
+	SectionDataNode node = sectionHeaderDataHead->next;
 
+	while(node != NULL && node->isLast == 0){
+		Elf32_Shdr *shdr = node->val.Elf32_Shdr_Val;
+		unsigned int size = sizeof(Elf32_Shdr);
+		fwrite(shdr, size, 1, file);
+		node = node->next;
+	}
 }
 
-void WriteELF(Elf32_Ehdr *ehdr)
+void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 {
 	FILE *file;
 
@@ -2852,7 +2978,7 @@ void WriteELF(Elf32_Ehdr *ehdr)
 	}
 
 	// TODO 这是冗余的。我为了快点看效果才这样写。
-	SectionData sectionData = GetSectionData();
+//	SectionData sectionData = GetSectionData();
 //	.data
 	SectionDataNode dataDataHead = sectionData->data;
 	WriteData(file, dataDataHead);
@@ -2860,10 +2986,23 @@ void WriteELF(Elf32_Ehdr *ehdr)
 	SectionDataNode roDataDataHead = sectionData->rodata;
 	WriteRoData(file, roDataDataHead);
 //	.symtab
+	SectionDataNode symtabDataHead = sectionData->symtab;
+	WriteSymtab(file, symtabDataHead);
 //	.strtab
+	SectionDataNode strtabDataHead = sectionData->strtab;
+	WriteStrtab(file, strtabDataHead);
 //	.rel.text
+	SectionDataNode relTextDataHead = sectionData->relText;
+	WriteRelText(file, relTextDataHead);
 //	.rel.data
+	SectionDataNode relDataDataHead = sectionData->relData;
+	WriteRelData(file, relDataDataHead);
 //	.shstrtab
+	SectionDataNode shstrtabDataHead = sectionData->shstrtab;
+	WriteShstrtab(file, shstrtabDataHead);
+//	 段表
+	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
+	WriteSectionHeaders(file, sectionHeaderDataHead);
 }
 
 void BuildELF()
@@ -2890,7 +3029,7 @@ void BuildELF()
 	// .symtab
 	GenerateSymtab(symtabDataHead);
 	// .rel.data
-	GenerateRelData(relDataDataHead, symtabDataHead);
+//	GenerateRelData(relDataDataHead, symtabDataHead);
 	// 段表
 	GenerateSectionHeaders(sectionHeaderDataHead);
 	
@@ -2898,7 +3037,7 @@ void BuildELF()
 	printf("BuildELF is over\n");
 
 	// 把数据写入文件。这个文件就是生成的可重定位文件。
-	WriteELF(ehdr);
+	WriteELF(ehdr, sectionData);
 }
 
 int main(int argc, char *argv[])
