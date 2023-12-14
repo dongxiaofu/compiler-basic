@@ -355,8 +355,8 @@ StrtabEntry preStrtabEntryNode;
 static int dataEntryOffset = 0;
 static int rodataEntryOffset = 0;
 
-#define SHSTRTAB_ENTRY_ARRAY_SIZE	10
-char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {"null",".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+#define SHSTRTAB_ENTRY_ARRAY_SIZE	9
+char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
 
 #define BSS_DATA_ENTRY_ARRAY_SIZE 100
 DataEntry bssDataEntryArray[BSS_DATA_ENTRY_ARRAY_SIZE];

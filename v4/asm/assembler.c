@@ -1244,6 +1244,7 @@ int FindShStrTabOffset(char *name)
 		if(strncmp(shStrTabStr, name, nameLength) == 0){
 			return i;
 		}
+		shStrTabStr++;
 	}
 	
 	return -1;
@@ -2177,7 +2178,8 @@ Elf32_Ehdr *GenerateELFHeader()
 	ehdr->e_phnum = 0;
 	ehdr->e_shentsize = 40;
 	// TODO 段表条目的数量，待定。
-	ehdr->e_shnum = 13;
+	// ehdr->e_shnum = 13;
+	ehdr->e_shnum = SHSTRTAB_ENTRY_ARRAY_SIZE;
 	// TODO .shstrtab在段表中的索引。
 	ehdr->e_shstrndx = 0;
 
@@ -2647,15 +2649,18 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 
 		// 创建链表。
-		if(sectionHeaderDataNode == NULL){
+		if(sectionHeaderDataHead == NULL){
+			sectionHeaderDataHead = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			sectionHeaderDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			sectionHeaderDataHead->next = sectionHeaderDataNode;
 		}else{
 			sectionHeaderDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
-			if(sectionHeaderDataNode->next == NULL){
+			if(sectionHeaderDataHead->next == NULL){
 				sectionHeaderDataHead->next = sectionHeaderDataNode;
+				preSectionHeaderData = sectionHeaderDataNode;
+			}else{
+				preSectionHeaderData->next = sectionHeaderDataNode;
 			}
-			preSectionHeaderData->next = sectionHeaderDataHead;
 		}
 		preSectionHeaderData = sectionHeaderDataNode;
 
@@ -2676,7 +2681,7 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 		Elf32_Word sh_flags=(Elf32_Word)0;    
 		Elf32_Addr sh_addr=(Elf32_Word)0;  
 		Elf32_Off 	  sh_offset=(Elf32_Word)0;   
-		Elf32_Word sh_size=(Elf32_Word)0;  
+		Elf32_Word sh_size=(Elf32_Word)16;  
 		Elf32_Word sh_link=(Elf32_Word)0;  
 		Elf32_Word sh_info=(Elf32_Word)0;  
 		Elf32_Word sh_addralign=(Elf32_Word)0;    
@@ -2752,7 +2757,8 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 		shdr->sh_flags = sh_flags;
 		shdr->sh_addr = sh_addr;
 		shdr->sh_offset = sh_offset;
-		shdr->sh_size = sh_size;
+		// shdr->sh_size = sh_size;
+		shdr->sh_size = 16;
 		shdr->sh_link = sh_link;
 		shdr->sh_info = sh_info;
 		shdr->sh_addralign = sh_addralign;
@@ -2937,7 +2943,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
 
 	// .text
-	unsigned int textOffset = 0;
+	unsigned int textOffset = 0x34;
 	Instruction instrNode = instrHead->next;
 	while(instrNode){
 		if(instrNode->prefix != 0){
@@ -3105,23 +3111,36 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	unsigned int sectionHeaderOffset = shstrtabOffset;
 	SectionDataNode sectionHeaderNode = sectionHeaderDataHead->next;
 
+	int i = 0;
 	while(sectionHeaderNode != NULL && sectionHeaderNode->isLast == 0){
 		Elf32_Shdr *shdr = sectionHeaderNode->val.Elf32_Shdr_Val;
 		unsigned int size = sizeof(Elf32_Shdr);
 		sectionHeaderOffset += size;
 		sectionHeaderNode = sectionHeaderNode->next;
+		i++;
 	}
+	printf("i = %d\n", i);
 
 	// 这是用正则表达式生成的代码。
+//	sectionOffset->text = textOffset;
+//	sectionOffset->relText = relTextOffset;
+//	sectionOffset->data = dataOffset;
+//	sectionOffset->relData = relDataOffset;
+//	sectionOffset->rodata = rodataOffset;
+//	sectionOffset->symtab = symtabOffset;
+//	sectionOffset->strtab = strtabOffset;
+//	sectionOffset->shstrtab = shstrtabOffset;
+//	sectionOffset->sectionHeader = sectionHeaderOffset;
+
 	sectionOffset->text = textOffset;
-	sectionOffset->relText = relTextOffset;
-	sectionOffset->data = dataOffset;
-	sectionOffset->relData = relDataOffset;
-	sectionOffset->rodata = rodataOffset;
-	sectionOffset->symtab = symtabOffset;
-	sectionOffset->strtab = strtabOffset;
-	sectionOffset->shstrtab = shstrtabOffset;
-	sectionOffset->sectionHeader = sectionHeaderOffset;
+	sectionOffset->relText = textOffset;
+	sectionOffset->data = relTextOffset;
+	sectionOffset->relData = dataOffset;
+	sectionOffset->rodata = relDataOffset;
+	sectionOffset->symtab = rodataOffset;
+	sectionOffset->strtab = symtabOffset;
+	sectionOffset->shstrtab = strtabOffset;
+	sectionOffset->sectionHeader = shstrtabOffset;
 
 	return sectionOffset;
 }
@@ -3129,6 +3148,9 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData)
 {
 	FILE *file;
+
+	SectionOffset sectionOffset = GetSectionOffset(sectionData);
+	ehdr->e_shoff = sectionOffset->sectionHeader;
 
 	file = fopen("my.o", "ab");
 	if(file == NULL){
