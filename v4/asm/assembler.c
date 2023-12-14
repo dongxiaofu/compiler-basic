@@ -2998,7 +2998,7 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 	unsigned int relTextOffset = textOffset;
-	SectionDatarelTextNode relTextNode = relTextDataHead->next;
+	SectionDataNode relTextNode = relTextDataHead->next;
 	while(relTextNode != NULL && relTextNode->isLast == 0){
 		Elf32_Rel *rel = relTextNode->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
@@ -3053,7 +3053,6 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 			char *strVal = rodataDataNode->val.strVal; 
 			int len = strlen(strVal) + 1;
 			rodataOffset += len;
-			fwrite(strVal, len, 1, file);
 		}else{
 			NumericData num = rodataDataNode->val.numVal;
 			int size = 0;
@@ -3084,7 +3083,6 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 		Elf32_Sym *symtabEntry = symtabDataNode->val.Elf32_Sym_Val;
 		unsigned int size = sizeof(Elf32_Sym);
 		symtabOffset += size;
-		fwrite(symtabEntry, size, 1, file);
 		symtabDataNode = symtabDataNode->next;
 	}
 
@@ -3098,14 +3096,10 @@ SectionOffset GetSectionOffset(SectionData sectionData)
 	}
 
 	unsigned int shstrtabOffset = strtabOffset;
-	SectionDataNode relTextNode = relTextDataHead->next;
-
-	while(relTextNode != NULL && relTextNode->isLast == 0){
-		char *name = relTextNode->name;
-		Elf32_Rel *rel = relTextNode->val.Elf32_Rel_Val;
-		unsigned int size = sizeof(Elf32_Rel);
+	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+		char *name = shstrtabEntryArray[i];
+		int size = strlen(name) + 1;
 		shstrtabOffset += size;
-		relTextNode = relTextNode->next;
 	}
 
 	unsigned int sectionHeaderOffset = shstrtabOffset;
