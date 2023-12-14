@@ -2639,7 +2639,73 @@ void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabData
 	}
 }
 
-void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
+Elf32_Off GetShOffset(char *segName, SectionOffset sectionOffset)
+{
+	// .text
+	// .data
+	// .rodata
+	// .symtab
+	// .strtab
+	// .rel.text
+	// .rel.data
+	// .shstrtab
+
+	sh_offset = 0x34;
+	if(strcmp(name, ".text") == 0){
+
+	}else if(strcmp(name, ".bss") == 0){
+		// TODO 
+		// sh_offset += sectionOffset->text;
+	}else if(strcmp(name, ".data") == 0){
+		sh_offset += sectionOffset->text;
+
+	}else if(strcmp(name, ".rodata") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+
+	}else if(strcmp(name, ".symtab") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+		sh_offset += sectionOffset->rodata;
+
+	}else if(strcmp(name, ".strtab") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+		sh_offset += sectionOffset->rodata;
+		sh_offset += sectionOffset->symtab;
+
+	}else if(strcmp(name, ".rel.text") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+		sh_offset += sectionOffset->rodata;
+		sh_offset += sectionOffset->symtab;
+		sh_offset += sectionOffset->strtab;
+
+	}else if(strcmp(name, ".rel.data") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+		sh_offset += sectionOffset->rodata;
+		sh_offset += sectionOffset->symtab;
+		sh_offset += sectionOffset->strtab; 
+		sh_offset += sectionOffset->relText; 
+
+	}else if(strcmp(name, ".shstrtab") == 0){
+		sh_offset += sectionOffset->text;
+		sh_offset += sectionOffset->data;
+		sh_offset += sectionOffset->rodata;
+		sh_offset += sectionOffset->symtab;
+		sh_offset += sectionOffset->strtab; 
+		sh_offset += sectionOffset->relText; 
+		sh_offset += sectionOffset->relData; 
+
+	}else{
+		// TODO
+	}
+
+	return sh_offset;
+}
+
+void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset sectionOffset)
 {
 	SectionDataNode preSectionHeaderData,sectionHeaderDataNode;
 	preSectionHeaderData = sectionHeaderDataNode = NULL;
@@ -2735,7 +2801,7 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead)
 		}
 
 		// todo 需要计算。
-		sh_offset=(Elf32_Off)0;   
+		sh_offset=(Elf32_Off)GetShOffset(name, sectionOffset); 
 		// 需要分情况处理。
 		sh_size=(Elf32_Word)0;  
 		
@@ -3350,7 +3416,7 @@ void BuildELF()
 	// .rel.data
 //	GenerateRelData(relDataDataHead, symtabDataHead);
 	// 段表
-	GenerateSectionHeaders(sectionHeaderDataHead);
+	GenerateSectionHeaders(sectionHeaderDataHead, sectionData);
 	
 
 	printf("BuildELF is over\n");
