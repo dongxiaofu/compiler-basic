@@ -2650,7 +2650,7 @@ Elf32_Off GetShOffset(char *name, SectionOffset sectionOffset)
 	// .rel.data
 	// .shstrtab
 
-	sh_offset = 0x34;
+	Elf32_Off sh_offset = 0x34;
 	if(strcmp(name, ".text") == 0){
 
 	}else if(strcmp(name, ".bss") == 0){
