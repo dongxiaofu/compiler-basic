@@ -333,6 +333,18 @@ typedef struct sectionData{
 	SectionDataNode sectionHeader;
 }*SectionData;
 
+typedef struct sectionOffset{
+  unsigned int text;
+  unsigned int relText;
+  unsigned int data;
+  unsigned int relData;
+  unsigned int rodata;
+  unsigned int symtab;
+  unsigned int strtab;
+  unsigned int shstrtab;
+  unsigned int sectionHeader;
+}*SectionOffset;
+
 // 存储Bind为globl的变量的单链表。
 // todo 是否需要用static修饰？
 // globlVariableList是链表的头结点，preGloblVariablenNode是在构造链表的过程中使用的变量。
@@ -500,7 +512,8 @@ Elf32_Ehdr *GenerateELFHeader();
 SectionData GetSectionData();
 void GenerateSymtab(SectionDataNode symtabDataNode);
 void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabDataHead);
-void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead);
+void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset sectionOffset);
+
 void WriteELF(Elf32_Ehdr *ehdr, SectionData sectionData);
 void BuildELF();
 

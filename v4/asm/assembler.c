@@ -3008,19 +3008,6 @@ unsigned int WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHe
 	return len;
 }
 
-
-typedef struct sectionOffset{
-  unsigned int text;
-  unsigned int relText;
-  unsigned int data;
-  unsigned int relData;
-  unsigned int rodata;
-  unsigned int symtab;
-  unsigned int strtab;
-  unsigned int shstrtab;
-  unsigned int sectionHeader;
-}*SectionOffset;
-
 SectionOffset GetSectionOffset(SectionData sectionData)
 {
 unsigned int textOffset = 0;
