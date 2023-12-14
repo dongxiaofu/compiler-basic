@@ -1236,8 +1236,14 @@ int myStrlen(char *name)
 
 int FindShStrTabOffset(char *name)
 {
-	char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
-	int length = strlen(shStrTabStr);
+	// 这是我用正则表达式生成的。
+	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+	unsigned int length = 0;
+	for(int i = 0; i < 7; i++){
+		length += strlen(arr[0]) + 1;
+	}
+	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
+	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
 	int nameLength = strlen(name);
 
 	for(int i = 0; i < length; i++){
@@ -2774,6 +2780,8 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		    sh_flags=(Elf32_Word)0;      // none
 
 			sh_addralign=(Elf32_Word)1;
+
+			sh_size = 70;
 		}else if(strcmp(name, ".strtab") == 0){
 		    sh_type=(Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
@@ -2801,9 +2809,13 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		}
 
 		// todo 需要计算。
+		// sh_offset=(Elf32_Off)0;
 		sh_offset=(Elf32_Off)GetShOffset(name, sectionOffset); 
 		// 需要分情况处理。
 		sh_size=(Elf32_Word)0;  
+		if(strcmp(name, ".shstrtab") == 0){
+			sh_size = 70;
+		}
 		
 		// todo 还没有设置好值。我不知道怎么设置。在《程序员的自我修养》的3.4.2的表3-11有相关资料。
 		if(sh_type == SHT_REL){
@@ -2824,7 +2836,7 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		shdr->sh_addr = sh_addr;
 		shdr->sh_offset = sh_offset;
 		// shdr->sh_size = sh_size;
-		shdr->sh_size = 16;
+		shdr->sh_size = sh_size;
 		shdr->sh_link = sh_link;
 		shdr->sh_info = sh_info;
 		shdr->sh_addralign = sh_addralign;
@@ -2978,17 +2990,29 @@ unsigned int WriteRelData(FILE *file, SectionDataNode relDataDataHead)
 //	.shstrtab
 unsigned int WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
 {
-	unsigned int len = 0;
-	// TODO 对于第一个元素, null，应该如何处理？
-	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
-		char *name = shstrtabEntryArray[i];
-		int size = strlen(name) + 1;
-
-		int count = fwrite(name, size, 1, file);
-		len += count * size;
+	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+	unsigned int length = 0;
+	for(int i = 0; i < 7; i++){
+		length += strlen(arr[0]) + 1;
 	}
+	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
+	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+
+	unsigned int len = fwrite(shStrTabStr, length, 1, file);
 
 	return len;
+
+//	unsigned int len = 0;
+//	// TODO 对于第一个元素, null，应该如何处理？
+//	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+//		char *name = shstrtabEntryArray[i];
+//		int size = strlen(name) + 1;
+//
+//		int count = fwrite(name, size, 1, file);
+//		len += count * size;
+//	}
+//
+//	return len;
 }
 // 段表
 unsigned int WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHead)
@@ -3202,11 +3226,20 @@ unsigned int sectionHeaderOffset = 0;
 	}
 
 //	unsigned int shstrtabOffset = strtabOffset;
-	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
-		char *name = shstrtabEntryArray[i];
-		int size = strlen(name) + 1;
-		shstrtabOffset += size;
+//	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
+//		char *name = shstrtabEntryArray[i];
+//		int size = strlen(name) + 1;
+//		shstrtabOffset += size;
+//	}
+
+	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+	unsigned int length = 0;
+	for(int i = 0; i < 7; i++){
+		length += strlen(arr[0]) + 1;
 	}
+	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
+	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+	shstrtabOffset += length;
 
 //	unsigned int sectionHeaderOffset = shstrtabOffset;
 	SectionDataNode sectionHeaderNode = sectionHeaderDataHead->next;
@@ -3347,6 +3380,8 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData section
 		instrNode = instrNode->next;
 	}
 
+	printf("text size = %d\n", len);
+
 //	unsigned int count = 0;
 
 	// TODO 这是冗余的。我为了快点看效果才这样写。
@@ -3354,27 +3389,35 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData section
 //	.data
 	SectionDataNode dataDataHead = sectionData->data;
 	count = WriteData(file, dataDataHead);
+	printf("data size = %d\n", count);
 //	.rodata
 	SectionDataNode roDataDataHead = sectionData->rodata;
 	count = WriteRoData(file, roDataDataHead);
+	printf("rodata size = %d\n", count);
 //	.symtab
 	SectionDataNode symtabDataHead = sectionData->symtab;
 	count = WriteSymtab(file, symtabDataHead);
+	printf("symtab size = %d\n", count);
 //	.strtab
 	SectionDataNode strtabDataHead = sectionData->strtab;
 	count = WriteStrtab(file, strtabDataHead);
+	printf("strtab size = %d\n", count);
 //	.rel.text
 	SectionDataNode relTextDataHead = sectionData->relText;
 	count = WriteRelText(file, relTextDataHead);
+	printf("rel.text size = %d\n", count);
 //	.rel.data
 	SectionDataNode relDataDataHead = sectionData->relData;
 	count = WriteRelData(file, relDataDataHead);
+	printf("rel.data size = %d\n", count);
 //	.shstrtab
 	SectionDataNode shstrtabDataHead = sectionData->shstrtab;
 	count = WriteShstrtab(file, shstrtabDataHead);
+	printf("shstrtab size = %d\n", count);
 //	 段表
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
 	count = WriteSectionHeaders(file, sectionHeaderDataHead);
+	printf("sectionHeader size = %d\n", count);
 }
 
 void BuildELF()
@@ -3393,7 +3436,7 @@ void BuildELF()
 	// .shstrtab
 	
 	SectionData sectionData = GetSectionData();
-	SectionOffset sectionOffset = GetSectionOffset(sectionData);
+//	SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	
 	SectionDataNode symtabDataHead = sectionData->symtab;
 	SectionDataNode relDataDataHead = sectionData->relData;
@@ -3403,6 +3446,8 @@ void BuildELF()
 	GenerateSymtab(symtabDataHead);
 	// .rel.data
 //	GenerateRelData(relDataDataHead, symtabDataHead);
+//	GetSectionOffset遍历链表。这些链表由上面的Generate创建。所以，必须先执行Generate。
+	SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	// 段表
 	GenerateSectionHeaders(sectionHeaderDataHead, sectionOffset);
 	

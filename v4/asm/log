@@ -853,13 +853,13 @@ token = 19
 ret is a valid instr
 token = -1
 over
-2022 in calculateDataEntryOffset
-2022 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
 Ro str = hello, len = 6
 Ro str = world, len = 6
 Ro str = Jim, len = 4
-2022 in calculateDataEntryOffset
-2022 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
 Ro str = How are you Jim, len = 16
 Ro str = How are you, len = 12
 Ro str = %d, len = 3
@@ -869,8 +869,8 @@ Ro str = cx = %d
 Ro str = @---------next--------, len = 23
 Ro str = str[%d] = %c
 , len = 14
-2022 in calculateDataEntryOffset
-2022 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
+2038 in calculateDataEntryOffset
 Cal name = ch7, len = 4
 Cal name = ch4, len = 4
 Cal name = str, len = 4
@@ -963,89 +963,41 @@ string in strtabList start
 16--main
 
 string in strtabList end
-error section 2240
-error section 2240
-variableName = str
-variableName2 = str
-variableName2 = str
-variableName2 = str
-error section 2240
-error section 2240
-variableName = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName = num11
-variableName2 = num11
-variableName = num12
-variableName2 = num12
-variableName2 = num12
-variableName = ch1
-variableName2 = ch1
-variableName = num1
-variableName2 = num1
-variableName = my_str_ak
-variableName2 = my_str_ak
-variableName = num2
-variableName2 = num2
-variableName = num3
-variableName2 = num3
-variableName = ch25
-variableName2 = ch25
-variableName = my_str_cg
-variableName2 = my_str_cg
-error section 2240
-error section 2240
+error section 2257
+error section 2257
+error section 2257
+error section 2257
+error section 2257
+error section 2257
+over
+i = 0
 BuildELF is over
-error section 2240
-error section 2240
-variableName = str
-variableName2 = str
-variableName2 = str
-variableName2 = str
-error section 2240
-error section 2240
-variableName = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName2 = num13
-variableName = num11
-variableName2 = num11
-variableName = num12
-variableName2 = num12
-variableName2 = num12
-variableName = ch1
-variableName2 = ch1
-variableName = num1
-variableName2 = num1
-variableName = my_str_ak
-variableName2 = my_str_ak
-variableName = num2
-variableName2 = num2
-variableName = num3
-variableName2 = num3
-variableName = ch25
-variableName2 = ch25
-variableName = my_str_cg
-variableName2 = my_str_cg
-error section 2240
-error section 2240
-value = 0
-value = -1717986918
-value = 1082340147
-value = 858993459
-value = 2
-value = 14
-value = 17
-value = 140
-value = 50
-value = 75
-value = 33
-name = , type = 0
-error in 2688 in assembler.c
+text size = 61
+name = str, value = 0
+name = str, value = 6
+name = str, value = 12
+name = num13, value = 2576980378
+name = num13, value = 1075026329
+name = num13, value = 3435973837
+name = num13, value = 1075104972
+name = num13, value = 2576980378
+name = num13, value = 1074633113
+name = num11, value = 1082340147
+name = num12, value = 858993459
+name = num12, value = 1075262259
+name = ch1, value = 2
+name = num1, value = 14
+name = my_str_ak, value = 17
+name = num2, value = 140
+name = num3, value = 50
+name = ch25, value = 75
+name = my_str_cg, value = 33
+data size = 70
+rodata size = 101
+symtab size = 368
+strtab size = 95
+rel.text size = 0
+rel.data size = 32
+shstrtab size = 1
+sectionHeader size = 360
+Game over
