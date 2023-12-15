@@ -366,6 +366,10 @@ StrtabEntry strtabEntryArray[100];
 static int strtabEntryArrayIndex = 0;
 static int strtabEntryOffset = 0;
 
+// LOCAL变量的数目。
+// TODO 在GenerateSymtab中会看到一个数组。这个数组生成默认的六个LOCAL符号。
+static unsigned int localVariableCount = 6;
+
 static StrtabEntry strtabEntryList;
 StrtabEntry preStrtabEntryNode;
 // 把StrtabEntry中的name连接成字符串。

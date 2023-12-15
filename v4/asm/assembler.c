@@ -2135,6 +2135,8 @@ void ReSortStrtab()
 		StrtabEntry node = (StrtabEntry)MALLOC(size);
 		memcpy(node, entry, size);
 		AddStrtabEntryListNode(node);
+
+		localVariableCount++;
 	}
 	
 	// 遍历`.strtab`，找到`Bind`为`globl`而且`Type`是`OBJECT`的字符串，放入链表`.strtabList`。
@@ -2909,7 +2911,9 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 			sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
 
 			sh_link = (Elf32_Word)STR_TAB;
-			sh_info = (Elf32_Word)SYM_TAB;
+			// 花了很多很多时间才弄明白这个值是什么。它是LOCAL变量的数目。
+			// sh_info = (Elf32_Word)SYM_TAB;
+			sh_info = localVariableCount;
 			
 		}else if(strcmp(name, ".text") == 0){
 		    sh_type=(Elf32_Word)SHT_PROGBITS;
