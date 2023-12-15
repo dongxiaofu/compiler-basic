@@ -1,5 +1,28 @@
 #include "common.h"
 
+// TODO 写完才知道，C语言中有和这个函数的功能相同的内置函数strstr。
+// 真是没见识！
+// 找机会处理掉我写的这个函数。
+// 这个函数可能有存在的必要。
+int GetSubStrIndex(char *subStr, char *str, unsigned int strLength)
+{
+	int index = -1;
+	
+// str可能是 hello\000\world\000。不能使用strlen计算它的真实长度。
+//	unsigned int length = strlen(str);
+	unsigned int subStrLength = strlen(subStr);
+
+	for(int i = 0; i < strLength; i++){
+		if(strncmp(subStr, str, subStrLength) == 0){
+			return i;
+		}
+		
+		str++;
+	} 
+
+	return - 1;
+}
+
 //Heap CurrentHeap;
 //struct heap ProgramHeap;
 //HEAP(ProgramHeap);

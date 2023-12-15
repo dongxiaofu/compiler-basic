@@ -334,6 +334,7 @@ static char instructionSets[INSTRUCTION_SETS_SIZE][8] = {
 	#undef INSTR_ELEMENT
 };
 
+int GetSubStrIndex(char *subStr, char *str, unsigned int strLength);
 void StrToUpper(char *str, char *upperStr);
 void StrToLower(char *str, char *lowerStr);
 void UcFirst(char *str);

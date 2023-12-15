@@ -2078,6 +2078,44 @@ void CalculateStrtabEntryOffset()
 	printf("strtabSegmentInfoNode->size = %d\n", strtabSegmentInfoNode->size);
 }
 
+// 把strtab中的字符串拼接成一个字符串。
+void StrcatStrtab()
+{
+	unsigned int strtabStringSize = sizeof(struct strtabString);
+	strtabString = (StrtabString)MALLOC(strtabStringSize);
+
+	// 这个函数的难点是连接字符串。
+	unsigned int size = 0;
+	StrtabEntry entry = strtabEntryList;
+	while(entry != NULL){
+		char *name = entry->name;
+		size += strlen(name) + 1;
+
+		entry = entry->next;
+	}
+
+	strtabString->length = size;
+
+	char *str = (char *)MALLOC(size);
+	strtabString->string = str;
+
+	printf("StrcatStrtab start\n");
+	size = 0;
+	entry = strtabEntryList;
+	while(entry != NULL){
+		char *name = entry->name;
+		// 复制粘贴导致的恶果！
+		// size += strlen(name) + 1;
+		size = strlen(name) + 1;
+		printf("name = %s, length = %d\n", name, size);
+		memcpy(str, name, size);
+		str += size;
+
+		entry = entry->next;
+	}
+	printf("StrcatStrtab end\n");
+}
+
 void ReSortStrtab()
 {
 	preStrtabEntryNode = NULL;
@@ -2151,6 +2189,11 @@ void ReSortStrtab()
 		}
 	}
 	
+
+	// 为什么在这个函数中调用它？因为它依赖ReSortStrtab处理后的strtabEntryList。
+	// 我担心在使用ReSortStrtab前调用StrcatStrtab，所以在ReSortStrtab调用StrcatStrtab。
+	// 我并不完全满意这种做法，但我暂时不知道其他更好的做法。
+	StrcatStrtab();
 }
 
 Elf32_Ehdr *GenerateELFHeader()
@@ -2381,6 +2424,23 @@ SectionData GetSectionData()
 	return sectionData;
 }
 
+Elf32_Word GetStName(char *name)
+{
+	// strtabString 是一个全局变量。隐患极大。最好复制一份数据，不要直接使用它。
+	char *str = strtabString->string;
+	unsigned int length = strtabString->length;
+	// TODO GetSubStrIndex的返回值可能是-1。我应该在此处理异常。
+	int index = GetSubStrIndex(name, str, length);
+	if(index == -1){
+		// TODO
+		printf("an exception in %d in %s\n", __LINE__, __FILE__);
+	}
+	
+	Elf32_Word stName = (Elf32_Word)index; 
+	
+	return stName;
+}
+
 // 究竟是用返回值呢还是用参数？都能达到目的。
 void GenerateSymtab(SectionDataNode symtabDataHead)
 {
@@ -2483,7 +2543,8 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 		// todo 需要设置sym的成员的值。
 		Elf32_Sym *sym = (Elf32_Sym *)MALLOC(sizeof(Elf32_Sym));
 		
-		Elf32_Word nameIndex = (Elf32_Word)FindIndexInStrtabEntryList(name);	
+		Elf32_Word nameIndex = GetStName(name);
+		printf("nameIndex = %d, name = %s\n", nameIndex, name);
 		Elf32_Addr offset = (Elf32_Addr)entry->offset;
 		Elf32_Addr size = (Elf32_Word)entry->size;
 		int symbolType = entry->symbolType;

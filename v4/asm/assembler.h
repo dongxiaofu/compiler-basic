@@ -368,6 +368,12 @@ static int strtabEntryOffset = 0;
 
 static StrtabEntry strtabEntryList;
 StrtabEntry preStrtabEntryNode;
+// 把StrtabEntry中的name连接成字符串。
+typedef struct strtabString{
+	char *string;
+	unsigned int length;
+} *StrtabString;
+static StrtabString strtabString;
 
 static int dataEntryOffset = 0;
 static int rodataEntryOffset = 0;
