@@ -2838,12 +2838,16 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 
 			sh_addralign=(Elf32_Word)1;
 		}else if(strcmp(name, ".symtab") == 0){
-		    sh_type=(Elf32_Word)SHT_STRTAB;
+		    sh_type=(Elf32_Word)SHT_SYMTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
 		    sh_flags=(Elf32_Word)0;
 
 			sh_addralign=(Elf32_Word)4;
 			sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
+
+			sh_link = (Elf32_Word)STR_TAB;
+			sh_info = (Elf32_Word)SYM_TAB;
+			
 		}else if(strcmp(name, ".text") == 0){
 		    sh_type=(Elf32_Word)SHT_PROGBITS;
 		    sh_flags=(Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
@@ -2855,19 +2859,35 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 				sh_addralign=(Elf32_Word)4;
 				sh_entsize=(Elf32_Word)sizeof(Elf32_Rel);  
 		    }
+		    if(strcmp(name, ".rel.data") == 0){
+				sh_link = (Elf32_Word)SYM_TAB;
+				sh_info = (Elf32_Word)DATA;
+			}
+
+		    if(strcmp(name, ".rel.text") == 0){
+				sh_link = (Elf32_Word)SYM_TAB;
+				sh_info = (Elf32_Word)TEXT;
+			}
 		}
 		
+// TODO 我在前面根据段条目的名称设置了sh_link和sh_info。
+// 那样做更好。按下面的做法，不能区分.rel.data和.rel.text，而它们的值是不一样的。
+// 错误是怎么产生的？这里就有一个例子。
+// 两三个月前，我写下了下面的代码，设置sh_link。几个月后，今天，我在前面写下了设置sh_link的代码。
+// 新增代码时，我不记得我在几个月前在这里写了代码。执行代码时，旧代码覆盖了新代码设置的值。
+// 我在新增代码时，没有考虑到我不记得的旧情况，错误就产生了。我若知道后面的代码，在新增代码时就会处
+// 理好旧代码。又可以描述为这种情况：主观世界和客观世界不吻合，错误就产生了。
 		// todo 还没有设置好值。我不知道怎么设置。在《程序员的自我修养》的3.4.2的表3-11有相关资料。
-		if(sh_type == SHT_REL){
-			sh_link=(Elf32_Word)0;
-			sh_info=(Elf32_Word)0;  
-		}else if(sh_type == SHT_STRTAB){
-			sh_link=(Elf32_Word)0;
-			sh_info=(Elf32_Word)0;  
-		}else{
-			sh_link=(Elf32_Word)SHN_UNDEF;
-			sh_info=(Elf32_Word)0;  
-		}
+//		if(sh_type == SHT_REL){
+//			sh_link=(Elf32_Word)0;
+//			sh_info=(Elf32_Word)0;  
+//		}else if(sh_type == SHT_STRTAB){
+//			sh_link=(Elf32_Word)0;
+//			sh_info=(Elf32_Word)0;  
+//		}else{
+//			sh_link=(Elf32_Word)SHN_UNDEF;
+//			sh_info=(Elf32_Word)0;  
+//		}
 
 		// 赋值。我用正则表达式生成的。比较顺利。
 		shdr->sh_name = sh_name;

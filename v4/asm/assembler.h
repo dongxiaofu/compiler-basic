@@ -63,6 +63,11 @@
 #define TOKEN_INSTR				4
 #define TOKEN_IDENT				5
 
+// 段表中的条目的索引。
+typedef enum {
+	TEXT = 1, DATA, RO_DATA, SYM_TAB, STR_TAB, REL_TEXT, REL_DATA, SH_STR_TAB 
+} SECTION_HEADER_ENTRY_INDEX;
+
 typedef struct _OpMemory
 {
 	int length;
