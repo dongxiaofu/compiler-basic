@@ -368,12 +368,49 @@ static int dataEntryOffset = 0;
 static int rodataEntryOffset = 0;
 
 #define SHSTRTAB_ENTRY_ARRAY_SIZE	9
-char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {".text",".rel.text",".data",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {"\000", ".text" ,".data" ,".rodata" ,".symtab" ,".strtab" ,".rel.text" ,".rel.data" ,".shstrtab"};
+
+
+//char *shstrtabEntryArray[SHSTRTAB_ENTRY_ARRAY_SIZE] = {"\000", ".text", ".strtab", ".shstrtab" }; 
 
 #define BSS_DATA_ENTRY_ARRAY_SIZE 100
 DataEntry bssDataEntryArray[BSS_DATA_ENTRY_ARRAY_SIZE];
 static int bssDataEntryArrayIndex = 0;
 
+// TODO 调试用。
+// 我不知道static是不是必需的。
+// 这是临时的。
+#define shstrtabArr_SIZE 8
+static char *shstrtabArr[shstrtabArr_SIZE] = {"\000", ".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+static char *shStrTabStr = "\000.rel.text\000.rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+//
+//#define shstrtabArr_SIZE 3
+//static char *shstrtabArr[shstrtabArr_SIZE] = {"\000", ".text",".shstrtab"};
+//static char *shStrTabStr = "\000.text\000.shstrtab\000";
+
+//#define shstrtabArr_SIZE 4
+//static char *shstrtabArr[shstrtabArr_SIZE] = {"\000", ".text", "strtab", ".shstrtab"};
+//static char *shStrTabStr = "\000.text\000.strtab\000.shstrtab\000";
+// 链表的第一个节点。
+// static SegmentInfo segmentInfoNode = NULL;
+static SegmentInfo segmentInfoNode;
+static SegmentInfo preSegmentInfoNode;
+
+static SectionDataNode preRelTextDataNode;
+static Instruction instrHead;
+// TODO 可能无用。
+// static SectionDataNode relTextDataNode;
+
+// enum FPUInstructionSet{
+// 	#include "../include/fpu_instruction_set.txt"
+// };
+// 
+// enum InstructionSet{
+// 	#include "../include/instruction_set.txt"
+// };
+
+// enum InstructionSet{
+// 	#include "../include/fpu_instruction_set.txt"
 // 链表的第一个节点。
 // static SegmentInfo segmentInfoNode = NULL;
 static SegmentInfo segmentInfoNode;

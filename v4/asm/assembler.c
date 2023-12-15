@@ -1237,20 +1237,23 @@ int myStrlen(char *name)
 int FindShStrTabOffset(char *name)
 {
 	// 这是我用正则表达式生成的。
-	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+//	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+	
 	unsigned int length = 0;
-	for(int i = 0; i < 7; i++){
-		length += strlen(arr[0]) + 1;
+	for(int i = 0; i < shstrtabArr_SIZE; i++){
+	//	length += strlen(arr[0]) + 1;
+		length += strlen(shstrtabArr[i]) + 1;
 	}
 	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
-	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+//	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
 	int nameLength = strlen(name);
 
+	char *str = shStrTabStr;
 	for(int i = 0; i < length; i++){
-		if(strncmp(shStrTabStr, name, nameLength) == 0){
+		if(strncmp(str, name, nameLength) == 0){
 			return i;
 		}
-		shStrTabStr++;
+		str++;
 	}
 	
 	return -1;
@@ -2187,7 +2190,8 @@ Elf32_Ehdr *GenerateELFHeader()
 	// ehdr->e_shnum = 13;
 	ehdr->e_shnum = SHSTRTAB_ENTRY_ARRAY_SIZE;
 	// TODO .shstrtab在段表中的索引。
-	ehdr->e_shstrndx = 0;
+	// ehdr->e_shstrndx = 0;
+	ehdr->e_shstrndx = 8;
 
 	return ehdr;
 }
@@ -2738,15 +2742,12 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 
 		// 把填充好的Elf32_Shdr存储到当前sectionHeaderDataHead。这样做没有任何问题。
 		Elf32_Shdr *shdr = (Elf32_Shdr *)MALLOC(sizeof(Elf32_Shdr));
-		char *name = shstrtabEntryArray[i];
-		if(strcmp(name, "null") == 0){
-			sectionHeaderDataHead->val.Elf32_Shdr_Val = shdr;
-			// TODO 当初，我为什么使用return？
-			// return;
-			// TODO 这里该怎么做？我暂时不知道。
-			// break;
+		if(i == 0){
+			sectionHeaderDataNode->val.Elf32_Shdr_Val = shdr;
+			continue;
 		}
 
+		char *name = shstrtabEntryArray[i];
 		// todo 当sh_name是-1时需要处理，我暂时懒得写这种代码。
 		Elf32_Word sh_name=(Elf32_Word)FindShStrTabOffset(name);  
 		Elf32_Word sh_type=(Elf32_Word)0;  
@@ -2781,7 +2782,7 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 
 			sh_addralign=(Elf32_Word)1;
 
-			sh_size = 70;
+			sh_size = 16;
 		}else if(strcmp(name, ".strtab") == 0){
 		    sh_type=(Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
@@ -2814,7 +2815,18 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		// 需要分情况处理。
 		sh_size=(Elf32_Word)0;  
 		if(strcmp(name, ".shstrtab") == 0){
-			sh_size = 70;
+		//	sh_name = 15;
+			sh_size = 60;
+		}
+
+		if(strcmp(name, ".text") == 0){
+		//	sh_name = 1;
+			sh_size = 61;
+		}
+		
+		if(strcmp(name, ".strtab") == 0){
+		//	sh_name = 7;
+			sh_size = 95;
 		}
 		
 		// todo 还没有设置好值。我不知道怎么设置。在《程序员的自我修养》的3.4.2的表3-11有相关资料。
@@ -2990,17 +3002,18 @@ unsigned int WriteRelData(FILE *file, SectionDataNode relDataDataHead)
 //	.shstrtab
 unsigned int WriteShstrtab(FILE *file, SectionDataNode shstrtabDataHead)
 {
-	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+//	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
 	unsigned int length = 0;
-	for(int i = 0; i < 7; i++){
-		length += strlen(arr[0]) + 1;
+	for(int i = 0; i < shstrtabArr_SIZE; i++){
+	//	length += strlen(arr[0]) + 1;
+		length += strlen(shstrtabArr[i]) + 1;
 	}
 	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
-	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+//	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
 
 	unsigned int len = fwrite(shStrTabStr, length, 1, file);
 
-	return len;
+	return len * length;
 
 //	unsigned int len = 0;
 //	// TODO 对于第一个元素, null，应该如何处理？
@@ -3026,6 +3039,13 @@ unsigned int WriteSectionHeaders(FILE *file, SectionDataNode sectionHeaderDataHe
 		unsigned int size = sizeof(Elf32_Shdr);
 		int count = fwrite(shdr, size, 1, file);
 		len += count * size;
+
+//		unsigned int arr[10] = {
+//			5,0,0,0,0,
+//			0,0,0,0,0
+//		};
+//		int count = fwrite(shdr, size, 1, file);
+	
 		node = node->next;
 	}
 
@@ -3232,13 +3252,14 @@ unsigned int sectionHeaderOffset = 0;
 //		shstrtabOffset += size;
 //	}
 
-	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
+//	char *arr[7] = {".rel.text",".rel.data",".bss",".rodata",".symtab",".strtab",".shstrtab"};
 	unsigned int length = 0;
-	for(int i = 0; i < 7; i++){
-		length += strlen(arr[0]) + 1;
+	for(int i = 0; i < shstrtabArr_SIZE; i++){
+	//	length += strlen(arr[i]) + 1;
+		length += strlen(shstrtabArr[i]) + 1;
 	}
 	// char *shStrTabStr = ".rel.text.rel.data.bss.rodata.symtab.strtab.shstrtab";
-	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+//	char *shStrTabStr = ".rel.text.\000rel.data\000.bss\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
 	shstrtabOffset += length;
 
 //	unsigned int sectionHeaderOffset = shstrtabOffset;
@@ -3291,7 +3312,6 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData section
 	ehdr->e_shoff += sectionOffset->rodata;
 	ehdr->e_shoff += sectionOffset->symtab;
 	ehdr->e_shoff += sectionOffset->strtab;
-	
 	ehdr->e_shoff += sectionOffset->relText;
 	ehdr->e_shoff += sectionOffset->relData;
 	ehdr->e_shoff += sectionOffset->shstrtab;
@@ -3308,7 +3328,6 @@ void WriteELF(Elf32_Ehdr *ehdr, SectionOffset sectionOffset, SectionData section
 	// ELF文件头。
 	unsigned int count = 0;
 	count = fwrite(ehdr, sizeof(Elf32_Ehdr), 1, file);	
-//	len += count * sizeof(Elf32_Ehdr);
 	// .text
 	// preRelTextDataNode
 	Instruction instrNode = instrHead->next;
