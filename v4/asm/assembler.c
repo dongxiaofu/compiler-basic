@@ -2085,7 +2085,8 @@ void StrcatStrtab()
 	strtabString = (StrtabString)MALLOC(strtabStringSize);
 
 	// 这个函数的难点是连接字符串。
-	unsigned int size = 0;
+	// unsigned int size = 0;
+	unsigned int size = 1;
 	StrtabEntry entry = strtabEntryList;
 	while(entry != NULL){
 		char *name = entry->name;
@@ -2101,6 +2102,7 @@ void StrcatStrtab()
 
 	printf("StrcatStrtab start\n");
 	size = 0;
+	str++;
 	entry = strtabEntryList;
 	while(entry != NULL){
 		char *name = entry->name;
@@ -3048,13 +3050,16 @@ unsigned int WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
 	unsigned int len = 0;
 	SectionDataNode symtabDataNode = symtabDataHead->next;
 
+	printf("WriteSymtab start\n");
 	while(symtabDataNode != NULL && symtabDataNode->isLast == 0){
 		Elf32_Sym *symtabEntry = symtabDataNode->val.Elf32_Sym_Val;
+		printf("st_name = %d\n", symtabEntry->st_name);
 		unsigned int size = sizeof(Elf32_Sym);
 		int count = fwrite(symtabEntry, size, 1, file);
 		len += count * size;
 		symtabDataNode = symtabDataNode->next;
 	}
+	printf("WriteSymtab end\n");
 
 	return len;
 }
@@ -3062,15 +3067,20 @@ unsigned int WriteSymtab(FILE *file, SectionDataNode symtabDataHead)
 unsigned int WriteStrtab(FILE *file, SectionDataNode strtabDataHead)
 {
 	unsigned int len = 0;
-	StrtabEntry node = strtabEntryList;
+//	StrtabEntry node = strtabEntryList;
+//
+//	while(node != NULL){
+//		char *name = node->name;
+//		unsigned int size = node->length + 1;
+//		int count = fwrite(name, size, 1, file);	
+//		len += count * size;
+//		node = node->next;
+//	}
 
-	while(node != NULL){
-		char *name = node->name;
-		unsigned int size = node->length + 1;
-		int count = fwrite(name, size, 1, file);	
-		len += count * size;
-		node = node->next;
-	}
+	char *str = strtabString->string;
+	unsigned int size = strtabString->length;	
+	int count = fwrite(str, size, 1, file);	
+	len = count * size;
 
 	return len;
 }
@@ -3353,6 +3363,8 @@ unsigned int sectionHeaderOffset = 0;
 		strtabOffset += size;
 		strtabEntry = strtabEntry->next;
 	}
+	// .strtab的第一个字符是\000。
+	strtabOffset += 1;
 
 //	unsigned int shstrtabOffset = strtabOffset;
 //	for(int i = 0; i < SHSTRTAB_ENTRY_ARRAY_SIZE; i++){
