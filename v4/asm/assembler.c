@@ -2757,7 +2757,7 @@ Elf32_Word GetShSize(char *name, SectionOffset sectionOffset)
 		sh_size = sectionOffset->relData; 
 	}else if(strcmp(name, ".shstrtab") == 0){
 
-		sh_size = sectionOffset->sectionHeader;
+		sh_size = sectionOffset->shstrtab;
 	}else{
 		// TODO
 	}
@@ -2831,8 +2831,6 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		    sh_flags=(Elf32_Word)0;      // none
 
 			sh_addralign=(Elf32_Word)1;
-
-			sh_size = 16;
 		}else if(strcmp(name, ".strtab") == 0){
 		    sh_type=(Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
