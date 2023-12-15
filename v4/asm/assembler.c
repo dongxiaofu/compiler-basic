@@ -2715,6 +2715,56 @@ Elf32_Off GetShOffset(char *name, SectionOffset sectionOffset)
 	return sh_offset;
 }
 
+// TODO 这个函数和GetShOffset非常相似，通过复制粘贴写的。
+// 在这个函数中充斥大量硬编码，是不是需要修改？硬编码，有利于当前进度，不利于后续维护。
+// sh_size，不符合本项目的命名规则，我只不过和业界的规则保持一致罢了。
+Elf32_Word GetShSize(char *name, SectionOffset sectionOffset)
+{
+	// .text
+	// .data
+	// .rodata
+	// .symtab
+	// .strtab
+	// .rel.text
+	// .rel.data
+	// .shstrtab
+
+	Elf32_Off sh_size = 0;
+
+	if(strcmp(name, ".text") == 0){
+
+		sh_size = sectionOffset->text;
+	}else if(strcmp(name, ".bss") == 0){
+		// TODO 
+		// sh_size = sectionOffset->text;
+	}else if(strcmp(name, ".data") == 0){
+
+		sh_size = sectionOffset->data;
+	}else if(strcmp(name, ".rodata") == 0){
+		sh_size = sectionOffset->rodata;
+
+	}else if(strcmp(name, ".symtab") == 0){
+
+		sh_size = sectionOffset->symtab;
+	}else if(strcmp(name, ".strtab") == 0){
+
+		sh_size = sectionOffset->strtab;
+	}else if(strcmp(name, ".rel.text") == 0){
+
+		sh_size = sectionOffset->relText; 
+	}else if(strcmp(name, ".rel.data") == 0){
+
+		sh_size = sectionOffset->relData; 
+	}else if(strcmp(name, ".shstrtab") == 0){
+
+		sh_size = sectionOffset->sectionHeader;
+	}else{
+		// TODO
+	}
+
+	return sh_size;
+}
+
 void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset sectionOffset)
 {
 	SectionDataNode preSectionHeaderData,sectionHeaderDataNode;
@@ -2753,8 +2803,8 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 		Elf32_Word sh_type=(Elf32_Word)0;  
 		Elf32_Word sh_flags=(Elf32_Word)0;    
 		Elf32_Addr sh_addr=(Elf32_Word)0;  
-		Elf32_Off 	  sh_offset=(Elf32_Word)0;   
-		Elf32_Word sh_size=(Elf32_Word)16;  
+		Elf32_Off 	  sh_offset = GetShOffset(name, sectionOffset);  
+		Elf32_Word sh_size= GetShSize(name, sectionOffset);  
 		Elf32_Word sh_link=(Elf32_Word)0;  
 		Elf32_Word sh_info=(Elf32_Word)0;  
 		Elf32_Word sh_addralign=(Elf32_Word)0;    
@@ -2807,26 +2857,6 @@ void GenerateSectionHeaders(SectionDataNode sectionHeaderDataHead, SectionOffset
 				sh_addralign=(Elf32_Word)4;
 				sh_entsize=(Elf32_Word)sizeof(Elf32_Rel);  
 		    }
-		}
-
-		// todo 需要计算。
-		// sh_offset=(Elf32_Off)0;
-		sh_offset=(Elf32_Off)GetShOffset(name, sectionOffset); 
-		// 需要分情况处理。
-		sh_size=(Elf32_Word)0;  
-		if(strcmp(name, ".shstrtab") == 0){
-		//	sh_name = 15;
-			sh_size = 60;
-		}
-
-		if(strcmp(name, ".text") == 0){
-		//	sh_name = 1;
-			sh_size = 61;
-		}
-		
-		if(strcmp(name, ".strtab") == 0){
-		//	sh_name = 7;
-			sh_size = 95;
 		}
 		
 		// todo 还没有设置好值。我不知道怎么设置。在《程序员的自我修养》的3.4.2的表3-11有相关资料。
