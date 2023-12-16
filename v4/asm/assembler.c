@@ -1878,7 +1878,17 @@ void ParseData()
 Instruction DealWithInstr(InstructionSet instrCode)
 {
 	// todo 先这样做吧。下面的分类，暂时没有作用。
-	return parseInstructionFunctions[(int)instrCode](instrCode);
+	Instruction instr = parseInstructionFunctions[(int)instrCode](instrCode);
+	// TODO 本想在GenerateSimpleInstr里面实现下面的功能，可在那个函数中，已经没有InstructionSet了。
+	if(instrCode == I_CALL || (I_JE <= instrCode && instrCode <= I_JMP) ){
+		if(instr->relTextEntry){
+			instr->relTextEntry->relType = R_386_PC32;	
+		}
+	}
+
+	return instr;
+
+//	return parseInstructionFunctions[(int)instrCode](instrCode);
 	// FPU指令
 	if(I_FCHS <= instrCode && instrCode <= I_FMULL){
 
@@ -2632,7 +2642,7 @@ void GenerateRelText(SectionDataNode relTextDataHead)
 		}else{
 			// `r_info`占用4个字节，高24位是`.symtab`的条目的索引，低8位是重定位类型。
 			int symbolIndex = target->index;
-			rel->r_info = (symbolIndex << 8) | R_386_PC32;  
+			rel->r_info = (symbolIndex << 8) | relTextEntry->relType;  
 		}
 
 		// 创建链表。

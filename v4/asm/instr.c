@@ -350,8 +350,14 @@ Instruction GenerateSimpleInstr(int prefix, Opcode opcode, ModRM modRM,\
 	if(offsetInfo != NULL){
 		if(offsetInfo->name != NULL){
 			entry = (RelTextEntry)MALLOC(sizeof(struct relTextEntry));
+			// TODO 这个值是否正确？是正确的。它是在指令中的偏移量。
+			// 在重定位信息中，需要这个值。
 			entry->offset = offsetInInstr;
 			entry->name = offsetInfo->name;
+
+			// 先把.rel.text中的重定位类型都设置成R_386_32，在外面再把call等的重定位修正为
+			// R_386_PC32。
+			entry->relType = R_386_32;
 
 			// instr->relTextEntry = entry;
 		}else{

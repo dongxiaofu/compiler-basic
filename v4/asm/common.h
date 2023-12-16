@@ -6,6 +6,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "elf.h"
+
 struct mblock
 {
     struct mblock *next;
@@ -161,6 +163,8 @@ typedef struct offsetInfo{
 typedef struct relTextEntry{
 	unsigned int offset;
 	char *name;
+	// 重定位类型。
+	unsigned char relType;
 } *RelTextEntry;
 
 typedef enum {
