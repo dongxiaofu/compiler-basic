@@ -2332,7 +2332,8 @@ SectionData GetSectionData()
 			int elementIndex = -1;
 
 			// `r_info`占用4个字节，高24位是`.symtab`的条目的索引，低8位是重定位类型。
-			Elf32_Word r_info = (RODATA_SYMTAB_INDEX << 8) | R_386_32;
+			// Elf32_Word r_info = (RODATA_SYMTAB_INDEX << 8) | R_386_32;
+			Elf32_Word r_info = (5 << 8) | R_386_32;
 
 			while(valPtr != NULL){
 				NumericData val = {0, EMPTY};
@@ -2351,13 +2352,13 @@ SectionData GetSectionData()
 					// 把.rel.data存储在哪里？
 					if(relDataDataNode == NULL){
 						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
-						relDataDataNode->isLast = 1;
+						// relDataDataNode->isLast = 1;
 						relDataDataHead->next = relDataDataNode;
 					}else{
-						relDataDataNode->isLast = 0;
+						// relDataDataNode->isLast = 0;
 						relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
 						preRelDataDataNode->next = relDataDataNode;
-						relDataDataNode->isLast = 1;
+						// relDataDataNode->isLast = 1;
 					}
 
 					relDataDataNode->val.Elf32_Rel_Val = relEntry;
@@ -2470,7 +2471,7 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 		// TODO 为什么要这样做？我非常怀疑这样做是不是对的。
 		// 在.symtab中加入一些常量节点。
 	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
-	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,1,3,5,6};
+	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,TEXT,DATA,5,RO_DATA};
 	int nodeSymbolTypeArray[6] = {
 // todo 找机会去掉这些自定义常量，因为我已经定义过了。
 //		SYMBOL_TYPE_NOTYPE, SYMBOL_TYPE_FILE, SYMBOL_TYPE_SECTION,
@@ -2674,6 +2675,7 @@ void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabData
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 
 		if(entry->isRel == 1){
+			printf("rel.data.name = %s, line = %d\n", name, __LINE__);
 			Elf32_Addr offset = (Elf32_Addr)entry->offset;
 			int relocationType = R_386_32;
 			// SectionDataNode dataNode = FindSymbolSectionDataNode(name, symtabDataHead);
@@ -2682,8 +2684,11 @@ void GenerateRelData(SectionDataNode relDataDataHead, SectionDataNode symtabData
 				printf("error in .rel.data.name = %s, line = %d", name, __LINE__);
 				exit(-1);
 			}
-			int symbolIndex = dataNode->index;
-			Elf32_Word info = (Elf32_Word)((symbolIndex << 8) | relocationType);
+//			int symbolIndex = dataNode->index;
+//			char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
+			int symbolIndex = RODATA_SYMTAB_INDEX; //RO_DATA;
+//			Elf32_Word info = (Elf32_Word)((symbolIndex << 8) | relocationType);
+			Elf32_Word info = 0;
 
 			int dataEntryValueNodeNum = entry->dataEntryValueNodeNum;
 			int dataEntryValueNodeSize = entry->dataTypeSize;
@@ -3111,14 +3116,19 @@ unsigned int WriteRelData(FILE *file, SectionDataNode relDataDataHead)
 	unsigned int len = 0;
 	SectionDataNode node = relDataDataHead->next;
 
-	while(node != NULL && node->isLast == 0){
+	int c = 0;
+	// while(node != NULL && node->isLast == 0){
+	while(node != NULL){
 		char *name = node->name;
 		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
 		int count = fwrite(rel, size, 1, file);	
 		len += count * size;
 		node = node->next;
+		c++;
 	}
+
+	printf("c = %d\n", c);
 
 	return len;
 }
@@ -3309,7 +3319,8 @@ unsigned int sectionHeaderOffset = 0;
 //	unsigned int relDataOffset = dataOffset;
 	SectionDataNode node = relDataDataHead->next;
 
-	while(node != NULL && node->isLast == 0){
+	// while(node != NULL && node->isLast == 0){
+	while(node != NULL){
 		char *name = node->name;
 		Elf32_Rel *rel = node->val.Elf32_Rel_Val;
 		unsigned int size = sizeof(Elf32_Rel);
@@ -3589,7 +3600,7 @@ void BuildELF()
 	// .symtab
 	GenerateSymtab(symtabDataHead);
 	// .rel.data
-//	GenerateRelData(relDataDataHead, symtabDataHead);
+	GenerateRelData(relDataDataHead, symtabDataHead);
 //	GetSectionOffset遍历链表。这些链表由上面的Generate创建。所以，必须先执行Generate。
 	SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	// 段表

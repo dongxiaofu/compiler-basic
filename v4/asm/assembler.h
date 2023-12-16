@@ -233,7 +233,8 @@ ScriptHeader gScriptHeader;
 #define DATA_TYPE_STRING	3
 
 // .rodata在段表中的索引。
-#define RODATA_SYMTAB_INDEX 2
+// 上面的注释写错了，应该是：.rodata在symtab中的索引。symtab是符号表。
+#define RODATA_SYMTAB_INDEX 5
 
 union SectionDataVal{
    NumericData numVal;
