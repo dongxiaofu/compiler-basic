@@ -1481,6 +1481,7 @@ Instruction ParseJleInstr(InstructionSet instrCode)
 
 
 	opcode.primaryOpcode = 0x8E;
+	Oprand oprand = ParseOprand();
 	offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
 	offsetInfo->offset = 0xFFFFFFFC;
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
@@ -1498,7 +1499,11 @@ Instruction ParseJbeInstr(InstructionSet instrCode)
 
 
 	opcode.primaryOpcode = 0x86;
-	offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	offsetInfo = mem->offsetInfo;
+	// TODO 最好做一下错误检测。
 	offsetInfo->offset = 0xFFFFFFFC;
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)
 	return GenerateSimpleInstr(prefix, opcode, modRM, sib, offsetInfo, immediate);
@@ -1547,7 +1552,10 @@ Instruction ParseJmpInstr(InstructionSet instrCode)
 		// 机器码：e9 fc ff ff ff       	jmp    13 <main+0x13>
 		// TODO 没有理会操作数是8位还是32位。统一当作32位处理。
 		opcode.primaryOpcode = 0xE9;
-		offset = 0xFFFFFFFC;
+		MemoryInfo mem = GetMemoryInfo(opr);
+		OffsetInfo offsetInfo = mem->offsetInfo;
+	// TODO 最好做一下错误检测。
+		offsetInfo->offset = 0xFFFFFFFC;
 	}
 
 	OffsetInfo offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
@@ -1927,7 +1935,14 @@ Instruction ParseCallInstr(InstructionSet instrCode)
 	Opcode opcode = {0xE8, -1};
 	NumericData immediate = {EMPTY, 0};
 
-	OffsetInfo offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+// 我没有想到在后面需要依靠call sum中的sum来识别重定位类型。
+//	OffsetInfo offsetInfo = (OffsetInfo)MALLOC(sizeof(struct offsetInfo));
+//	offsetInfo->offset = 0xFFFFFFFC;
+
+	Oprand oprand = ParseOprand();
+	MemoryInfo mem = GetMemoryInfo(oprand);
+	OffsetInfo offsetInfo = mem->offsetInfo;
+	// TODO 最好做一下错误检测。
 	offsetInfo->offset = 0xFFFFFFFC;
 
 	//GenerateSimpleInstr(prefix, opcode, modRM, sib, offset, immediate)

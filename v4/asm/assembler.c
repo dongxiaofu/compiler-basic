@@ -1564,6 +1564,18 @@ void ParseData()
 			if(token == TYPE_TOKEN_DATA){
 	//			entry->section = SECTION_DATA; 
 				currentSection = SECTION_DATA;
+			}else if(token == TYPE_TOKEN_TEXT){
+				// TODO 是否要在这里记录.text？
+				// 可以在这里记载。我之所以有过滤，是因为ch.s的开头就是.text。
+				// 无需担心。除了local变量外，遇到其他段名，例如.data，会覆盖.text。
+				// 那么，被误认为.text的local变量怎么办？我打算遇到local就把段名修正为.bss。
+				currentSection = SECTION_TEXT;
+				StartPeekToken();
+				token = GetNextToken();
+				if(token == TYPE_TOKEN_LOCAL){
+					currentSection = SECTION_BSS;
+				}
+				EndPeekToken();
 			}else if(token == TYPE_TOKEN_SECTION){
 				nextToken = GetLookAheadToken();
 				if(nextToken == TYPE_TOKEN_RODATA){
@@ -1573,7 +1585,18 @@ void ParseData()
 	//				entry->section = SECTION_DATA; 
 					currentSection = SECTION_DATA;
 				}else if(nextToken == TYPE_TOKEN_TEXT){
+					// TODO 我并不确定是否会出现这种情况。已经把这段代码移动到前面了。
 					// TODO 是否要在这里记录.text？
+					// 可以在这里记载。我之所以有过滤，是因为ch.s的开头就是.text。
+					// 无需担心。除了local变量外，遇到其他段名，例如.data，会覆盖.text。
+					// 那么，被误认为.text的local变量怎么办？我打算遇到local就把段名修正为.bss。
+					currentSection = SECTION_TEXT;
+					StartPeekToken();
+					token = GetNextToken();
+					if(token == TYPE_TOKEN_LOCAL){
+						currentSection = SECTION_BSS;
+					}
+					EndPeekToken();
 				}
 				GetNextToken();
 			
@@ -1720,21 +1743,28 @@ void ParseData()
 					printf("name3 = %s\n", name);
 					strcpy(entry->name, name); 
 					AddStrtabEntry(entry);
-					// strcpy(entry->name, name); 
-				//	entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
-				//	dataEntryArray[dataEntryArrayIndex++] = entry;
-					// strcpy(entry->name, name); 
-				// TODO 不知道两种情况有没有差异，先这样做。
+
 				}else if(entry->symbolType == SYMBOL_TYPE_FUNC){
 					printf("name4 = %s\n", name);
 					int targetIndex = FindDataEntryIndex(name);
 					strcpy(entry->name, name); 
+					// TODO 要非常注意。如果把这行代码放在下面的if(targetIndex == -1)中，
+					// 达不到预期目的。
+					// 这行代码也许能够提升到上一层级。可能并不需要提升到上面。
+					entry->section = currentSection;
+					// 遇到main:，是一个函数的开始，也是另一个函数的结束，所以，我在几个月前写下来
+					// 下面的注释：最好把下面的代码放到遇到ret指令的时候。
 					if(targetIndex == -1){
+						// 当一个函数名在已经收集到的函数库中不存在时，这个函数是一个新函数的开始，
+						// 是旧函数的结束。
 						AddStrtabEntry(entry);
 						// TODO 最好把下面的代码放到遇到ret指令的时候。
 						entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 						dataEntryArray[dataEntryArrayIndex++] = entry;
 					}else{
+						// TODO 我不太理解这里为什么要这样写。
+						// 当初，我为了处理call sum和sum:，确实处理过函数重复的问题。
+						// 但这里的逻辑似乎不完全是为了处理这种情况。
 					//	AddStrtabEntry(entry);
 						// TODO 这里需要写更多代码，因为还要处理函数中的指令。
 						DataEntry targetEntry = dataEntryArray[targetIndex];
@@ -1788,8 +1818,6 @@ void ParseData()
 			bssDataEntry->align = alignment;
 
 			AddStrtabEntry(entry);
-
-			// dataEntryArray[dataEntryArrayIndex++] = bssDataEntry;
 
 			entry = (DataEntry)MALLOC(sizeof(struct dataEntry));
 			dataEntryArray[dataEntryArrayIndex++] = entry;
@@ -1929,7 +1957,9 @@ void ParseInstr()
 		printf("token = %d\n", token);
 		if(token == TYPE_TOKEN_INVALID)	break; 
 
-		if(token == TYPE_TOKEN_INDENT){
+		// TODO 不能处理call sum，多次调试我才怀疑漏掉了token == TYPE_TOKEN_CALL。
+		// 像这样用特殊条件判断，我很不满意。要想个方法处理好。
+		if(token == TYPE_TOKEN_INDENT || token == TYPE_TOKEN_CALL){
 			char *name = GetCurrentTokenLexeme();
 			InstructionSet instrCode = FindInstrCode(name);
 			if(instrCode == I_INSTR_INVALID){
@@ -2479,6 +2509,7 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 	int symtabDataNodeIndex = 0;
 
 		// TODO 为什么要这样做？我非常怀疑这样做是不是对的。
+		// 因为GCC也是这样做的。
 		// 在.symtab中加入一些常量节点。
 	char *nodeNameArray[6] = {"UND", "ch.c", ".text", ".data", ".bss", ".rodata"};
 	int nodeIndexArray[6] = {SECTION_NDX_UND,SECTION_NDX_ABS,TEXT,DATA,5,RO_DATA};
@@ -2572,16 +2603,19 @@ void GenerateSymtab(SectionDataNode symtabDataHead)
 		// 不必理会st_other。
 		sym->st_other = 0;
 		sym->st_shndx = entry->section;
+		printf("name = %s, st_shndx = %d\n", name, entry->section);
 
 		int sectionDataNodeSize = sizeof(struct sectionDataNode);
 		if(symtabDataNode == NULL){
 			symtabDataNode = (SectionDataNode)MALLOC(sectionDataNodeSize);
 			strcpy(symtabDataNode->name, name);
+			printf("name2 = %s, st_shndx = %d\n", symtabDataNode->name, entry->section);
 			symtabDataNode->isLast = 1;
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			symtabDataHead->next = symtabDataNode;
 		}else{
 			strcpy(symtabDataNode->name, name);
+			printf("name3 = %s, st_shndx = %d\n", symtabDataNode->name, entry->section);
 			symtabDataNode->val.Elf32_Sym_Val = sym;
 			preSymtabDataNode->next = symtabDataNode;
 		}

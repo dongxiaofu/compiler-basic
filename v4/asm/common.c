@@ -13,7 +13,19 @@ int GetSubStrIndex(char *subStr, char *str, unsigned int strLength)
 	unsigned int subStrLength = strlen(subStr);
 
 	for(int i = 0; i < strLength; i++){
-		if(strncmp(subStr, str, subStrLength) == 0){
+		// if(strncmp(subStr, str, subStrLength) == 0)){
+		// 上面是最初版本。它不能查询num13\000num1。当subStr是num1时，结果是错误的。
+		// 不遇到这种数据，我难以想到这种条件语句。
+		/***
+		 * (gdb) p (subStrLength+str) == '\000'
+		*$7 = 0
+		*(gdb) p (subStrLength+str)[0] == '\000'
+		*$8 = 1
+		*(gdb) p *(subStrLength+str) == '\000'
+		*$9 = 1
+		* * 让我开了眼界。
+		* */
+		if((strncmp(subStr, str, subStrLength) == 0) && (*(str + subStrLength) == '\000')){
 			return i;
 		}
 		
