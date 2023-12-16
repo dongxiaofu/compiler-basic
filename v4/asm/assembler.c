@@ -2599,6 +2599,14 @@ void GenerateRelText(SectionDataNode relTextDataHead)
 
 	while(instrDataNode != NULL){
 		RelTextEntry relTextEntry = instrDataNode->relTextEntry;
+		// TODO 错误是怎么产生的？疏忽了我在instr.c中的设计：instrDataNode->relTextEntry可能是NULL。
+		if(relTextEntry == NULL){
+			instrDataNode = instrDataNode->next;
+			continue;
+		}
+		// instrDataNode的唯一作用是从它里面获取relTextEntry。
+		instrDataNode = instrDataNode->next;
+
 		Elf32_Rel *rel = (Elf32_Rel *)MALLOC(sizeof(Elf32_Rel));
 		rel->r_offset = relTextEntry->offset;	
 		
@@ -2612,6 +2620,8 @@ void GenerateRelText(SectionDataNode relTextDataHead)
 				target = symtabDataNode;
 				break;
 			}
+
+			symtabDataNode = symtabDataNode->next;
 		}
 
 		if(target == NULL){
@@ -2626,20 +2636,17 @@ void GenerateRelText(SectionDataNode relTextDataHead)
 		}
 
 		// 创建链表。
+		SectionDataNode relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
+		relDataDataNode->val.Elf32_Rel_Val = rel;
 		if(relTextDataHead == NULL){
 			relTextDataHead= (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
-			SectionDataNode relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
-			relDataDataNode->val.Elf32_Rel_Val = rel;
-			
 			relTextDataHead->next = relDataDataNode;
 		}else{
 			if(relTextDataHead->next == NULL){
 				relTextDataHead->next = relDataDataNode;
-			}
-			SectionDataNode relDataDataNode = (SectionDataNode)MALLOC(sizeof(struct sectionDataNode));
-			relDataDataNode->val.Elf32_Rel_Val = rel;
-			
-			preRelDataDataNode->next = relDataDataNode;
+			}else{
+				preRelDataDataNode->next = relDataDataNode;
+			}			
 		} 
 
 		preRelDataDataNode = relDataDataNode;
@@ -3595,12 +3602,15 @@ void BuildELF()
 	
 	SectionDataNode symtabDataHead = sectionData->symtab;
 	SectionDataNode relDataDataHead = sectionData->relData;
+	SectionDataNode relTextDataHead = sectionData->relText;
 	SectionDataNode sectionHeaderDataHead = sectionData->sectionHeader;
 
 	// .symtab
 	GenerateSymtab(symtabDataHead);
 	// .rel.data
 	GenerateRelData(relDataDataHead, symtabDataHead);
+	// .rel.text
+	GenerateRelText(relTextDataHead);
 //	GetSectionOffset遍历链表。这些链表由上面的Generate创建。所以，必须先执行Generate。
 	SectionOffset sectionOffset = GetSectionOffset(sectionData);
 	// 段表
