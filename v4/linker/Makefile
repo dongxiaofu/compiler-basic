@@ -9,9 +9,9 @@ CC          = gcc
 LD	=	ld
 LDFLAGS		= -m elf_i386
 
-SCANNER = linker
+SCANNER = link
 # 包含main函数的.o文件必须放在前面。
-OBJS	= linker.o common.o
+OBJS	= linker.o common.o main.o
 
 all:clean everything
 
@@ -23,8 +23,11 @@ ${SCANNER}:${OBJS}
 clean:
 	rm -f *.o ${SCANNER}
 
-linker.o:main.c
+main.o:main.c
 	${CC} ${CFLAGS} -c -o $@ $<
 
 common.o:common.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
+linker.o:linker.c
 	${CC} ${CFLAGS} -c -o $@ $<
