@@ -1,0 +1,6 @@
+
+void nomain()
+{
+	print();
+	exit();
+}
