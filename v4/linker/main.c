@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
 		ELF32 elf32 = (ELF32)MALLOC(sizeof(struct elf32));
 
 		Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(52);;
-//		elf32->ehdr = ehdr;
 		
 		
 
@@ -40,15 +39,119 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 
+	 	// int fseek(FILE *stream, long offset, int whence);
+	 	Elf32_Phdr *phdr = NULL;
+	 	unsigned int phnum = ehdr->e_phnum;
+		if(phnum > 0){
+	 		int offset = fseek(file, ehdr->e_phoff, SEEK_SET);
+			int phdrSize = ehdr->e_phentsize;
+			phdr = (Elf32_Phdr *)MALLOC(sizeof(Elf32_Phdr));
+			fread(phdr, phdrSize, 1, file);
+		}
+
+		Elf32_Shdr *shdr = NULL;
+		unsigned int shnum = ehdr->e_shnum;
+		if(shnum > 0){
+			int offset = fseek(file, ehdr->e_shoff, SEEK_SET);
+			int size = ehdr->e_shentsize;
+			shdr = (Elf32_Shdr *)MALLOC(size * shnum);
+			int bytes = fread(shdr, size, shnum, file);
+		}
+//	// .text
+		char *strtab = NULL;
+		char *shstrtab = NULL;
+		Elf32_Shdr *ptrShdr = shdr;
+		for(int i = 0; i < shnum; i++){
+			Elf32_Shdr *shdrEntry = ptrShdr++; 	
+			printf("sh_offset = %d\n", shdrEntry->sh_offset);
+			int size = shdrEntry->sh_size;
+			int offset = fseek(file, shdrEntry->sh_offset, SEEK_SET);
+			char *str = (char *)MALLOC(size);
+			int bytes = fread(str, size, 1, file);
+
+			Elf32_Word type = shdrEntry->sh_type;
+			if(type == SHT_STRTAB){
+				// GetSubStrIndex(char *subStr, char *str, unsigned int strLength)
+				if(GetSubStrIndex(".text", str, size) != -1){
+					// 是.shstrtab
+					elf32->shstrtab.addr = (void *)str;
+					elf32->shstrtab.size = bytes;
+					shstrtab = str;
+				}else{
+					// 是.strtab
+					elf32->strtab.addr = (void *)str;
+					elf32->strtab.size = bytes;
+					strtab = str;
+				}
+			}
+
+			if(strtab && shstrtab){
+				break;
+			}
+		}
+
+		ptrShdr = shdr;
+		for(int i = 0; i < shnum; i++){
+			Elf32_Shdr *shdrEntry = ptrShdr++; 	
+  			Elf32_Word	name = shdrEntry->sh_name;		
+			char *subStr = shstrtab + name;
+			printf("seg name = %s, sh_offset = %x, size = %d\n", subStr,\
+				 shdrEntry->sh_offset, shdrEntry->sh_size);
+			int size = shdrEntry->sh_size;
+			int offset = fseek(file, shdrEntry->sh_offset, SEEK_SET);
+
+			if(strcmp(subStr, ".text") == 0){
+				// char *text = (char *)MALLOC(size);
+				void *text = (void *)MALLOC(size);
+				int bytes = fread(text, size, 1, file);
+				elf32->text.addr = text;
+				// TODO 我不确定用bytes还是size。正常情况下，二者是相等的。
+				elf32->text.size = bytes;
+
+			}else if(strcmp(subStr, ".data") == 0){
+				void *addr = (void *)MALLOC(size);
+				int bytes = fread(addr, size, 1, file);
+				elf32->data.addr = (void *) addr;
+				elf32->data.size = size;
+
+			}else if(strcmp(subStr, ".rel.data") == 0){
+				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
+				int bytes = fread(rel, size, 1, file);
+				elf32->relData.addr = (void *)rel;
+				elf32->relData.size = bytes;
+
+			}else if(strcmp(subStr, ".rel.text") == 0){
+				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
+				int bytes = fread(rel, size, 1, file);
+				elf32->relText.addr = (void *)rel;
+			    elf32->relText.size = bytes;
+
+			}else if(strcmp(subStr, ".rodata") == 0){
+				void *addr = (void *)MALLOC(size);
+				int bytes = fread(addr, size, 1, file);
+				elf32->rodata.addr = (void *) addr;
+				elf32->rodata.size = bytes;
+
+			}else if(strcmp(subStr, ".symtab") == 0){
+				void *addr = (void *)MALLOC(size);
+				int bytes = fread(addr, size, 1, file);
+				elf32->symtab.addr = (void *) addr;
+				elf32->symtab.size = bytes;
+
+			}else{
+				// TODO 怎么处理？
+			}
+		}
 
 
 		elf32->ehdr = ehdr;
+		elf32->phdr = phdr;
+		elf32->shdr = shdr;
 
 		AppendElf32LinkList(elf32);
-
 	}
 
-		printf("over\n");
+	printf("over\n");
 
 	return 0;
 }
