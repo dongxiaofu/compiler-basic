@@ -52,6 +52,21 @@ typedef struct elf32{
 // static ELF32 elf32LinkList;
 ELF32 elf32LinkList;
 ELF32 preElf32;
+//unsigned int textSize = 0;
+//unsigned int dataSize = 0;
+//unsigned int rodataSize = 0;
+//unsigned int relDataSize = 0;
+//unsigned int relTextSize = 0;
+//unsigned int symtabSize = 0;
+//unsigned int strtabSize = 0;
+
+unsigned int textSize ;// 0;
+unsigned int dataSize ;// 0;
+unsigned int rodataSize ;// 0;
+unsigned int relDataSize ;// 0;
+unsigned int relTextSize ;// 0;
+unsigned int symtabSize ;// 0;
+unsigned int strtabSize ;// 0;
 
 void AppendElf32LinkList(ELF32 node);
 

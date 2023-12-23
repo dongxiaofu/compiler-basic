@@ -9,6 +9,15 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
+	textSize = 0;
+dataSize = 0;
+rodataSize = 0;
+relDataSize = 0;
+relTextSize = 0;
+symtabSize = 0;
+strtabSize = 0;
+
+
 
 	unsigned int num = argc;
 //	elf32LinkList = (ELF32)MALLOC(sizeof(struct elf32));
@@ -75,13 +84,15 @@ int main(int argc, char *argv[])
 				if(GetSubStrIndex(".text", str, size) != -1){
 					// 是.shstrtab
 					elf32->shstrtab.addr = (void *)str;
-					elf32->shstrtab.size = bytes;
+					elf32->shstrtab.size = size;
 					shstrtab = str;
 				}else{
 					// 是.strtab
 					elf32->strtab.addr = (void *)str;
-					elf32->strtab.size = bytes;
+					elf32->strtab.size = size;
 					strtab = str;
+
+					strtabSize += size;
 				}
 			}
 
@@ -106,7 +117,9 @@ int main(int argc, char *argv[])
 				int bytes = fread(text, size, 1, file);
 				elf32->text.addr = text;
 				// TODO 我不确定用bytes还是size。正常情况下，二者是相等的。
-				elf32->text.size = bytes;
+				elf32->text.size = size;
+
+				textSize += size;
 
 			}else if(strcmp(subStr, ".data") == 0){
 				void *addr = (void *)MALLOC(size);
@@ -114,29 +127,37 @@ int main(int argc, char *argv[])
 				elf32->data.addr = (void *) addr;
 				elf32->data.size = size;
 
+				dataSize += size;
+
 			}else if(strcmp(subStr, ".rel.data") == 0){
 				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
 				int bytes = fread(rel, size, 1, file);
 				elf32->relData.addr = (void *)rel;
-				elf32->relData.size = bytes;
+				elf32->relData.size = size;
+
+				relDataSize += size;
 
 			}else if(strcmp(subStr, ".rel.text") == 0){
 				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
 				int bytes = fread(rel, size, 1, file);
 				elf32->relText.addr = (void *)rel;
-			    elf32->relText.size = bytes;
+			    elf32->relText.size = size;
+
+				relTextSize += size;
 
 			}else if(strcmp(subStr, ".rodata") == 0){
 				void *addr = (void *)MALLOC(size);
 				int bytes = fread(addr, size, 1, file);
 				elf32->rodata.addr = (void *) addr;
-				elf32->rodata.size = bytes;
+				elf32->rodata.size = size;
+
+				rodataSize += size;
 
 			}else if(strcmp(subStr, ".symtab") == 0){
 				void *addr = (void *)MALLOC(size);
 				int bytes = fread(addr, size, 1, file);
 				elf32->symtab.addr = (void *) addr;
-				elf32->symtab.size = bytes;
+				elf32->symtab.size = size;
 
 			}else{
 				// TODO 怎么处理？
