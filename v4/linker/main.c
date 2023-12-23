@@ -69,6 +69,7 @@ strtabSize = 0;
 //	// .text
 		char *strtab = NULL;
 		char *shstrtab = NULL;
+		unsigned int segmentSize = sizeof(struct segment);
 		Elf32_Shdr *ptrShdr = shdr;
 		for(int i = 0; i < shnum; i++){
 			Elf32_Shdr *shdrEntry = ptrShdr++; 	
@@ -83,13 +84,15 @@ strtabSize = 0;
 				// GetSubStrIndex(char *subStr, char *str, unsigned int strLength)
 				if(GetSubStrIndex(".text", str, size) != -1){
 					// 是.shstrtab
-					elf32->shstrtab.addr = (void *)str;
-					elf32->shstrtab.size = size;
+					elf32->shstrtab = (Segment)MALLOC(segmentSize);
+					elf32->shstrtab->addr = (void *)str;
+					elf32->shstrtab->size = size;
 					shstrtab = str;
 				}else{
 					// 是.strtab
-					elf32->strtab.addr = (void *)str;
-					elf32->strtab.size = size;
+					elf32->strtab = (Segment)MALLOC(segmentSize);
+					elf32->strtab->addr = (void *)str;
+					elf32->strtab->size = size;
 					strtab = str;
 
 					strtabSize += size;
@@ -115,49 +118,55 @@ strtabSize = 0;
 				// char *text = (char *)MALLOC(size);
 				void *text = (void *)MALLOC(size);
 				int bytes = fread(text, size, 1, file);
-				elf32->text.addr = text;
+				elf32->text = (Segment)MALLOC(segmentSize);
+				elf32->text->addr = text;
 				// TODO 我不确定用bytes还是size。正常情况下，二者是相等的。
-				elf32->text.size = size;
+				elf32->text->size = size;
 
 				textSize += size;
 
 			}else if(strcmp(subStr, ".data") == 0){
 				void *addr = (void *)MALLOC(size);
 				int bytes = fread(addr, size, 1, file);
-				elf32->data.addr = (void *) addr;
-				elf32->data.size = size;
+				elf32->data = (Segment)MALLOC(segmentSize);
+				elf32->data->addr = (void *) addr;
+				elf32->data->size = size;
 
 				dataSize += size;
 
 			}else if(strcmp(subStr, ".rel.data") == 0){
 				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
 				int bytes = fread(rel, size, 1, file);
-				elf32->relData.addr = (void *)rel;
-				elf32->relData.size = size;
+				elf32->relData = (Segment)MALLOC(segmentSize);
+				elf32->relData->addr = (void *)rel;
+				elf32->relData->size = size;
 
 				relDataSize += size;
 
 			}else if(strcmp(subStr, ".rel.text") == 0){
 				Elf32_Rel *rel = (Elf32_Rel *)MALLOC(size);
 				int bytes = fread(rel, size, 1, file);
-				elf32->relText.addr = (void *)rel;
-			    elf32->relText.size = size;
+				elf32->relText = (Segment)MALLOC(segmentSize);
+				elf32->relText->addr = (void *)rel;
+			    elf32->relText->size = size;
 
 				relTextSize += size;
 
 			}else if(strcmp(subStr, ".rodata") == 0){
 				void *addr = (void *)MALLOC(size);
 				int bytes = fread(addr, size, 1, file);
-				elf32->rodata.addr = (void *) addr;
-				elf32->rodata.size = size;
+				elf32->rodata = (Segment)MALLOC(segmentSize);
+				elf32->rodata->addr = (void *) addr;
+				elf32->rodata->size = size;
 
 				rodataSize += size;
 
 			}else if(strcmp(subStr, ".symtab") == 0){
 				void *addr = (void *)MALLOC(size);
 				int bytes = fread(addr, size, 1, file);
-				elf32->symtab.addr = (void *) addr;
-				elf32->symtab.size = size;
+				elf32->symtab = (Segment)MALLOC(segmentSize);
+				elf32->symtab->addr = (void *) addr;
+				elf32->symtab->size = size;
 
 			}else{
 				// TODO 怎么处理？
@@ -173,6 +182,9 @@ strtabSize = 0;
 	}
 
 	printf("over\n");
+
+	// 合并段。
+	MergeSegment();
 
 	return 0;
 }

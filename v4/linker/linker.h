@@ -7,7 +7,7 @@ typedef struct segment{
 //	unsigned int addr;
 	void *addr;
 	unsigned int size;
-} Segment;
+} *Segment;
 
 typedef struct elf32{
 	// ELF文件头。
@@ -69,5 +69,12 @@ unsigned int symtabSize ;// 0;
 unsigned int strtabSize ;// 0;
 
 void AppendElf32LinkList(ELF32 node);
+void MergeRodata(Segment src, Segment dst);
+void MergeRelData(Segment src, Segment dst);
+void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSize);
+void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segment symtab);
+void MergeSymtab(Segment dst, Segment src);
+void MergeText(Segment textDst, Segment textSrc);
+void MergeSegment();
 
 #endif

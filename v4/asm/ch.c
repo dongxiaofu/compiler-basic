@@ -33,6 +33,7 @@ char *my_str_cg = "How are you";
 
 int main(int argc, char *argv[])
 {
+	char *str45 = my_str_ak;
 	int x = sum(5,9);
 	const char ch38 = 'D';
 	static char ch44 = 'E';
