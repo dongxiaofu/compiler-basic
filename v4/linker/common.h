@@ -7,7 +7,8 @@
 #include <ctype.h>
 
 #include "elf.h"
-#include "linklist.h"
+//#include "linker.h"
+//#include "linklist.h"
 
 #define MAX_SIZE 200
 
@@ -52,6 +53,21 @@ typedef struct _Label
 	// 行标签指向的指令的索引。
 	int targetIndex;
 } *Label;
+
+typedef enum{
+	NUM, STRING, SYMBOL_LINK
+} NODE_VALUE;
+
+typedef struct symbolLink{
+	char *name;
+	Elf32_Sym *sym;
+} *SymbolLink;
+
+typedef union value{
+	int num;
+	char *str;
+	SymbolLink symLink;
+} Value;
 
 
 //static Heap CurrentHeap;

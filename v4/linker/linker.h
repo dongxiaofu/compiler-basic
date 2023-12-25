@@ -2,6 +2,7 @@
 #define LINKER_H
 
 #include "common.h"
+#include "linklist.h"
 
 typedef struct segment{
 //	unsigned int addr;

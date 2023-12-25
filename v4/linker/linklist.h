@@ -3,14 +3,15 @@
 
 #include "common.h"
 
-typedef enum{
-	NUM, STRING
-} NODE_VALUE;
-
-typedef union value{
-	int num;
-	char *str;
-} Value;
+// typedef enum{
+// 	NUM, STRING, SYMBOL_LINK
+// } NODE_VALUE;
+// 
+// typedef union value{
+// 	int num;
+// 	char *str;
+// 	SymbolLink symLink;
+// } Value;
 
 typedef struct node{
 	Value val;
