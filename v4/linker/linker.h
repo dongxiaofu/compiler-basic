@@ -68,11 +68,13 @@ unsigned int relTextSize ;// 0;
 unsigned int symtabSize ;// 0;
 unsigned int strtabSize ;// 0;
 
+Node ExplodeStrtab(char *strtab, unsigned int size);
 void AppendElf32LinkList(ELF32 node);
+void CollectInfo(unsigned int num, char **filenames);
 void MergeRodata(Segment src, Segment dst);
 void MergeRelData(Segment src, Segment dst);
 void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSize);
-void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segment symtab);
+void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segment symtab, char *strtab);
 void MergeSymtab(Segment dst, Segment src);
 void MergeText(Segment textDst, Segment textSrc);
 void MergeSegment();

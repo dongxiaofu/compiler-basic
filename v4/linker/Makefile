@@ -11,7 +11,7 @@ LDFLAGS		= -m elf_i386
 
 SCANNER = link
 # 包含main函数的.o文件必须放在前面。
-OBJS	= linker.o common.o main.o
+OBJS	= linker.o common.o main.o linklist.o
 
 all:clean everything
 
@@ -30,4 +30,7 @@ common.o:common.c
 	${CC} ${CFLAGS} -c -o $@ $<
 
 linker.o:linker.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
+linklist.o:linklist.c
 	${CC} ${CFLAGS} -c -o $@ $<

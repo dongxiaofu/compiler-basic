@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include "elf.h"
+#include "linklist.h"
 
 #define MAX_SIZE 200
 
