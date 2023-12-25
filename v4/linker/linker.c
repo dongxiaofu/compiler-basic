@@ -6,7 +6,7 @@ Node ExplodeStrtab(char *strtab, unsigned int size)
 	unsigned int len = 0;
 	while(len < size){
 		char *str = strtab + len;
-		unsigned int strLen = strlen(strtab) + 1;
+		unsigned int strLen = strlen(str) + 1;
 		
 		Node node = (Node)MALLOC(sizeof(struct node)); 
 		node->type = STRING;
@@ -19,6 +19,54 @@ Node ExplodeStrtab(char *strtab, unsigned int size)
 	}
 
 	return head;
+}
+
+Segment UniqueLinkListStr(Node list)
+{
+	Node currentNode = list->next;
+	int size = 1;
+	Node head = InitLinkList();
+
+	while(currentNode->next != list){
+		char *str = currentNode->val.str;
+		if(*str == '\000'){
+			currentNode = currentNode->next;
+			continue;
+		}
+
+		if(FindNodeByStr(head, str) == NULL){
+			size += strlen(str) + 1;
+			unsigned int nodeSize = sizeof(struct node);
+			// 必须新建节点，不能直接使用currentNode。
+			Node node = (Node)MALLOC(nodeSize);
+			memcpy(node, currentNode, nodeSize);
+			AppendNode(head, node);
+		}
+
+		currentNode = currentNode->next;
+	}	
+
+	Segment segment = (Segment)MALLOC(sizeof(struct segment));
+//	segment->addr = (char *)MALLOC(size);
+	char *addr = (char *)MALLOC(size);
+	char *addrStart = addr;
+	addr++;
+	currentNode = head->next;
+	while(currentNode != head){
+		char *str = currentNode->val.str;
+		printf("str = %s in UniqueLinkListStr\n", str);
+		unsigned int len = strlen(str);
+		memcpy(addr, str, len);
+		printf("addr = %s in UniqueLinkListStr\n", addr);
+		addr += len + 1; 
+
+		currentNode = currentNode->next;
+	}
+	
+	segment->addr = addrStart;
+	segment->size = size;
+
+	return segment;
 }
 
 void AppendElf32LinkList(ELF32 node)
@@ -196,6 +244,8 @@ void CollectInfo(unsigned int num, char **filenames)
 
 void MergeRodata(Segment src, Segment dst)
 {
+	if(src == NULL)	return;
+
 	void *srcAddr = src->addr;
 	unsigned int len = src->size;
 
@@ -208,6 +258,8 @@ void MergeRodata(Segment src, Segment dst)
 
 void MergeRelData(Segment src, Segment dst)
 {
+	if(src == NULL)	return;
+
 	void *srcAddr = src->addr;
 	unsigned int len = src->size;
 
@@ -220,12 +272,21 @@ void MergeRelData(Segment src, Segment dst)
 
 void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSize)
 {
+	if(src == NULL)	return;
+
 	void *srcAddr = src->addr;
 	unsigned int delta = src->size;
 	// 先通过rel.data找到要处理的.data。
-	Elf32_Rel *rel = (Elf32_Rel *)(relData->addr);
+	Elf32_Rel *rel = NULL;
 	unsigned int relSize = sizeof(Elf32_Rel);
-	unsigned int relNum = relData->size / relSize;
+	unsigned int relNum = 0;
+	if(relData == NULL){
+		relNum = 0;
+		rel = NULL;
+	}else{
+		relNum = relData->size / relSize;
+		rel = (Elf32_Rel *)(relData->addr);
+	}
 	for(int i = 0; i < relNum; i++){
 		Elf32_Addr	offset = rel->r_offset;
 		// TODO 搁置重定位类型。
@@ -255,6 +316,8 @@ void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSiz
 
 void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segment symtab, char *strtab)
 {
+	if(relTextSrc == NULL)	return;
+
 	Elf32_Rel *rel = (Elf32_Rel *)(relTextSrc->addr);
 	unsigned int relSize = sizeof(Elf32_Rel);
 	unsigned int relTextSrcLen = relTextSrc->size;
@@ -289,6 +352,8 @@ void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segme
 
 void MergeSymtab(Segment src, Segment dst)
 {
+	if(src == NULL)	return;
+
 	memcpy(dst->addr, src->addr, src->size);	
 	dst->addr += src->size;
 	dst->size += src->size;
@@ -296,6 +361,8 @@ void MergeSymtab(Segment src, Segment dst)
 
 void MergeText(Segment textSrc, Segment textDst)
 {
+	if(textSrc == NULL)	return;
+
 	memcpy(textDst->addr, textSrc->addr, textSrc->size);	
 	textDst->addr += textSrc->size;
 	textDst->size += textSrc->size;
@@ -327,8 +394,10 @@ void MergeSegment()
 
 	while(elf32 != NULL){
 		// 合并.data。
+		Segment elf32Rodata = elf32->rodata;
+		unsigned int rodataSize = elf32Rodata != NULL ? elf32Rodata->size : 0;
 		// MergeData(Segment *src, Segment *dst, Segment *relData, unsigned int rodataSize)
-		MergeData(elf32->data, data, elf32->relData, elf32->rodata->size);
+		MergeData(elf32->data, data, elf32->relData, rodataSize);
 		// 合并.rodata。
 		MergeRodata(elf32->rodata, rodata);
 		// 合并.rel.text。

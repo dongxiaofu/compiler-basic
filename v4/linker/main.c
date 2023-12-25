@@ -1,5 +1,20 @@
 #include "linker.h"
 
+void PrintStrtabTest(char *strtab, unsigned int size)
+{
+	unsigned int len = 0;
+
+	printf("\n--------printStrtab start-------\n");
+	while(len < size){
+		char *str = strtab;
+		printf("str = %s\n", str);
+
+		len += strlen(str) + 1;
+		strtab += strlen(str) + 1;
+	}
+	printf("\n--------printStrtab end-------\n");
+}
+
 int main(int argc, char *argv[])
 {
 	printf("hi, I am a linker.\n");
@@ -35,6 +50,9 @@ int main(int argc, char *argv[])
 
 		elf32 = elf32->next;
 	}
+	Segment strtab = UniqueLinkListStr(strtabLinkList);
+	PrintStrtabTest(strtab->addr, strtab->size);
+	
 	// 合并段。
 	MergeSegment();
 

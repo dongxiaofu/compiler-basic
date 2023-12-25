@@ -69,6 +69,7 @@ unsigned int symtabSize ;// 0;
 unsigned int strtabSize ;// 0;
 
 Node ExplodeStrtab(char *strtab, unsigned int size);
+Segment UniqueLinkListStr(Node list);
 void AppendElf32LinkList(ELF32 node);
 void CollectInfo(unsigned int num, char **filenames);
 void MergeRodata(Segment src, Segment dst);
