@@ -120,4 +120,5 @@ void EndPeekToken();
 // todo 放在这里并不合适。
 int StrToNumber(char *str);
 
+void PrintStrtabTest(char *strtab, unsigned int size);
 #endif

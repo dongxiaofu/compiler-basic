@@ -8,6 +8,7 @@ typedef struct segment{
 //	unsigned int addr;
 	void *addr;
 	unsigned int size;
+	unsigned int shndx;
 } *Segment;
 
 typedef struct elf32{
@@ -77,7 +78,7 @@ void MergeRodata(Segment src, Segment dst);
 void MergeRelData(Segment src, Segment dst);
 void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSize);
 void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segment symtab, char *strtab);
-void MergeSymtab(Segment dst, Segment src);
+void MergeSymtab();
 void MergeText(Segment textDst, Segment textSrc);
 void MergeSegment();
 

@@ -102,3 +102,18 @@ int HeapAllocate(Heap heap, int size)
 	// return blk->avail - size;
 	return (int)(blk->avail - size);
 }
+
+void PrintStrtabTest(char *strtab, unsigned int size)
+{
+	unsigned int len = 0;
+
+	printf("\n--------printStrtab start-------\n");
+	while(len < size){
+		char *str = strtab;
+		printf("str = %s\n", str);
+
+		len += strlen(str) + 1;
+		strtab += strlen(str) + 1;
+	}
+	printf("\n--------printStrtab end-------\n");
+}

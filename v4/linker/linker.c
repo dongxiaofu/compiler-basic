@@ -350,13 +350,140 @@ void MergeRelText(Segment relTextSrc, Segment relTextDst, Segment textDst, Segme
 	relTextDst->size += relTextSrc->size;
 }
 
-void MergeSymtab(Segment src, Segment dst)
+void MergeSymtab()
 {
-	if(src == NULL)	return;
+	Node localSymLinkList = InitLinkList();
+	Node globalSymLinkList = InitLinkList();
+	ELF32 elf32 = elf32LinkList->next;
+	int i = 0;
+	unsigned int rodataSize = 0;
+	unsigned int dataSize = 0;
+	unsigned int textSize = 0;
+	while(elf32 != NULL){
+		printf("elf32--%d\n", i++);
+		Elf32_Shdr *shdr = elf32->shdr;
+		char *shstrtab = elf32->shstrtab->addr;
+		// 处理.symtab：
+		// 1. 把.symtab分成local和global两类。
+		// 2. 查询符合的name。
+		Elf32_Sym *sym = (Elf32_Sym *)elf32->symtab->addr;
 
-	memcpy(dst->addr, src->addr, src->size);	
-	dst->addr += src->size;
-	dst->size += src->size;
+//		textSize += elf32->text->size;
+//		dataSize += elf32->data->size;
+//		rodataSize += elf32->rodata->size;
+
+		unsigned int symSize = sizeof(Elf32_Sym);
+		unsigned int symtabSize = 0;
+		while(symtabSize < elf32->symtab->size){
+  			unsigned char st_info = sym->st_info;		/* Symbol type and binding */
+			// unsigned char bind = st_info >> 4;
+			unsigned char bind = ELF32_ST_BIND(st_info);
+			// unsigned char type = st_info & 0xF;
+			unsigned char type = ELF32_ST_TYPE(st_info);
+
+			Node node = (Node)MALLOC(sizeof(struct node));
+			unsigned int symLinkSize = sizeof(struct symbolLink);
+			SymbolLink symLink = (SymbolLink)MALLOC(symLinkSize);			
+			
+			Elf32_Section shndx = sym->st_shndx;
+			if(shndx == SHN_ABS || shndx == SHN_COMMON || shndx == SHN_UNDEF){
+				printf("segName = %s\n", "special value");
+			}else{
+				Elf32_Shdr *currentShdr = shdr + shndx;
+				Elf32_Word name = currentShdr->sh_name;
+				char *segName = shstrtab + name;
+				printf("segName = %s\n", segName);
+				if(strcmp(segName, ".text") == 0){
+					sym->st_value += textSize; 
+					// textSize += elf32->text->size;
+				}else if(strcmp(segName, ".data") == 0){
+					sym->st_value += dataSize; 
+					// dataSize += elf32->data->size;
+				}else if(strcmp(segName, ".rodata") == 0){
+					sym->st_value += rodataSize; 
+					// rodataSize += elf32->rodata->size;
+				}else{
+					// TODO 怎么做？
+				}
+			}
+
+			symLink->sym = sym;
+			symLink->name = elf32->strtab->addr + sym->st_name;
+			printf("name = %s, st_name = %d\n", symLink->name, sym->st_name);
+			node->val.symLink = symLink;
+			node->type = SYMBOL_LINK;
+
+			if(bind == STB_LOCAL){
+				AppendNode(localSymLinkList, node);
+			}else{
+				AppendNode(globalSymLinkList, node);
+			}
+
+			symtabSize += symSize;
+			sym++;
+
+			if(elf32->text != NULL){
+				textSize += elf32->text->size;
+			}
+
+			if(elf32->data != NULL){
+				dataSize += elf32->data->size;
+			}
+
+			if(elf32->rodata != NULL){
+				rodataSize += elf32->rodata->size;
+			}
+		}
+
+		elf32 = elf32->next;
+	}
+
+	// 合并localSymLinkList和globalSymLinkList。
+	Node allSymLinkList = MergeLinkList(localSymLinkList, globalSymLinkList);
+	// 去掉st_name是0或未定义的符号。
+	Node trimSymLinkList = InitLinkList();
+	Node currentSymLinkNode = allSymLinkList->next;
+	Node trimStrtabLinkList = InitLinkList();
+	unsigned int trimStrtabSize = 0;
+	while(currentSymLinkNode != allSymLinkList){
+		SymbolLink symLink = currentSymLinkNode->val.symLink;
+		printf("symLink name = %s\n", symLink->name);
+		Elf32_Sym *sym = symLink->sym; 
+		unsigned int shndx = sym->st_shndx; 
+		unsigned int nameOffset = sym->st_name;
+		// TODO 难点是这个条件。我不熟悉相关情况，所以不确定目前的条件是否正确。
+		// 这个条件没有问题。
+		// if(shndx != SHN_UNDEF || nameOffset != 0){
+		if(shndx != SHN_UNDEF && nameOffset != 0){
+			unsigned int nodeSize = sizeof(struct node);
+			Node node = (Node)MALLOC(nodeSize);
+			memcpy(node, currentSymLinkNode, nodeSize); 
+			AppendNode(trimSymLinkList, node);
+			Node strNode = (Node)MALLOC(sizeof(struct node));
+			unsigned int strSize = strlen(symLink->name) + 1;
+			trimStrtabSize += strSize;
+			strNode->val.str = (char *)MALLOC(strSize);
+			memcpy(strNode->val.str, symLink->name, strSize - 1);
+			printf("strNode->val.str = %s\n", strNode->val.str);
+			AppendNode(trimStrtabLinkList, strNode);
+		}
+
+		currentSymLinkNode = currentSymLinkNode->next;
+	}
+
+	char *trimStrtab = (char *)MALLOC(trimStrtabSize);
+	char *trimStrtabStart = trimStrtab;
+	unsigned int strtabOffset = 0;
+	Node currentTrimStrtabNode = trimStrtabLinkList->next;
+	while(currentTrimStrtabNode != trimStrtabLinkList){
+		unsigned int len = strlen(currentTrimStrtabNode->val.str);
+		memcpy(trimStrtab, currentTrimStrtabNode->val.str, len);
+		trimStrtab += len + 1;
+
+		currentTrimStrtabNode = currentTrimStrtabNode->next; 
+	}
+
+	PrintStrtabTest(trimStrtabStart, trimStrtabSize);
 }
 
 void MergeText(Segment textSrc, Segment textDst)
@@ -404,10 +531,12 @@ void MergeSegment()
 		// MergeRelText(Segment *relTextSrc, Segment *relTextDst, Segment *textDst, Segment *symtab)
 		MergeRelText(elf32->relText, relText, text, symtab, "");
 		// 合并.symtab。
-		MergeSymtab(elf32->symtab, symtab);
+		// MergeSymtab(elf32->symtab, symtab);
 		// 合并.text。
 		MergeText(elf32->text, text);	
 
 		elf32 = elf32->next;
 	}
+	// 合并.symtab。
+	MergeSymtab();
 }
