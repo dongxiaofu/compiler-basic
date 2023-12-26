@@ -484,6 +484,23 @@ void MergeSymtab()
 	}
 
 	PrintStrtabTest(trimStrtabStart, trimStrtabSize);
+
+	// 更新符号的st_name。
+	currentSymLinkNode = trimSymLinkList->next;
+	while(currentSymLinkNode != trimSymLinkList){
+		char *name = currentSymLinkNode->val.symLink->name;
+		// int GetSubStrIndex(char *subStr, char *str, unsigned int strLength)
+		int index = GetSubStrIndex(name, trimStrtabStart, trimStrtabSize);
+		// TODO 对此处的异常，我并不知道怎么处理。像这样处理，只是为了发现错误。
+		// 正常情况下，strtab和symtab的名称必须是一一对应的。
+		// 如果二者不是一一对应的，那么，前面的产生的数据有问题。
+		if(index == -1){
+			printf("%s does not exist in %d in %s", name, __LINE__, __FILE__);
+			exit(-1);
+		}
+		currentSymLinkNode->val.symLink->sym->st_name = (Elf32_Word)index;
+		currentSymLinkNode = currentSymLinkNode->next;
+	}
 }
 
 void MergeText(Segment textSrc, Segment textDst)
