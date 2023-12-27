@@ -130,14 +130,14 @@ void AllocSegmentAddress(char *segName, unsigned int *base)
 		if(entry == NULL){
 			printf("error! seg %s is not exists in %d in %s\n", segName, __LINE__, __FILE__);
 			// exit(-1);
-
 			currentElf32 = currentElf32->next;
 			continue;
 		}
 
 		Elf32_Shdr *shdr = entry->shdr;
 		shdr->sh_addr = *base + size;
-		printf("%s sh_addr = %d, shdr->sh_size = %d\n", segName, shdr->sh_addr, shdr->sh_size);
+		printf("%s:%s sh_addr = %d, shdr->sh_size = %d\n", currentElf32->filename,\
+			 segName, shdr->sh_addr, shdr->sh_size);
 		size += shdr->sh_size;
 
 		currentElf32 = currentElf32->next;
@@ -366,7 +366,7 @@ void ReadElf(unsigned int num, char **filenames)
 		}
 
 		// 格式化shdr。
-		elf32->segTabLinkList = InitLinkList();
+		elf32->segTabLinkList = (void *)InitLinkList();
 		Elf32_Shdr *shdrPtr = shdr;
 		shstrtab = elf32->shstrtab->addr;
 		for(int i = 0; i < shnum; i++){
@@ -378,12 +378,13 @@ void ReadElf(unsigned int num, char **filenames)
 			Node node = (Node)MALLOC(sizeof(struct node));
 			node->val.segTab = entry;
 			node->type = NODE_VALUE_SEG_TAB;
-			AppendNode(elf32->segTabLinkList, node);
+			AppendNode((Node)elf32->segTabLinkList, node);
 
 			shdrPtr++;
 		}
 
 
+		elf32->filename = name;
 		elf32->ehdr = ehdr;
 		elf32->phdr = phdr;
 		elf32->shdr = shdr;

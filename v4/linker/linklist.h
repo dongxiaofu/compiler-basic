@@ -10,6 +10,7 @@ typedef struct segment{
 } *Segment;
 
 typedef struct elf32{
+	char *filename;
 	// ELF文件头。
 	Elf32_Ehdr *ehdr;
 	// 程序头。
@@ -44,7 +45,8 @@ typedef struct elf32{
 //	unsigned char *shstrtab;
 	Segment shstrtab;
 
-	Node segTabLinkList;
+//	Node segTabLinkList;
+	void *segTabLinkList;
 
 //	struct elf32 *pre;
 	struct elf32 *next;
