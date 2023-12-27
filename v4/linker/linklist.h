@@ -48,6 +48,12 @@ typedef struct elf32{
 	struct elf32 *next;
 } *ELF32;
 
+// 段名--段表项。
+typedef struct segNameSegTabEntry{
+	char *segName;
+	Elf32_Shdr *shdr;
+} *SegNameSegTabEntry;
+
 typedef struct symbolLink{
 	char *name;
 	Elf32_Sym *sym;
@@ -56,13 +62,14 @@ typedef struct symbolLink{
 } *SymbolLink;
 
 typedef enum{
-	NUM, STRING, SYMBOL_LINK
+	NUM, STRING, SYMBOL_LINK, NODE_VALUE_SEG_TAB
 } NODE_VALUE;
 
 typedef union value{
 	int num;
 	char *str;
 	SymbolLink symLink;
+	SegNameSegTabEntry segTab;
 } Value;
 
 typedef struct node{

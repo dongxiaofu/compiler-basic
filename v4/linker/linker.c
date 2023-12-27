@@ -81,6 +81,47 @@ void AppendElf32LinkList(ELF32 node)
 	preElf32 = node;
 }
 
+// 为一个段分配地址空间。
+// 这是一个简化之后的函数。
+void AllocSegmentAddress(char *segName, unsigned int *base)
+{
+	ELF32 currentElf32 = elf32LinkList->next;
+	
+	while(currentElf32 != NULL){
+		Segment segment = NULL;
+		Elf32_Shdr *shdr = (Elf32_Shdr *)currentElf32->shdr;
+		// 根据短命获取段表项。
+		// 可是，段表项中并没有段名，只有sh_name。
+		// 我需要重新处理段表。这并不难。
+	
+		if(strcmp(segName, ".text") == 0){
+			segment = currentElf32->text;
+		}
+	
+		if(strcmp(segName, ".data") == 0){
+			segment = currentElf32->data;
+		}
+	
+		if(strcmp(segName, ".rodata") == 0){
+			segment = currentElf32->rodata;
+		}
+
+		if(segment == NULL){
+			currentElf32 = currentElf32->next;
+			continue;
+		}
+
+		
+
+		currentElf32 = currentElf32->next;
+	}
+}
+
+void AllocAddress()
+{
+
+}
+
 // 收集信息。
 // 什么信息？把符号分成定义的符号和未定义的符号。
 void CollectInfo()
@@ -287,6 +328,16 @@ void ReadElf(unsigned int num, char **filenames)
 			}else{
 				// TODO 怎么处理？
 			}
+		}
+
+		// 格式化shdr。
+		Elf32_Shdr *shdrPtr = shdr;
+		shstrtab = elf32->shstrtab->addr;
+		for(int i = 0; i < shnum; i++){
+			SegNameSegTabEntry entry = (SegNameSegTabEntry)MALLOC(sizeof(struct segNameSegTabEntry));
+			entry->segName = shdrPtr->sh_name + shstrtab;
+			entry->shdr = shdrPtr;
+			shdrPtr++;
 		}
 
 
