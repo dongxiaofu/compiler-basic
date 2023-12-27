@@ -44,6 +44,8 @@ typedef struct elf32{
 //	unsigned char *shstrtab;
 	Segment shstrtab;
 
+	Node segTabLinkList;
+
 //	struct elf32 *pre;
 	struct elf32 *next;
 } *ELF32;
@@ -51,6 +53,7 @@ typedef struct elf32{
 // 段名--段表项。
 typedef struct segNameSegTabEntry{
 	char *segName;
+	unsigned int index;
 	Elf32_Shdr *shdr;
 } *SegNameSegTabEntry;
 

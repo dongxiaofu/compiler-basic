@@ -81,45 +81,80 @@ void AppendElf32LinkList(ELF32 node)
 	preElf32 = node;
 }
 
+SegNameSegTabEntry FindSegNameSegTabEntryByIndex(Node segTabLinkList, unsigned int index)
+{
+	SegNameSegTabEntry target = NULL;
+
+	Node node = segTabLinkList->next;
+	while(node != segTabLinkList){
+		SegNameSegTabEntry entry = node->val.segTab;
+		if(entry->index == index){
+			target = entry;
+			break;
+		}
+		node = node->next;
+	}
+
+	return target;
+}
+
+SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segName)
+{
+	SegNameSegTabEntry target = NULL;
+
+	Node node = segTabLinkList->next;
+	while(node != segTabLinkList){
+		SegNameSegTabEntry entry = node->val.segTab;
+		if(strcmp(segName, entry->segName) == 0){
+			target = entry;
+			break;
+		}
+		node = node->next;
+	}
+
+	return target;
+}
+
 // 为一个段分配地址空间。
 // 这是一个简化之后的函数。
 void AllocSegmentAddress(char *segName, unsigned int *base)
 {
 	ELF32 currentElf32 = elf32LinkList->next;
 	
+	unsigned int size = 0;
+
 	while(currentElf32 != NULL){
 		Segment segment = NULL;
-		Elf32_Shdr *shdr = (Elf32_Shdr *)currentElf32->shdr;
-		// 根据短命获取段表项。
-		// 可是，段表项中并没有段名，只有sh_name。
-		// 我需要重新处理段表。这并不难。
-	
-		if(strcmp(segName, ".text") == 0){
-			segment = currentElf32->text;
-		}
-	
-		if(strcmp(segName, ".data") == 0){
-			segment = currentElf32->data;
-		}
-	
-		if(strcmp(segName, ".rodata") == 0){
-			segment = currentElf32->rodata;
-		}
+		Node segTabLinkList = currentElf32->segTabLinkList;
+		SegNameSegTabEntry entry = FindSegNameSegTabEntryByName(segTabLinkList, segName);
+		if(entry == NULL){
+			printf("error! seg %s is not exists in %d in %s\n", segName, __LINE__, __FILE__);
+			// exit(-1);
 
-		if(segment == NULL){
 			currentElf32 = currentElf32->next;
 			continue;
 		}
 
-		
+		Elf32_Shdr *shdr = entry->shdr;
+		shdr->sh_addr = *base + size;
+		printf("%s sh_addr = %d, shdr->sh_size = %d\n", segName, shdr->sh_addr, shdr->sh_size);
+		size += shdr->sh_size;
 
 		currentElf32 = currentElf32->next;
 	}
+
+	*base += size;
 }
 
-void AllocAddress()
+void AllocAddress(unsigned int *base)
 {
+	char *segNames[3] = {".text", ".data", ".rodata"};
 
+	for(int i = 0; i < 3; i++){
+		printf("base = %d\n", *base);
+		char *segName = segNames[i];
+		AllocSegmentAddress(segName, base);
+	}
 }
 
 // 收集信息。
@@ -331,12 +366,20 @@ void ReadElf(unsigned int num, char **filenames)
 		}
 
 		// 格式化shdr。
+		elf32->segTabLinkList = InitLinkList();
 		Elf32_Shdr *shdrPtr = shdr;
 		shstrtab = elf32->shstrtab->addr;
 		for(int i = 0; i < shnum; i++){
 			SegNameSegTabEntry entry = (SegNameSegTabEntry)MALLOC(sizeof(struct segNameSegTabEntry));
 			entry->segName = shdrPtr->sh_name + shstrtab;
 			entry->shdr = shdrPtr;
+			entry->index = i;
+
+			Node node = (Node)MALLOC(sizeof(struct node));
+			node->val.segTab = entry;
+			node->type = NODE_VALUE_SEG_TAB;
+			AppendNode(elf32->segTabLinkList, node);
+
 			shdrPtr++;
 		}
 

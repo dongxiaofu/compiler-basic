@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
 	ReadElf(num, filenames);
 	// 收集信息。
 	CollectInfo();
+	unsigned int base = 0x80;
+	AllocAddress(&base);
 	// 
 	// 合并所有的`.strtab`。
 	
