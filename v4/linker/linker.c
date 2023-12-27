@@ -111,15 +111,21 @@ void CollectInfo()
 			SymbolLink symbolLink = (SymbolLink)MALLOC(sizeof(struct symbolLink));
 			symbolLink->name = strtab + sym->st_name;
 			symbolLink->sym = sym;
-
-			Node node = (Node)MALLOC(sizeof(struct node));
-			node->val.symLink = symbolLink;
-			node->type = SYMBOL_LINK; 
 			
-			if(sym->st_shndx == SHN_UNDEF){
-				AppendNode(symLink, node);
-			}else{
-				AppendNode(symDefine, node);
+			unsigned char bind = ELF32_ST_BIND(sym->st_info);
+			if(bind == STB_GLOBAL){
+				Node node = (Node)MALLOC(sizeof(struct node));
+				node->val.symLink = symbolLink;
+				node->type = SYMBOL_LINK; 
+				if(sym->st_shndx == SHN_UNDEF){
+					symbolLink->provider = NULL;
+					symbolLink->receiver = currentElf32;
+					AppendNode(symLink, node);
+				}else{
+					symbolLink->provider = currentElf32;
+					symbolLink->receiver = NULL;
+					AppendNode(symDefine, node);
+				}
 			}
 
 			sym++;

@@ -3,15 +3,67 @@
 
 #include "common.h"
 
-// typedef enum{
-// 	NUM, STRING, SYMBOL_LINK
-// } NODE_VALUE;
-// 
-// typedef union value{
-// 	int num;
-// 	char *str;
-// 	SymbolLink symLink;
-// } Value;
+typedef struct segment{
+	void *addr;
+	unsigned int size;
+	unsigned int shndx;
+} *Segment;
+
+typedef struct elf32{
+	// ELF文件头。
+	Elf32_Ehdr *ehdr;
+	// 程序头。
+	Elf32_Phdr *phdr;	
+	// 段表。
+	Elf32_Shdr *shdr;
+	// .text
+//	unsigned int *text;
+	// unsigned char *text;
+	Segment text;
+	// .symtab
+//	Elf32_Sym *symtab;
+	Segment symtab;
+	// .rel.data
+//	Elf32_Rel *relData;
+	Segment relData;
+	// .rel.text
+//	Elf32_Rel *relText;
+	Segment relText;
+	// .rodata
+//	unsigned int *rodata;
+//	unsigned char *rodata;
+	Segment rodata;
+	// .data
+//	unsigned int *data;
+//	unsigned char *data;
+	Segment data;
+	// .strtab
+//	unsigned char *strtab;
+	Segment strtab;
+	// .shstrtab
+//	unsigned char *shstrtab;
+	Segment shstrtab;
+
+//	struct elf32 *pre;
+	struct elf32 *next;
+} *ELF32;
+
+typedef struct symbolLink{
+	char *name;
+	Elf32_Sym *sym;
+	ELF32 provider;
+	ELF32 receiver;
+} *SymbolLink;
+
+typedef enum{
+	NUM, STRING, SYMBOL_LINK
+} NODE_VALUE;
+
+typedef union value{
+	int num;
+	char *str;
+	SymbolLink symLink;
+} Value;
 
 typedef struct node{
 	Value val;

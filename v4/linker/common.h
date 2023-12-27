@@ -54,20 +54,22 @@ typedef struct _Label
 	int targetIndex;
 } *Label;
 
-typedef enum{
-	NUM, STRING, SYMBOL_LINK
-} NODE_VALUE;
+// typedef enum{
+// 	NUM = 1, STRING, SYMBOL_LINK
+// } NODE_VALUE;
 
-typedef struct symbolLink{
-	char *name;
-	Elf32_Sym *sym;
-} *SymbolLink;
+//typedef struct symbolLink{
+//	char *name;
+//	Elf32_Sym *sym;
+//	ELF32 provider;
+//	ELF32 receiver;
+//} *SymbolLink;
 
-typedef union value{
-	int num;
-	char *str;
-	SymbolLink symLink;
-} Value;
+// typedef union value{
+// 	int num;
+// 	char *str;
+// 	SymbolLink symLink;
+// } Value;
 
 
 //static Heap CurrentHeap;
