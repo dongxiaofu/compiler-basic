@@ -54,6 +54,8 @@ typedef struct elf32{
 // static ELF32 elf32LinkList;
 ELF32 elf32LinkList;
 ELF32 preElf32;
+Node symDefine;
+Node symLink;
 //unsigned int textSize = 0;
 //unsigned int dataSize = 0;
 //unsigned int rodataSize = 0;
@@ -73,7 +75,10 @@ unsigned int strtabSize ;// 0;
 Node ExplodeStrtab(char *strtab, unsigned int size);
 Segment UniqueLinkListStr(Node list);
 void AppendElf32LinkList(ELF32 node);
-void CollectInfo(unsigned int num, char **filenames);
+
+void CollectInfo();
+void ReadElf(unsigned int num, char **filenames);
+
 void MergeRodata(Segment src, Segment dst);
 void MergeRelData(Segment src, Segment dst);
 void MergeData(Segment src, Segment dst, Segment relData, unsigned int rodataSize);

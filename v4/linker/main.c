@@ -34,7 +34,9 @@ int main(int argc, char *argv[])
 
 	unsigned int num = argc;
 	char **filenames = ++argv;
-	CollectInfo(num, filenames);
+	ReadElf(num, filenames);
+	// 收集信息。
+	CollectInfo();
 	// 
 	// 合并所有的`.strtab`。
 	

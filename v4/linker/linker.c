@@ -81,7 +81,56 @@ void AppendElf32LinkList(ELF32 node)
 	preElf32 = node;
 }
 
-void CollectInfo(unsigned int num, char **filenames)
+// 收集信息。
+// 什么信息？把符号分成定义的符号和未定义的符号。
+void CollectInfo()
+{
+	ELF32 currentElf32 = elf32LinkList->next;
+	symDefine = InitLinkList();
+	symLink = InitLinkList();
+	
+	while(currentElf32 != NULL){
+		Segment symSeg = currentElf32->symtab;
+		if(symSeg == NULL){
+			currentElf32 = currentElf32->next;
+			continue;
+		}
+
+		char *strtab = NULL;
+		Segment strtabSeg = currentElf32->strtab;
+		if(strtabSeg == NULL){
+			printf("strtab can't be NULL when symtab is not NULL in %d in %s", __LINE__, __FILE__);	
+			exit(-1);
+		}else{
+			strtab = (char *)strtabSeg->addr;
+		}
+
+		unsigned int size = 0;
+		Elf32_Sym *sym = (Elf32_Sym *)symSeg->addr;
+		while(size < symSeg->size){
+			SymbolLink symbolLink = (SymbolLink)MALLOC(sizeof(struct symbolLink));
+			symbolLink->name = strtab + sym->st_name;
+			symbolLink->sym = sym;
+
+			Node node = (Node)MALLOC(sizeof(struct node));
+			node->val.symLink = symbolLink;
+			node->type = SYMBOL_LINK; 
+			
+			if(sym->st_shndx == SHN_UNDEF){
+				AppendNode(symLink, node);
+			}else{
+				AppendNode(symDefine, node);
+			}
+
+			sym++;
+			size += sizeof(Elf32_Sym);
+		}
+
+		currentElf32 = currentElf32->next;
+	}
+}
+
+void ReadElf(unsigned int num, char **filenames)
 {
 	for(int i = 1; i < num; i++){
 		// char *name = filenames[i];
@@ -126,7 +175,8 @@ void CollectInfo(unsigned int num, char **filenames)
 			shdr = (Elf32_Shdr *)MALLOC(size * shnum);
 			int bytes = fread(shdr, size, shnum, file);
 		}
-//	// .text
+		
+		// 先读取.shstrtab和.strtab的目的是在下面获取段名称。
 		char *strtab = NULL;
 		char *shstrtab = NULL;
 		unsigned int segmentSize = sizeof(struct segment);
