@@ -88,6 +88,11 @@ void AllocSegmentAddress(char *segName, unsigned int *base);
 void AllocAddress(unsigned int *base);
 void CollectInfo();
 void ReadElf(unsigned int num, char **filenames);
+SymbolLink FindSymbolLinkBySymName(Node list, char *symName);
+SymbolLink FindSymbolLinkBySymIndex(Node list, unsigned int index);
+void ParseSym();
+void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char type);
+void Relocation();
 
 void MergeRodata(Segment src, Segment dst);
 void MergeRelData(Segment src, Segment dst);

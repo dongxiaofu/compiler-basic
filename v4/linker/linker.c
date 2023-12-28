@@ -105,7 +105,9 @@ SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segNa
 	Node node = segTabLinkList->next;
 	while(node != segTabLinkList){
 		SegNameSegTabEntry entry = node->val.segTab;
-		if(strcmp(segName, entry->segName) == 0){
+		unsigned int len = strlen(segName);
+		// if(strcmp(segName, entry->segName) == 0){
+		if(strncmp(segName, entry->segName, len) == 0){
 			target = entry;
 			break;
 		}
@@ -181,12 +183,14 @@ void CollectInfo()
 			strtab = (char *)strtabSeg->addr;
 		}
 
+		unsigned int symbolLinkIndex = 0;
 		unsigned int size = 0;
 		Elf32_Sym *sym = (Elf32_Sym *)symSeg->addr;
 		while(size < symSeg->size){
 			SymbolLink symbolLink = (SymbolLink)MALLOC(sizeof(struct symbolLink));
 			symbolLink->name = strtab + sym->st_name;
 			symbolLink->sym = sym;
+			symbolLink->index = symbolLinkIndex++;
 			
 			unsigned char bind = ELF32_ST_BIND(sym->st_info);
 			if(bind == STB_GLOBAL){
@@ -372,6 +376,7 @@ void ReadElf(unsigned int num, char **filenames)
 		for(int i = 0; i < shnum; i++){
 			SegNameSegTabEntry entry = (SegNameSegTabEntry)MALLOC(sizeof(struct segNameSegTabEntry));
 			entry->segName = shdrPtr->sh_name + shstrtab;
+			printf("section name = %s\n", entry->segName);
 			entry->shdr = shdrPtr;
 			entry->index = i;
 
@@ -390,6 +395,179 @@ void ReadElf(unsigned int num, char **filenames)
 		elf32->shdr = shdr;
 
 		AppendElf32LinkList(elf32);
+	}
+}
+
+SymbolLink FindSymbolLinkBySymName(Node list, char *symName)
+{
+	SymbolLink target = NULL;
+
+	Node currentNode = list->next;
+	while(currentNode != list){
+		SymbolLink symLink = currentNode->val.symLink;
+		if(strcmp(symName, currentNode->val.symLink->name) == 0){
+			target = symLink; 
+			break;
+		}
+		currentNode = currentNode->next;
+	}
+
+	return target;
+}
+
+SymbolLink FindSymbolLinkBySymIndex(Node list, unsigned int index)
+{
+	SymbolLink target = NULL;
+
+	Node currentNode = list->next;
+	while(currentNode != list){
+		SymbolLink symLink = currentNode->val.symLink;
+		if(symLink->index == index){
+			target = symLink; 
+			break;
+		}
+		currentNode = currentNode->next;
+	}
+
+	return target;
+}
+
+// 解析符号。
+void ParseSym()
+{
+	// 处理已经定义的符号。
+	Node currentSymDefineNode = symDefine->next;
+	while(currentSymDefineNode != symDefine){
+		SymbolLink symbolLink = currentSymDefineNode->val.symLink;
+		ELF32 elf32 = symbolLink->provider;
+		char *strtab = (char *)elf32->strtab->addr;
+		Elf32_Sym *sym = symbolLink->sym;
+		Node segTabLinkList = (Node)elf32->segTabLinkList;
+		SegNameSegTabEntry segNameSegTabEntry = FindSegNameSegTabEntryByIndex(segTabLinkList, sym->st_shndx);
+		Elf32_Shdr *shdr = segNameSegTabEntry->shdr; 
+		if(shdr == NULL){
+			printf("symbol %s has an error in %d in %s\n", symbolLink->name, __LINE__, __FILE__);
+			exit(-1);
+		}
+		unsigned int old_value = sym->st_value;
+		sym->st_value += shdr->sh_addr;
+		printf("file = %s, sym name = %s, old_value = %d, st_value = %d, sh_addr = %d, segName = %s\n",\
+			 elf32->filename, strtab + sym->st_name, old_value, sym->st_value,\
+			 shdr->sh_addr, segNameSegTabEntry->segName);
+
+		currentSymDefineNode = currentSymDefineNode->next;
+	}
+
+	// 处理引用的符号。
+	Node currentSymLinkNode = symLink->next;
+	while(currentSymLinkNode != symLink){
+		SymbolLink symbolLink = currentSymLinkNode->val.symLink;
+		char *name = symbolLink->name;
+		// 不检查localSymDefine是否为NULL，在其他地方检查。
+		SymbolLink localSymDefine = FindSymbolLinkBySymName(symDefine, name);
+		symbolLink->sym->st_value = localSymDefine->sym->st_value;
+		
+		currentSymLinkNode = currentSymLinkNode->next;
+	}
+}
+
+// 重定位。被调用的函数。
+void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char type)
+{
+	Node segTabLinkList = elf32->segTabLinkList;
+	void *segAddr = NULL;
+	void *rodataSegAddr = NULL;
+	void *segAddrInFile = NULL;
+	if(type == 1){
+		segAddr = elf32->data->addr;
+		// ELF文件有.rel.data，必定有.rodata。
+		rodataSegAddr = elf32->rodata->addr;
+		SegNameSegTabEntry segTab= FindSegNameSegTabEntryByName(segTabLinkList, ".data");
+		Elf32_Shdr *shdr = segTab->shdr;
+		segAddrInFile = (void *)shdr->sh_addr;
+	}else{
+		segAddr = elf32->text->addr;
+		SegNameSegTabEntry segTab= FindSegNameSegTabEntryByName(segTabLinkList, ".text");
+		Elf32_Shdr *shdr = segTab->shdr;
+		segAddrInFile = (void *)shdr->sh_addr;
+	}
+	int *ptrSymbol = NULL;
+	// ptrSymbol = (unsigned int)segAddr + rel->r_offset;	
+	ptrSymbol = (int *)((unsigned int)segAddr + rel->r_offset);	
+	printf("before relocation, data = %d\n", *ptrSymbol);
+	// 实际上上虚拟地址。
+	int *ptrSymbolInFile = (int *)((unsigned int)segAddrInFile + rel->r_offset);	
+
+	unsigned char relocationType = rel->r_info & 0xFF;
+	if(relocationType == R_386_32){
+		if(type == 1){
+			*ptrSymbol = *(int *)((unsigned int)rodataSegAddr + (int )(*ptrSymbol));
+		}else{
+			// 处理完.rel.data后,再处理.rel.text时会执行到这里。
+			*ptrSymbol = sym->st_value; 		
+		}
+	}else if(type == R_386_PC32){
+		// 相对重定位，我依然不能在几秒钟想出计算方法。
+		// *ptrSymbol = sym->st_value - ptrSymbol + *ptrSymbol;
+		// *ptrSymbol = sym->st_value - (unsigned int)ptrSymbol + *ptrSymbol;
+		*ptrSymbol = sym->st_value - (unsigned int)ptrSymbolInFile + *ptrSymbol;
+		printf("st_value = %d, segAddrInFile = %d in RelocationAddr\n",\
+			 sym->st_value, ptrSymbolInFile);
+	}else{
+		printf("an error occurs in %d in %s\n", __LINE__, __FILE__);
+		exit(-1);
+	}
+
+	printf("after relocation, data = %d\n", *ptrSymbol);
+}
+
+// 重定位。
+void Relocation()
+{
+	ELF32 elf32 = elf32LinkList->next;
+
+	while(elf32 != NULL){
+		Node segTabLinkList = elf32->segTabLinkList;
+		SegNameSegTabEntry segTab= FindSegNameSegTabEntryByName(segTabLinkList, ".rel.data");
+		if(segTab != NULL){
+			// shdr是重定位数据的段表项。
+			Elf32_Shdr *shdr = segTab->shdr;
+			// Elf32_Rel *rel = shdr->sh_offset; 
+			Elf32_Rel *rel = elf32->relData->addr; 
+			unsigned int relNum = shdr->sh_size / 8;
+
+			for(int i = 0; i < relNum; i++){
+				Elf32_Sym *sym = elf32->symtab->addr;
+				unsigned int symbolIndex = rel->r_info >> 8;
+				sym += symbolIndex; 
+				// void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char type)
+				RelocationAddr(elf32, rel, sym, 1);
+
+				rel++;
+			}
+		}
+
+		// 必须先处理.rel.data，再处理.rel.text。
+		segTab= FindSegNameSegTabEntryByName(segTabLinkList, ".rel.text");
+		if(segTab != NULL){
+			// shdr是重定位数据的段表项。
+			Elf32_Shdr *shdr = segTab->shdr;
+			// Elf32_Rel *rel = shdr->sh_offset; 
+			Elf32_Rel *rel = elf32->relText->addr; 
+			unsigned int relNum = shdr->sh_size / 8;
+
+			for(int i = 0; i < relNum; i++){
+				Elf32_Sym *sym = elf32->symtab->addr;
+				unsigned int symbolIndex = rel->r_info >> 8;
+				sym += symbolIndex; 
+				// void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char type)
+				RelocationAddr(elf32, rel, sym, 2);
+
+				rel++;
+			}
+		}
+		
+		elf32 = elf32->next;
 	}
 }
 

@@ -60,6 +60,7 @@ typedef struct segNameSegTabEntry{
 } *SegNameSegTabEntry;
 
 typedef struct symbolLink{
+	unsigned int index;
 	char *name;
 	Elf32_Sym *sym;
 	ELF32 provider;

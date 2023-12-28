@@ -32,15 +32,20 @@ int main(int argc, char *argv[])
 	symtabSize = 0;
 	strtabSize = 0;
 
+	// 读取文件。
 	unsigned int num = argc;
 	char **filenames = ++argv;
 	ReadElf(num, filenames);
 	// 收集信息。
 	CollectInfo();
-	unsigned int base = 0x80;
+	// 分配地址空间。
+	// unsigned int base = 0x8048000;
+	unsigned int base = 0x08040000 + 52;
 	AllocAddress(&base);
-	// 
-	// 合并所有的`.strtab`。
+	// 解析符号。
+	ParseSym();
+	// 重定位。
+	Relocation();
 	
 	// 合并段。
 	MergeSegment();
