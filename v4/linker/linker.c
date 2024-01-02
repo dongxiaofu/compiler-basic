@@ -600,10 +600,10 @@ ELF32 AssembleELF()
 	ELF32 elf32 = (ELF32)MALLOC(sizeof(struct elf32));
 
 	// .shstrtab。
-	char *shStrTabStr = "\000.text\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
-	char *shStrTabStrWithoutNull = ".text.rodata.symtab.strtab.shstrtab";
-	// shStrTabStr中的\000有6个。
-	unsigned int shStrTabStrLength = strlen(shStrTabStrWithoutNull) + 6;
+	char *shStrTabStr = "\000.text\000.data\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+	char *shStrTabStrWithoutNull = ".text.data.rodata.symtab.strtab.shstrtab";
+	// shStrTabStr中的\000有7个。
+	unsigned int shStrTabStrLength = strlen(shStrTabStrWithoutNull) + 7;
 	Segment shstrtabSegment = (Segment)MALLOC(sizeof(struct segment));
 	shstrtabSegment->addr = (void *)MALLOC(shStrTabStrLength); 
 	shstrtabSegment->size = shStrTabStrLength;
@@ -688,12 +688,12 @@ ELF32 AssembleELF()
 	textSeg->size = segSize[0];
 
 	Segment dataSeg = (Segment)MALLOC(segmentSize);
-	dataSeg->addr = (void *)MALLOC(segSize[0]);
-	dataSeg->size = segSize[0];
+	dataSeg->addr = (void *)MALLOC(segSize[1]);
+	dataSeg->size = segSize[1];
 
 	Segment rodataSeg = (Segment)MALLOC(segmentSize);
-	rodataSeg->addr = (void *)MALLOC(segSize[0]);
-	rodataSeg->size = segSize[0];
+	rodataSeg->addr = (void *)MALLOC(segSize[2]);
+	rodataSeg->size = segSize[2];
 
 	void *ptrAddr = NULL;
 	
@@ -776,12 +776,100 @@ ELF32 AssembleELF()
 		PrintStrtabTest(providerShstrtab->addr, providerShstrtab->size);
 		printf("providerShstrtab segName = %s, name = %s, index = %d\n", segName, symlink->name,\
 			 sym->st_shndx);
-		int shndx = GetSubStrIndex(segName, shStrTabStr, shStrTabStrLength); 
+		char *segNames[7] = {"", ".text", ".data", ".rodata", ".symtab", ".strtab", ".shstrtab"};
+		int shndx = -1;
+		for(int i = 0; i < 7; i++){
+			if(strcmp(segName, segNames[i]) == 0){
+				shndx = i;
+				break;
+			}
+		}
+
+		if(shndx == -1){
+			printf("segName %s is not valid in %d in %s\n", segName, __LINE__, __FILE__); 
+			exit(-1);
+		}
 		// TODO 不做错误检测。
 		ptrSym->st_shndx = shndx;
 		ptrSym++;
 		symbolLinkNode = symbolLinkNode->next;
 	}
+
+	// 段表。
+//	char *shStrTabStr = "\000.text\000.data\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+//	char *shStrTabStrWithoutNull = ".text.data.rodata.symtab.strtab.shstrtab";
+	unsigned int shdrSize = sizeof(Elf32_Shdr);
+	Elf32_Shdr *shdrs[7] = {NULL};
+	
+	// 空表项。
+	shdrs[0] = (Elf32_Shdr *)MALLOC(shdrSize);
+
+	char *ptrShStrTabStr = shStrTabStr;
+	ptrShStrTabStr++;
+	for(int i = 1; i < 7; i++){
+		shdrs[i] = (Elf32_Shdr *)MALLOC(shdrSize);
+		printf("ptrShStrTabStr = %s\n", ptrShStrTabStr);
+		shdrs[i]->sh_name = GetSubStrIndex(ptrShStrTabStr, shStrTabStr, shStrTabStrLength);
+		
+//	char *segNames[3] = {".text", ".data", ".rodata"};
+//	unsigned int segSize[3] = {0, 0, 0};
+				if(strcmp(ptrShStrTabStr, ".bss") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_NOBITS;
+		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
+
+			shdrs[i]->sh_addralign = (Elf32_Word)4;
+		}else if(strcmp(ptrShStrTabStr, ".data") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
+
+			shdrs[i]->sh_size = segSize[1];
+			shdrs[i]->sh_addralign = (Elf32_Word)8;
+		}else if(strcmp(ptrShStrTabStr, ".rodata") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC;
+
+			shdrs[i]->sh_size = segSize[2];
+			shdrs[i]->sh_addralign = (Elf32_Word)1;
+		}else if(strcmp(ptrShStrTabStr, ".shstrtab") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
+		    shdrs[i]->sh_flags = (Elf32_Word)0;      // none
+
+			shdrs[i]->sh_addralign = (Elf32_Word)1;
+		}else if(strcmp(ptrShStrTabStr, ".strtab") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
+		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
+		    shdrs[i]->sh_flags = (Elf32_Word)0;
+
+			shdrs[i]->sh_addralign = (Elf32_Word)1;
+		}else if(strcmp(ptrShStrTabStr, ".symtab") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_SYMTAB;
+		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
+		    shdrs[i]->sh_flags = (Elf32_Word)0;
+
+			shdrs[i]->sh_size = symSize;
+			shdrs[i]->sh_addralign = (Elf32_Word)4;
+			shdrs[i]->sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
+
+			// TODO 暂时不知道怎么设置。
+			// shdrs[i]->sh_link = (Elf32_Word)STR_TAB;
+			// 花了很多很多时间才弄明白这个值是什么。它是LOCAL变量的数目。
+			// sh_info = (Elf32_Word)SYM_TAB;
+			// TODO 待补充。
+			shdrs[i]->sh_info = 0;
+			
+		}else if(strcmp(ptrShStrTabStr, ".text") == 0){
+		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
+
+			shdrs[i]->sh_size = segSize[0];
+			shdrs[i]->sh_addralign = (Elf32_Word)1;
+		}else{
+			// TODO 不会出现这种情况。
+		}
+
+		ptrShStrTabStr += strlen(ptrShStrTabStr) + 1;
+	}
+
 
 }
 
