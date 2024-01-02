@@ -193,7 +193,9 @@ void CollectInfo()
 			symbolLink->index = symbolLinkIndex++;
 			
 			unsigned char bind = ELF32_ST_BIND(sym->st_info);
-			if(bind == STB_GLOBAL){
+			// if(bind == STB_GLOBAL){
+			// TODO 暂未明确是否收集local符号，所以只能这样做。
+			if(1 == 1){
 				Node node = (Node)MALLOC(sizeof(struct node));
 				node->val.symLink = symbolLink;
 				node->type = SYMBOL_LINK; 
@@ -442,6 +444,11 @@ void ParseSym()
 		ELF32 elf32 = symbolLink->provider;
 		char *strtab = (char *)elf32->strtab->addr;
 		Elf32_Sym *sym = symbolLink->sym;
+		// TODO 没有想到更好的方法，只能这样做。
+		if(sym->st_shndx == SHN_ABS){
+			currentSymDefineNode = currentSymDefineNode->next;
+			continue;
+		}
 		Node segTabLinkList = (Node)elf32->segTabLinkList;
 		SegNameSegTabEntry segNameSegTabEntry = FindSegNameSegTabEntryByIndex(segTabLinkList, sym->st_shndx);
 		Elf32_Shdr *shdr = segNameSegTabEntry->shdr; 
@@ -569,6 +576,62 @@ void Relocation()
 		
 		elf32 = elf32->next;
 	}
+}
+
+// 组合成可执行文件。
+ELF32 AssembleELF()
+{
+	ELF32 elf32 = (ELF32)MALLOC(sizeof(struct elf32));
+
+	// .shstrtab。
+	char *shStrTabStr = "\000.text\000.rodata\000.symtab\000.strtab\000.shstrtab\000";
+	char *shStrTabStrWithoutNull = ".text.rodata.symtab.strtab.shstrtab";
+	// shStrTabStr中的\000有6个。
+	unsigned int shStrTabStrLength = strlen(shStrTabStrWithoutNull) + 6;
+	Segment shstrtabSegment = (Segment)MALLOC(sizeof(struct segment));
+	shstrtabSegment->addr = (void *)MALLOC(shStrTabStrLength); 
+	shstrtabSegment->size = shStrTabStrLength;
+	memcpy(shstrtabSegment->addr, shStrTabStr, shStrTabStrLength);
+
+	// .strtab
+	unsigned int strtabSize = 0;
+	Node symNode = symDefine->next;
+	while(symNode != symDefine){
+		SymbolLink symlink = (SymbolLink)symNode->val.symLink;
+		printf("sym name = %s\n", symlink->name);
+		unsigned int size = strlen(symlink->name);
+		if(size == 0){
+			symNode = symNode->next;
+			continue;
+		}
+
+		strtabSize += size; 
+		symNode = symNode->next;
+	}
+
+	Segment strtabSegment = (Segment)MALLOC(sizeof(struct segment));
+	strtabSegment->addr = (void *)MALLOC(strtabSize + 1); 
+	strtabSegment->size = strtabSize + 1;
+
+	symNode = symDefine->next;
+	unsigned int strtabOffset = 1;
+	while(symNode != symDefine){
+		SymbolLink symlink = (SymbolLink)symNode->val.symLink;
+		unsigned int size = strlen(symlink->name);
+		if(size == 0){
+			symNode = symNode->next;
+			continue;
+		}
+
+		printf("without null sym name = %s\n", symlink->name);
+		memcpy(strtabSegment->addr + strtabOffset, symlink->name, size);
+
+		strtabOffset += size + 1; 
+		symNode = symNode->next;
+	}
+
+	
+	
 }
 
 void MergeRodata(Segment src, Segment dst)

@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
 	ParseSym();
 	// 重定位。
 	Relocation();
+	// 组装ELF文件。
+	AssembleELF();
 	
 	// 合并段。
 	MergeSegment();

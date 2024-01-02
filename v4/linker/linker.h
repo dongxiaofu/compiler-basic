@@ -93,6 +93,7 @@ SymbolLink FindSymbolLinkBySymIndex(Node list, unsigned int index);
 void ParseSym();
 void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char type);
 void Relocation();
+ELF32 AssembleELF();
 
 void MergeRodata(Segment src, Segment dst);
 void MergeRelData(Segment src, Segment dst);
