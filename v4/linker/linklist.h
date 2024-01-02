@@ -55,6 +55,9 @@ typedef struct elf32{
 // 段名--段表项。
 typedef struct segNameSegTabEntry{
 	char *segName;
+	unsigned int addr;
+	unsigned int size;
+	unsigned int offset;
 	unsigned int index;
 	Elf32_Shdr *shdr;
 } *SegNameSegTabEntry;

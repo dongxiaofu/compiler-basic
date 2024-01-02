@@ -136,7 +136,22 @@ void AllocSegmentAddress(char *segName, unsigned int *base)
 			continue;
 		}
 
+		entry->offset = size;
+
 		Elf32_Shdr *shdr = entry->shdr;
+		
+		// entry->addr = (unsigned int)shdr->sh_addr;
+		// 上面这句有问题。
+		if(strcmp(segName, ".text") == 0){
+			entry->addr = (unsigned int)currentElf32->text->addr;;
+		}else if(strcmp(segName, ".data") == 0){
+			entry->addr = (unsigned int)currentElf32->data->addr;;
+		}else if(strcmp(segName, ".rodata") == 0){
+			entry->addr = (unsigned int)currentElf32->rodata->addr;;
+		}else{
+			// TODO 不会出现这种情况。
+		}
+
 		shdr->sh_addr = *base + size;
 		printf("%s:%s sh_addr = %d, shdr->sh_size = %d\n", currentElf32->filename,\
 			 segName, shdr->sh_addr, shdr->sh_size);
@@ -381,6 +396,7 @@ void ReadElf(unsigned int num, char **filenames)
 			printf("section name = %s\n", entry->segName);
 			entry->shdr = shdrPtr;
 			entry->index = i;
+			entry->size = shdrPtr->sh_size;
 
 			Node node = (Node)MALLOC(sizeof(struct node));
 			node->val.segTab = entry;
@@ -630,8 +646,143 @@ ELF32 AssembleELF()
 		symNode = symNode->next;
 	}
 
+	// 计算所有文件的段的长度。
+	char *segNames[3] = {".text", ".data", ".rodata"};
+	unsigned int segSize[3] = {0, 0, 0};
+
+	for(int i = 0; i < 3; i++){
+		unsigned int *ptrSegSize = NULL;
+		char *segName = segNames[i];
+		if(strcmp(segName, ".text") == 0){
+			ptrSegSize = &segSize[0];
+		}else if(strcmp(segName, ".data") == 0){
+			ptrSegSize = &segSize[1];
+		}else if(strcmp(segName, ".rodata") == 0){
+			ptrSegSize = &segSize[2];
+		}else{
+			// TODO 不会出现这种情况。
+		}
+
+		ELF32 currentElf32 = elf32LinkList->next;
+		while(currentElf32 != NULL){
+			Segment segment = NULL;
+			Node segTabLinkList = currentElf32->segTabLinkList;
+			SegNameSegTabEntry entry = FindSegNameSegTabEntryByName(segTabLinkList, segName);
+			if(entry == NULL){
+				printf("error! seg %s is not exists in %d in %s\n", segName, __LINE__, __FILE__);
+				currentElf32 = currentElf32->next;
+				continue;
+			}
 	
+			Elf32_Shdr *shdr = entry->shdr;
+			*ptrSegSize += shdr->sh_size;
 	
+			currentElf32 = currentElf32->next;
+		}
+	}
+
+	// 生成.text等。
+	unsigned int segmentSize = sizeof(struct segment);
+	Segment textSeg = (Segment)MALLOC(segmentSize);
+	textSeg->addr = (void *)MALLOC(segSize[0]);
+	textSeg->size = segSize[0];
+
+	Segment dataSeg = (Segment)MALLOC(segmentSize);
+	dataSeg->addr = (void *)MALLOC(segSize[0]);
+	dataSeg->size = segSize[0];
+
+	Segment rodataSeg = (Segment)MALLOC(segmentSize);
+	rodataSeg->addr = (void *)MALLOC(segSize[0]);
+	rodataSeg->size = segSize[0];
+
+	void *ptrAddr = NULL;
+	
+	for(int i = 0; i < 3; i++){
+		unsigned int *ptrSegSize = NULL;
+		char *segName = segNames[i];
+		if(strcmp(segName, ".text") == 0){
+			ptrAddr = textSeg->addr;
+		}else if(strcmp(segName, ".data") == 0){
+			ptrAddr = dataSeg->addr;
+		}else if(strcmp(segName, ".rodata") == 0){
+			ptrAddr = rodataSeg->addr;
+		}else{
+			// TODO 不会出现这种情况。
+		}
+
+		ELF32 currentElf32 = elf32LinkList->next;
+		while(currentElf32 != NULL){
+			Segment segment = NULL;
+			Node segTabLinkList = currentElf32->segTabLinkList;
+			SegNameSegTabEntry entry = FindSegNameSegTabEntryByName(segTabLinkList, segName);
+			if(entry == NULL){
+				printf("error! seg %s is not exists in %d in %s\n", segName, __LINE__, __FILE__);
+				currentElf32 = currentElf32->next;
+				continue;
+			}
+
+			void *dst = (void *)((unsigned int)ptrAddr + entry->offset);
+			Elf32_Shdr *shdr = entry->shdr;
+			void *src = (void *)entry->addr;
+			unsigned int size = entry->size;
+			memcpy(dst, src, size);
+	
+			currentElf32 = currentElf32->next;
+		}
+	}
+
+	elf32->text = textSeg;
+	elf32->data = dataSeg;
+	elf32->rodata = rodataSeg;
+
+	// 生成.symtab。
+	// 计算.symtab的长度。
+	unsigned int symSize = sizeof(Elf32_Sym);
+	Node symbolLinkNode = symDefine->next;
+	while(symbolLinkNode != symDefine){
+		// node->val.symLink = symbolLink;
+		// symSize += symbolLinkNode->val.symLink->sym->;
+		symSize += sizeof(Elf32_Sym);
+
+		symbolLinkNode = symbolLinkNode->next;
+	}
+
+	Segment symtabSeg = (Segment)MALLOC(segmentSize);
+	symtabSeg->addr = (void *)MALLOC(symSize);
+	symtabSeg->size = symSize;
+	Elf32_Sym *ptrSym = (Elf32_Sym *)symtabSeg->addr;
+	// 空表项。
+	ptrSym->st_shndx = SHN_UNDEF;
+	ptrSym++;
+	symbolLinkNode = symDefine->next;
+	while(symbolLinkNode != symDefine){
+		SymbolLink symlink = symbolLinkNode->val.symLink;
+		Elf32_Sym *sym = symlink->sym;
+		if(sym->st_shndx == SHN_ABS || sym->st_name == 0){
+			symbolLinkNode = symbolLinkNode->next;
+			continue;
+		}
+		memcpy(ptrSym, sym, sizeof(Elf32_Sym));
+		int st_name = GetSubStrIndex(symlink->name, strtabSegment->addr, strtabSize);
+		// TODO 暂时不检查st_name。
+		// 更新st_name。因为还没有确定段表，无法更新st_shndx。
+		ptrSym->st_name = (Elf32_Word)st_name;
+		// 更新st_shndx。
+		ELF32 provider = symlink->provider;
+		Segment providerShstrtab = provider->shstrtab;
+		printf("st_shndx = %d\n", sym->st_shndx);
+		Elf32_Shdr *shdr = (Elf32_Shdr *)provider->shdr + sym->st_shndx;
+		char *segName = (char *)(providerShstrtab->addr + shdr->sh_name);
+		PrintStrtabTest(providerShstrtab->addr, providerShstrtab->size);
+		printf("providerShstrtab segName = %s, name = %s, index = %d\n", segName, symlink->name,\
+			 sym->st_shndx);
+		int shndx = GetSubStrIndex(segName, shStrTabStr, shStrTabStrLength); 
+		// TODO 不做错误检测。
+		ptrSym->st_shndx = shndx;
+		ptrSym++;
+		symbolLinkNode = symbolLinkNode->next;
+	}
+
 }
 
 void MergeRodata(Segment src, Segment dst)
