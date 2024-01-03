@@ -117,6 +117,48 @@ SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segNa
 	return target;
 }
 
+Elf32_Ehdr *GenerateELFHeader()
+{
+	// ELF文件头
+	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)MALLOC(sizeof(Elf32_Ehdr));
+
+	ehdr->e_ident[0] = 0x7F;
+	ehdr->e_ident[1] = 0x45;
+	ehdr->e_ident[2] = 0x4C;
+
+	ehdr->e_ident[3] = 0x46;
+	ehdr->e_ident[4] = 1;
+	ehdr->e_ident[5] = 1;
+	ehdr->e_ident[6] = 1;
+
+	for(int i = 7; i < 16; i++){
+		ehdr->e_ident[i] = 0;
+	}
+
+	ehdr->e_type =	ET_EXEC; 	
+	ehdr->e_machine = EM_386;
+	ehdr->e_version = 1;
+	ehdr->e_entry = 0x08048000;
+	ehdr->e_phoff = 52;
+	// TODO 需计算。
+	// 段表在文件中的偏移。
+	ehdr->e_shoff = 0;
+	// TODO 不知道设置成什么值。
+	ehdr->e_flags = 0;
+	// 是一个固定值。
+	ehdr->e_ehsize = 52;
+	ehdr->e_phentsize = sizeof(Elf32_Phdr);
+	ehdr->e_phnum = 3;
+	ehdr->e_shentsize = 40;
+	// TODO 段表条目的数量，待定。
+	ehdr->e_shnum = 7;
+	// TODO .shstrtab在段表中的索引。
+	// ehdr->e_shstrndx = 0;
+	ehdr->e_shstrndx = 6;
+
+	return ehdr;
+}
+
 // 为一个段分配地址空间。
 // 这是一个简化之后的函数。
 void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset, Node segList)
@@ -926,6 +968,54 @@ ELF32 AssembleELF()
 
 		ptrPhdr++;
 	}
+
+	// ELF文件头。
+	Elf32_Ehdr *ehdr = GenerateELFHeader();
+	char *entryFunc = "nomain";
+
+	symNode = symDefine->next;
+	while(symNode != symDefine){
+		SymbolLink symlink = (SymbolLink)symNode->val.symLink;
+		unsigned int size = strlen(symlink->name);
+		if(size == 0){
+			symNode = symNode->next;
+			continue;
+		}
+
+		if(strcmp(entryFunc, symlink->name) == 0){
+			// TODO e_entry的默认值是0。当它是默认值时，判定为错误。
+			ehdr->e_entry = symlink->sym->st_value;
+			printf("e_entry = %x\n", ehdr->e_entry);
+			printf("e_entry = %d\n", 3);
+			break;
+		}
+
+		symNode = symNode->next;
+	}
+
+	if(ehdr->e_entry == 0){
+		printf("Entry point address should not be 0\n");
+		exit(-1);
+	}
+
+	// e_shoff
+	unsigned int eShoff = 0;
+	eShoff += 52;	// ELF文件头。
+	eShoff += phdrSize * 3;	// 程序头。
+	// segSize
+	for(int i = 0; i < 3; i++){
+		eShoff += segSize[i];	// 代码、数据等。
+	}
+	// .text.data.rodata.symtab.strtab.shstrtab
+	eShoff += symtabSeg->size;
+	eShoff += strtabSegment->size;
+	eShoff += shstrtabSegment->size;
+
+	ehdr->e_shoff = eShoff;
+
+
+
+	
 
 }
 

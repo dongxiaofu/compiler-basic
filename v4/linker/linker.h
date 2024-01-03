@@ -88,6 +88,7 @@ void AppendElf32LinkList(ELF32 node);
 SegNameSegTabEntry FindSegNameSegTabEntryByIndex(Node segTabLinkList, unsigned int index);
 SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segName);
 void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset, Node segList);
+Elf32_Ehdr *GenerateELFHeader();
 void AllocAddress(unsigned int *base);
 void CollectInfo();
 void ReadElf(unsigned int num, char **filenames);
