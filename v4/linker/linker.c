@@ -861,7 +861,6 @@ ELF32 AssembleELF()
 	char *ptrShStrTabStr = shStrTabStr;
 	ptrShStrTabStr++;
 	for(int i = 1; i < 7; i++){
-		ptrShdr = (Elf32_Shdr *)MALLOC(shdrSize);
 		printf("ptrShStrTabStr = %s\n", ptrShStrTabStr);
 		ptrShdr->sh_name = GetSubStrIndex(ptrShStrTabStr, shStrTabStr, shStrTabStrLength);
 		
@@ -930,6 +929,7 @@ ELF32 AssembleELF()
 			// TODO 不会出现这种情况。
 		}
 
+		ptrShdr++;
 		ptrShStrTabStr += strlen(ptrShStrTabStr) + 1;
 	}
 
