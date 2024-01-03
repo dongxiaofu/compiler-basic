@@ -1027,6 +1027,45 @@ ELF32 AssembleELF()
 	return elf32;
 }
 
+void WriteElf(ELF32 elf32)
+{
+	char *filename = "ab";
+
+	FILE *file = fopen(filename, "wb");
+
+	// 写入文件头。
+	fwrite(elf32->ehdr, 52, 1, file);
+	// 写入程序头。
+	fwrite(elf32->phdr, sizeof(Elf32_Phdr) * 3, 1, file);
+	// 依次写入.text.data.rodata.symtab.strtab.shstrtab
+	Segment textSeg = elf32->text;
+	fwrite(textSeg->addr, textSeg->size, 1, file);
+
+	Segment dataSeg = elf32->data;
+	fwrite(dataSeg->addr, dataSeg->size, 1, file);
+
+	Segment rodataSeg = elf32->rodata;
+	fwrite(rodataSeg->addr, rodataSeg->size, 1, file);
+
+	Segment symtabSeg = elf32->symtab;
+	fwrite(symtabSeg->addr, symtabSeg->size, 1, file);
+
+	Segment strtabSeg = elf32->strtab;
+	fwrite(strtabSeg->addr, strtabSeg->size, 1, file);
+
+	Segment shstrtabSeg = elf32->shstrtab;
+	fwrite(shstrtabSeg->addr, shstrtabSeg->size, 1, file);
+
+	// 写入段表。
+	fwrite(elf32->shdr, sizeof(Elf32_Shdr) * 7, 1, file);
+
+	int result = fclose(file);
+
+	if(result == EOF){
+		printf("create file %s failure\n", filename);
+	}	
+}
+
 void MergeRodata(Segment src, Segment dst)
 {
 	if(src == NULL)	return;

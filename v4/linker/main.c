@@ -47,10 +47,12 @@ int main(int argc, char *argv[])
 	// 重定位。
 	Relocation();
 	// 组装ELF文件。
-	AssembleELF();
+	ELF32 elf32 = AssembleELF();
+	// 写入文件。
+	WriteElf(elf32);
 	
 	// 合并段。
-	MergeSegment();
+//	MergeSegment();
 
 	return 0;
 }
