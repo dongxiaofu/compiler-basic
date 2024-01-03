@@ -813,7 +813,7 @@ ELF32 AssembleELF()
 		
 //	char *segNames[3] = {".text", ".data", ".rodata"};
 //	unsigned int segSize[3] = {0, 0, 0};
-				if(strcmp(ptrShStrTabStr, ".bss") == 0){
+		if(strcmp(ptrShStrTabStr, ".bss") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_NOBITS;
 		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
 
@@ -821,6 +821,8 @@ ELF32 AssembleELF()
 		}else if(strcmp(ptrShStrTabStr, ".data") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
+		    // TODO 比较麻烦。
+		    shdrs[i]->sh_addr = 2;
 
 			shdrs[i]->sh_size = segSize[1];
 			shdrs[i]->sh_addralign = (Elf32_Word)8;
@@ -834,19 +836,21 @@ ELF32 AssembleELF()
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
 		    shdrs[i]->sh_flags = (Elf32_Word)0;      // none
 
+		    shdrs[i]->sh_size = shstrtabSegment->size;
 			shdrs[i]->sh_addralign = (Elf32_Word)1;
 		}else if(strcmp(ptrShStrTabStr, ".strtab") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
 		    shdrs[i]->sh_flags = (Elf32_Word)0;
 
+			shdrs[i]->sh_size = strtabSegment->size;
 			shdrs[i]->sh_addralign = (Elf32_Word)1;
 		}else if(strcmp(ptrShStrTabStr, ".symtab") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_SYMTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
 		    shdrs[i]->sh_flags = (Elf32_Word)0;
 
-			shdrs[i]->sh_size = symSize;
+			shdrs[i]->sh_size = symtabSeg->size;
 			shdrs[i]->sh_addralign = (Elf32_Word)4;
 			shdrs[i]->sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
 
