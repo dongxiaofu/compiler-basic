@@ -203,7 +203,7 @@ void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset
 		}
 
 		shdr->sh_addr = *base + size;
-		printf("%s:%s sh_addr = %d, shdr->sh_size = %d\n", currentElf32->filename,\
+		printf("%s:%s sh_addr = %x, shdr->sh_size = %d\n", currentElf32->filename,\
 			 segName, shdr->sh_addr, shdr->sh_size);
 		size += shdr->sh_size;
 		*offset += shdr->sh_size;
@@ -218,6 +218,8 @@ void AllocAddress(unsigned int *base)
 {
 	char *segNames[3] = {".text", ".data", ".rodata"};
 	unsigned int offset = 0;
+	offset += 52;	// 文件头。
+	offset += sizeof(Elf32_Phdr) * 3;	// 程序头。
 
 	for(int i = 0; i < 3; i++){
 		printf("base = %d\n", *base);
@@ -875,7 +877,7 @@ ELF32 AssembleELF()
 		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
 			ptrShdr->sh_addr = segLists[1]->next->val.segTab->shdr->sh_addr;
-			ptrShdr->sh_addr = segLists[1]->next->val.segTab->shdr->sh_offset;
+			ptrShdr->sh_offset = segLists[1]->next->val.segTab->shdr->sh_offset;
 
 			ptrShdr->sh_size = segSize[1];
 			ptrShdr->sh_addralign = (Elf32_Word)8;
@@ -883,7 +885,7 @@ ELF32 AssembleELF()
 		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC;
 			ptrShdr->sh_addr = segLists[2]->next->val.segTab->shdr->sh_addr;
-			ptrShdr->sh_addr = segLists[2]->next->val.segTab->shdr->sh_offset;
+			ptrShdr->sh_offset = segLists[2]->next->val.segTab->shdr->sh_offset;
 
 			ptrShdr->sh_size = segSize[2];
 			ptrShdr->sh_addralign = (Elf32_Word)1;
@@ -910,7 +912,7 @@ ELF32 AssembleELF()
 			ptrShdr->sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
 
 			// TODO 暂时不知道怎么设置。
-			// ptrShdr->sh_link = (Elf32_Word)STR_TAB;
+			ptrShdr->sh_link = (Elf32_Word)5;
 			// 花了很多很多时间才弄明白这个值是什么。它是LOCAL变量的数目。
 			// sh_info = (Elf32_Word)SYM_TAB;
 			// TODO 待补充。
@@ -921,13 +923,17 @@ ELF32 AssembleELF()
 		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
 
 			ptrShdr->sh_addr = segLists[0]->next->val.segTab->shdr->sh_addr;
-			ptrShdr->sh_addr = segLists[0]->next->val.segTab->shdr->sh_offset;
+			ptrShdr->sh_offset = segLists[0]->next->val.segTab->shdr->sh_offset;
 
 			ptrShdr->sh_size = segSize[0];
 			ptrShdr->sh_addralign = (Elf32_Word)1;
 		}else{
 			// TODO 不会出现这种情况。
 		}
+
+		ptrShdr->sh_name = (Elf32_Word)GetSubStrIndex(ptrShStrTabStr, shStrTabStr, shStrTabStrLength); 
+		printf("ptrShdr->sh_name = %d, sh_name = %s\n", ptrShdr->sh_name, \
+			shStrTabStr + ptrShdr->sh_name);
 
 		ptrShdr++;
 		ptrShStrTabStr += strlen(ptrShStrTabStr) + 1;
