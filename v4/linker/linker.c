@@ -853,78 +853,79 @@ ELF32 AssembleELF()
 //	char *shStrTabStrWithoutNull = ".text.data.rodata.symtab.strtab.shstrtab";
 	unsigned int shdrSize = sizeof(Elf32_Shdr);
 	Elf32_Shdr *shdrs[7] = {NULL};
-	
+	Elf32_Shdr *shdr = (Elf32_Shdr *)MALLOC(shdrSize * 7);
+	Elf32_Shdr *ptrShdr = shdr;
 	// 空表项。
-	shdrs[0] = (Elf32_Shdr *)MALLOC(shdrSize);
+	ptrShdr++;
 
 	char *ptrShStrTabStr = shStrTabStr;
 	ptrShStrTabStr++;
 	for(int i = 1; i < 7; i++){
-		shdrs[i] = (Elf32_Shdr *)MALLOC(shdrSize);
+		ptrShdr = (Elf32_Shdr *)MALLOC(shdrSize);
 		printf("ptrShStrTabStr = %s\n", ptrShStrTabStr);
-		shdrs[i]->sh_name = GetSubStrIndex(ptrShStrTabStr, shStrTabStr, shStrTabStrLength);
+		ptrShdr->sh_name = GetSubStrIndex(ptrShStrTabStr, shStrTabStr, shStrTabStrLength);
 		
 //	char *segNames[3] = {".text", ".data", ".rodata"};
 //	unsigned int segSize[3] = {0, 0, 0};
 		if(strcmp(ptrShStrTabStr, ".bss") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_NOBITS;
-		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_NOBITS;
+		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
 
-			shdrs[i]->sh_addralign = (Elf32_Word)4;
+			ptrShdr->sh_addralign = (Elf32_Word)4;
 		}else if(strcmp(ptrShStrTabStr, ".data") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
-		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
-			shdrs[i]->sh_addr = segLists[1]->next->val.segTab->shdr->sh_addr;
-			shdrs[i]->sh_addr = segLists[1]->next->val.segTab->shdr->sh_offset;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
+			ptrShdr->sh_addr = segLists[1]->next->val.segTab->shdr->sh_addr;
+			ptrShdr->sh_addr = segLists[1]->next->val.segTab->shdr->sh_offset;
 
-			shdrs[i]->sh_size = segSize[1];
-			shdrs[i]->sh_addralign = (Elf32_Word)8;
+			ptrShdr->sh_size = segSize[1];
+			ptrShdr->sh_addralign = (Elf32_Word)8;
 		}else if(strcmp(ptrShStrTabStr, ".rodata") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
-		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC;
-			shdrs[i]->sh_addr = segLists[2]->next->val.segTab->shdr->sh_addr;
-			shdrs[i]->sh_addr = segLists[2]->next->val.segTab->shdr->sh_offset;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC;
+			ptrShdr->sh_addr = segLists[2]->next->val.segTab->shdr->sh_addr;
+			ptrShdr->sh_addr = segLists[2]->next->val.segTab->shdr->sh_offset;
 
-			shdrs[i]->sh_size = segSize[2];
-			shdrs[i]->sh_addralign = (Elf32_Word)1;
+			ptrShdr->sh_size = segSize[2];
+			ptrShdr->sh_addralign = (Elf32_Word)1;
 		}else if(strcmp(ptrShStrTabStr, ".shstrtab") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
-		    shdrs[i]->sh_flags = (Elf32_Word)0;      // none
+		    ptrShdr->sh_type = (Elf32_Word)SHT_STRTAB;
+		    ptrShdr->sh_flags = (Elf32_Word)0;      // none
 
-		    shdrs[i]->sh_size = shstrtabSegment->size;
-			shdrs[i]->sh_addralign = (Elf32_Word)1;
+		    ptrShdr->sh_size = shstrtabSegment->size;
+			ptrShdr->sh_addralign = (Elf32_Word)1;
 		}else if(strcmp(ptrShStrTabStr, ".strtab") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_STRTAB;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
-		    shdrs[i]->sh_flags = (Elf32_Word)0;
+		    ptrShdr->sh_flags = (Elf32_Word)0;
 
-			shdrs[i]->sh_size = strtabSegment->size;
-			shdrs[i]->sh_addralign = (Elf32_Word)1;
+			ptrShdr->sh_size = strtabSegment->size;
+			ptrShdr->sh_addralign = (Elf32_Word)1;
 		}else if(strcmp(ptrShStrTabStr, ".symtab") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_SYMTAB;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_SYMTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
-		    shdrs[i]->sh_flags = (Elf32_Word)0;
+		    ptrShdr->sh_flags = (Elf32_Word)0;
 
-			shdrs[i]->sh_size = symtabSeg->size;
-			shdrs[i]->sh_addralign = (Elf32_Word)4;
-			shdrs[i]->sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
+			ptrShdr->sh_size = symtabSeg->size;
+			ptrShdr->sh_addralign = (Elf32_Word)4;
+			ptrShdr->sh_entsize=(Elf32_Word)sizeof(Elf32_Sym);  
 
 			// TODO 暂时不知道怎么设置。
-			// shdrs[i]->sh_link = (Elf32_Word)STR_TAB;
+			// ptrShdr->sh_link = (Elf32_Word)STR_TAB;
 			// 花了很多很多时间才弄明白这个值是什么。它是LOCAL变量的数目。
 			// sh_info = (Elf32_Word)SYM_TAB;
 			// TODO 待补充。
-			shdrs[i]->sh_info = 0;
+			ptrShdr->sh_info = 0;
 			
 		}else if(strcmp(ptrShStrTabStr, ".text") == 0){
-		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
-		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
+		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
+		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
 
-			shdrs[i]->sh_addr = segLists[0]->next->val.segTab->shdr->sh_addr;
-			shdrs[i]->sh_addr = segLists[0]->next->val.segTab->shdr->sh_offset;
+			ptrShdr->sh_addr = segLists[0]->next->val.segTab->shdr->sh_addr;
+			ptrShdr->sh_addr = segLists[0]->next->val.segTab->shdr->sh_offset;
 
-			shdrs[i]->sh_size = segSize[0];
-			shdrs[i]->sh_addralign = (Elf32_Word)1;
+			ptrShdr->sh_size = segSize[0];
+			ptrShdr->sh_addralign = (Elf32_Word)1;
 		}else{
 			// TODO 不会出现这种情况。
 		}
