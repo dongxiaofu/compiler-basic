@@ -62,6 +62,9 @@ ELF32 elf32LinkList;
 ELF32 preElf32;
 Node symDefine;
 Node symLink;
+// char *segNames[3] = {".text", ".data", ".rodata"};
+// 三个元素依次是.text、.data、.rodata的链表。
+Node segLists[3];
 //unsigned int textSize = 0;
 //unsigned int dataSize = 0;
 //unsigned int rodataSize = 0;
@@ -84,7 +87,7 @@ void AppendElf32LinkList(ELF32 node);
 
 SegNameSegTabEntry FindSegNameSegTabEntryByIndex(Node segTabLinkList, unsigned int index);
 SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segName);
-void AllocSegmentAddress(char *segName, unsigned int *base);
+void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset, Node segList);
 void AllocAddress(unsigned int *base);
 void CollectInfo();
 void ReadElf(unsigned int num, char **filenames);

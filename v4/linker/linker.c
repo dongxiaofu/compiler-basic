@@ -119,7 +119,7 @@ SegNameSegTabEntry FindSegNameSegTabEntryByName(Node segTabLinkList, char *segNa
 
 // 为一个段分配地址空间。
 // 这是一个简化之后的函数。
-void AllocSegmentAddress(char *segName, unsigned int *base)
+void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset, Node segList)
 {
 	ELF32 currentElf32 = elf32LinkList->next;
 	
@@ -136,9 +136,17 @@ void AllocSegmentAddress(char *segName, unsigned int *base)
 			continue;
 		}
 
+		// 因为Node是指针，所以在更新entry前把Node存储到链表中。这就是指针的好处。
+		Node node = (Node)MALLOC(sizeof(struct node));
+		node->val.segTab = entry;
+		node->type = NODE_VALUE_SEG_TAB;
+		AppendNode(segList, node); 
+
 		entry->offset = size;
+		
 
 		Elf32_Shdr *shdr = entry->shdr;
+		shdr->sh_offset = *offset;
 		
 		// entry->addr = (unsigned int)shdr->sh_addr;
 		// 上面这句有问题。
@@ -156,6 +164,7 @@ void AllocSegmentAddress(char *segName, unsigned int *base)
 		printf("%s:%s sh_addr = %d, shdr->sh_size = %d\n", currentElf32->filename,\
 			 segName, shdr->sh_addr, shdr->sh_size);
 		size += shdr->sh_size;
+		*offset += shdr->sh_size;
 
 		currentElf32 = currentElf32->next;
 	}
@@ -166,11 +175,13 @@ void AllocSegmentAddress(char *segName, unsigned int *base)
 void AllocAddress(unsigned int *base)
 {
 	char *segNames[3] = {".text", ".data", ".rodata"};
+	unsigned int offset = 0;
 
 	for(int i = 0; i < 3; i++){
 		printf("base = %d\n", *base);
+		segLists[i] = InitLinkList();
 		char *segName = segNames[i];
-		AllocSegmentAddress(segName, base);
+		AllocSegmentAddress(segName, base, &offset, segLists[i]);
 	}
 }
 
@@ -821,14 +832,16 @@ ELF32 AssembleELF()
 		}else if(strcmp(ptrShStrTabStr, ".data") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_WRITE;
-		    // TODO 比较麻烦。
-		    shdrs[i]->sh_addr = 2;
+			shdrs[i]->sh_addr = segLists[1]->next->val.segTab->shdr->sh_addr;
+			shdrs[i]->sh_addr = segLists[1]->next->val.segTab->shdr->sh_offset;
 
 			shdrs[i]->sh_size = segSize[1];
 			shdrs[i]->sh_addralign = (Elf32_Word)8;
 		}else if(strcmp(ptrShStrTabStr, ".rodata") == 0){
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC;
+			shdrs[i]->sh_addr = segLists[2]->next->val.segTab->shdr->sh_addr;
+			shdrs[i]->sh_addr = segLists[2]->next->val.segTab->shdr->sh_offset;
 
 			shdrs[i]->sh_size = segSize[2];
 			shdrs[i]->sh_addralign = (Elf32_Word)1;
@@ -865,6 +878,9 @@ ELF32 AssembleELF()
 		    shdrs[i]->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    shdrs[i]->sh_flags = (Elf32_Word)SHF_ALLOC + SHF_EXECINSTR;
 
+			shdrs[i]->sh_addr = segLists[0]->next->val.segTab->shdr->sh_addr;
+			shdrs[i]->sh_addr = segLists[0]->next->val.segTab->shdr->sh_offset;
+
 			shdrs[i]->sh_size = segSize[0];
 			shdrs[i]->sh_addralign = (Elf32_Word)1;
 		}else{
@@ -874,6 +890,42 @@ ELF32 AssembleELF()
 		ptrShStrTabStr += strlen(ptrShStrTabStr) + 1;
 	}
 
+	// 程序头表。
+	unsigned int phdrSize = sizeof(Elf32_Phdr);
+	// Elf32_Phdr *phdr = (Elf32_Phdr *)MALLOC(phdrSize * 4);
+	// TODO 是否应该设置一个空表项？暂时不设置。
+	Elf32_Phdr *phdr = (Elf32_Phdr *)MALLOC(phdrSize * 3);
+
+	Elf32_Phdr *ptrPhdr = phdr;
+
+//	Elf32_Word    p_type;         /* Segment type */
+//	Elf32_Off p_offset;       /* Segment file offset */
+//	Elf32_Addr    p_vaddr;        /* Segment virtual address */
+//	Elf32_Addr    p_paddr;        /* Segment physical address */
+//	Elf32_Word    p_filesz;       /* Segment size in file */
+//	Elf32_Word    p_memsz;        /* Segment size in memory */
+//	Elf32_Word    p_flags;        /* Segment flags */
+//	Elf32_Word    p_align;        /* Segment alignment */	
+
+	// p_flags数组。
+	// char *segNames[3] = {".text", ".data", ".rodata"};
+	unsigned int flags[3] = {PF_R | PF_X, PF_R | PF_W, PF_R};
+
+	for(int i = 0; i < 3; i++){
+		Elf32_Shdr *shdr = segLists[i]->next->val.segTab->shdr;
+
+		ptrPhdr->p_type = PT_LOAD; 
+		ptrPhdr->p_offset = shdr->sh_offset;
+		ptrPhdr->p_vaddr = shdr->sh_addr;
+		ptrPhdr->p_paddr = shdr->sh_addr;
+		ptrPhdr->p_filesz = shdr->sh_size;
+		ptrPhdr->p_memsz = shdr->sh_size;
+		ptrPhdr->p_flags = flags[i];
+		// TODO 不知道怎么处理。
+		ptrPhdr->p_align = 0;
+
+		ptrPhdr++;
+	}
 
 }
 
