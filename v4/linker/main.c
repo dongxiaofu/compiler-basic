@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	CollectInfo();
 	// 分配地址空间。
 	// unsigned int base = 0x8048000;
-	unsigned int base = 0x08040000 + 52;
+	unsigned int base = 0x08048000 + 52 + sizeof(Elf32_Phdr) * 3;
 	AllocAddress(&base);
 	// 解析符号。
 	ParseSym();

@@ -665,12 +665,12 @@ ELF32 AssembleELF()
 	memcpy(shstrtabSegment->addr, shStrTabStr, shStrTabStrLength);
 
 	// .strtab
-	unsigned int strtabSize = 0;
+	unsigned int strtabSize = 1;
 	Node symNode = symDefine->next;
 	while(symNode != symDefine){
 		SymbolLink symlink = (SymbolLink)symNode->val.symLink;
 		printf("sym name = %s\n", symlink->name);
-		unsigned int size = strlen(symlink->name);
+		unsigned int size = strlen(symlink->name) + 1;
 		if(size == 0){
 			symNode = symNode->next;
 			continue;
@@ -696,10 +696,13 @@ ELF32 AssembleELF()
 
 		printf("without null sym name = %s\n", symlink->name);
 		memcpy(strtabSegment->addr + strtabOffset, symlink->name, size);
+		printf("without2 null sym name = %s\n", strtabSegment->addr + strtabOffset);
 
 		strtabOffset += size + 1; 
 		symNode = symNode->next;
 	}
+
+	PrintStrtabTest(strtabSegment->addr, strtabSegment->size);
 
 	// 计算所有文件的段的长度。
 	char *segNames[3] = {".text", ".data", ".rodata"};
@@ -786,19 +789,24 @@ ELF32 AssembleELF()
 		}
 	}
 
-	elf32->text = textSeg;
-	elf32->data = dataSeg;
-	elf32->rodata = rodataSeg;
+	PrintStrtabTest(strtabSegment->addr, strtabSegment->size);
 
 	// 生成.symtab。
 	// 计算.symtab的长度。
 	unsigned int symSize = sizeof(Elf32_Sym);
 	Node symbolLinkNode = symDefine->next;
 	while(symbolLinkNode != symDefine){
-		// node->val.symLink = symbolLink;
-		// symSize += symbolLinkNode->val.symLink->sym->;
+		SymbolLink symlink = symbolLinkNode->val.symLink;
+		Elf32_Sym *sym = symlink->sym;
+		// if(sym->st_shndx == SHN_ABS || sym->st_name == 0){
+		if(sym->st_name == 0){
+			symbolLinkNode = symbolLinkNode->next;
+			continue;
+		}
+
 		symSize += sizeof(Elf32_Sym);
 
+		printf("2symbol name = %s\n", symbolLinkNode->val.symLink->name);
 		symbolLinkNode = symbolLinkNode->next;
 	}
 
@@ -813,14 +821,28 @@ ELF32 AssembleELF()
 	while(symbolLinkNode != symDefine){
 		SymbolLink symlink = symbolLinkNode->val.symLink;
 		Elf32_Sym *sym = symlink->sym;
-		if(sym->st_shndx == SHN_ABS || sym->st_name == 0){
+		// if(sym->st_shndx == SHN_ABS || sym->st_name == 0){
+		if(sym->st_name == 0){
+			symbolLinkNode = symbolLinkNode->next;
+			continue;
+		}
+
+		PrintStrtabTest(strtabSegment->addr, strtabSize);
+
+		printf("3symbol name = %s\n", symbolLinkNode->val.symLink->name);
+		if(sym->st_shndx == SHN_ABS){
+			memcpy(ptrSym, sym, sizeof(Elf32_Sym));
+			ptrSym++;
 			symbolLinkNode = symbolLinkNode->next;
 			continue;
 		}
 		memcpy(ptrSym, sym, sizeof(Elf32_Sym));
-		int st_name = GetSubStrIndex(symlink->name, strtabSegment->addr, strtabSize);
+		PrintStrtabTest(strtabSegment->addr, strtabSegment->size);
+		int st_name = GetSubStrIndex(symlink->name, strtabSegment->addr, strtabSegment->size);
 		// TODO 暂时不检查st_name。
 		// 更新st_name。因为还没有确定段表，无法更新st_shndx。
+		printf("symlink->name = %s, st_name = %d\n", symlink->name, st_name);
+		
 		ptrSym->st_name = (Elf32_Word)st_name;
 		// 更新st_shndx。
 		ELF32 provider = symlink->provider;
@@ -927,7 +949,7 @@ ELF32 AssembleELF()
 			// 花了很多很多时间才弄明白这个值是什么。它是LOCAL变量的数目。
 			// sh_info = (Elf32_Word)SYM_TAB;
 			// TODO 待补充。
-			ptrShdr->sh_info = 0;
+			ptrShdr->sh_info = 12;
 
 			ptrShdr->sh_offset = offset;
 			offset += ptrShdr->sh_size;
@@ -981,8 +1003,11 @@ ELF32 AssembleELF()
 		ptrPhdr->p_offset = shdr->sh_offset;
 		ptrPhdr->p_vaddr = shdr->sh_addr;
 		ptrPhdr->p_paddr = shdr->sh_addr;
-		ptrPhdr->p_filesz = shdr->sh_size;
-		ptrPhdr->p_memsz = shdr->sh_size;
+		unsigned int size = segSize[i];
+	//	ptrPhdr->p_filesz = shdr->sh_size;
+	//	ptrPhdr->p_memsz = shdr->sh_size;
+		ptrPhdr->p_filesz = size;
+		ptrPhdr->p_memsz = size;
 		ptrPhdr->p_flags = flags[i];
 		// TODO 不知道怎么处理。
 		ptrPhdr->p_align = 0;

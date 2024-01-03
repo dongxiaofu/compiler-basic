@@ -108,6 +108,7 @@ void PrintStrtabTest(char *strtab, unsigned int size)
 	unsigned int len = 0;
 
 	printf("\n--------printStrtab start-------\n");
+	printf("size = %d in PrintStrtabTest\n", size);
 	while(len < size){
 		char *str = strtab;
 		printf("str = %s\n", str);
@@ -116,4 +117,5 @@ void PrintStrtabTest(char *strtab, unsigned int size)
 		strtab += strlen(str) + 1;
 	}
 	printf("\n--------printStrtab end-------\n");
+	printf("Elf32_Sym size = %d\n", sizeof(Elf32_Sym));
 }
