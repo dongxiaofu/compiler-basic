@@ -860,6 +860,11 @@ ELF32 AssembleELF()
 	// 空表项。
 	ptrShdr++;
 
+	
+//	char *shStrTabStrWithoutNull = ".text.data.rodata.symtab.strtab.shstrtab";
+	unsigned int offset = segSize[0] + segSize[1] + segSize[2];
+	offset += 52;
+	offset += sizeof(Elf32_Phdr) * 3;
 	char *ptrShStrTabStr = shStrTabStr;
 	ptrShStrTabStr++;
 	for(int i = 1; i < 7; i++){
@@ -895,6 +900,9 @@ ELF32 AssembleELF()
 
 		    ptrShdr->sh_size = shstrtabSegment->size;
 			ptrShdr->sh_addralign = (Elf32_Word)1;
+
+			ptrShdr->sh_offset = offset;
+			offset += ptrShdr->sh_size;
 		}else if(strcmp(ptrShStrTabStr, ".strtab") == 0){
 		    ptrShdr->sh_type = (Elf32_Word)SHT_STRTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
@@ -902,6 +910,9 @@ ELF32 AssembleELF()
 
 			ptrShdr->sh_size = strtabSegment->size;
 			ptrShdr->sh_addralign = (Elf32_Word)1;
+
+			ptrShdr->sh_offset = offset;
+			offset += ptrShdr->sh_size;
 		}else if(strcmp(ptrShStrTabStr, ".symtab") == 0){
 		    ptrShdr->sh_type = (Elf32_Word)SHT_SYMTAB;
 		    // todo 不知道怎么处理。在《程序员的自我修养》3.4节有资料。
@@ -917,6 +928,9 @@ ELF32 AssembleELF()
 			// sh_info = (Elf32_Word)SYM_TAB;
 			// TODO 待补充。
 			ptrShdr->sh_info = 0;
+
+			ptrShdr->sh_offset = offset;
+			offset += ptrShdr->sh_size;
 			
 		}else if(strcmp(ptrShStrTabStr, ".text") == 0){
 		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
