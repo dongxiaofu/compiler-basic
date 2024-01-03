@@ -1014,10 +1014,17 @@ ELF32 AssembleELF()
 
 	ehdr->e_shoff = eShoff;
 
+	elf32->ehdr = ehdr;
+	elf32->phdr = phdr;
+	elf32->shdr = shdr;
+	elf32->text = textSeg;
+	elf32->data = dataSeg;
+	elf32->rodata = rodataSeg;
+	elf32->symtab = symtabSeg;
+	elf32->strtab = strtabSegment;
+	elf32->shstrtab = shstrtabSegment;
 
-
-	
-
+	return elf32;
 }
 
 void MergeRodata(Segment src, Segment dst)
