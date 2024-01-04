@@ -302,7 +302,8 @@ void CollectInfo()
 
 void ReadElf(unsigned int num, char **filenames)
 {
-	for(int i = 1; i < num; i++){
+	// for(int i = 1; i < num; i++){
+	for(int i = 0; i < num; i++){
 		// char *name = filenames[i];
 		// char *name = filenames++;
 		char *name = (char *)(*filenames);
@@ -310,6 +311,8 @@ void ReadElf(unsigned int num, char **filenames)
 		printf("read file %s\n", name);
 		char path[20] = "obj/";
 		strcat(path, name);
+		// TODO 最后应该改成这样的。调试时，应该使用前面的写法。
+		// char *path = name;
 
 		FILE *file = fopen(path, "rb");
 		if(file == NULL){
@@ -1042,7 +1045,11 @@ ELF32 AssembleELF()
 
 	// ELF文件头。
 	Elf32_Ehdr *ehdr = GenerateELFHeader();
-	char *entryFunc = "nomain";
+	char *defaultEntryFunc = "nomain";
+	char *entryFunc = entryFunctionName;
+	if(entryFunc == NULL){
+		entryFunc = defaultEntryFunc;
+	}
 
 	symNode = symDefine->next;
 	while(symNode != symDefine){
@@ -1100,7 +1107,8 @@ ELF32 AssembleELF()
 
 void WriteElf(ELF32 elf32)
 {
-	char *filename = "ab";
+	// char *filename = "ab";
+	char *filename = executableFileName;
 
 	FILE *file = fopen(filename, "wb");
 

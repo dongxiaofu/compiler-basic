@@ -82,6 +82,10 @@ unsigned int relDataSize ;// 0;
 unsigned int relTextSize ;// 0;
 unsigned int symtabSize ;// 0;
 unsigned int strtabSize ;// 0;
+// 可执行文件的入口函数。
+char *entryFunctionName;
+// 生成的可执行文件的名称。
+char *executableFileName;
 
 Node ExplodeStrtab(char *strtab, unsigned int size);
 Segment UniqueLinkListStr(Node list);

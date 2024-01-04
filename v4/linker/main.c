@@ -32,9 +32,57 @@ int main(int argc, char *argv[])
 	symtabSize = 0;
 	strtabSize = 0;
 
+	entryFunctionName = NULL;
+	char *defaultExecutableFileName = "a";
+	executableFileName = defaultExecutableFileName;
+
+	unsigned int fileNum = 0;
+	unsigned int optionNum = 0;
+
+	// link -e main -o ab a.o b.o c.o
+	// 解析参数。
+	for(unsigned int i = 1; i < argc; i++){
+		char *argument = argv[i];
+		printf("argument = %s\n", argument);
+		if(*argument != '-'){
+			// 处理完了所有的选项。
+			break;
+		}
+		optionNum++;
+		// 设置函数的入口。
+		if(strcmp("-e", argument) == 0){
+			i++;
+			if(i >= argc){
+				// TODO 讨厌这种处理方式。找机会优化。
+				break;
+			}
+			optionNum++;
+			argument = argv[i];
+			unsigned int size = strlen(argument) + 1;
+			entryFunctionName = (char *)MALLOC(size);
+			memcpy(entryFunctionName, argument, size);	
+
+		}else if(strcmp("-o", argument) == 0){
+			i++;
+			if(i >= argc){
+				// TODO 讨厌这种处理方式。找机会优化。
+				break;
+			}
+			optionNum++;
+			argument = argv[i];
+			unsigned int size = strlen(argument) + 1;
+			executableFileName = (char *)MALLOC(size);
+			memcpy(executableFileName, argument, size);
+		}
+	}
+
+	printf("executableFileName = %s, entryFunctionName = %s, optionNum = %d, argc = %d\n", \
+		executableFileName, entryFunctionName, optionNum, argc);
+
 	// 读取文件。
-	unsigned int num = argc;
-	char **filenames = ++argv;
+	unsigned int num = argc - optionNum - 1;
+	// char **filenames = ++argv;
+	char **filenames = argv + 1 + optionNum;
 	ReadElf(num, filenames);
 	// 收集信息。
 	CollectInfo();
