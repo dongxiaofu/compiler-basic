@@ -159,6 +159,14 @@ Elf32_Ehdr *GenerateELFHeader()
 	return ehdr;
 }
 
+unsigned int RoundUp(unsigned int num, unsigned int base)
+{
+	unsigned int quotient = (num + base - 1) / base;
+	unsigned int result = quotient * base;
+
+	return result;
+}
+
 // 为一个段分配地址空间。
 // 这是一个简化之后的函数。
 void AllocSegmentAddress(char *segName, unsigned int *base, unsigned int *offset, Node segList)
@@ -220,11 +228,15 @@ void AllocAddress(unsigned int *base)
 	unsigned int offset = 0;
 	offset += 52;	// 文件头。
 	offset += sizeof(Elf32_Phdr) * 3;	// 程序头。
+	offset = RoundUp(offset, 0x1000);
 
 	for(int i = 0; i < 3; i++){
 		printf("base = %d\n", *base);
 		segLists[i] = InitLinkList();
 		char *segName = segNames[i];
+		*base = RoundUp(*base, 0x1000);
+		offset = RoundUp(offset, 0x1000);
+		segOffsetLists[i] = offset;
 		AllocSegmentAddress(segName, base, &offset, segLists[i]);
 	}
 }
@@ -884,9 +896,10 @@ ELF32 AssembleELF()
 
 	
 //	char *shStrTabStrWithoutNull = ".text.data.rodata.symtab.strtab.shstrtab";
-	unsigned int offset = segSize[0] + segSize[1] + segSize[2];
-	offset += 52;
-	offset += sizeof(Elf32_Phdr) * 3;
+//	unsigned int offset = segSize[0] + segSize[1] + segSize[2];
+//	offset += 52;
+//	offset += sizeof(Elf32_Phdr) * 3;
+	unsigned int offset = segOffsetLists[2] + segSize[2];
 	char *ptrShStrTabStr = shStrTabStr;
 	ptrShStrTabStr++;
 	for(int i = 1; i < 7; i++){
@@ -907,7 +920,8 @@ ELF32 AssembleELF()
 			ptrShdr->sh_offset = segLists[1]->next->val.segTab->shdr->sh_offset;
 
 			ptrShdr->sh_size = segSize[1];
-			ptrShdr->sh_addralign = (Elf32_Word)8;
+			// gcc设置sh_addralign的值是4。
+			ptrShdr->sh_addralign = (Elf32_Word)4;
 		}else if(strcmp(ptrShStrTabStr, ".rodata") == 0){
 		    ptrShdr->sh_type = (Elf32_Word)SHT_PROGBITS;
 		    ptrShdr->sh_flags = (Elf32_Word)SHF_ALLOC;
@@ -1010,7 +1024,7 @@ ELF32 AssembleELF()
 		ptrPhdr->p_memsz = size;
 		ptrPhdr->p_flags = flags[i];
 		// TODO 不知道怎么处理。
-		ptrPhdr->p_align = 0;
+		ptrPhdr->p_align = 0x1000;
 
 		ptrPhdr++;
 	}
@@ -1044,14 +1058,15 @@ ELF32 AssembleELF()
 		exit(-1);
 	}
 
-	// e_shoff
+	// e_shoff。过了好一会儿才重新想起e_shoff是什么。
 	unsigned int eShoff = 0;
-	eShoff += 52;	// ELF文件头。
-	eShoff += phdrSize * 3;	// 程序头。
-	// segSize
-	for(int i = 0; i < 3; i++){
-		eShoff += segSize[i];	// 代码、数据等。
-	}
+	eShoff += segOffsetLists[2] + segSize[2];
+//	eShoff += 52;	// ELF文件头。
+//	eShoff += phdrSize * 3;	// 程序头。
+//	// segSize
+//	for(int i = 0; i < 3; i++){
+//		eShoff += segSize[i];	// 代码、数据等。
+//	}
 	// .text.data.rodata.symtab.strtab.shstrtab
 	eShoff += symtabSeg->size;
 	eShoff += strtabSegment->size;
@@ -1084,12 +1099,15 @@ void WriteElf(ELF32 elf32)
 	fwrite(elf32->phdr, sizeof(Elf32_Phdr) * 3, 1, file);
 	// 依次写入.text.data.rodata.symtab.strtab.shstrtab
 	Segment textSeg = elf32->text;
+	fseek(file ,segOffsetLists[0], SEEK_SET);
 	fwrite(textSeg->addr, textSeg->size, 1, file);
 
 	Segment dataSeg = elf32->data;
+	fseek(file ,segOffsetLists[1], SEEK_SET);
 	fwrite(dataSeg->addr, dataSeg->size, 1, file);
 
 	Segment rodataSeg = elf32->rodata;
+	fseek(file ,segOffsetLists[2], SEEK_SET);
 	fwrite(rodataSeg->addr, rodataSeg->size, 1, file);
 
 	Segment symtabSeg = elf32->symtab;
