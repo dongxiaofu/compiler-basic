@@ -1138,6 +1138,15 @@ void WriteElf(ELF32 elf32)
 	if(result == EOF){
 		printf("create file %s failure\n", filename);
 	}	
+
+	// 设置文件的权限。
+	int mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXOTH;
+	result = chmod(filename, mode);
+	if(result != 0){
+		// printf("change file %s mode failure\n", filename);
+		perror("Error:");
+		exit(-1);
+	}
 }
 
 void MergeRodata(Segment src, Segment dst)
