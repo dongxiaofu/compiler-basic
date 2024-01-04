@@ -844,6 +844,8 @@ ELF32 AssembleELF()
 		printf("3symbol name = %s\n", symbolLinkNode->val.symLink->name);
 		if(sym->st_shndx == SHN_ABS){
 			memcpy(ptrSym, sym, sizeof(Elf32_Sym));
+			// TODO 没有对GetSubStrIndex的返回值进行错误检查。
+			ptrSym->st_name = GetSubStrIndex(symlink->name, strtabSegment->addr, strtabSegment->size);
 			ptrSym++;
 			symbolLinkNode = symbolLinkNode->next;
 			continue;
