@@ -591,7 +591,16 @@ void RelocationAddr(ELF32 elf32, Elf32_Rel *rel, Elf32_Sym *sym, unsigned char t
 	unsigned char relocationType = rel->r_info & 0xFF;
 	if(relocationType == R_386_32){
 		if(type == 1){
-			*ptrSymbol = *(int *)((unsigned int)rodataSegAddr + (int )(*ptrSymbol));
+			// *ptrSymbol = *(int *)((unsigned int)rodataSegAddr + (int )(*ptrSymbol));
+			// *ptrSymbol = (unsigned int)rodataSegAddr + (int )(*ptrSymbol);
+			// *ptrSymbol = 0x0804b000 + (int )(*ptrSymbol);
+			// 上面被注释的代码体现了我对重定位的理解过程，所以保留它们。
+			SegNameSegTabEntry segTab= FindSegNameSegTabEntryByName(segTabLinkList, ".rodata");
+			Elf32_Shdr *shdr = segTab->shdr;
+			// 直接使用.rodata的虚拟地址的硬编码，当然不合适，所以，修改成下面这样。
+			// shdr->sh_addr是.rodata的虚拟地址。ptrSymbol是要重定位的那块内存空间。它里面
+			// 存储的是偏移量，在.rodata中的偏移量。
+			*ptrSymbol = (unsigned int)shdr->sh_addr + (unsigned int)(*ptrSymbol);
 		}else{
 			// 处理完.rel.data后,再处理.rel.text时会执行到这里。
 			*ptrSymbol = sym->st_value; 		
