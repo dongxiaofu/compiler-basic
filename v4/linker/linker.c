@@ -1111,6 +1111,10 @@ void WriteElf(ELF32 elf32)
 	char *filename = executableFileName;
 
 	FILE *file = fopen(filename, "wb");
+	if(file == NULL){
+		perror("Error");
+		exit(-1);
+	}
 
 	// 写入文件头。
 	fwrite(elf32->ehdr, 52, 1, file);

@@ -21,7 +21,7 @@ ${SCANNER}:${OBJS}
 	$(CC) ${CFLAGS}  -o $@ $^
 
 clean:
-	rm -f *.o ${SCANNER} ab
+	rm -f *.o ${SCANNER} demo/*
 
 main.o:main.c
 	${CC} ${CFLAGS} -c -o $@ $<

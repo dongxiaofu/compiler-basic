@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 	// 读取文件。
 	unsigned int num = argc - optionNum - 1;
 	// char **filenames = ++argv;
+	// 跳过程序名称，例如./link。跳过选项的数量，例如 -e main -o ab。
 	char **filenames = argv + 1 + optionNum;
 	ReadElf(num, filenames);
 	// 收集信息。
@@ -99,8 +100,5 @@ int main(int argc, char *argv[])
 	// 写入文件。
 	WriteElf(elf32);
 	
-	// 合并段。
-//	MergeSegment();
-
 	return 0;
 }
